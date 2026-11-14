@@ -1,0 +1,61 @@
+[
+  {
+    "name": "a playbook whose hash matches a passing record passes",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
+      "docs/fix.md": "# Fix\n",
+      "evals/runs/fix/record.json": "{\"playbook_sha256\": \"2d446b59ad4513c2d4a3b54e9622d5d480f5d75b8e92810299dba930c4454a51\", \"with_playbook\": {\"passed\": true}}"
+    },
+    "expect": []
+  },
+  {
+    "name": "an edited playbook fails until its case is run again",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
+      "docs/fix.md": "# Fix, reworded\n",
+      "evals/runs/fix/record.json": "{\"playbook_sha256\": \"0000\", \"with_playbook\": {\"passed\": true}}"
+    },
+    "expect": [
+      "changed since its last recorded eval run; run case fix again"
+    ]
+  },
+  {
+    "name": "a matching record that did not pass fails",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
+      "docs/fix.md": "# Fix\n",
+      "evals/runs/fix/record.json": "{\"playbook_sha256\": \"2d446b59ad4513c2d4a3b54e9622d5d480f5d75b8e92810299dba930c4454a51\", \"with_playbook\": {\"passed\": false}}"
+    },
+    "expect": [
+      "did not pass"
+    ]
+  },
+  {
+    "name": "a playbook with no run on record fails",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
+      "docs/fix.md": "# Fix\n"
+    },
+    "expect": [
+      "no eval run on record for case fix"
+    ]
+  },
+  {
+    "name": "a case that names a missing playbook fails",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/gone.md\"}"
+    },
+    "expect": [
+      "its playbook is missing: docs/gone.md"
+    ]
+  },
+  {
+    "name": "a broken case file is reported, not a crash",
+    "files": {
+      "evals/cases/fix.json": "{not json"
+    },
+    "expect": [
+      "not a readable eval case"
+    ]
+  }
+]

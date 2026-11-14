@@ -12,7 +12,7 @@ A change is done when all of these hold:
 
 1. **A test came first, and it failed before the fix.** A test written after the fix proves only that the code does what the code does.
 2. **The build is clean against where it started.** Compare warnings with the base branch and count only new ones, so old warnings cannot hide a new one.
-3. **The change was checked in the running app**, on a local environment that no other session shares.
+3. **The change was checked in the running app**, where there is one, on a local environment that no other session shares.
 4. **An impact check lists what else the changed paths touch.** Name each caller you looked at and each one you did not.
 5. **Every claim in the report is marked verified or inferred.**
 

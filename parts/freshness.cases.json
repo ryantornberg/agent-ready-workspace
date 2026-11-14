@@ -1,0 +1,54 @@
+[
+  {
+    "name": "a stale page nobody edited is reported, as a warning",
+    "files": {"old.md": "---\nlast-reviewed: 2025-01-01\n---\n# Old\n"},
+    "config": {"today": "2026-06-30"},
+    "expect": ["last reviewed 2025-01-01, more than 180 days ago"]
+  },
+  {
+    "name": "a stale page the commit edits must be reviewed",
+    "files": {"old.md": "---\nlast-reviewed: 2025-01-01\n---\n# Old\n"},
+    "changed": ["old.md"],
+    "config": {"today": "2026-06-30"},
+    "expect": ["this commit edits it, so review it and move the date"]
+  },
+  {
+    "name": "fresh pages and undated pages outside required folders pass",
+    "files": {"new.md": "---\nlast-reviewed: 2026-06-01\n---\n# New\n", "plain.md": "# No front matter\n"},
+    "changed": ["new.md", "plain.md"],
+    "config": {"today": "2026-06-30"},
+    "expect": []
+  },
+  {
+    "name": "deleting the date is not a way out where a date is required",
+    "files": {"docs/a.md": "# A\n", "docs/deep/b.md": "---\ntitle: B\n---\n# B\n", "notes.md": "# Notes\n"},
+    "config": {"today": "2026-06-30", "require": ["docs"]},
+    "expect": ["no last-reviewed date"]
+  },
+  {
+    "name": "a date that is not a date is reported, not a crash",
+    "files": {"a.md": "---\nlast-reviewed: 2020-13-45\n---\n# A\n"},
+    "config": {"today": "2026-06-30"},
+    "expect": ["last-reviewed is not a date: 2020-13-45"]
+  },
+  {
+    "name": "a future date is refused",
+    "files": {"a.md": "---\nlast-reviewed: 2031-01-01\n---\n# A\n"},
+    "config": {"today": "2026-06-30"},
+    "expect": ["is in the future"]
+  },
+  {
+    "name": "a quoted date and a byte-order mark are read, not skipped",
+    "files": {"a.md": "---\nlast-reviewed: \"2025-01-01\"\n---\n# A\n", "b.md": "﻿---\nlast-reviewed: 2025-01-01\n---\n# B\n"},
+    "changed": ["a.md", "b.md"],
+    "config": {"today": "2026-06-30"},
+    "expect": ["this commit edits it"]
+  },
+  {
+    "name": "the age limit is configurable",
+    "files": {"a.md": "---\nlast-reviewed: 2026-06-01\n---\n# A\n"},
+    "changed": ["a.md"],
+    "config": {"today": "2026-06-30", "max_age_days": 7},
+    "expect": ["more than 7 days ago"]
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{"type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/ws.py\" hook before-shell"}]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{"type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/ws.py\" hook before-edit"}]
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "parts": [
+    {
+      "use": "links",
+      "skip": [
+        "evals/scaffold"
+      ]
+    },
+    {
+      "use": "freshness",
+      "max_age_days": 180,
+      "require": [
+        "docs"
+      ],
+      "skip": [
+        "evals/scaffold"
+      ]
+    },
+    {
+      "use": "aliases",
+      "index": "INDEX.md",
+      "heading": "Search aliases",
+      "code": "src"
+    },
+    {
+      "use": "eval_record"
+    },
+    {
+      "use": "no_stage_all"
+    },
+    {
+      "use": "shelved",
+      "paths": [
+        "src/orders-service-v1"
+      ]
+    }
+  ]
+}

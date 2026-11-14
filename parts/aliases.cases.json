@@ -1,0 +1,46 @@
+[
+  {
+    "name": "aliases that resolve pass, in three languages",
+    "files": {
+      "INDEX.md": "# Index\n\n## Search aliases\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |\n",
+      "src/api/ReconciliationWorker.cs": "public sealed class ReconciliationWorker\n{\n}\n",
+      "src/api/freeze.py": "class AccountFreeze:\n    pass\n",
+      "src/web/report.ts": "export class QuarterlyExport {}\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a renamed class leaves a dangling alias",
+    "files": {
+      "INDEX.md": "## Search aliases\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n",
+      "src/api/Worker.cs": "public sealed class LedgerSyncWorker\n{\n}\n"
+    },
+    "expect": ["alias points at ReconciliationWorker, which is not defined under src/"]
+  },
+  {
+    "name": "a name that survives only in a comment does not count",
+    "files": {
+      "INDEX.md": "## Search aliases\n\n| You say | The code says |\n|---|---|\n| a hold | `AccountFreeze` |\n",
+      "src/api/Freeze.cs": "// public class AccountFreeze was here\n/*\npublic class AccountFreeze\n*/\npublic class AccountHold { }\n"
+    },
+    "expect": ["alias points at AccountFreeze"]
+  },
+  {
+    "name": "a name defined outside the code folder does not count",
+    "files": {
+      "INDEX.md": "## Search aliases\n\n| You say | The code says |\n|---|---|\n| a hold | `AccountFreeze` |\n",
+      "tools/freeze.py": "class AccountFreeze:\n    pass\n"
+    },
+    "expect": ["alias points at AccountFreeze"]
+  },
+  {
+    "name": "a missing table is an error, not a silent pass",
+    "files": {"INDEX.md": "# Index\n\n## Topics\n\n| Topic | Page |\n|---|---|\n| x | `Thing` |\n"},
+    "expect": ["no alias table"]
+  },
+  {
+    "name": "a missing index is an error",
+    "files": {"README.md": "# Readme\n"},
+    "expect": ["the index is missing"]
+  }
+]

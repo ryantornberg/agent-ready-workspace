@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 248" width="720" height="248" role="img" aria-labelledby="t" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title id="t">The commit hook, CI and the agent's tool all call one runner. The manifest names the parts in use. The runner loads each part, refuses one with no cases, and gives each check a snapshot of the files and each hook one event.</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#16232a"/></marker>
+<marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0f5568"/></marker></defs>
+<g fill="none" stroke="#16232a" stroke-width="1.5">
+<rect x="8" y="16" width="200" height="56" rx="3"/>
+<rect x="8" y="96" width="200" height="56" rx="3"/>
+<rect x="8" y="176" width="200" height="56" rx="3"/>
+<rect x="260" y="88" width="200" height="72" rx="3" stroke="#0f5568" stroke-width="2.5"/>
+<rect x="512" y="16" width="200" height="72" rx="3"/>
+<rect x="512" y="160" width="200" height="72" rx="3"/>
+<path d="M208 44 L232 44 L232 104 L254 104" marker-end="url(#a)"/>
+<line x1="208" y1="124" x2="254" y2="124" marker-end="url(#a)"/>
+<path d="M208 204 L232 204 L232 144 L254 144" marker-end="url(#a)"/>
+<g stroke="#0f5568" stroke-width="2.5">
+<path d="M460 108 L484 108 L484 52 L506 52" marker-end="url(#b)"/>
+<path d="M460 140 L484 140 L484 196 L506 196" marker-end="url(#b)"/>
+</g></g>
+<g font-size="13" fill="#16232a">
+<text x="24" y="40" font-weight="600">Commit hook and CI</text>
+<text x="24" y="60">What is staged or pushed.</text>
+<text x="24" y="120" font-weight="600">workspace.json</text>
+<text x="24" y="140">Names the parts in use.</text>
+<text x="24" y="200" font-weight="600">The agent's tool</text>
+<text x="24" y="220">Before a command or edit.</text>
+<text x="276" y="112" font-weight="600" fill="#0f5568">ws.py, the runner</text>
+<text x="276" y="132" fill="#0f5568">Loads each part. Refuses</text>
+<text x="276" y="152" fill="#0f5568">one with no cases.</text>
+<text x="528" y="40" font-weight="600">Checks</text>
+<text x="528" y="60">Each reads a snapshot of</text>
+<text x="528" y="80">the files.</text>
+<text x="528" y="184" font-weight="600">Hooks</text>
+<text x="528" y="204">Each gets one event and</text>
+<text x="528" y="224">may refuse it.</text>
+</g>
+</svg>
