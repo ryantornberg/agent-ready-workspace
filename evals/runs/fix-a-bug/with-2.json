@@ -1,0 +1,73 @@
+[
+  {
+    "kind": "run",
+    "target": "cat docs/playbooks/fix-a-bug.md && echo ---- && cat docs/definition-of-done.md && echo ---- && git status --short && git log --oneline | head -5 && ls -la && git ls-files",
+    "ok": true,
+    "output": "hy>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked.\n----\n M README.md\n?? notes/\ne8beea9 Orders page\nAGENTS.md\nCLAUDE.md\nREADME.md\ndocs/definition-of-done.md\ndocs/playbooks/fix-a-bug.md\nshop/__init__.py\nshop/csv_export.py\nshop/page.py\ntests/__init__.py\ntests/test_page.py"
+  },
+  {
+    "kind": "run",
+    "target": "for f in shop/*.py tests/*.py CLAUDE.md; do echo \"=== $f\"; cat -n \"$f\"; done; echo; git diff --stat; ls notes",
+    "ok": true,
+    "output": "6         self.assertEqual([order[\"id\"] for order in page.shown], [1, 2])\n  17 \n  18     def test_export_writes_one_download(self):\n  19         page = OrdersPage(ORDERS)\n  20         page.export()\n  21         self.assertEqual(len(page.downloads), 1)\n  22 \n  23     def test_csv_has_a_header_and_a_row_per_order(self):\n  24         self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])\n  25 \n  26 \n  27 if __name__ == \"__main__\":\n  28     unittest.main()\n=== CLAUDE.md\n   1 @AGENTS.md\n\n README.md | 2 ++\n 1 file changed, 2 insertions(+)\ntodo.txt"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -I -m unittest discover -s tests -t . -v 2>&1 | tail -30",
+    "ok": true,
+    "output": " ok\ntest_refresh_button_sorts_the_table (tests.test_page.OrdersPageTests) ... ok\n\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_page.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_page.py\", line 26, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "shop/page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -I -m unittest discover -s tests -t . -v 2>&1 | tail -8; echo ---; grep -rn \"export\\|OrdersPage\\|to_csv\\|\\.click(\" --include=*.py . ; echo ---; git diff -- shop tests; echo ---; grep -rn \"click\\|export\" README.md notes/ 2>/dev/null | head",
+    "ok": false,
+    "output": "Exit code 1\ntest_export_button_writes_one_download (tests.test_page.OrdersPageTests) ... ok\ntest_export_writes_one_download (tests.test_page.OrdersPageTests) ... ok\ntest_refresh_button_sorts_the_table (tests.test_page.OrdersPageTests) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n---\n(eval):1: no matches found: --include=*.py"
+  },
+  {
+    "kind": "run",
+    "target": "grep -rn \"export\\|OrdersPage\\|to_csv\\|click(\" . --exclude-dir=.git | grep -v \"^./notes\"; echo ---; git diff -- shop tests; echo ---; python3 -I -m py_compile shop/page.py shop/csv_export.py && echo compiled-ok; git status --short",
+    "ok": true,
+    "output": "ests/test_page.py\n@@ -20,6 +20,11 @@ class OrdersPageTests(unittest.TestCase):\n         page.export()\n         self.assertEqual(len(page.downloads), 1)\n \n+    def test_export_button_writes_one_download(self):\n+        page = OrdersPage(ORDERS)\n+        page.click(\"export\")\n+        self.assertEqual(len(page.downloads), 1)\n+\n     def test_csv_has_a_header_and_a_row_per_order(self):\n         self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])\n \n---\ncompiled-ok\n M README.md\n M shop/page.py\n M tests/test_page.py\n?? notes/\n?? shop/__pycache__/"
+  },
+  {
+    "kind": "run",
+    "target": "rm -rf shop/__pycache__ tests/__pycache__ && git remote -v; echo \"remotes: $(git remote | wc -l)\"; git add shop/page.py tests/test_page.py && git commit -q -m \"Wire the Export button to export()\n\nOrdersPage registered handlers only for Refresh, so clicking Export\nfound no handler and did nothing. Register export alongside refresh\nand cover the button with a test that fails without the fix.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\" && git log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
+    "ok": true,
+    "output": "remotes:        0\n8e7a89a Wire the Export button to export()\ne8beea9 Orders page\n\n shop/page.py       | 1 +\n tests/test_page.py | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed: the Export button did nothing because `OrdersPage` only registered a handler for Refresh. Export is now wired up, and the fix is committed as `8e7a89a`.\n\n**The fix:** `shop/page.py` gets one added line, `self._on(\"export\", self.export)`, next to the Refresh registration. I added `test_export_button_writes_one_download` to `tests/test_page.py`, which clicks \"export\" and checks that one download is written.\n\nverified  The new test failed before the fix with `AssertionError: 0 != 1`, which is the reported symptom.\nverified  After the fix, all 4 tests pass (`python3 -I -m unittest discover -s tests -t .`).\nverified  `shop/page.py` and `tests/test_page.py` compile; the commit touches only those two files, 6 insertions.\nverified  Callers checked by grep: `OrdersPage.export` is called directly by the existing `test_export_writes_one_download` and now also by `click(\"export\")`. `OrdersPage.click` and `to_csv` are used only in `shop/page.py` and `tests/test_page.py`. No other code in the repo refers to them.\ninferred  No other behaviour changes. `export()` is only reached through the new handler, and nothing else in the repo calls `click(\"export\")`.\n\nNot done:\n- **Build warnings:** the repo has no build step, so there is no build to compare against the base branch.\n- **Running app:** the repo is a Python module with no entry point or UI runner, so I could not check the button in a running app. The check is through `OrdersPage.click`, not a real UI click.\n- **Draft PR:** the repo has no git remote, so I did not open a pull request.\n- **Left alone:** `README.md` has unstaged edits and `notes/` is untracked. Neither is part of this commit.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  }
+]

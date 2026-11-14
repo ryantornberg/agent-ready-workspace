@@ -1,9 +1,11 @@
 """Check: a playbook ships only with a passing eval run on record for its current wording.
 
-Each eval case names the playbook it tests and the guidance files an agent is
-given with it. evals/run.py stores a record of the last run, with one hash over
-those files and the case itself. Edit any of them and the hash stops matching,
-so this check fails until the case is run again and passes.
+Each eval case names the playbook it tests, the guidance files an agent is
+given with it, and the scaffold folder the agent works in. evals/run.py stores a
+record of the last run, with one hash over all of those and the case itself.
+Edit any of them and the hash stops matching, so this check fails until the
+case is run again and passes. A page's last-reviewed line is left out of the
+hash: reviewing a page and moving its date does not change what an agent reads.
 
 It trusts the record file: it shows that someone ran the case on this wording.
 It cannot stop a person from editing the record by hand.
@@ -13,6 +15,7 @@ Config: "cases" (default evals/cases), "runs" (default evals/runs),
 """
 import hashlib
 import json
+import re
 
 from wslib.parts import finding
 
@@ -23,12 +26,18 @@ def guidance_hash(texts):
     """One hash over the case and every guidance file, in a fixed order. Line endings do not count."""
     digest = hashlib.sha256()
     for name in sorted(texts):
-        digest.update(name.encode("utf-8") + b"\0" + texts[name].replace("\r\n", "\n").encode("utf-8") + b"\0")
+        text = re.sub(r"(?m)^last-reviewed\s*:.*\n", "", texts[name].replace("\r\n", "\n"))
+        digest.update(name.encode("utf-8") + b"\0" + text.encode("utf-8") + b"\0")
     return digest.hexdigest()
 
 
-def covered_files(case_path, case):
-    return [case_path, case["playbook"]] + [g for g in case.get("guidance", []) if g != case["playbook"]]
+def covered_files(case_path, case, paths=()):
+    """The case, its playbook, its guidance, and every file in its scaffold folder. paths: all known file paths."""
+    files = [case_path, case["playbook"]] + [g for g in case.get("guidance", []) if g != case["playbook"]]
+    folder = case.get("scaffold_dir")
+    if folder:
+        files += [p for p in paths if p.startswith(folder.strip("/") + "/") and p not in files]
+    return files
 
 
 def run(snapshot, config):
@@ -40,7 +49,7 @@ def run(snapshot, config):
         try:
             case = json.loads(snapshot.read(path) or "")
             name, playbook = case["name"], case["playbook"]
-            files = covered_files(path, case)
+            files = covered_files(path, case, list(snapshot.paths()))
             if not all(isinstance(f, str) for f in [name] + files):
                 raise TypeError
         except (ValueError, KeyError, TypeError):

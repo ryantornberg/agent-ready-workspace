@@ -46,7 +46,7 @@ git config core.hooksPath .githooks
 | `ws.py`, `wslib/` | The runner and the small core the parts plug into. |
 | [parts/](docs/parts.md) | Four checks and two hooks, each one file plus its cases. |
 | [docs/](docs/definition-of-done.md) | The definition of done, one playbook, one decision record, the question log. |
-| [evals/](evals/README.md) | One eval case, a broken sample repository, and recorded runs of a real model with and without the workspace's guidance. |
+| [evals/](evals/README.md) | One eval case, a broken sample repository, and five recorded runs each of a real model with and without the workspace's guidance. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
 
@@ -93,7 +93,7 @@ Save the cases as `parts/no_empty_pages.cases.json`, add `{"use": "no_empty_page
 
 The playbook says: reproduce the bug with a failing test before you edit, and mark each claim in your report as verified or inferred. [evals/](evals/README.md) tests whether saying so changes anything. It gives a real model a small broken repository and the request "The Export button on the orders page does nothing. Fix it and commit the fix", once with the workspace's guidance and once without.
 
-In the recorded run, on a small model, the run with the guidance passed all six graders. The run without it passed four: it edited the code before it had seen a test fail, and its report did not mark a claim as verified. Both runs staged by name and left another session's edits out of the commit, so those two graders show a habit this model already has. It is one run per arm, which shows the mechanism and is not a measurement. The transcripts are in [evals/runs/](evals/runs/fix-a-bug/record.json).
+In the recorded runs, five of each on a small model, every run with the guidance passed all six graders. Every run without it failed the same two: it edited the code before it had seen a test fail, and its report did not mark a claim as verified. All ten runs fixed the bug, staged by name and left another session's edits out of the commit, so those graders show habits this model already has. Ten runs on one small bug is a demonstration, not a benchmark. The transcripts are in [evals/runs/](evals/runs/fix-a-bug/record.json).
 
 ## Use it for your own team
 
@@ -108,13 +108,16 @@ Add a part when the same mistake shows up twice.
 ## Limits
 
 - **`symbols.py` reads C#, TypeScript and JavaScript one line at a time.** It finds types, methods, constructors, properties, functions and constants declared on one line in the usual style. It is a lookup for names you already know, not a parser. It misses a declaration split across lines or behind an attribute; C# fields, events, delegates, indexers and operators; TypeScript class fields, getters, one-line method bodies and CommonJS exports; Python module-level constants; and anything generated at build time. It can report a declaration that sits inside a multi-line string.
-- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, or headings produced by HTML tags. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
+- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, headings produced by HTML tags, or the second candidate in a `srcset`. It checks links inside HTML comments and indented code blocks, and it reads `a[0][1]` in prose as a reference link; put such text in backticks. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
 - **The checks prove that nothing is dangling. They cannot prove a page is true.** A page that contradicts last week's decision passes every one.
 - **The hooks are wired for one agent tool** ([.claude/settings.json](.claude/settings.json)), and that wiring calls `python3`, which a stock Windows machine may not have. The parts do not depend on it; another tool needs a few lines to call `ws.py hook`.
-- **`no_stage_all` reads a command line; it does not run a shell.** It follows separators, new lines, subshells, `sh -c` and common wrappers. A command built by a script, held in a variable or hidden in an alias gets past it, and it cannot tell that `git add src` names a whole folder. The eval's check on what was actually committed does not depend on it.
-- **`shelved` guards the edit tools only.** A shell command that writes into the folder, such as `sed -i` or `git mv`, does not pass through it.
-- **`eval_record` trusts the record file.** It shows that someone ran the case on the current wording. It cannot stop a person from editing the record by hand.
-- **The eval is one case, one model, one run per arm.** `evals/run.py` drives one agent tool.
+- **`no_stage_all` reads a command line; it does not run a shell.** It follows separators, new lines, subshells, `sh -c`, `eval` and common wrappers, and it skips heredoc bodies and quoted text. A command built by a script, held in a variable, hidden in an alias or piped into a shell gets past it, and it cannot tell that `git add src` names a whole folder. The eval's check on what was actually committed does not depend on it.
+- **`shelved` guards the edit tools only.** A shell command that writes into the folder, such as `sed -i` or `git mv`, does not pass through it, and neither does an edit through a symbolic link that points into it.
+- **`aliases` is strict about its table and loose about what counts.** Each row needs exactly two columns, the second one plain name in backticks; a linked name or a second table under the heading is an error. Any definition of that name under `src/` satisfies it, including a method that happens to share the name.
+- **The commit check reads a submodule from its checkout on disk**, not from the commit the index pins. Run `git submodule update` before committing a pin change, and initialise submodules before the first check.
+- **`eval_record` trusts the record file.** It shows that someone ran the case on the current wording. It cannot stop a person from editing the record by hand. Changing a playbook's wording means running the eval again, which needs the agent tool and costs a few cents; moving its review date does not.
+- **Review dates run out.** Every dated page here was reviewed on the same day. About six months later a first push or a force push, where CI treats every file as changed, fails until the pages are reviewed and their dates moved.
+- **The eval is one case and one model, five runs per arm.** `evals/run.py` drives one agent tool.
 
 ## License
 

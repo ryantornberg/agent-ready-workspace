@@ -2,20 +2,22 @@
   {
     "name": "a matching hash and a passing record pass",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
       "docs/done.md": "# Done\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
     },
     "expect": []
   },
   {
     "name": "an edited playbook fails until its case is run again",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
       "docs/fix.md": "# Fix, reworded\n",
       "docs/done.md": "# Done\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
     },
     "expect": [
       "changed since the last recorded eval run; run case fix again"
@@ -24,10 +26,24 @@
   {
     "name": "so does an edit to the other guidance the agent is given",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
       "docs/done.md": "# Done, reworded\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "and an edit to the scaffold the agent works in",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "docs/done.md": "# Done\n",
+      "evals/scaffold/app.py": "x = 2\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
     },
     "expect": [
       "changed since the last recorded eval run"
@@ -36,32 +52,46 @@
   {
     "name": "and an edit to the case's own graders",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"graders\": []}",
-      "docs/fix.md": "# Fix\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\", \"graders\": []}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
       "docs/done.md": "# Done\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
     },
     "expect": [
       "changed since the last recorded eval run"
     ]
   },
   {
-    "name": "line endings alone do not count as an edit",
+    "name": "moving a page's review date is not an edit",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\r\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2027-06-01\n---\n# Fix\n",
       "docs/done.md": "# Done\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+    },
+    "expect": []
+  },
+  {
+    "name": "line endings alone are not an edit",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "docs/done.md": "# Done\r\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
     },
     "expect": []
   },
   {
     "name": "a matching record that did not pass fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
       "docs/done.md": "# Done\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": false}}"
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": false}}"
     },
     "expect": [
       "did not pass"
@@ -70,10 +100,11 @@
   {
     "name": "passed must be true, not merely present",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
       "docs/done.md": "# Done\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": \"no\"}}"
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": \"no\"}}"
     },
     "expect": [
       "did not pass"
@@ -82,9 +113,10 @@
   {
     "name": "no run on record fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\n",
-      "docs/done.md": "# Done\n"
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "docs/done.md": "# Done\n",
+      "evals/scaffold/app.py": "x = 1\n"
     },
     "expect": [
       "no eval run on record for case fix"
@@ -93,9 +125,10 @@
   {
     "name": "a record that is not an object is reported, not a crash",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
       "docs/done.md": "# Done\n",
+      "evals/scaffold/app.py": "x = 1\n",
       "evals/runs/fix/record.json": "[]"
     },
     "expect": [
@@ -105,7 +138,7 @@
   {
     "name": "a case that covers a missing file fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
       "docs/fix.md": "# Fix\n"
     },
     "expect": [
@@ -124,10 +157,11 @@
   {
     "name": "a playbook with no case fails where every playbook must have one",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
-      "docs/fix.md": "# Fix\n",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
       "docs/done.md": "# Done\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}",
       "docs/new.md": "# New\n"
     },
     "config": {

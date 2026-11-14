@@ -26,6 +26,10 @@
   {"name": "behind timeout", "event": {"command": "timeout 5 git add -A"}, "allow": false},
   {"name": "commit of the whole folder", "event": {"command": "git commit . -m x"}, "allow": false},
   {"name": "after a line continuation", "event": {"command": "git add \\\n  -A"}, "allow": false},
+  {"name": "a login shell with -lc", "event": {"command": "bash -lc \"git add -A\""}, "allow": false},
+  {"name": "timeout with a unit", "event": {"command": "timeout 5s git add -A"}, "allow": false},
+  {"name": "sudo with its own option", "event": {"command": "sudo -u me git add -A"}, "allow": false},
+  {"name": "eval", "event": {"command": "eval 'git add -A'"}, "allow": false},
   {"name": "add by name", "event": {"command": "git add src/orders/export.js tests/orders/export.test.js"}, "allow": true},
   {"name": "add by name with a leading dot-slash", "event": {"command": "git add ./src/x.js"}, "allow": true},
   {"name": "add a dot-folder by name", "event": {"command": "git add .github/workflows/ci.yml"}, "allow": true},
@@ -37,5 +41,10 @@
   {"name": "not git at all", "event": {"command": "echo git add -A is refused here"}, "allow": true},
   {"name": "an event with no command", "event": {"path": "docs/a.md"}, "allow": true},
   {"name": "xargs passes names", "event": {"command": "git diff --name-only | xargs git add"}, "allow": true},
-  {"name": "sh -c that stages by name", "event": {"command": "sh -c 'git add a.md && git commit -m x'"}, "allow": true}
+  {"name": "sh -c that stages by name", "event": {"command": "sh -c 'git add a.md && git commit -m x'"}, "allow": true},
+  {"name": "a heredoc commit message that mentions the command", "event": {"command": "git add a.py && git commit -F - <<'EOF'\nRefuse more spellings\n\n- git add ./* is now refused\n- so is git add -A\nEOF"}, "allow": true},
+  {"name": "a multi-line -m message that mentions the command", "event": {"command": "git commit -m \"Fix staging\n\ngit add -A is refused now\""}, "allow": true},
+  {"name": "writing notes that mention the command", "event": {"command": "cat > NOTES.md <<'EOF'\nnever run git add -A\nEOF"}, "allow": true},
+  {"name": "a real command after the heredoc still counts", "event": {"command": "cat > NOTES.md <<EOF\nnotes\nEOF\ngit add -A"}, "allow": false},
+  {"name": "add -p, add -- file, and -c before add", "event": {"command": "git add -p src/a.py; git add -- b.py; git -c core.autocrlf=false add c.py"}, "allow": true}
 ]
