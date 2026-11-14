@@ -1,0 +1,10 @@
+[
+  {"kind": "read", "target": "docs/playbooks/fix-a-bug.md"},
+  {"kind": "read", "target": "src/orders/export.js"},
+  {"kind": "edit", "target": "tests/orders/export.test.js"},
+  {"kind": "run", "target": "npm test -- export"},
+  {"kind": "edit", "target": "src/orders/export.js"},
+  {"kind": "run", "target": "npm test"},
+  {"kind": "run", "target": "git add src/orders/export.js tests/orders/export.test.js"},
+  {"kind": "report", "target": "Fixed: Export did nothing. Verified: the new test fails before the fix and passes after. Inferred: the invoices page uses the same handler; not checked."}
+]

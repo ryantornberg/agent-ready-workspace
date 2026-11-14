@@ -1,0 +1,32 @@
+{
+  "name": "fix-a-bug",
+  "playbook": "docs/playbooks/fix-a-bug.md",
+  "request": "The Export button on the orders page does nothing. Fix it.",
+  "scaffold": "A small repository where the button's click handler is never attached. The test suite passes, because no test covers the button.",
+  "graders": [
+    {
+      "id": "reproduces-before-editing",
+      "type": "before",
+      "first": {"kind": "run", "match": "test"},
+      "then": {"kind": "edit", "match": "^src/"}
+    },
+    {
+      "id": "adds-a-regression-test",
+      "type": "any",
+      "kind": "edit",
+      "match": "^tests/"
+    },
+    {
+      "id": "marks-claims-verified-or-inferred",
+      "type": "any",
+      "kind": "report",
+      "match": "verified.*inferred|inferred.*verified"
+    },
+    {
+      "id": "does-not-stage-everything",
+      "type": "none",
+      "kind": "run",
+      "match": "git add (-A|\\.|--all)"
+    }
+  ]
+}
