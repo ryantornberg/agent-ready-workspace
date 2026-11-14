@@ -9,33 +9,57 @@
   },
   {
     "name": "a missing file fails",
-    "files": {"a.md": "# A\n\n[gone](docs/gone.md)\n"},
-    "expect": ["link to missing file: docs/gone.md"]
+    "files": {
+      "a.md": "# A\n\n[gone](docs/gone.md)\n"
+    },
+    "expect": [
+      "link to missing file: docs/gone.md"
+    ]
   },
   {
     "name": "a missing heading fails",
-    "files": {"a.md": "[x](b.md#no-such-heading)\n", "b.md": "# B\n"},
-    "expect": ["no heading for #no-such-heading in b.md"]
+    "files": {
+      "a.md": "[x](b.md#no-such-heading)\n",
+      "b.md": "# B\n"
+    },
+    "expect": [
+      "no heading for #no-such-heading in b.md"
+    ]
   },
   {
     "name": "external links, code spans and fenced code are not checked",
-    "files": {"a.md": "[site](https://example.com) [mail](mailto:a@example.com) [cdn](//example.com/x) `[x](nope.md)` ``[y](`nope`.md)``\n\n```\n[z](nope.md)\n```\n"},
+    "files": {
+      "a.md": "[site](https://example.com) [mail](mailto:a@example.com) [cdn](//example.com/x) `[x](nope.md)` ``[y](`nope`.md)``\n\n```\n[z](nope.md)\n```\n"
+    },
     "expect": []
   },
   {
     "name": "a three-backtick line inside a four-backtick block does not end it",
-    "files": {"a.md": "[x](#real)\n\n````\n```\n## Not a heading\n[y](nope.md)\n```\n````\n\n## Real\n\n[z](#not-a-heading)\n"},
-    "expect": ["no heading for #not-a-heading in a.md"]
+    "files": {
+      "a.md": "[x](#real)\n\n````\n```\n## Not a heading\n[y](nope.md)\n```\n````\n\n## Real\n\n[z](#not-a-heading)\n"
+    },
+    "expect": [
+      "no heading for #not-a-heading in a.md"
+    ]
   },
   {
     "name": "reference-style links are checked at their definition",
-    "files": {"a.md": "See [the page][p] and [another][q].\n\n[p]: gone.md\n[q]: <b page.md>\n", "b page.md": "# B\n"},
-    "expect": ["link to missing file: gone.md"]
+    "files": {
+      "a.md": "See [the page][p] and [another][q].\n\n[p]: gone.md\n[q]: <b page.md>\n",
+      "b page.md": "# B\n"
+    },
+    "expect": [
+      "link to missing file: gone.md"
+    ]
   },
   {
     "name": "a reference that is never defined fails",
-    "files": {"a.md": "See [the page][nowhere].\n"},
-    "expect": ["reference [nowhere] is never defined"]
+    "files": {
+      "a.md": "See [the page][nowhere].\n"
+    },
+    "expect": [
+      "reference [nowhere] is never defined"
+    ]
   },
   {
     "name": "bracketed destinations, titles and parentheses",
@@ -44,52 +68,125 @@
       "paren(1).md": "# P\n",
       "my page.md": "# M\n"
     },
-    "expect": ["link to missing file: no such.md", "link to missing file: gone.md", "link to missing file: gone2.md"]
+    "expect": [
+      "link to missing file: no such.md",
+      "link to missing file: gone.md",
+      "link to missing file: gone2.md"
+    ]
   },
   {
     "name": "brackets in the link text, images and linked images",
-    "files": {"a.md": "[a [nested] label](gone.md) ![alt](gone.png) [![badge](badge.svg)](gone2.md)\n", "badge.svg": "<svg/>"},
-    "expect": ["link to missing file: gone.md", "link to missing file: gone.png", "link to missing file: gone2.md"]
+    "files": {
+      "a.md": "[a [nested] label](gone.md) ![alt](gone.png) [![badge](badge.svg)](gone2.md)\n",
+      "badge.svg": "<svg/>"
+    },
+    "expect": [
+      "link to missing file: gone.md",
+      "link to missing file: gone.png",
+      "link to missing file: gone2.md"
+    ]
   },
   {
     "name": "HTML links and HTML anchors",
-    "files": {"a.md": "<a href=\"gone.md\">x</a> <img src=\"b.md\"> [ok](b.md#custom)\n", "b.md": "# B\n\n<a id=\"custom\"></a>\n"},
-    "expect": ["link to missing file: gone.md"]
+    "files": {
+      "a.md": "<a href=\"gone.md\">x</a> <img src=\"b.md\"> [ok](b.md#custom)\n",
+      "b.md": "# B\n\n<a id=\"custom\"></a>\n"
+    },
+    "expect": [
+      "link to missing file: gone.md"
+    ]
   },
   {
     "name": "repeated headings get numbered anchors",
-    "files": {"a.md": "[one](b.md#notes) [two](b.md#notes-1) [three](b.md#notes-2)\n", "b.md": "## Notes\n\n## Notes\n"},
-    "expect": ["no heading for #notes-2 in b.md"]
+    "files": {
+      "a.md": "[one](b.md#notes) [two](b.md#notes-1) [three](b.md#notes-2)\n",
+      "b.md": "## Notes\n\n## Notes\n"
+    },
+    "expect": [
+      "no heading for #notes-2 in b.md"
+    ]
   },
   {
     "name": "anchors follow GitHub: punctuation drops, underscores in words stay, emphasis goes",
-    "files": {"a.md": "[1](#whats-done-and-whats-next) [2](#foo_bar) [3](#run-the-check) [4](#foobar) [5](#an-emphasised-word)\n\n## What's done, and what's next?\n\n## foo_bar\n\n## Run `the` *check*\n\n## An _emphasised_ word\n"},
-    "expect": ["no heading for #foobar in a.md"]
+    "files": {
+      "a.md": "[1](#whats-done-and-whats-next) [2](#foo_bar) [3](#run-the-check) [4](#foobar) [5](#an-emphasised-word)\n\n## What's done, and what's next?\n\n## foo_bar\n\n## Run `the` *check*\n\n## An _emphasised_ word\n"
+    },
+    "expect": [
+      "no heading for #foobar in a.md"
+    ]
   },
   {
     "name": "setext headings and indented headings are anchors",
-    "files": {"a.md": "[1](#first-title) [2](#second-title) [3](#indented) [4](#not-a-title)\n\nFirst title\n===========\n\nSecond title\n---\n\n   ## Indented\n\nnot a title\n\n---\n"},
-    "expect": ["no heading for #not-a-title in a.md"]
+    "files": {
+      "a.md": "[1](#first-title) [2](#second-title) [3](#indented) [4](#not-a-title)\n\nFirst title\n===========\n\nSecond title\n---\n\n   ## Indented\n\nnot a title\n\n---\n"
+    },
+    "expect": [
+      "no heading for #not-a-title in a.md"
+    ]
   },
   {
     "name": "file names are case-sensitive everywhere, not only on Linux",
-    "files": {"a.md": "[x](upper.md)\n", "Upper.md": "# U\n"},
-    "expect": ["link to missing file: upper.md"]
+    "files": {
+      "a.md": "[x](upper.md)\n",
+      "Upper.md": "# U\n"
+    },
+    "expect": [
+      "link to missing file: upper.md"
+    ]
   },
   {
     "name": "a link that climbs out of the workspace fails instead of crashing",
-    "files": {"a.md": "[x](../other/readme.md#part)\n"},
-    "expect": ["link leaves the workspace"]
+    "files": {
+      "a.md": "[x](../other/readme.md#part)\n"
+    },
+    "expect": [
+      "link leaves the workspace"
+    ]
   },
   {
     "name": "skipped folders are not checked",
-    "files": {"archive/old.md": "[gone](nope.md)\n", "a.md": "# A\n"},
-    "config": {"skip": ["archive"]},
+    "files": {
+      "archive/old.md": "[gone](nope.md)\n",
+      "a.md": "# A\n"
+    },
+    "config": {
+      "skip": [
+        "archive"
+      ]
+    },
     "expect": []
   },
   {
     "name": "front matter is not prose",
-    "files": {"a.md": "---\ntitle: \"[x](nope.md)\"\n---\n# A\n"},
+    "files": {
+      "a.md": "---\ntitle: \"[x](nope.md)\"\n---\n# A\n"
+    },
     "expect": []
+  },
+  {
+    "name": "footnotes are not links",
+    "files": {
+      "a.md": "A claim.[^1] Another.[^note]\n\n[^1]: The source.\n[^note]: More.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a picture's dark-mode source is checked too",
+    "files": {
+      "a.md": "<picture>\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"gone-dark.svg\">\n  <img src=\"light.svg\" alt=\"x\">\n</picture>\n",
+      "light.svg": "<svg/>"
+    },
+    "expect": [
+      "link to missing file: gone-dark.svg"
+    ]
+  },
+  {
+    "name": "a heading inside a blockquote is an anchor",
+    "files": {
+      "a.md": "[x](#quoted-title) [y](#missing)\n\n> ## Quoted title\n"
+    },
+    "expect": [
+      "no heading for #missing in a.md"
+    ]
   }
 ]

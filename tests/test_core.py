@@ -83,6 +83,30 @@ class SnapshotTests(Folder):
         self.git("add", "docs")
         self.assertEqual(snapshots.Index(self.root).changed, {"docs/my page.md", "docs/café.md"})
 
+    def test_a_staged_submodule_is_read_from_its_pinned_checkout(self):
+        code = self.root / "code"
+        code.mkdir()
+        (code / "Worker.cs").write_text("public class NightlyWorker { }\n", encoding="utf-8")
+        for args in (["init", "-q"], ["add", "."], ["-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-q", "-m", "code"]):
+            subprocess.run(["git", "-C", str(code), *args], check=True, capture_output=True)
+        work = self.root / "ws"
+        work.mkdir()
+        self.root = work
+        self.git("init", "-q")
+        self.git("-c", "protocol.file.allow=always", "submodule", "add", "-q", str(code), "src/code")
+        self.write("a.md", "[the worker](src/code/Worker.cs)\n")
+        self.git("add", "a.md")
+        index = snapshots.Index(self.root)
+        self.assertTrue(index.exists("src/code/Worker.cs"))
+        self.assertEqual([s[3] for s in symbols.scan(index, "src")], ["NightlyWorker"])
+
+    def test_a_dangling_symlink_is_not_a_file(self):
+        try:
+            (self.root / "ghost.md").symlink_to(self.root / "nowhere.md")
+        except OSError:
+            self.skipTest("symlinks are not available here")
+        self.assertEqual(list(snapshots.Tree(self.root).paths()), [])
+
     def test_existence_is_case_sensitive_and_knows_folders(self):
         memory = snapshots.Memory({"docs/Upper.md": "x"})
         self.assertTrue(memory.exists("docs/Upper.md"))
@@ -108,7 +132,7 @@ class LoaderTests(Folder):
         self.write(f"parts/{name}.py", body)
         if cases is not None:
             self.write(f"parts/{name}.cases.json", json.dumps(cases))
-        return partlib.load(self.root, {"use": name})
+        return partlib.load(self.root, {"use": name}, run_cases=False)
 
     def test_a_part_with_no_cases_is_refused(self):
         with self.assertRaisesRegex(partlib.PartError, "refused, it has no cases file"):
@@ -132,7 +156,7 @@ class LoaderTests(Folder):
     def test_a_case_that_crashes_the_part_is_a_failed_case(self):
         part = self.part("boom", 'KIND = "check"\ndef run(snapshot, config):\n    raise ValueError("no")\n',
                          [{"name": "crash", "files": {}, "expect": ["x"]}])
-        self.assertEqual(part.failed_cases(), ["crash: raised ValueError: no"])
+        self.assertEqual(part.failed_cases(), ["crash: part boom crashed: ValueError: no"])
 
     def test_an_unknown_part_and_a_bad_manifest_are_named(self):
         with self.assertRaisesRegex(partlib.PartError, "no file at parts/ghost.py"):
@@ -197,6 +221,64 @@ class RunnerTests(Folder):
         payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": "git commit -am x"}})
         self.workspace({"use": "no_stage_all"})
         self.assertEqual(self.ws("hook", "before-shell", stdin=payload)[0], 2)
+
+    def test_a_part_whose_case_fails_is_refused_on_every_command_not_only_selftest(self):
+        self.workspace({"use": "links"})
+        self.write("parts/links.cases.json", json.dumps([{"name": "wrong", "files": {"a.md": "x"}, "expect": ["nothing like this"]}]))
+        for command in (["check"], ["check", "--changed", "a.md"], ["list"]):
+            code, output = self.ws(*command)
+            self.assertEqual(code, 2, command)
+            self.assertIn("refused, 1 of its 1 cases fail", output)
+        self.assertEqual(self.ws("selftest")[0], 1)
+
+    def test_a_part_that_crashes_or_returns_nonsense_is_an_error_not_a_traceback(self):
+        cases = json.dumps([{"name": "c", "files": {}, "expect": ["x"]}])
+        for body in ('KIND = "check"\ndef run(snapshot, config):\n    return None\n',
+                     'KIND = "check"\ndef run(snapshot, config):\n    raise KeyError("boom")\n',
+                     'KIND = "check"\ndef run(:\n'):
+            self.write("workspace.json", json.dumps({"parts": [{"use": "odd"}]}))
+            self.write("parts/odd.py", body)
+            self.write("parts/odd.cases.json", cases)
+            self.assertEqual(self.ws("check")[0], 2, body)
+        self.write("parts/odd.cases.json", '["x"]')
+        self.assertEqual(self.ws("check")[0], 2)
+
+    def test_a_hook_on_an_unknown_event_cannot_load_and_an_unknown_event_is_refused(self):
+        self.workspace({"use": "no_stage_all"})
+        self.assertEqual(self.ws("hook", "before-banana", stdin='{"command": "ls"}')[0], 2)
+        source = (ROOT / "parts/no_stage_all.py").read_text(encoding="utf-8").replace('EVENT = "before-shell"', 'EVENT = "before-shel"')
+        self.write("parts/no_stage_all.py", source)
+        code, output = self.ws("hook", "before-shell", stdin='{"command": "ls"}')
+        self.assertEqual(code, 2)
+        self.assertIn("EVENT must be one of", output)
+
+    def test_a_hook_that_cannot_decide_fails_closed(self):
+        self.workspace({"use": "shelved", "paths": ["src/old"]})
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": 5}')[0], 2)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='[]')[0], 2)
+
+    def test_ci_fails_closed_when_it_cannot_compare(self):
+        self.workspace({"use": "freshness"})
+        self.write("old.md", STALE)
+        self.git("init", "-q")
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "base")
+        for ref in ("0" * 40, "deadbeef" * 5):
+            code, output = self.ws("check", "--changed-from", ref)
+            self.assertEqual(code, 1, ref)
+            self.assertIn("every file is treated as changed", output)
+
+    def test_the_staged_manifest_decides_not_the_one_on_disk(self):
+        self.workspace({"use": "links"})
+        self.git("init", "-q")
+        self.write("a.md", "[gone](nope.md)\n")
+        self.git("add", ".")
+        self.write("workspace.json", json.dumps({"parts": [{"use": "freshness"}]}))   # unstaged: drops the links check
+        self.write("parts/freshness.py", (ROOT / "parts/freshness.py").read_text(encoding="utf-8"))
+        self.write("parts/freshness.cases.json", (ROOT / "parts/freshness.cases.json").read_text(encoding="utf-8"))
+        code, output = self.ws("check", "--staged")
+        self.assertEqual(code, 1)
+        self.assertIn("link to missing file", output)
 
     def test_setup_mistakes_exit_2(self):
         self.assertEqual(self.ws("check")[0], 2)                       # no manifest
@@ -303,6 +385,7 @@ class SymbolTests(unittest.TestCase):
 
 class GradeTests(unittest.TestCase):
     CASE = json.loads((ROOT / "evals/cases/fix-a-bug.json").read_text(encoding="utf-8"))
+    FIRST = "sees-a-test-fail-before-editing"
     GOOD = [
         {"kind": "edit", "target": "tests/test_page.py", "ok": True},
         {"kind": "run", "target": "python3 -m unittest 2>&1 | tail -5", "ok": True, "output": "Ran 4 tests in 0.001s\n\nFAILED (failures=1)"},
@@ -334,21 +417,23 @@ class GradeTests(unittest.TestCase):
         self.assertFalse(self.results(gamed)["report-marks-a-claim-verified"])
 
     def test_a_test_run_that_passed_is_not_a_reproduction(self):
-        self.assertFalse(self.results(self.swap(1, output="Ran 4 tests in 0.001s\n\nOK"))["reproduces-before-editing"])
-        self.assertFalse(self.results(self.swap(1, target="echo test", output="test"))["reproduces-before-editing"])
+        self.assertFalse(self.results(self.swap(1, output="Ran 4 tests in 0.001s\n\nOK"))[self.FIRST])
+        self.assertFalse(self.results(self.swap(1, target="echo test", output="test"))[self.FIRST])
+        no_tests = self.swap(1, target="python3 -m unittest no_such_module", output="Ran 1 test in 0.000s\n\nFAILED (errors=1)")
+        self.assertFalse(self.results(no_tests)[self.FIRST])
 
     def test_a_failing_run_counts_even_when_a_pipe_hides_its_exit_code(self):
         self.assertTrue(self.GOOD[1]["ok"])
-        self.assertTrue(self.results(self.GOOD)["reproduces-before-editing"])
+        self.assertTrue(self.results(self.GOOD)[self.FIRST])
         pytest = self.swap(1, target="pytest -q", output="=== 1 failed, 3 passed in 0.02s ===")
-        self.assertTrue(self.results(pytest)["reproduces-before-editing"])
+        self.assertTrue(self.results(pytest)[self.FIRST])
 
     def test_editing_the_code_first_fails(self):
         actions = [self.GOOD[2], self.GOOD[0], self.GOOD[1]] + self.GOOD[3:]
-        self.assertFalse(self.results(actions)["reproduces-before-editing"])
+        self.assertFalse(self.results(actions)[self.FIRST])
 
     def test_staging_everything_fails_in_every_spelling_and_by_name_passes(self):
-        for command in ("git add  -A", "git add -u", "git add *", "git commit -am fix", "npm test && git add ."):
+        for command in ("git add  -A", "git add -u", "git add *", "git commit -am fix", "npm test && git add .", "echo x\ngit add -A"):
             self.assertFalse(self.results(self.swap(4, target=command))["stages-by-name"], command)
         for command in ("git add ./shop/page.py", "git add .github/x.yml", "echo git add -A"):
             self.assertTrue(self.results(self.swap(4, target=command))["stages-by-name"], command)

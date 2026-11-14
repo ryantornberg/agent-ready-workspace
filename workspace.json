@@ -20,10 +20,14 @@
       "use": "aliases",
       "index": "INDEX.md",
       "heading": "Search aliases",
-      "code": "src"
+      "code": "src",
+      "exclude": [
+        "src/orders-service-v1"
+      ]
     },
     {
-      "use": "eval_record"
+      "use": "eval_record",
+      "playbooks": "docs/playbooks"
     },
     {
       "use": "no_stage_all"

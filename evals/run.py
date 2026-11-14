@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
-"""Run an eval case against a real agent, twice: with the playbook and without it.
+"""Run an eval case against a real agent, twice: with the workspace's guidance and without it.
 
     python3 evals/run.py fix-a-bug --model haiku
 
 For each arm this:
 
   1. copies evals/scaffold into a fresh temporary git repository;
-  2. for the "with" arm, adds the contract (evals/arm) and the real playbook and
-     definition of done from docs/, so the eval tests the files the workspace ships;
+  2. for the "with" arm, adds the guidance the case lists: a short contract
+     (evals/arm) and the real playbook and definition of done from docs/, so the
+     eval tests the files the workspace ships. The "without" arm gets none of it;
   3. leaves another session's uncommitted edits in the folder;
   4. gives the agent the case's request and records what it does;
   5. inspects the folder the agent left and appends "state" lines the agent cannot fake;
   6. grades the transcript.
 
 It writes evals/runs/<case>/with.json, without.json and record.json. The record
-holds a hash of the playbook, which the eval_record check compares on every commit.
+holds one hash over the case and its guidance files, which the eval_record check
+compares on every commit.
 
 The agent here is Claude Code, run headless with only project settings, so the
 operator's personal instructions do not leak into either arm. To use another
 tool, replace agent_command and to_transcript; nothing else knows which agent ran.
 
-Exit 0 when the with-playbook arm passes every grader.
+Exit 0 when the with-guidance arm passes every grader.
 """
 import argparse
 import datetime
@@ -38,7 +40,6 @@ sys.path.insert(0, str(ROOT / "evals"))
 import grade as grading  # noqa: E402
 from parts import eval_record  # noqa: E402
 
-SHIPPED_DOCS = ("docs/playbooks/fix-a-bug.md", "docs/definition-of-done.md")
 OTHER_SESSION = {
     "README.md": "\nNote to self: ask whether Export should include cancelled orders.\n",   # appended to a tracked file
     "notes/todo.txt": "Draft, not ready to commit.\n",                                       # a new untracked file
@@ -60,14 +61,15 @@ def git(folder, *args, check=True):
               "-c", "commit.gpgsign=false", *args, check=check)
 
 
-def prepare(folder, with_playbook):
+def prepare(folder, case, with_guidance):
     """Build the repository the agent starts in. Returns the starting commit."""
     shutil.copytree(ROOT / "evals/scaffold", folder, dirs_exist_ok=True)
-    if with_playbook:
+    if with_guidance:
         shutil.copytree(ROOT / "evals/arm", folder, dirs_exist_ok=True)
-        for doc in SHIPPED_DOCS:
-            (folder / doc).parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy(ROOT / doc, folder / doc)
+        for doc in case["guidance"]:
+            if not doc.startswith("evals/arm/"):
+                (folder / doc).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(ROOT / doc, folder / doc)
     git(folder, "init", "-q", "-b", "main")
     git(folder, "add", "--all")
     git(folder, "commit", "-q", "-m", "Orders page")
@@ -166,11 +168,11 @@ def inspect(folder, start):
     ]
 
 
-def run_arm(case, model, with_playbook, timeout):
+def run_arm(case, model, with_guidance, timeout):
     with tempfile.TemporaryDirectory() as scratch:
         folder = pathlib.Path(scratch) / "orders"
         folder.mkdir()
-        start = prepare(folder, with_playbook)
+        start = prepare(folder, case, with_guidance)
         done = subprocess.run(agent_command(case["request"], model), cwd=folder, capture_output=True, text=True, timeout=timeout)
         if done.returncode != 0 and not done.stdout.strip():
             raise RuntimeError(f"the agent did not run: {done.stderr.strip()[:300]}")
@@ -181,30 +183,33 @@ def run_arm(case, model, with_playbook, timeout):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Run an eval case with and without its playbook.")
+    parser = argparse.ArgumentParser(description="Run an eval case with and without the workspace's guidance.")
     parser.add_argument("case")
     parser.add_argument("--model", default="haiku")
     parser.add_argument("--timeout", type=int, default=900, help="seconds allowed per arm")
     args = parser.parse_args(argv)
 
-    case = json.loads((ROOT / "evals/cases" / f"{args.case}.json").read_text(encoding="utf-8"))
+    case_path = f"evals/cases/{args.case}.json"
+    case = json.loads((ROOT / case_path).read_text(encoding="utf-8"))
+    covered = eval_record.covered_files(case_path, case)
     out = ROOT / "evals/runs" / case["name"]
     out.mkdir(parents=True, exist_ok=True)
     record = {
         "case": case["name"],
         "date": datetime.date.today().isoformat(),
         "playbook": case["playbook"],
-        "playbook_sha256": eval_record.playbook_hash((ROOT / case["playbook"]).read_text(encoding="utf-8")),
+        "covers": covered,
+        "guidance_sha256": eval_record.guidance_hash({f: (ROOT / f).read_text(encoding="utf-8") for f in covered}),
     }
-    for arm, with_playbook in (("with", True), ("without", False)):
-        print(f"running {case['name']} {arm} the playbook on {args.model} ...", flush=True)
-        actions, result, model, version = run_arm(case, args.model, with_playbook, args.timeout)
+    for arm, with_guidance in (("with", True), ("without", False)):
+        print(f"running {case['name']} {arm} the guidance on {args.model} ...", flush=True)
+        actions, result, model, version = run_arm(case, args.model, with_guidance, args.timeout)
         (out / f"{arm}.json").write_text(json.dumps(actions, indent=2) + "\n", encoding="utf-8")
-        record.update({"agent": f"Claude Code {version}", "model": model, f"{arm}_playbook": result})
+        record.update({"agent": f"Claude Code {version}", "model": model, f"{arm}_guidance": result})
         for grader_id, ok in result["graders"].items():
             print(f"  {'pass' if ok else 'FAIL'}  {grader_id}")
     (out / "record.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-    return 0 if record["with_playbook"]["passed"] else 1
+    return 0 if record["with_guidance"]["passed"] else 1
 
 
 if __name__ == "__main__":

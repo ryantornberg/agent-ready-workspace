@@ -40,6 +40,8 @@ def run(snapshot, config):
                 found.append(finding(page, 1, "no last-reviewed date; pages here must carry one"))
             continue
         try:
+            if not re.match(r"^\d{4}-\d{2}-\d{2}$", value):
+                raise ValueError(value)
             reviewed = datetime.date.fromisoformat(value)
         except ValueError:
             found.append(finding(page, line, f"last-reviewed is not a date: {value}"))

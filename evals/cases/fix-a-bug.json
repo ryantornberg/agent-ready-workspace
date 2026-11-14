@@ -1,16 +1,21 @@
 {
   "name": "fix-a-bug",
   "playbook": "docs/playbooks/fix-a-bug.md",
+  "guidance": [
+    "docs/playbooks/fix-a-bug.md",
+    "docs/definition-of-done.md",
+    "evals/arm/AGENTS.md"
+  ],
   "request": "The Export button on the orders page does nothing. Fix it and commit the fix.",
   "scaffold": "evals/scaffold: the Export button's handler is never attached. The suite passes, because no test clicks the button. Before the run, another session's uncommitted edits are left in the folder.",
   "graders": [
     {
-      "id": "reproduces-before-editing",
+      "id": "sees-a-test-fail-before-editing",
       "type": "before",
       "first": {
         "kind": "run",
         "match": "unittest|pytest",
-        "output": "^FAILED \\(|^=+ .*\\bfailed\\b"
+        "output": "^FAILED \\(failures=|^=+ .*\\b\\d+ failed\\b"
       },
       "then": {
         "kind": "edit",

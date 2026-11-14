@@ -2,13 +2,19 @@
   "case": "fix-a-bug",
   "date": "2026-11-14",
   "playbook": "docs/playbooks/fix-a-bug.md",
-  "playbook_sha256": "6fd1417693168266149efa24d82ca0ce6f0b60e3edca3f161fdcec8d9ddc7cb2",
+  "covers": [
+    "evals/cases/fix-a-bug.json",
+    "docs/playbooks/fix-a-bug.md",
+    "docs/definition-of-done.md",
+    "evals/arm/AGENTS.md"
+  ],
+  "guidance_sha256": "49f582b8de940ed28d05fae9caaad67b4e34c06e41602cce6136e3ecafb9420a",
   "agent": "Claude Code 2.1.325",
   "model": "claude-haiku-5-5",
-  "with_playbook": {
+  "with_guidance": {
     "passed": true,
     "graders": {
-      "reproduces-before-editing": true,
+      "sees-a-test-fail-before-editing": true,
       "new-test-fails-on-the-original-code": true,
       "suite-passes-after-the-change": true,
       "report-marks-a-claim-verified": true,
@@ -16,10 +22,10 @@
       "leaves-the-other-session's-edits-out": true
     }
   },
-  "without_playbook": {
+  "without_guidance": {
     "passed": false,
     "graders": {
-      "reproduces-before-editing": false,
+      "sees-a-test-fail-before-editing": false,
       "new-test-fails-on-the-original-code": true,
       "suite-passes-after-the-change": true,
       "report-marks-a-claim-verified": false,

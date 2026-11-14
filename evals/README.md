@@ -1,6 +1,6 @@
 # Evals
 
-A test of a playbook: does an agent that has it behave differently from one that does not? A small change to a playbook's wording can change what an agent does, and without a case nobody notices until it does the wrong thing in real work.
+A test of the workspace's guidance: does an agent that is given it behave differently from one that is not? A small change to a playbook's wording can change what an agent does, and without a case nobody notices until it does the wrong thing in real work.
 
 ## The case
 
@@ -10,26 +10,35 @@ A test of a playbook: does an agent that has it behave differently from one that
 - **The request** is one line: "The Export button on the orders page does nothing. Fix it and commit the fix."
 - **Before the run**, another session's uncommitted edits are left in the folder: a note added to the README and a new draft file.
 
+## The two arms
+
+| Arm | The agent is given |
+|---|---|
+| With the guidance | The scaffold, plus three files: a four-line contract ([arm/AGENTS.md](arm/AGENTS.md)), the playbook and the [definition of done](../docs/definition-of-done.md). |
+| Without it | The scaffold only. |
+
+The arms differ by all three files, so a difference between them belongs to the guidance as a whole, not to the playbook alone. None of the three files says what the graders look for.
+
 ## The graders
 
 | Grader | Passes when | Decided by |
 |---|---|---|
-| `reproduces-before-editing` | A test run printed a failure before the first edit to the code. | The transcript |
+| `sees-a-test-fail-before-editing` | A test run printed a failed test before the first edit to the code. | The transcript |
 | `new-test-fails-on-the-original-code` | The agent's tests, run against the code as it was, fail. | Inspecting the folder |
 | `suite-passes-after-the-change` | The whole suite passes at the end. | Inspecting the folder |
 | `report-marks-a-claim-verified` | A line of the final report starts with "verified". | The transcript |
 | `stages-by-name` | The `no_stage_all` hook would allow every command the agent ran. | The hook's own function |
 | `leaves-the-other-session's-edits-out` | The other session's two edits are not in the commit. | Inspecting the folder |
 
-Three graders do not take the agent's word for anything. `run.py` checks them afterwards in the folder the agent left.
+Three graders do not take the agent's word for anything: `run.py` checks them afterwards in the folder the agent left. The two transcript graders check the shape of what the agent did, not its truth. A report line that starts with "verified" passes whatever follows it.
 
 ## The recorded run
 
 `runs/fix-a-bug/` holds one run of each arm, recorded on 2026-11-14 with Claude Code on `claude-haiku-5-5`: [record.json](runs/fix-a-bug/record.json), [with.json](runs/fix-a-bug/with.json) and [without.json](runs/fix-a-bug/without.json).
 
-| Grader | With the playbook | Without it |
+| Grader | With the guidance | Without it |
 |---|---|---|
-| `reproduces-before-editing` | pass | **fail** |
+| `sees-a-test-fail-before-editing` | pass | **fail** |
 | `new-test-fails-on-the-original-code` | pass | pass |
 | `suite-passes-after-the-change` | pass | pass |
 | `report-marks-a-claim-verified` | pass | **fail** |
@@ -38,12 +47,10 @@ Three graders do not take the agent's word for anything. `run.py` checks them af
 
 What this does and does not show:
 
-- Without the playbook the model fixed the bug correctly. It edited the code first and wrote the test second, and its report stated results without saying which it had checked.
-- With the playbook it wrote the test, watched it fail, then fixed the code, and its report marked each claim.
-- Two graders passed in both arms. The model already stages by name and leaves other people's edits alone, so on this model those two playbook lines are not doing the work.
-- This is one run per arm. Models vary from run to run, so it shows the mechanism working end to end. It is not a measured rate.
-
-An earlier version of the first grader looked only at the test command's exit code. Both arms failed it, because the agent piped the test output through `tail`, which exits zero. The grader now reads the output. That is the kind of mistake a recorded run finds and a hand-written transcript hides.
+- Without the guidance the model fixed the bug correctly. It edited the code first and added a test second, and never ran that test against the unfixed code. Its report stated results without saying which it had checked.
+- With the guidance it added the test, ran the suite and saw it fail, then fixed the code. Its report listed claims on lines marked verified or inferred.
+- Two graders passed in both arms. This model already stages by name and leaves other people's edits alone, so on this model those lines of guidance are not what produces the behavior.
+- This is one run per arm on one model. Models vary from run to run, so it shows the mechanism working end to end. It is not a measured rate.
 
 ## Run it yourself
 
@@ -54,24 +61,25 @@ python3 evals/grade.py evals/cases/fix-a-bug.json evals/runs/fix-a-bug/with.json
 
 `run.py` needs the Claude Code command line tool, signed in. It costs a few cents on a small model and rewrites the three files in `runs/fix-a-bug/`. It runs the agent with project settings only, so your personal instructions do not reach either arm. To use another agent, replace `agent_command` and `to_transcript` in `run.py`.
 
-`grade.py` needs nothing but the two files.
+`grade.py` needs no agent: it reads the case and a transcript, and loads the `no_stage_all` part from this repository. It trusts the transcript it is given. A transcript is evidence only when `run.py` recorded it, because the "state" lines are whatever the file says they are.
 
 ## What the two arms tell you
 
-| With the playbook | Without it | Meaning |
+| With the guidance | Without it | Meaning |
 |---|---|---|
-| passes | fails | The playbook earns its place. |
-| passes | passes | The model has caught up. Delete the playbook, or the lines that grader covers. |
-| fails | either | The playbook is broken. Fix it before it ships. |
+| passes | fails | The guidance earns its place. |
+| passes | passes | The model has caught up. Delete the guidance that grader covers. |
+| fails | either | The guidance is broken. Fix it before it ships. |
 
 ## The gate
 
-`record.json` stores a hash of the playbook as it was when the case last ran. The [`eval_record` check](../docs/parts.md#the-parts-here) compares it on every commit and in CI. Edit the playbook and the commit fails until the case has been run again and the with-playbook arm passes.
+`record.json` stores one hash over the case, the playbook and the other guidance files, as they were when the case last ran. The [`eval_record` check](../docs/parts.md#the-parts-here) compares it on every commit and in CI. Edit any of them and the commit fails until the case has been run again and the with-guidance arm passes. A playbook with no case fails too.
 
 The gate trusts the record file. It shows that someone ran the case on this wording; it cannot stop a person from editing the record by hand.
 
 ## Rules that make this worth doing
 
-- When an agent goes wrong in real work, turn the failure into a case before you fix the playbook.
+- When an agent goes wrong in real work, turn the failure into a case before you fix the guidance.
 - Run the cases on the smaller models you hand work to, not only the largest.
 - Write a new playbook only after a run without it shows the model failing at the task.
+- Never describe the graders in a page the agent reads.

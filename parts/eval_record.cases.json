@@ -1,52 +1,115 @@
 [
   {
-    "name": "a playbook whose hash matches a passing record passes",
+    "name": "a matching hash and a passing record pass",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
       "docs/fix.md": "# Fix\n",
-      "evals/runs/fix/record.json": "{\"playbook_sha256\": \"2d446b59ad4513c2d4a3b54e9622d5d480f5d75b8e92810299dba930c4454a51\", \"with_playbook\": {\"passed\": true}}"
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
     },
     "expect": []
   },
   {
     "name": "an edited playbook fails until its case is run again",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
       "docs/fix.md": "# Fix, reworded\n",
-      "evals/runs/fix/record.json": "{\"playbook_sha256\": \"0000\", \"with_playbook\": {\"passed\": true}}"
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
     },
     "expect": [
-      "changed since its last recorded eval run; run case fix again"
+      "changed since the last recorded eval run; run case fix again"
     ]
+  },
+  {
+    "name": "so does an edit to the other guidance the agent is given",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "docs/fix.md": "# Fix\n",
+      "docs/done.md": "# Done, reworded\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "and an edit to the case's own graders",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"graders\": []}",
+      "docs/fix.md": "# Fix\n",
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "line endings alone do not count as an edit",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "docs/fix.md": "# Fix\r\n",
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}"
+    },
+    "expect": []
   },
   {
     "name": "a matching record that did not pass fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
       "docs/fix.md": "# Fix\n",
-      "evals/runs/fix/record.json": "{\"playbook_sha256\": \"2d446b59ad4513c2d4a3b54e9622d5d480f5d75b8e92810299dba930c4454a51\", \"with_playbook\": {\"passed\": false}}"
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": false}}"
     },
     "expect": [
       "did not pass"
     ]
   },
   {
-    "name": "a playbook with no run on record fails",
+    "name": "passed must be true, not merely present",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\"}",
-      "docs/fix.md": "# Fix\n"
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "docs/fix.md": "# Fix\n",
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": \"no\"}}"
+    },
+    "expect": [
+      "did not pass"
+    ]
+  },
+  {
+    "name": "no run on record fails",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "docs/fix.md": "# Fix\n",
+      "docs/done.md": "# Done\n"
     },
     "expect": [
       "no eval run on record for case fix"
     ]
   },
   {
-    "name": "a case that names a missing playbook fails",
+    "name": "a record that is not an object is reported, not a crash",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/gone.md\"}"
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "docs/fix.md": "# Fix\n",
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "[]"
     },
     "expect": [
-      "its playbook is missing: docs/gone.md"
+      "not a readable eval record"
+    ]
+  },
+  {
+    "name": "a case that covers a missing file fails",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "docs/fix.md": "# Fix\n"
+    },
+    "expect": [
+      "a file the case covers is missing: docs/done.md"
     ]
   },
   {
@@ -56,6 +119,22 @@
     },
     "expect": [
       "not a readable eval case"
+    ]
+  },
+  {
+    "name": "a playbook with no case fails where every playbook must have one",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"]}",
+      "docs/fix.md": "# Fix\n",
+      "docs/done.md": "# Done\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"9168e20fc44460a9650a2fe84f9ae55b32fc383c647539470118050dba33d6f6\", \"with_guidance\": {\"passed\": true}}",
+      "docs/new.md": "# New\n"
+    },
+    "config": {
+      "playbooks": "docs"
+    },
+    "expect": [
+      "no eval case tests this playbook"
     ]
   }
 ]

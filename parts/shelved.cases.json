@@ -2,6 +2,8 @@
   {"name": "an edit inside the shelved folder", "event": {"path": "src/orders-service-v1/OrderService.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": false},
   {"name": "a deeper path, with a leading dot-slash", "event": {"path": "./src/orders-service-v1/Data/Db.cs"}, "config": {"paths": ["src/orders-service-v1/"]}, "allow": false},
   {"name": "a Windows-style path", "event": {"path": "src\\orders-service-v1\\OrderService.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": false},
+  {"name": "a path that climbs out and back in", "event": {"path": "docs/../src/orders-service-v1/OrderService.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": false},
+  {"name": "the same folder in another case", "event": {"path": "src/Orders-Service-V1/OrderService.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": false},
   {"name": "the live service next to it", "event": {"path": "src/orders-api/OrdersController.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": true},
   {"name": "a folder that only shares the prefix", "event": {"path": "src/orders-service-v10/x.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": true},
   {"name": "an event with no path", "event": {"command": "ls"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": true}

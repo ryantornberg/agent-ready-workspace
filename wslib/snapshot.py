@@ -44,10 +44,9 @@ class Snapshot:
 
     def read(self, path):
         """The file's text, or None when it is not valid UTF-8."""
-        data = self._bytes(path)
         try:
-            return data.decode("utf-8-sig")
-        except UnicodeDecodeError:
+            return self._bytes(path).decode("utf-8-sig")
+        except (UnicodeDecodeError, OSError, RuntimeError):
             return None
 
     def _bytes(self, path):
@@ -73,7 +72,7 @@ class Tree(Snapshot):
         for folder, dirs, files in os.walk(self.root):
             dirs[:] = [d for d in dirs if d not in ALWAYS_SKIP]
             base = pathlib.Path(folder).relative_to(self.root)
-            found.extend((base / name).as_posix() for name in files)
+            found.extend((base / name).as_posix() for name in files if (pathlib.Path(folder) / name).is_file())
         super().__init__(found, changed)
 
     def _bytes(self, path):
@@ -92,16 +91,34 @@ def _names(output):
 
 
 class Index(Snapshot):
-    """What is staged. An unstaged edit or an untracked file cannot pass or fail the commit."""
+    """What is staged. An unstaged edit or an untracked file cannot pass or fail the commit.
+
+    A submodule is staged as one pinned commit, not as files. Its files are read
+    from its checkout on disk, so links into pinned code and names defined there
+    still resolve.
+    """
 
     def __init__(self, root):
         self.root = pathlib.Path(root).resolve()
-        paths = [p for p in _names(_git(self.root, "ls-files", "-z"))
-                 if not ALWAYS_SKIP.intersection(p.split("/"))]
+        paths, self._on_disk = [], set()
+        for entry in _names(_git(self.root, "ls-files", "-s", "-z")):
+            meta, _, path = entry.partition("\t")
+            if ALWAYS_SKIP.intersection(path.split("/")):
+                continue
+            if meta.startswith("160000"):
+                folder = self.root / path
+                if folder.is_dir():
+                    inside = [f"{path}/{name}" for name in Tree(folder).paths()]
+                    self._on_disk.update(inside)
+                    paths.extend(inside)
+            else:
+                paths.append(path)
         changed = _names(_git(self.root, "diff", "--cached", "--name-only", "-z", "--diff-filter=ACMR"))
         super().__init__(paths, changed)
 
     def _bytes(self, path):
+        if path in self._on_disk:
+            return (self.root / path).read_bytes()
         return _git(self.root, "show", f":{path}")
 
 

@@ -21,6 +21,6 @@ The steps for a bug that is small, easy to reverse and in one repository. An age
 - The failing test passes on the base branch, so the bug is not where the report says.
 - The fix would undo a recorded decision.
 
-## Why it is tested
+## Changing this page
 
-A small wording change here can change what an agent does. [The eval case](../../evals/README.md) for this playbook runs a real model on a small broken repository, once with this page and once without it. It checks that the agent saw a test fail before it edited the code, that its new test fails on the original code, that the report marks a claim as verified, and that someone else's uncommitted edits stayed out of the commit. The `eval_record` check fails any commit that changes this page without a new passing run.
+A small wording change here can change what an agent does. This page has an eval case, and a check fails any commit that changes the page without a new passing run. This page does not say what the case looks for, because an agent reads this page.

@@ -11,7 +11,8 @@ ATX = re.compile(r"^ {0,3}(#{1,6})[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$")
 SETEXT = re.compile(r"^ {0,3}(=+|-+)[ \t]*$")
 DEFINITION = re.compile(r"^ {0,3}\[([^\]]+)\]:[ \t]*(?:<([^>]*)>|(\S+))")
 REFERENCE = re.compile(r"\]\[([^\]]+)\]")
-HTML_TARGET = re.compile(r"""<(?:a|img)\b[^>]*?\b(?:href|src)\s*=\s*["']([^"']*)["']""", re.I)
+HTML_TARGET = re.compile(r"""<(?:a|img|source)\b[^>]*?\b(?:href|src|srcset)\s*=\s*["']\s*([^"'\s,]*)""", re.I)
+QUOTE = re.compile(r"^(?: {0,3}> ?)+")
 HTML_ID = re.compile(r"""<[a-z][^>]*?\b(?:id|name)\s*=\s*["']([^"']+)["']""", re.I)
 EXTERNAL = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|//)")
 
@@ -95,6 +96,8 @@ def links(text):
     defined, used = set(), []
     for number, raw in prose_lines(text):
         definition = DEFINITION.match(raw)
+        if definition and definition.group(1).startswith("^"):
+            continue  # a footnote, not a link
         if definition:
             defined.add(definition.group(1).strip().lower())
             yield number, definition.group(2) if definition.group(2) is not None else definition.group(3), None
@@ -104,7 +107,7 @@ def links(text):
             yield number, target, None
         for target in HTML_TARGET.findall(line):
             yield number, target, None
-        used.extend((number, label.strip().lower()) for label in REFERENCE.findall(line))
+        used.extend((number, label.strip().lower()) for label in REFERENCE.findall(line) if not label.startswith("^"))
     for number, label in used:
         if label not in defined:
             yield number, None, label
@@ -137,6 +140,7 @@ def anchors(text):
 
     previous = ""
     for _, line in prose_lines(text):
+        line = QUOTE.sub("", line)  # a heading inside a blockquote still gets an anchor
         atx = ATX.match(line)
         if atx:
             add(atx.group(2))

@@ -2,7 +2,7 @@
 
 A small, working workspace for coding agents. It holds what neither the model nor the code knows, and it checks that what it holds stays true. Python standard library only, no install step.
 
-A model brings general skill. A repository says what the code is today. Neither knows which service is the live one, what your team calls things, or how you have agreed to finish work. A workspace writes that down. This one is built so that every rule in it is either checked by a part or tested by an eval, and so that adding a rule means adding one file.
+A model brings general skill. A repository says what the code is today. Neither knows which service is the live one, what your team calls things, or how you have agreed to finish work. A workspace writes that down. Where a machine can check one of its rules, a part checks it, and the table below says which rules those are and which stay prose. Adding a check means adding one part: a file, its cases and a line in the manifest.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/parts-dark.svg">
@@ -28,7 +28,7 @@ echo '{"path": "src/orders-service-v1/OrderService.cs"}' | python3 ws.py hook be
 python3 tools/symbols.py ReconciliationWorker src                      # file and line
 ```
 
-Rename the class in `src/orders-api/ReconciliationWorker.cs` and `python3 ws.py check` fails, because the index still sends agents to the old name. Edit `docs/playbooks/fix-a-bug.md` and it fails again, because the playbook no longer matches its last passing eval run.
+Rename the class in `src/orders-api/ReconciliationWorker.cs` and `python3 ws.py check` fails, because the index still sends agents to the old name. Edit `docs/playbooks/fix-a-bug.md` and it fails again, because the playbook no longer matches its last passing eval run. Both changes are easy to undo with `git checkout`.
 
 To run the checks before every commit:
 
@@ -46,7 +46,7 @@ git config core.hooksPath .githooks
 | `ws.py`, `wslib/` | The runner and the small core the parts plug into. |
 | [parts/](docs/parts.md) | Four checks and two hooks, each one file plus its cases. |
 | [docs/](docs/definition-of-done.md) | The definition of done, one playbook, one decision record, the question log. |
-| [evals/](evals/README.md) | One eval case, a broken sample repository, and recorded runs of a real model with and without the playbook. |
+| [evals/](evals/README.md) | One eval case, a broken sample repository, and recorded runs of a real model with and without the workspace's guidance. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
 
@@ -57,12 +57,14 @@ git config core.hooksPath .githooks
 | A link points at a real file and heading. | `links` check | Commit, CI |
 | Whoever edits a page past its review date reviews it. | `freshness` check | Commit, CI |
 | An alias in the index names something the code still defines. | `aliases` check | Commit, CI |
-| A playbook changes only with a new passing eval run. | `eval_record` check | Commit, CI |
+| A playbook, and the guidance tested with it, changes only with a new passing eval run. | `eval_record` check | Commit, CI |
 | Files are staged by name, never all at once. | `no_stage_all` hook | Before a shell command |
 | A shelved folder is not edited. | `shelved` hook | Before an edit |
-| A part has cases that show it working. | The runner | Every run |
+| A part's own cases pass. | The runner | Every command: a part with a failing case is refused |
 
-The commit check reads the staged snapshot, not the folder, so another session's unsaved edits cannot make a commit pass or fail. CI runs the same checks on Linux, macOS and Windows and treats every file in the push as changed, so a teammate who never installed the hook is still caught.
+The commit check reads the staged pages and the staged manifest, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. The parts' own code runs from disk. CI runs the same checks on Linux, macOS and Windows and compares with the commit before the push, so a teammate who never installed the hook is still caught. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed.
+
+These rules in [AGENTS.md](AGENTS.md) and the [definition of done](docs/definition-of-done.md) stay prose, because nothing here can check them: open pull requests only as drafts, write a goal and non-goals for larger work, log the questions you had to ask, compare build warnings with the base branch, and list the callers you checked. The eval tests two more: see a test fail before editing, and mark claims as verified.
 
 ## Add a part
 
@@ -85,18 +87,18 @@ def run(snapshot, config):
 [{"name": "an empty page fails", "files": {"a.md": "", "b.md": "# B"}, "expect": ["this page is empty"]}]
 ```
 
-Save the cases as `parts/no_empty_pages.cases.json`, add `{"use": "no_empty_pages"}` to `workspace.json`, and it runs at commit and in CI. Without the cases file the runner refuses to load it.
+Save the cases as `parts/no_empty_pages.cases.json`, add `{"use": "no_empty_pages"}` to `workspace.json`, and it runs at commit and in CI. Without the cases file, or with a case that fails, the runner refuses to load it.
 
 ## The eval
 
-The playbook says: reproduce the bug before you edit, and mark each claim in your report as verified or inferred. [evals/](evals/README.md) tests whether saying so changes anything. It gives a real model a small broken repository and the request "The Export button on the orders page does nothing. Fix it and commit the fix", once with the playbook and once without.
+The playbook says: reproduce the bug with a failing test before you edit, and mark each claim in your report as verified or inferred. [evals/](evals/README.md) tests whether saying so changes anything. It gives a real model a small broken repository and the request "The Export button on the orders page does nothing. Fix it and commit the fix", once with the workspace's guidance and once without.
 
-In the recorded run, on a small model, the run with the playbook passed all six graders. The run without it passed four: it edited the code before it had seen a test fail, and its report did not mark a claim as verified. Both runs staged by name and left another session's edits out of the commit, so those two graders show a habit the model already has. It is one run per arm, which shows the mechanism and is not a measurement. The transcripts are in [evals/runs/](evals/runs/fix-a-bug/record.json).
+In the recorded run, on a small model, the run with the guidance passed all six graders. The run without it passed four: it edited the code before it had seen a test fail, and its report did not mark a claim as verified. Both runs staged by name and left another session's edits out of the commit, so those two graders show a habit this model already has. It is one run per arm, which shows the mechanism and is not a measurement. The transcripts are in [evals/runs/](evals/runs/fix-a-bug/record.json).
 
 ## Use it for your own team
 
 1. Replace the facts in `AGENTS.md` with the ones a model gets wrong about your code. Leave out anything it gets right from the code alone.
-2. Put your code repositories under `src/` as submodules, and remove the samples.
+2. Put your code repositories under `src/` as submodules, and remove the samples. Add `submodules: true` to the checkout step in `.github/workflows/ci.yml`.
 3. Fill the alias table from the words your team actually says.
 4. Write a playbook for the task you repeat most, and one eval case for it.
 5. Start the question log. Each entry is a gap; fix the page, then note the fix.
@@ -105,11 +107,13 @@ Add a part when the same mistake shows up twice.
 
 ## Limits
 
-- **`symbols.py` reads C#, TypeScript and JavaScript one line at a time.** It finds types, methods, constructors, properties, functions and constants declared on one line in the usual style. It misses a declaration split across lines, a C# field or event, a TypeScript arrow function assigned inside a class, and anything generated at build time. It can report a declaration that sits inside a multi-line string.
-- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `id` and `name`. It does not read autolinks or headings produced by HTML tags. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
+- **`symbols.py` reads C#, TypeScript and JavaScript one line at a time.** It finds types, methods, constructors, properties, functions and constants declared on one line in the usual style. It is a lookup for names you already know, not a parser. It misses a declaration split across lines or behind an attribute; C# fields, events, delegates, indexers and operators; TypeScript class fields, getters, one-line method bodies and CommonJS exports; Python module-level constants; and anything generated at build time. It can report a declaration that sits inside a multi-line string.
+- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, or headings produced by HTML tags. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
 - **The checks prove that nothing is dangling. They cannot prove a page is true.** A page that contradicts last week's decision passes every one.
-- **The hooks are wired for one agent tool** ([.claude/settings.json](.claude/settings.json)). The parts do not depend on it; another tool needs a few lines to call `ws.py hook`.
-- **`no_stage_all` reads a command line; it does not run a shell.** A command built by a script, or hidden in an alias, gets past it. The eval's check on what was actually committed does not depend on it.
+- **The hooks are wired for one agent tool** ([.claude/settings.json](.claude/settings.json)), and that wiring calls `python3`, which a stock Windows machine may not have. The parts do not depend on it; another tool needs a few lines to call `ws.py hook`.
+- **`no_stage_all` reads a command line; it does not run a shell.** It follows separators, new lines, subshells, `sh -c` and common wrappers. A command built by a script, held in a variable or hidden in an alias gets past it, and it cannot tell that `git add src` names a whole folder. The eval's check on what was actually committed does not depend on it.
+- **`shelved` guards the edit tools only.** A shell command that writes into the folder, such as `sed -i` or `git mv`, does not pass through it.
+- **`eval_record` trusts the record file.** It shows that someone ran the case on the current wording. It cannot stop a person from editing the record by hand.
 - **The eval is one case, one model, one run per arm.** `evals/run.py` drives one agent tool.
 
 ## License
