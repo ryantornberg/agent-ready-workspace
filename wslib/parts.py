@@ -3,7 +3,7 @@
 A part is one Python file. It declares what it is and exposes one function:
 
     KIND = "check"     def run(snapshot, config) -> [finding(...), ...]
-    KIND = "hook"      EVENT = "before-shell" or "before-edit"
+    KIND = "hook"      EVENT = "before-shell", "before-edit" or "before-handoff"
                        def decide(event, config) -> None to allow, or the reason to refuse
 
 KIND and EVENT are each one plain line of their own, such as KIND = "hook".
@@ -17,6 +17,10 @@ part runs its cases, every time. A part with no cases, or with a case that
 fails, is refused. A check that nobody tests can stop finding things, and a
 hook can stop firing, and nobody notices. A case runs with its own "config"
 only, never the manifest's settings, so changing a setting cannot fail a case.
+
+A part's config is its manifest entry without "use", plus the manifest's tier
+binding as "tiers" when the manifest has one. The binding lives in one place:
+an entry that sets "tiers" itself is refused.
 
 A check case:  {"name", "files": {path: text}, "changed": [paths], "config": {}, "expect": [...]}
                Each expectation is text in an error, or {"message": text, "level": "warning"}.
@@ -36,7 +40,7 @@ import types
 from . import snapshot as snapshots
 
 KINDS = ("check", "hook")
-EVENTS = ("before-shell", "before-edit")
+EVENTS = ("before-shell", "before-edit", "before-handoff")
 LEVELS = ("error", "warning")
 MANIFEST = "workspace.json"
 
@@ -191,12 +195,13 @@ def _read_cases(name, kind, cases_file, text):
     return cases
 
 
-def load(root, entry, run_cases=True, snapshot=None):
+def load(root, entry, run_cases=True, snapshot=None, tiers=None):
     """Load one manifest entry: {"use": "links", ...config}. "use" is a name under parts/, or a path to a .py file.
 
     The part's cases run as it loads, and a failing case refuses the part.
     run_cases=False is for `ws.py selftest`, which reports every failure instead of stopping at the first.
     snapshot: read the part and its cases from it (the staged commit) instead of from disk.
+    tiers: the manifest's tier binding, given to the part as config["tiers"].
     """
     name, relative = source_of(root, entry)
     text = _read(root, relative, snapshot)
@@ -222,7 +227,11 @@ def load(root, entry, run_cases=True, snapshot=None):
 
     cases_file = relative[:-len(".py")] + ".cases.json"
     cases = _read_cases(name, kind, pathlib.PurePosixPath(cases_file).name, _read(root, cases_file, snapshot))
+    if "tiers" in entry:
+        raise PartError(f'part {name}: refused, it sets "tiers"; the tier binding is the manifest\'s top-level "tiers"')
     config = {key: value for key, value in entry.items() if key != "use"}
+    if tiers is not None:
+        config["tiers"] = tiers
     part = Part(name, module, cases, config)
     if run_cases:
         failures = part.failed_cases()
@@ -233,7 +242,7 @@ def load(root, entry, run_cases=True, snapshot=None):
 
 def load_all(root, manifest=None, run_cases=True, snapshot=None):
     manifest = manifest or load_manifest(root)
-    return [load(root, entry, run_cases, snapshot) for entry in manifest["parts"]]
+    return [load(root, entry, run_cases, snapshot, manifest.get("tiers")) for entry in manifest["parts"]]
 
 
 def load_hooks(root, event, manifest):
@@ -254,7 +263,7 @@ def load_hooks(root, event, manifest):
                             "so no hook call can be decided")
         # A hook whose EVENT is unreadable or unknown loads, and so refuses: a misspelt event must not hide a hook.
         if kind == "hook" and (declared(text, "EVENT") == event or declared(text, "EVENT") not in EVENTS):
-            hooks.append(load(root, entry))
+            hooks.append(load(root, entry, tiers=manifest.get("tiers")))
     return hooks
 
 

@@ -10,6 +10,8 @@ import io
 import json
 import os
 import pathlib
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -29,6 +31,15 @@ from wslib import snapshot as snapshots  # noqa: E402
 from wslib import symbols  # noqa: E402
 
 STALE = "---\nlast-reviewed: 2020-01-01\n---\n# Old\n"
+
+
+def claude(tool, cwd=None, **tool_input):
+    """A Claude Code PreToolUse payload, as the tool sends it to a hook."""
+    payload = {"session_id": "s", "transcript_path": "/t.jsonl", "permission_mode": "default",
+               "hook_event_name": "PreToolUse", "tool_name": tool, "tool_input": tool_input}
+    if cwd is not None:
+        payload["cwd"] = str(cwd)
+    return json.dumps(payload)
 
 
 class Folder(unittest.TestCase):
@@ -209,20 +220,20 @@ class RunnerTests(Folder):
 
     def test_hooks_refuse_with_exit_2_and_a_reason(self):
         self.workspace({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
-        code, output = self.ws("hook", "before-shell", stdin='{"command": "git add -A"}')
+        code, output = self.ws("hook", "before-shell", stdin='{"version": 1, "command": "git add -A"}')
         self.assertEqual(code, 2)
         self.assertIn("Refused by no_stage_all", output)
-        self.assertEqual(self.ws("hook", "before-shell", stdin='{"command": "git add a.md"}')[0], 0)
-        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": "src/old/x.cs"}')[0], 2)
-        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": "src/new/x.cs"}')[0], 0)
+        self.assertEqual(self.ws("hook", "before-shell", stdin='{"version": 1, "command": "git add a.md"}')[0], 0)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "src/old/x.cs"}')[0], 2)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "src/new/x.cs"}')[0], 0)
 
     def test_hooks_read_an_agent_tool_payload_with_an_absolute_path(self):
         self.workspace({"use": "shelved", "paths": ["src/old"]})
-        payload = json.dumps({"tool_name": "Edit", "tool_input": {"file_path": str(self.root / "src/old/x.cs")}})
-        self.assertEqual(self.ws("hook", "before-edit", stdin=payload)[0], 2)
-        payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": "git commit -am x"}})
+        payload = claude("Edit", file_path=str(self.root / "src/old/x.cs"))
+        self.assertEqual(self.ws("hook", "before-edit", "--tool", "claude-code", stdin=payload)[0], 2)
+        payload = claude("Bash", command="git commit -am x")
         self.workspace({"use": "no_stage_all"})
-        self.assertEqual(self.ws("hook", "before-shell", stdin=payload)[0], 2)
+        self.assertEqual(self.ws("hook", "before-shell", "--tool", "claude-code", stdin=payload)[0], 2)
 
     def test_a_part_whose_case_fails_is_refused_on_every_command_not_only_selftest(self):
         self.workspace({"use": "links"})
@@ -247,16 +258,16 @@ class RunnerTests(Folder):
 
     def test_a_hook_on_an_unknown_event_cannot_load_and_an_unknown_event_is_refused(self):
         self.workspace({"use": "no_stage_all"})
-        self.assertEqual(self.ws("hook", "before-banana", stdin='{"command": "ls"}')[0], 2)
+        self.assertEqual(self.ws("hook", "before-banana", stdin='{"version": 1, "command": "ls"}')[0], 2)
         source = (ROOT / "parts/no_stage_all.py").read_text(encoding="utf-8").replace('EVENT = "before-shell"', 'EVENT = "before-shel"')
         self.write("parts/no_stage_all.py", source)
-        code, output = self.ws("hook", "before-shell", stdin='{"command": "ls"}')
+        code, output = self.ws("hook", "before-shell", stdin='{"version": 1, "command": "ls"}')
         self.assertEqual(code, 2)
         self.assertIn("EVENT must be one of", output)
 
     def test_a_hook_that_cannot_decide_fails_closed(self):
         self.workspace({"use": "shelved", "paths": ["src/old"]})
-        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": 5}')[0], 2)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": 5}')[0], 2)
         self.assertEqual(self.ws("hook", "before-edit", stdin='[]')[0], 2)
 
     def test_ci_fails_closed_when_it_cannot_compare(self):
@@ -326,24 +337,24 @@ class NoSelfLockTests(Folder):
     def test_a_broken_check_case_does_not_lock_the_hooks(self):
         self.workspace({"use": "links"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
         self.break_cases("links")
-        code, output = self.ws("hook", "before-shell", stdin='{"command": "ls"}')
+        code, output = self.ws("hook", "before-shell", stdin='{"version": 1, "command": "ls"}')
         self.assertEqual(code, 0, output)
-        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": "parts/links.cases.json"}')[0], 0)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "parts/links.cases.json"}')[0], 0)
         self.assertEqual(self.ws("selftest")[0], 1)
         self.assertNotEqual(self.ws("check")[0], 0)
 
     def test_a_broken_hook_case_refuses_its_own_event_only(self):
         self.workspace({"use": "links"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
         self.break_cases("no_stage_all")
-        code, output = self.ws("hook", "before-shell", stdin='{"command": "ls"}')
+        code, output = self.ws("hook", "before-shell", stdin='{"version": 1, "command": "ls"}')
         self.assertEqual(code, 2)
         self.assertIn("no_stage_all", output)
-        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": "parts/no_stage_all.cases.json"}')[0], 0)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "parts/no_stage_all.cases.json"}')[0], 0)
 
     def test_a_check_that_will_not_even_import_does_not_lock_the_hooks(self):
         self.workspace({"use": "links"}, {"use": "no_stage_all"})
         self.write("parts/links.py", (ROOT / "parts/links.py").read_text(encoding="utf-8") + "\ndef broken(:\n")
-        self.assertEqual(self.ws("hook", "before-shell", stdin='{"command": "ls"}')[0], 0)
+        self.assertEqual(self.ws("hook", "before-shell", stdin='{"version": 1, "command": "ls"}')[0], 0)
         self.assertEqual(self.ws("check")[0], 2)
 
     def test_a_part_whose_kind_cannot_be_read_without_running_it_fails_closed(self):
@@ -357,8 +368,8 @@ class NoSelfLockTests(Folder):
                     (self.root / "parts/no_stage_all.py").unlink()
                 else:
                     self.write("parts/no_stage_all.py", body)
-                self.assertEqual(self.ws("hook", "before-shell", stdin='{"command": "git add -A"}')[0], 2)
-                self.assertEqual(self.ws("hook", "before-shell", stdin='{"command": "ls"}')[0], 2)
+                self.assertEqual(self.ws("hook", "before-shell", stdin='{"version": 1, "command": "git add -A"}')[0], 2)
+                self.assertEqual(self.ws("hook", "before-shell", stdin='{"version": 1, "command": "ls"}')[0], 2)
 
     def test_a_declared_kind_that_differs_from_the_running_one_is_refused(self):
         self.workspace({"use": "no_stage_all"})
@@ -372,7 +383,7 @@ class NoSelfLockTests(Folder):
     def test_a_half_written_manifest_refuses_every_hook_call_and_names_the_manifest(self):
         self.workspace({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
         self.write("workspace.json", '{"parts": [{"use": "no_stage_all"}, {"use": "she')
-        for event, payload in (("before-shell", '{"command": "ls"}'), ("before-edit", '{"path": "workspace.json"}')):
+        for event, payload in (("before-shell", '{"version": 1, "command": "ls"}'), ("before-edit", '{"version": 1, "path": "workspace.json"}')):
             code, output = self.ws("hook", event, stdin=payload)
             self.assertEqual(code, 2, event)
             self.assertIn("workspace.json", output)
@@ -496,6 +507,258 @@ class NoSelfLockTests(Folder):
         code, output = self.ws("check", "--staged")
         self.assertEqual(code, 2)
         self.assertIn("workspace.json", output)
+
+
+class FailClosedTests(Folder):
+    """M1 slice 1: a hook refuses whatever it cannot read, and the wiring refuses when it cannot run the hook."""
+
+    TIERS = {"driver": {"model": "opus", "effort": "high"}, "worker": {"model": "opus", "effort": "medium"},
+             "mechanical": {"model": "haiku", "effort": "low"}}
+
+    def hooks(self, *entries, tiers=None):
+        self.workspace(*entries)
+        manifest = json.loads((self.root / "workspace.json").read_text(encoding="utf-8"))
+        if tiers is not None:
+            manifest = {"tiers": tiers, **manifest}
+        self.write("workspace.json", json.dumps(manifest))
+
+    def answer(self, event, payload, tool=None):
+        return self.ws("hook", event, *(["--tool", tool] if tool else []), stdin=payload)[0]
+
+    # Criterion 7. Each value here is harmless, so a refusal can only come from the event's shape.
+    UNREADABLE = [
+        ("before-edit", "{}"),
+        ("before-edit", '{"tool_input": {"filePath": "src/new/x.cs"}}'),
+        ("before-edit", '{"file_path": "src/new/x.cs"}'),
+        ("before-edit", '{"tool_input": {"path": "src/new/x.cs"}}'),
+        ("before-edit", '{"toolArgs": "{\\"path\\": \\"src/new/x.cs\\"}"}'),
+        ("before-shell", "{}"),
+        ("before-shell", '{"tool_input": {"cmd": "ls"}}'),
+        ("before-shell", '{"tool_input": {"command": ["ls"]}}'),
+        ("before-shell", '{"command": "ls"}'),
+        ("before-shell", '{"version": 1, "cmd": "ls"}'),
+        ("before-shell", '{"version": 2, "command": "ls"}'),
+        ("before-shell", '{"version": "1", "command": "ls"}'),
+        ("before-shell", '{"version": true, "command": "ls"}'),
+        ("before-shell", '{"version": 1, "command": ""}'),
+        ("before-shell", '{"version": 1, "command": "ls", "path": "a.md"}'),
+        ("before-shell", '{"version": 1, "command": ["ls"]}'),
+        ("before-edit", '{"version": 1, "command": "ls"}'),
+        ("before-edit", '{"version": 1, "path": null}'),
+        ("before-edit", '{"version": 1, "path": "a\\u0000b"}'),
+        ("before-handoff", '{"version": 1}'),
+        ("before-shell", "[]"),
+        ("before-shell", '"ls"'),
+        ("before-shell", ""),
+        ("before-shell", "[" * 100000),
+    ]
+
+    def test_an_event_in_no_known_shape_is_refused(self):
+        self.hooks({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]}, {"use": "handoff_tier"}, tiers=self.TIERS)
+        for event, payload in self.UNREADABLE:
+            for tool in (None, "claude-code"):
+                with self.subTest(event=event, payload=payload[:60], tool=tool):
+                    self.assertEqual(self.answer(event, payload, tool), 2)
+        self.assertEqual(self.answer("before-shell", '{"version": 1, "command": "ls"}'), 0)
+        self.assertEqual(self.answer("before-edit", '{"version": 1, "path": "src/new/x.cs"}'), 0)
+
+    def test_a_tool_payload_missing_the_field_its_kind_needs_is_refused(self):
+        self.hooks({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]}, {"use": "handoff_tier"}, tiers=self.TIERS)
+        here = str(self.root / "src/new/x.cs")
+        refused = [
+            ("before-edit", claude("Edit", filePath=here)),
+            ("before-edit", claude("Write", path=here)),
+            ("before-edit", claude("Edit", file_path="")),
+            ("before-edit", claude("NotebookEdit", file_path=here)),
+            ("before-edit", claude("Read", file_path=here)),            # a tool the adapter does not map to this event
+            ("before-edit", claude("Bash", command="ls")),
+            ("before-shell", claude("Bash", cmd="ls")),
+            ("before-shell", claude("Bash", command=["ls"])),
+            ("before-shell", claude("Bash")),
+            ("before-shell", claude("Edit", file_path=here)),
+            ("before-handoff", claude("Agent", description="x")),
+            ("before-shell", json.dumps({"hook_event_name": "PostToolUse", "tool_name": "Bash", "tool_input": {"command": "ls"}})),
+            ("before-shell", json.dumps({"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": '{"command": "ls"}'})),
+            ("before-shell", json.dumps({"tool_name": "Bash", "tool_input": {"command": "ls"}})),
+            ("before-edit", claude("Edit", file_path="src/new/x.cs")),   # relative, and no cwd to place it
+            ("before-edit", claude("Edit", cwd="relative/dir", file_path="x.cs")),
+        ]
+        for event, payload in refused:
+            with self.subTest(event=event, payload=payload):
+                self.assertEqual(self.answer(event, payload, "claude-code"), 2)
+                self.assertEqual(self.answer(event, payload), 2)        # read the same way with no --tool
+        self.assertEqual(self.answer("before-shell", claude("Bash", command="ls", description="list"), "claude-code"), 0)
+        self.assertEqual(self.answer("before-edit", claude("Edit", file_path=here, old_string="a", new_string="b"), "claude-code"), 0)
+        self.assertEqual(self.answer("before-edit", claude("Write", cwd=self.root, file_path="src/new/x.cs"), "claude-code"), 0)
+        self.assertEqual(self.answer("before-shell", claude("Bash", command="ls"), "an-unknown-tool"), 2)
+
+    def test_wiring_written_before_the_adapters_keeps_working_and_stays_closed(self):
+        # A running session keeps the wiring it started with, which named no --tool. The upgrade must not lock it out.
+        self.hooks({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        self.assertEqual(self.answer("before-shell", claude("Bash", command="ls")), 0)
+        self.assertEqual(self.answer("before-shell", claude("Bash", command="git add -A")), 2)
+        self.assertEqual(self.answer("before-edit", claude("Edit", file_path=str(self.root / "src/old/x.cs"))), 2)
+        self.assertEqual(self.answer("before-shell", claude("Bash", cmd="ls")), 2)
+        # A named tool reads only its own payload.
+        self.assertEqual(self.answer("before-shell", '{"version": 1, "command": "ls"}', "claude-code"), 2)
+
+    def test_input_that_is_not_text_is_refused_without_a_traceback(self):
+        self.hooks({"use": "no_stage_all"})
+        for data in (b"\xff\xfe{", b'{"version": 1, "command": "ls"\xff}'):
+            ran = subprocess.run([sys.executable, str(ROOT / "ws.py"), "--root", str(self.root), "hook", "before-shell"],
+                                 input=data, capture_output=True)
+            self.assertEqual(ran.returncode, 2, data)
+            self.assertNotIn(b"Traceback", ran.stderr)
+
+    # Criterion 8
+    def test_an_upper_cased_absolute_path_on_a_case_insensitive_file_system_is_refused(self):
+        self.hooks({"use": "shelved", "paths": ["src/old"]})
+        (self.root / "src/old").mkdir(parents=True)
+        upper = str(self.root).upper()
+        if upper == str(self.root) or not os.path.exists(upper) or not os.path.samefile(upper, self.root):
+            self.skipTest("this file system tells upper and lower case apart")
+        for tool, field in (("Edit", "file_path"), ("Write", "file_path"), ("NotebookEdit", "notebook_path")):
+            with self.subTest(tool=tool):
+                payload = claude(tool, **{field: os.path.join(upper, "SRC", "OLD", "X.CS")})
+                self.assertEqual(self.answer("before-edit", payload, "claude-code"), 2)
+        self.assertEqual(self.answer("before-edit", claude("Edit", file_path=os.path.join(upper, "SRC", "NEW", "X.CS")),
+                                     "claude-code"), 0)
+
+    def test_an_edit_through_a_symbolic_link_into_the_shelved_folder_is_refused(self):
+        self.hooks({"use": "shelved", "paths": ["src/old"]})
+        (self.root / "src/old").mkdir(parents=True)
+        (self.root / "src/new").mkdir(parents=True)
+        try:
+            (self.root / "legacy").symlink_to(self.root / "src/old", target_is_directory=True)
+            (self.root / "current").symlink_to(self.root / "src/new", target_is_directory=True)
+        except OSError:
+            self.skipTest("symlinks are not available here")
+        self.assertEqual(self.answer("before-edit", '{"version": 1, "path": "legacy/x.cs"}'), 2)
+        self.assertEqual(self.answer("before-edit", claude("Edit", file_path=str(self.root / "legacy/x.cs")), "claude-code"), 2)
+        self.assertEqual(self.answer("before-edit", claude("Write", cwd=self.root / "legacy", file_path="x.cs"), "claude-code"), 2)
+        self.assertEqual(self.answer("before-edit", '{"version": 1, "path": "current/x.cs"}'), 0)
+        self.assertEqual(self.answer("before-edit", claude("Edit", file_path=str(self.root / "current/x.cs")), "claude-code"), 0)
+
+    def test_the_notebook_edit_tool_is_wired_and_refused(self):
+        self.hooks({"use": "shelved", "paths": ["src/old"]})
+        payload = claude("NotebookEdit", notebook_path=str(self.root / "src/old/n.ipynb"), new_source="x")
+        self.assertEqual(self.answer("before-edit", payload, "claude-code"), 2)
+        payload = claude("NotebookEdit", notebook_path=str(self.root / "src/new/n.ipynb"), new_source="x")
+        self.assertEqual(self.answer("before-edit", payload, "claude-code"), 0)
+
+    def test_the_wiring_sends_every_tool_the_adapter_reads_and_every_event_has_wiring(self):
+        from wslib import events
+        wiring = self.wiring()
+        self.assertEqual(set(wiring), set(partlib.EVENTS))
+        for event, tools in events.CLAUDE_CODE_TOOLS.items():
+            matcher, command = wiring[event]
+            for tool in tools:
+                with self.subTest(event=event, tool=tool):
+                    self.assertTrue(re.fullmatch(matcher, tool), f"{matcher!r} does not send {tool} to {event}")
+            self.assertIn("--tool claude-code", command)
+            self.assertTrue(command.rstrip().endswith("|| exit 2"), command)
+
+    # Criterion 9
+    def test_a_path_inside_a_code_repository_under_src_is_decided_like_any_other(self):
+        self.hooks({"use": "shelved", "paths": ["src/product/Legacy"]})
+        product = self.root / "src/product"
+        self.write("src/product/Legacy/Old.cs", "class Old { }\n")
+        self.write("src/product/Billing/Run.cs", "class Run { }\n")
+        for args in (["init", "-q"], ["add", "Legacy/Old.cs", "Billing/Run.cs"],
+                     ["-c", "user.name=t", "-c", "user.email=t@example.invalid", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "p"]):
+            subprocess.run(["git", "-C", str(product), *args], check=True, capture_output=True)
+        answers = [
+            ('{"version": 1, "path": "src/product/Legacy/Old.cs"}', None, 2),
+            ('{"version": 1, "path": "src/product/Billing/Run.cs"}', None, 0),
+            (claude("Edit", file_path=str(product / "Legacy/Old.cs")), "claude-code", 2),
+            (claude("Edit", file_path=str(product / "Billing/Run.cs")), "claude-code", 0),
+            (claude("Write", cwd=product, file_path="Legacy/New.cs"), "claude-code", 2),
+            (claude("Write", cwd=product, file_path="Billing/New.cs"), "claude-code", 0),
+            (claude("Write", cwd=product / "Billing", file_path="../Legacy/New.cs"), "claude-code", 2),
+        ]
+        for payload, tool, want in answers:
+            with self.subTest(payload=payload):
+                self.assertEqual(self.answer("before-edit", payload, tool), want)
+
+    # Criterion 10
+    def wiring(self):
+        """{event: (matcher, command)} from the agent tool's settings."""
+        settings = json.loads((ROOT / ".claude/settings.json").read_text(encoding="utf-8"))
+        found = {}
+        for entry in settings["hooks"]["PreToolUse"]:
+            for hook in entry["hooks"]:
+                event = re.search(r"\bhook (before-[a-z]+)\b", hook["command"]).group(1)
+                found[event] = (entry["matcher"], hook["command"])
+        return found
+
+    def shell(self):
+        if os.name == "nt":   # Git's own bash: the one an agent tool on Windows runs hooks with, not WSL's
+            git = shutil.which("git")
+            candidate = git and pathlib.Path(git).resolve().parent.parent / "bin" / "bash.exe"
+            return str(candidate) if candidate and candidate.exists() else None
+        return shutil.which("sh")
+
+    def run_wiring(self, event, payload, project, path=None):
+        shell = self.shell()
+        if not shell:
+            self.skipTest("no POSIX shell here")
+        environment = dict(os.environ, CLAUDE_PROJECT_DIR=pathlib.Path(project).as_posix())
+        if path is not None:
+            environment["PATH"] = path
+        return subprocess.run([shell, "-c", self.wiring()[event][1]], input=payload.encode("utf-8"),
+                              capture_output=True, env=environment)
+
+    def test_the_wiring_refuses_when_python_is_missing(self):
+        empty = self.root / "empty-bin"
+        empty.mkdir()
+        for event, payload in (("before-shell", claude("Bash", command="ls")),
+                               ("before-edit", claude("Edit", file_path=str(ROOT / "README.md")))):
+            with self.subTest(event=event):
+                ran = self.run_wiring(event, payload, ROOT)
+                self.assertEqual(ran.returncode, 0, ran.stderr)                    # with Python: allowed
+                ran = self.run_wiring(event, payload, ROOT, path=str(empty))
+                self.assertEqual(ran.returncode, 2, ran.stderr)                    # without: refused, not 0 or 1
+                self.assertIn(b"Python", ran.stderr)
+        ran = self.run_wiring("before-shell", claude("Bash", command="git add -A"), ROOT)
+        self.assertEqual(ran.returncode, 2, ran.stderr)
+        ran = self.run_wiring("before-shell", claude("Bash", command="ls"), self.root)   # no launcher there at all
+        self.assertEqual(ran.returncode, 2, ran.stderr)
+
+    # Criterion 11
+    def handoff(self, tool="Agent", **tool_input):
+        return self.answer("before-handoff", claude(tool, description="d", subagent_type="Explore", **tool_input), "claude-code")
+
+    def test_a_delegated_task_must_name_its_tier_and_run_at_its_binding(self):
+        self.hooks({"use": "handoff_tier"}, tiers=self.TIERS)
+        named = "Tier: mechanical\nList every caller of decide()."
+        self.assertEqual(self.handoff(prompt="List every caller of decide().", model="haiku", effort="low"), 2)
+        self.assertEqual(self.handoff(prompt="Look up the tier in docs/orchestration.md\nTier: mechanical", model="haiku", effort="low"), 2)
+        self.assertEqual(self.handoff(prompt="Tier: boss\nList.", model="haiku", effort="low"), 2)
+        self.assertEqual(self.handoff(prompt=named, model="haiku", effort="low"), 0)
+        self.assertEqual(self.handoff("Task", prompt=named, model="haiku", effort="low"), 0)
+        self.assertEqual(self.handoff(prompt="\n  tier: Worker - build slice 1\n", model="opus", effort="medium"), 0)
+        self.assertEqual(self.handoff(prompt=named, model="opus", effort="low"), 2)       # model off the binding
+        self.assertEqual(self.handoff(prompt=named, model="haiku", effort="high"), 2)     # effort off the binding
+        self.assertEqual(self.handoff(prompt=named, effort="low"), 2)                     # unset: it would inherit
+        self.assertEqual(self.handoff(prompt=named, model="haiku"), 2)
+        code, output = self.ws("hook", "before-handoff", "--tool", "claude-code", stdin=claude("Agent", prompt="List."))
+        self.assertEqual(code, 2)
+        self.assertIn("names no tier", output)
+
+    def test_a_tool_that_exposes_no_model_or_effort_needs_only_the_tier(self):
+        self.hooks({"use": "handoff_tier"}, tiers=self.TIERS)
+        self.assertEqual(self.answer("before-handoff", '{"version": 1, "prompt": "Tier: worker\\nBuild it."}'), 0)
+        self.assertEqual(self.answer("before-handoff", '{"version": 1, "prompt": "Build it."}'), 2)
+        self.assertEqual(self.answer("before-handoff", '{"version": 1, "prompt": "Tier: worker", "model": "haiku"}'), 2)
+        self.assertEqual(self.answer("before-handoff", '{"version": 1, "prompt": "Tier: worker", "effort": "medium"}'), 0)
+
+    def test_the_binding_comes_from_the_manifest_only(self):
+        self.hooks({"use": "handoff_tier"})                                          # no binding at all
+        self.assertEqual(self.answer("before-handoff", '{"version": 1, "prompt": "Tier: worker"}'), 2)
+        self.hooks({"use": "handoff_tier", "tiers": self.TIERS}, tiers=self.TIERS)   # a part may not carry its own
+        code, output = self.ws("hook", "before-handoff", stdin='{"version": 1, "prompt": "Tier: worker"}')
+        self.assertEqual(code, 2)
+        self.assertIn("top-level", output)
 
 
 class SymbolTests(unittest.TestCase):
