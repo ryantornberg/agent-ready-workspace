@@ -8,11 +8,13 @@ Run: python3 -m unittest discover -b tests
 import contextlib
 import io
 import json
+import os
 import pathlib
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -452,6 +454,94 @@ class GradeTests(unittest.TestCase):
             grade.grade(self.CASE, {"kind": "run"})
         with self.assertRaises(grade.Malformed):
             grade.grade(self.CASE, [{"kind": "ran", "target": "x"}])
+
+
+class DenyListTests(Folder):
+    """The deny list is read from a file the environment names, so these cases cannot be data in a cases file."""
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "deny_list"})
+        self.list_file = self.root.parent / f"{self.root.name}-deny.txt"
+        self.list_file.write_text("# private\nglobex corp\nre:\\bGLX-\\d+\\b\n", encoding="utf-8")
+        self.addCleanup(self.list_file.unlink)
+        home = self.root.parent / f"{self.root.name}-home"   # so the default list path is never the real one
+        environment = mock.patch.dict(os.environ, {"WS_DENY_LIST": str(self.list_file), "HOME": str(home), "USERPROFILE": str(home)})
+        environment.start()
+        self.addCleanup(environment.stop)
+
+    def test_a_listed_term_fails_and_the_output_never_shows_the_term(self):
+        self.write("docs/a.md", "Ships to GLOBEX Corp, see GLX-42.\n")
+        code, out = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("docs/a.md:1: matches line 2 of the private deny list", out)
+        self.assertIn("docs/a.md:1: matches line 3 of the private deny list", out)
+        self.assertNotIn("globex", out.lower())
+
+    def test_files_in_other_encodings_are_still_checked(self):
+        (self.root / "utf16.txt").write_bytes("globex corp\n".encode("utf-16"))
+        (self.root / "latin1.cs").write_bytes("// \xa9 Globex Corp\n".encode("latin-1"))
+        code, out = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("utf16.txt:1:", out)
+        self.assertIn("latin1.cs:1:", out)
+
+    def test_the_commit_check_reads_what_is_staged(self):
+        self.git("init", "-q")
+        self.write("a.md", "fine\n")
+        self.git("add", "a.md", "workspace.json", "parts")
+        self.assertEqual(self.ws("check", "--staged")[0], 0)
+        self.write("a.md", "globex corp\n")
+        self.assertEqual(self.ws("check", "--staged")[0], 0)   # the bad edit is not staged
+        self.git("add", "a.md")
+        self.assertEqual(self.ws("check", "--staged")[0], 1)
+
+    def test_a_list_committed_by_mistake_fails_on_its_own_contents(self):
+        self.write("deny.txt", self.list_file.read_text(encoding="utf-8"))
+        code, out = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("deny.txt:", out)
+
+    def test_a_list_that_cannot_be_read_fails_closed(self):
+        os.environ["WS_DENY_LIST"] = str(self.root / "missing.txt")
+        code, out = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("the private deny list cannot be read", out)
+        self.assertNotIn("missing.txt", out)
+
+    def test_no_list_set_is_a_warning_and_nothing_is_checked(self):
+        del os.environ["WS_DENY_LIST"]
+        self.write("a.md", "globex corp\n")
+        code, out = self.ws("check")
+        self.assertEqual(code, 0)
+        self.assertIn("warning: workspace.json:1: no private deny list", out)
+
+    def test_with_no_variable_the_list_at_the_default_path_is_used(self):
+        del os.environ["WS_DENY_LIST"]
+        default = pathlib.Path(os.environ["HOME"]) / ".config" / "agent-ready-workspace" / "deny-list.txt"
+        default.parent.mkdir(parents=True)
+        default.write_text("\ufeffglobex corp\n", encoding="utf-8")   # a byte-order mark must not hide the first entry
+        self.addCleanup(lambda: __import__("shutil").rmtree(os.environ["HOME"]))
+        self.write("a.md", "globex corp\n")
+        code, out = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("a.md:1: matches line 1 of the private deny list", out)
+
+    def test_a_matching_file_name_is_never_printed(self):
+        self.write("plans/globex-corp-rollout.md", "# Rollout\n")
+        code, out = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("plans/<name ", out)
+        self.assertNotIn("globex", out.lower())
+
+    def test_the_manifest_cannot_carry_terms_or_redirect_the_list(self):
+        for setting in ({"terms": ["zzz"]}, {"list": ""}):
+            self.workspace({"use": "deny_list", **setting})
+            self.write("a.md", "globex corp\n")
+            code, out = self.ws("check")
+            # Refused either way: by the part itself, or (until manifest settings stop leaking into cases) at load.
+            self.assertNotEqual(code, 0, setting)
+            self.assertRegex(out, "only its cases may|refused", setting)
 
 
 class RepositoryTests(unittest.TestCase):

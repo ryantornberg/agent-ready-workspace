@@ -100,5 +100,6 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `freshness` | check | A commit edits a page that is past its review date. |
 | `aliases` | check | The index maps a phrase to a name the code no longer defines. |
 | `eval_record` | check | A playbook, its guidance or its eval case changed since the last passing eval run, or a playbook has no case. |
+| `deny_list` | check | A file or file name holds a term from a private list kept outside the repository. With no list it warns and checks nothing, so CI cannot run it. |
 | `no_stage_all` | hook, before-shell | A command stages everything instead of naming files. |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |

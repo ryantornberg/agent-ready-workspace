@@ -1,0 +1,14 @@
+[
+  {"name": "a listed term in a file fails, and the finding does not repeat the term", "files": {"notes.md": "# Notes\nShips to Acme Corp next week.\n"}, "config": {"terms": ["acme corp"]}, "expect": ["matches line 1 of the private deny list"]},
+  {"name": "matching ignores case, and comments and blank lines are not entries", "files": {"notes.md": "ACME CORP\n"}, "config": {"terms": ["# a comment", "", "acme corp"]}, "expect": ["matches line 3 of the private deny list"]},
+  {"name": "words joined by a line break, a hyphen, an underscore or nothing still match", "files": {"a.md": "Acme\ncorp\n", "b.md": "acme-corp\n", "c.md": "ACME_CORP\n", "d.md": "AcmeCorp\n"}, "config": {"terms": ["acme corp"]}, "expect": ["matches line 1 of the private deny list"]},
+  {"name": "zero-width characters and full-width letters do not hide a term", "files": {"a.md": "ac​me\n", "b.md": "ａｃｍｅ\n"}, "config": {"terms": ["acme"]}, "expect": ["matches line 1 of the private deny list"]},
+  {"name": "UTF-16 with no byte-order mark does not hide a term", "files": {"a.txt": "a\u0000c\u0000m\u0000e\u0000"}, "config": {"terms": ["acme"]}, "expect": ["matches line 1 of the private deny list"]},
+  {"name": "a listed term in a file name fails, and the name is not printed", "files": {"plans/acme-rollout.md": "# Rollout\n"}, "config": {"terms": ["acme"]}, "expect": ["the file name matches line 1 of the private deny list"]},
+  {"name": "a regular-expression entry matches a ticket pattern and nothing wider", "files": {"a.md": "Fixes TICK-123.\n", "b.md": "A TICKET-9 is fine.\n"}, "config": {"terms": ["re:\\bTICK-\\d+\\b"]}, "expect": ["matches line 1 of the private deny list"]},
+  {"name": "files with no listed term pass", "files": {"a.md": "# Orders\nThe nightly job reconciles.\n", "src/x.cs": "class X { }\n"}, "config": {"terms": ["acme", "re:\\bTICK-\\d+\\b"]}, "expect": []},
+  {"name": "no list is reported as a warning, and nothing is checked", "files": {"a.md": "acme\n"}, "config": {"list": ""}, "expect": ["no private deny list"]},
+  {"name": "a list that cannot be read is an error, not a pass", "files": {"a.md": "acme\n"}, "config": {"list": "/nonexistent/deny-list-for-a-case.txt"}, "expect": ["the private deny list cannot be read"]},
+  {"name": "a list with no entries is an error, not a pass", "files": {"a.md": "acme\n"}, "config": {"terms": ["# only a comment", ""]}, "expect": ["holds no entries"]},
+  {"name": "a bad regular expression is an error, not a pass", "files": {"a.md": "acme\n"}, "config": {"terms": ["re:("]}, "expect": ["line 1 of the deny list is not a valid regular expression"]}
+]

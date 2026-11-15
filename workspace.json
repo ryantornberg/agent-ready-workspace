@@ -1,4 +1,18 @@
 {
+  "tiers": {
+    "driver": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "worker": {
+      "model": "opus",
+      "effort": "medium"
+    },
+    "mechanical": {
+      "model": "haiku",
+      "effort": "low"
+    }
+  },
   "parts": [
     {
       "use": "links",
@@ -37,6 +51,9 @@
       "paths": [
         "src/orders-service-v1"
       ]
+    },
+    {
+      "use": "deny_list"
     }
   ]
 }
