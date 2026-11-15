@@ -56,10 +56,15 @@ def run(snapshot, config):
             found.append(finding(path, 1, "not a readable eval case with a name and a playbook"))
             continue
         tested.add(playbook)
-        texts = {f: snapshot.read(f) if snapshot.is_file(f) else None for f in files}
-        missing = [f for f, text in texts.items() if text is None]
+        missing = [f for f in files if not snapshot.is_file(f)]
         if missing:
             found.append(finding(path, 1, f"a file the case covers is missing: {missing[0]}"))
+            continue
+        texts = {f: snapshot.read(f) for f in files}
+        unreadable = [f for f, text in texts.items() if text is None]
+        if unreadable:
+            found.append(finding(path, 1, f"a file the case covers {snapshot.not_utf8(unreadable[0])}, so the case "
+                                          f"cannot be hashed: {unreadable[0]}"))
             continue
 
         record_path = f"{runs}/{name}/record.json"

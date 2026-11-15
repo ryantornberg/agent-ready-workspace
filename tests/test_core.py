@@ -6,6 +6,7 @@ and by test_every_part_passes_its_own_cases below.
 Run: python3 -m unittest discover -b tests
 """
 import contextlib
+import datetime
 import io
 import json
 import os
@@ -333,6 +334,7 @@ class NoSelfLockTests(Folder):
         settings = [("freshness", {"max_age_days": 1}), ("freshness", {"require": ["docs", "notes"]}),
                     ("freshness", {"skip": ["docs"]}), ("aliases", {"code": "lib"}), ("aliases", {"heading": "Words"}),
                     ("aliases", {"index": "docs/INDEX.md"}), ("aliases", {"exclude": ["src/api"]}),
+                    ("aliases", {"contract": ["AGENTS.md"]}), ("freshness", {"require": ["docs", "AGENTS.md"]}),
                     ("links", {"skip": ["docs"]}), ("eval_record", {"playbooks": "docs"}),
                     ("eval_record", {"cases": "tests/cases"}), ("shelved", {"paths": []})]
         for name, setting in settings:
@@ -986,6 +988,229 @@ class StagingAtTheCommitTests(Folder):
             code, output = self.ws("check", "--message", str(message))
         self.assertEqual(code, 1)
         self.assertIn("only its cases may", output)
+
+
+class AdoptionPathTests(Folder):
+    """M1 slice 4: a team can adopt the workspace. Code repositories under src/, files in any encoding, and the
+    working-folder check and the commit check listing the same files."""
+
+    def setUp(self):
+        super().setUp()
+        home = self.root.parent / f"{self.root.name}-home"   # no real deny list in these tests unless one sets it
+        environment = mock.patch.dict(os.environ, {"HOME": str(home), "USERPROFILE": str(home), "WS_DENY_LIST": ""})
+        environment.start()
+        self.addCleanup(environment.stop)
+
+    def copy_of_this_repository(self, extra=None):
+        """This repository's tracked files, committed in a new repository."""
+        names = [n for n in subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z"], capture_output=True,
+                                           check=True).stdout.decode("utf-8").split("\0") if n]
+        for name in names:
+            if (ROOT / name).is_file():
+                (self.root / name).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / name, self.root / name)
+        for name, text in (extra or {}).items():
+            self.write(name, text)
+        self.git("init", "-q")
+        self.git("add", "-A")
+        self.git("commit", "-q", "--no-verify", "-m", "copy")
+
+    def both(self):
+        """(exit code, error lines) of `check`, then of `check --staged`."""
+        results = []
+        for args in (["check"], ["check", "--staged"]):
+            code, output = self.ws(*args)
+            results.append((code, sorted(line for line in output.splitlines() if line.startswith("error:"))))
+        return tuple(results)
+
+    def deny(self, term):
+        listed = self.root.parent / f"{self.root.name}-deny.txt"
+        listed.write_text(term + "\n", encoding="utf-8")
+        self.addCleanup(listed.unlink)
+        os.environ["WS_DENY_LIST"] = str(listed)
+
+    # Criterion 15
+    def test_a_code_repository_under_src_with_its_own_broken_links_passes(self):
+        self.copy_of_this_repository()
+        origin = self.root.parent / f"{self.root.name}-product"
+        self.addCleanup(shutil.rmtree, origin, True)
+        origin.mkdir()
+        files = {"README.md": "# Product\n\nSee [setup](docs/setup.md) and [the wiki](../wiki/Home.md).\n",
+                 "docs/guide.md": "---\nlast-reviewed: 2001-01-01\n---\n# Guide\n\n[gone](#nowhere)\n",
+                 "docs/undated.md": "# No date\n"}
+        for name, text in files.items():
+            (origin / name).parent.mkdir(parents=True, exist_ok=True)
+            (origin / name).write_text(text, encoding="utf-8")
+        for args in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "product"]):
+            subprocess.run(["git", "-C", str(origin), "-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                            "-c", "commit.gpgsign=false", *args], check=True, capture_output=True)
+        self.git("-c", "protocol.file.allow=always", "submodule", "add", "-q", str(origin), "src/product")
+        self.git("clone", "-q", str(origin), "src/clone")                        # a clone not yet added
+        for args in (["check"], ["check", "--staged"]):
+            with self.subTest(args=args):
+                code, output = self.ws(*args)
+                self.assertEqual(code, 0, output)
+        self.write("src/notes.md", "[gone](nope.md)\n")                            # the workspace's own page under src/
+        code, output = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("error: src/notes.md:1: link to missing file: nope.md", output)
+        self.assertNotIn("src/product/", output)
+        self.assertNotIn("src/clone/", output)
+
+    # Criterion 16
+    def test_a_page_in_another_encoding_is_reported_not_skipped(self):
+        self.workspace({"use": "links"}, {"use": "freshness", "require": ["docs"]})
+        page = "---\nlast-reviewed: 2026-01-01\n---\n# Café\n\n[gone](nope.md)\n"
+        pages = {"docs/cp1252.md": (page.encode("cp1252"), "Windows-1252"),
+                 "docs/utf16.md": (page.encode("utf-16"), "UTF-16"),
+                 "docs/utf16-no-mark.md": (page.encode("utf-16-le"), "UTF-16")}
+        for path, (data, _) in pages.items():
+            (self.root / "docs").mkdir(exist_ok=True)
+            (self.root / path).write_bytes(data)
+        code, output = self.ws("check")
+        self.assertEqual(code, 1)
+        for path, (_, name) in pages.items():
+            with self.subTest(path=path):
+                self.assertIn(f"error: {path}:1: is {name}, not UTF-8, so its links were not checked", output)
+                self.assertIn(f"error: {path}:1: is {name}, not UTF-8, so its review date was not read", output)
+
+    def test_symbols_finds_a_type_declared_in_a_windows_1252_file(self):
+        (self.root / "src/api").mkdir(parents=True)
+        (self.root / "src/api/Konto.cs").write_bytes("// Grüße aus Köln\npublic class Kundenkonto\n{\n}\n".encode("cp1252"))
+        (self.root / "src/api/Breite.cs").write_bytes("public class Spaltenbreite { }\n".encode("utf-16"))
+        with contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(symbols_cli.main(["Kundenkonto", str(self.root / "src")]), 0)
+            self.assertEqual(symbols_cli.main(["Spaltenbreite", str(self.root / "src")]), 0)
+        self.assertIn("api/Konto.cs:2  type  Kundenkonto", out.getvalue())
+        self.assertIn("api/Breite.cs:1  type  Spaltenbreite", out.getvalue())
+        self.workspace({"use": "aliases"})
+        self.write("INDEX.md", "## Search aliases\n\n| You say | The code says |\n|---|---|\n| the account | `Kundenkonto` |\n")
+        code, output = self.ws("check")
+        self.assertEqual(code, 0, output)
+
+    # Criterion 17
+    def test_check_and_the_staged_check_agree(self):
+        self.copy_of_this_repository()
+        clean = ((0, []), (0, []))
+        self.assertEqual(self.both(), clean)
+        scaffold = self.root / "evals/scaffold"
+        with self.subTest("a stray .DS_Store in the eval scaffold"):
+            (scaffold / ".DS_Store").write_bytes(b"\x00\x00\x00\x01Bud1\x00\x00\x10\x00" + bytes(range(256)))
+            try:
+                self.assertEqual(self.both(), clean)
+            finally:
+                (scaffold / ".DS_Store").unlink()
+        with self.subTest("a .pytest_cache folder in the eval scaffold"):
+            cache = {".gitignore": "# Created by pytest automatically.\n*\n",
+                     "CACHEDIR.TAG": "Signature: 8a477f597d28d172789f06886806bc55\n",
+                     "README.md": "# pytest cache directory #\n\nSee [the docs](https://docs.pytest.org/en/stable/how-to/cache.html).\n",
+                     "v/cache/nodeids": '[\n  "tests/test_page.py::PageTests::test_export"\n]\n',
+                     "v/cache/lastfailed": "{}\n"}
+            for name, text in cache.items():
+                self.write(f"evals/scaffold/.pytest_cache/{name}", text)
+            try:
+                self.assertEqual(self.both(), clean)
+            finally:
+                shutil.rmtree(scaffold / ".pytest_cache")
+        with self.subTest("a symlinked page"):
+            self.symlinked_page_agrees(clean)
+        with self.subTest("a staged file under node_modules/"):
+            term = "t" + os.urandom(8).hex()
+            self.deny(term)
+            self.write("node_modules/left-pad/index.js", f"// {term}\n")
+            self.git("add", "node_modules/left-pad/index.js")
+            check, staged = self.both()
+            self.assertEqual(check, staged)
+            self.assertEqual(check, (1, ["error: node_modules/left-pad/index.js:1: matches line 1 of the private deny list  [deny_list]"]))
+
+    def symlinked_page_agrees(self, clean):
+        setting = subprocess.run(["git", "-C", str(self.root), "config", "--bool", "core.symlinks"], capture_output=True, text=True)
+        if setting.stdout.strip() == "false":
+            self.skipTest("this git stores symbolic links as plain files")
+        try:
+            (self.root / "docs/done.md").symlink_to("definition-of-done.md")
+        except OSError:
+            self.skipTest("symlinks are not available here")
+        try:
+            self.git("add", "docs/done.md")
+            self.assertEqual(self.both(), clean)
+        finally:
+            self.git("rm", "-q", "--cached", "--ignore-unmatch", "docs/done.md")
+            (self.root / "docs/done.md").unlink()
+
+    def test_in_a_linked_working_copy_check_does_not_read_the_git_file(self):
+        # A linked working copy's .git is a file that holds the main checkout's absolute path.
+        self.copy_of_this_repository()
+        linked = self.root.parent / f"{self.root.name}-linked"
+        self.addCleanup(shutil.rmtree, linked, True)
+        self.git("worktree", "add", "-q", "-b", "other", str(linked))
+        self.assertIn(self.root.name, (linked / ".git").read_text(encoding="utf-8"))
+        self.deny(self.root.name)
+        self.root = linked
+        self.assertEqual(self.both(), ((0, []), (0, [])))
+
+    # Criterion 18
+    def test_the_staged_check_starts_at_most_three_git_processes(self):
+        notes = {f"notes/n{i:04}.md": f"# Note {i}\n\n[next](n{(i + 1) % 3000:04}.md)\n" for i in range(3000)}
+        self.copy_of_this_repository(notes)
+        self.assertGreaterEqual(len(self.git("ls-files", "-z").stdout.split("\0")) - 1, 3000)
+        self.write("notes/n2999.md", "# Last\n\n[gone](nope.md)\n")
+        self.git("add", "notes/n2999.md")
+        started, real = [], subprocess.Popen
+
+        class Counting(real):
+            def __init__(self, args, *rest, **options):
+                first = args if isinstance(args, str) else args[0]
+                if pathlib.Path(str(first).split()[0]).stem == "git":
+                    started.append(args)
+                super().__init__(args, *rest, **options)
+
+        with mock.patch("subprocess.Popen", Counting):
+            code, output = self.ws("check", "--staged")
+        self.assertEqual(code, 1, output)
+        self.assertIn("error: notes/n2999.md:3: link to missing file: nope.md", output)
+        self.assertLessEqual(len(started), 3, [list(a)[3:6] for a in started[:5]])
+
+    # Criterion 19
+    def test_the_contract_and_the_index_need_a_review_date(self):
+        self.copy_of_this_repository()
+        for name in ("AGENTS.md", "INDEX.md"):
+            with self.subTest(page=name):
+                text = (self.root / name).read_text(encoding="utf-8")
+                self.assertTrue(text.startswith("---\nlast-reviewed: "), f"{name} carries no review date")
+                self.write(name, text.split("---\n", 2)[2])
+                code, output = self.ws("check")
+                self.assertEqual(code, 1)
+                self.assertIn(f"error: {name}:1: no last-reviewed date", output)
+                self.write(name, text)
+
+    def test_a_name_in_the_contract_that_the_code_no_longer_defines_fails(self):
+        self.copy_of_this_repository()
+        contract = (self.root / "AGENTS.md").read_text(encoding="utf-8")
+        line = next(n for n, row in enumerate(contract.splitlines(), 1) if "`AccountFreeze`" in row)
+        source = (self.root / "src/orders-api/AccountFreeze.cs").read_text(encoding="utf-8")
+        self.write("src/orders-api/AccountFreeze.cs", source.replace("AccountFreeze", "AccountHold"))
+        code, output = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn(f"error: AGENTS.md:{line}: the contract names AccountFreeze, which is not defined under src/", output)
+        self.write("src/orders-api/AccountFreeze.cs", source)
+        self.write("AGENTS.md", contract + "\nPush to `main`, set `KIND` and `max_age_days`, and run `LedgerSweeper` first.\n")
+        code, output = self.ws("check")
+        self.assertEqual(code, 1)
+        errors = [row for row in output.splitlines() if row.startswith("error:")]
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("the contract names LedgerSweeper, which is not defined under src/", errors[0])
+
+    def test_a_page_dated_one_day_ahead_of_utc_passes(self):
+        self.workspace({"use": "freshness"})
+        utc = datetime.datetime.now(datetime.timezone.utc).date()
+        self.write("ahead.md", f"---\nlast-reviewed: {utc + datetime.timedelta(days=1)}\n---\n# Ahead\n")
+        code, output = self.ws("check")
+        self.assertEqual(code, 0, output)
+        self.write("ahead.md", f"---\nlast-reviewed: {utc + datetime.timedelta(days=2)}\n---\n# Ahead\n")
+        code, output = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("is in the future", output)
 
 
 @contextlib.contextmanager

@@ -1,5 +1,10 @@
 """Check: every local link points at a file that exists, and every #fragment at a real anchor.
 
+It reads the pages the workspace owns. A page inside a code repository under the
+workspace, such as a submodule in src/, links by that repository's own layout and
+is not read; a link into one still resolves. A symbolic link is not read as a page.
+A page that is not UTF-8 is an error, not skipped.
+
 Config: "skip": folders whose pages are not checked (finished work, fixtures).
 """
 from wslib import markdown
@@ -16,10 +21,10 @@ def run(snapshot, config):
             anchor_cache[path] = markdown.anchors(snapshot.read(path) or "")
         return anchor_cache[path]
 
-    for page in snapshot.paths(suffixes=(".md",), skip=config.get("skip", ())):
+    for page in snapshot.pages(skip=config.get("skip", ())):
         text = snapshot.read(page)
         if text is None:
-            found.append(finding(page, 1, "not valid UTF-8, so its links were not checked"))
+            found.append(finding(page, 1, f"{snapshot.not_utf8(page)}, so its links were not checked; save it as UTF-8"))
             continue
         for line, target, undefined_label in markdown.links(text):
             if undefined_label is not None:
@@ -33,6 +38,7 @@ def run(snapshot, config):
                 found.append(finding(page, line, f"link leaves the workspace: {target}"))
             elif not snapshot.exists(path):
                 found.append(finding(page, line, f"link to missing file: {target}"))
-            elif fragment and path.lower().endswith(".md") and snapshot.is_file(path) and fragment not in anchors(path):
+            elif fragment and path.lower().endswith(".md") and snapshot.is_file(path) and not snapshot.is_link(path) \
+                    and fragment not in anchors(path):
                 found.append(finding(page, line, f"no heading for #{fragment} in {path}"))
     return found

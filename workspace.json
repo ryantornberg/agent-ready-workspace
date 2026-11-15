@@ -24,7 +24,9 @@
       "use": "freshness",
       "max_age_days": 180,
       "require": [
-        "docs"
+        "docs",
+        "AGENTS.md",
+        "INDEX.md"
       ],
       "skip": [
         "evals/scaffold"
@@ -37,6 +39,9 @@
       "code": "src",
       "exclude": [
         "src/orders-service-v1"
+      ],
+      "contract": [
+        "AGENTS.md"
       ]
     },
     {

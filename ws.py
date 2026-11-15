@@ -90,13 +90,15 @@ def command_check(root, args):
         return command_message(root, args)
     if args.staged:
         # The commit decides: its manifest, its parts and their cases, not the files on disk.
-        snapshot = snapshots.Index(root)
+        # The last commit's manifest comes in the same batch read as the staged files: three git processes in all.
+        last = f"HEAD:./{partlib.MANIFEST}"
+        snapshot = snapshots.Index(root, extra=(last,))
         if not snapshot.is_file(partlib.MANIFEST):
             raise partlib.PartError(f"no {partlib.MANIFEST} is staged, so the commit cannot be checked")
         manifest = partlib.parse_manifest(snapshot.read(partlib.MANIFEST) or "", f"staged {partlib.MANIFEST}")
         parts = partlib.load_all(root, manifest, snapshot=snapshot)
-        required, problem = partlib.required_parts(root)
         where = "the last commit"
+        required, problem = partlib.required_from(snapshot.object(last), where)
     else:
         manifest = partlib.load_manifest(root)
         snapshot = snapshots.Tree(root, args.changed)

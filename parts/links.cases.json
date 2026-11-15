@@ -188,5 +188,32 @@
     "expect": [
       "no heading for #missing in a.md"
     ]
+  },
+  {
+    "name": "a page inside a code repository is not read, and a link into one still resolves",
+    "files": {
+      "README.md": "[the product](src/product/README.md)\n[gone](src/product/nope.md)\n",
+      "src/product/README.md": "[setup](docs/setup.md)\n"
+    },
+    "repositories": [
+      "src/product"
+    ],
+    "expect": [
+      "link to missing file: src/product/nope.md"
+    ]
+  },
+  {
+    "name": "a symbolic link is not read as a page, and a fragment into one is not checked",
+    "files": {
+      "docs/real.md": "# Real\n\n[gone](nope.md)\n",
+      "docs/alias.md": "real.md",
+      "index.md": "[alias](docs/alias.md#real)\n"
+    },
+    "symlinks": [
+      "docs/alias.md"
+    ],
+    "expect": [
+      "link to missing file: nope.md"
+    ]
   }
 ]

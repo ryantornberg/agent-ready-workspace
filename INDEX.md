@@ -1,3 +1,7 @@
+---
+last-reviewed: 2026-11-15
+---
+
 # Index
 
 Where each topic lives, and what the code calls the things people talk about. Agents read this before they search.

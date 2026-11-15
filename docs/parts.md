@@ -41,6 +41,19 @@ The snapshot is the only way a check reads files. That is what lets one check ru
 | `python3 ws.py check --staged` | Exactly what is staged. This is the commit hook. |
 | A case | The files written in the case. |
 
+Both commands start from one git listing, so they see the same files. A tracked or staged file is always in it, wherever it sits, and the `.git` entry never is. `check` adds the untracked files that git does not ignore. A folder that is not the top of a git working copy is walked instead. `check --staged` reads every staged file in one batch: three git processes in all, however many files there are.
+
+What a check can ask the snapshot:
+
+| Call | Gives |
+|---|---|
+| `paths(suffixes, under, skip)` | Every file path, sorted. |
+| `pages(suffixes, skip)` | The pages the workspace owns: no symbolic link, and nothing inside a code repository under the workspace, such as a submodule in `src/`. The page checks use it. |
+| `read(path)` | The text, or `None` when the file is not UTF-8 text. |
+| `not_utf8(path)` | Why `read` gave `None`, such as "is Windows-1252, not UTF-8", to start a finding with. |
+| `read_text(path)` | The text in whatever encoding it is in: UTF-8, UTF-16, or Windows-1252. For reading code. |
+| `read_bytes(path)` | The bytes. A symbolic link reads as its target path, as git stores it. |
+
 A finding is an error unless it says `level="warning"`. An error fails the commit.
 
 A check that sets `COMMIT_MESSAGE = True` also runs from the commit-msg hook, `python3 ws.py check --message FILE`. Its snapshot then holds three files: `commit message`, `author` and `committer`, each identity as git will record it. `deny_list` is the one here.
@@ -106,7 +119,7 @@ A check case gives files and the findings to expect. Every finding the check ret
 
 An expectation written as text is an error. A warning is expected by saying so, as `{"message": "...", "level": "warning"}`. So a check whose errors are demoted to warnings fails its own cases, and cannot quietly stop failing commits.
 
-A check that reads the commit's state takes it from the case: `"staged"` lists every staged path, deletions included (default: `"changed"`); `"ledger"` lists the edit ledger's paths, and leaving it out means no ledger is open; `"replaying"` names a merge or rebase in progress.
+A check that reads the commit's state takes it from the case: `"staged"` lists every staged path, deletions included (default: `"changed"`); `"ledger"` lists the edit ledger's paths, and leaving it out means no ledger is open; `"replaying"` names a merge or rebase in progress. `"repositories"` names folders that are code repositories, and `"symlinks"` names files that are symbolic links.
 
 A case runs with the settings in its own `config`, never with the manifest's. Changing a setting in the manifest therefore cannot fail a part's cases.
 
@@ -158,8 +171,8 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | Part | Kind | Fails or refuses when |
 |---|---|---|
 | `links` | check | A link points at a missing file or heading. |
-| `freshness` | check | A commit edits a page that is past its review date. |
-| `aliases` | check | The index maps a phrase to a name the code no longer defines. |
+| `freshness` | check | A commit edits a page that is past its review date, a required page has no date, or a date is more than a day ahead of today in UTC. |
+| `aliases` | check | The index maps a phrase to a name the code no longer defines, or a contract page names one in backticks. |
 | `eval_record` | check | A playbook, its guidance or its eval case changed since the last passing eval run, or a playbook has no case. |
 | `deny_list` | check | A file or file name holds a term from a private list kept outside the repository, and so, from the commit-msg hook, does the commit message, the author or the committer. With no list it warns and checks nothing, so CI cannot run it. |
 | `edit_ledger` | check | While the edit ledger is open, a commit stages a path that no edit tool of the agent session wrote. |
