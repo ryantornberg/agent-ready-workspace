@@ -966,7 +966,10 @@ class StagingAtTheCommitTests(Folder):
         message = self.root / "MSG"
         message.write_text("x\n", encoding="utf-8")
         self.git("add", "workspace.json", "parts")
-        code, output = self.ws("check", "--message", str(message))
+        identity = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.invalid",   # as git sets them for its hooks;
+                    "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.invalid"}   # CI has no identity
+        with mock.patch.dict(os.environ, identity):
+            code, output = self.ws("check", "--message", str(message))
         self.assertEqual(code, 1)
         self.assertIn("only its cases may", output)
 
