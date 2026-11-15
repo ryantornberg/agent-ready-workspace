@@ -5,6 +5,8 @@ A part is one Python file. It declares what it is and exposes one function:
     KIND = "check"     def run(snapshot, config) -> [finding(...), ...]
     KIND = "hook"      EVENT = "before-shell", "before-edit" or "before-handoff"
                        def decide(event, config) -> None to allow, or the reason to refuse
+                       MODE = "remind" (optional): the hook never refuses. Its reason is shown
+                       to the agent as a reminder and the call goes ahead. The default is "refuse".
 
 KIND and EVENT are each one plain line of their own, such as KIND = "hook".
 The runner reads those lines without running the file, so a hook call loads
@@ -25,7 +27,10 @@ an entry that sets "tiers" itself is refused.
 A check case:  {"name", "files": {path: text}, "changed": [paths], "config": {}, "expect": [...]}
                Each expectation is text in an error, or {"message": text, "level": "warning"}.
                "expect": [] means the case must produce no findings. Every finding must be expected.
+               For the commit's own state, a case may also give "staged": [paths], "ledger": [paths]
+               and "replaying": text (see wslib/snapshot.py).
 A hook case:   {"name", "event": {...}, "config": {}, "allow": true|false}
+               A hook with MODE = "remind" states "remind": true|false instead of "allow".
 
 The manifest's "parts" lists the parts in use. A part that an older manifest
 used may leave only by being listed under "retired", with a reason:
@@ -42,6 +47,7 @@ from . import snapshot as snapshots
 KINDS = ("check", "hook")
 EVENTS = ("before-shell", "before-edit", "before-handoff")
 LEVELS = ("error", "warning")
+MODES = ("refuse", "remind")
 MANIFEST = "workspace.json"
 
 
@@ -63,6 +69,7 @@ class Part:
         self.name, self.module, self.cases, self.config = name, module, cases, config
         self.kind = module.KIND
         self.event = getattr(module, "EVENT", None)
+        self.mode = getattr(module, "MODE", "refuse")
 
     def run(self, snapshot, config=None):
         try:
@@ -92,7 +99,9 @@ class Part:
             config = case.get("config", {})
             try:
                 if self.kind == "check":
-                    got = [(f["message"], f["level"]) for f in self.run(snapshots.Memory(case["files"], case.get("changed", ())), config)]
+                    memory = snapshots.Memory(case["files"], case.get("changed", ()), case.get("staged"),
+                                              case.get("ledger"), case.get("replaying"))
+                    got = [(f["message"], f["level"]) for f in self.run(memory, config)]
                     want = [_expected(item) for item in case["expect"]]
                     missing = [f"{text} ({level})" for text, level in want
                                if not any(text in message and level == got_level for message, got_level in got)]
@@ -102,9 +111,12 @@ class Part:
                         failures.append(f"{case['name']}: missing {missing}, unexpected {extra}")
                 else:
                     reason = self.decide(case["event"], config)
-                    if (reason is None) != case["allow"]:
-                        failures.append(f"{case['name']}: expected {'allow' if case['allow'] else 'refuse'}, "
-                                        f"got {'allow' if reason is None else 'refuse: ' + reason}")
+                    # A refusing hook's case says "allow"; a reminding hook's says "remind". Either way, None is quiet.
+                    quiet = case["allow"] if self.mode == "refuse" else not case["remind"]
+                    acts = "refuse" if self.mode == "refuse" else "remind"
+                    if (reason is None) != quiet:
+                        failures.append(f"{case['name']}: expected {'no ' + acts if quiet else acts}, "
+                                        f"got {'no ' + acts if reason is None else acts + ': ' + reason}")
             except PartError as error:  # a case that crashes the part is a failed case
                 failures.append(f"{case['name']}: {error}")
         return failures
@@ -165,7 +177,7 @@ def declared(text, name):
     return lines[0][1] if len(lines) == 1 else None
 
 
-def _read_cases(name, kind, cases_file, text):
+def _read_cases(name, kind, cases_file, text, mode="refuse"):
     if text is None:
         raise PartError(f"part {name}: refused, it has no cases file ({cases_file})")
     try:
@@ -181,17 +193,21 @@ def _read_cases(name, kind, cases_file, text):
                 and all(isinstance(item, str) or (isinstance(item, dict) and set(item) == {"message", "level"}
                                                   and isinstance(item["message"], str) and item["level"] in LEVELS)
                         for item in case["expect"])
+            well_formed = well_formed and all(isinstance(case.get(key, []), list) for key in ("staged", "ledger")) \
+                and isinstance(case.get("replaying", ""), str)
         else:
+            answer, other = ("allow", "remind") if mode == "refuse" else ("remind", "allow")
             well_formed = isinstance(case, dict) and isinstance(case.get("name"), str) \
-                and isinstance(case.get("event"), dict) and isinstance(case.get("allow"), bool)
+                and isinstance(case.get("event"), dict) and isinstance(case.get(answer), bool) and other not in case
         if not well_formed or not isinstance(case.get("config", {}), dict):
             needs = ('"name", "files" and "expect", each expectation text or {"message", "level"} with a level in '
-                     f"{LEVELS}" if kind == "check" else '"name", "event" and "allow"')
+                     f"{LEVELS}" if kind == "check" else f'"name", "event" and "{answer}", and no "{other}"')
             raise PartError(f"part {name}: {cases_file}: every case needs {needs}: {case!r}")
     if kind == "check" and not any(case["expect"] for case in cases):
         raise PartError(f"part {name}: refused, no case shows it finding anything")
-    if kind == "hook" and {case["allow"] for case in cases} != {True, False}:
-        raise PartError(f"part {name}: refused, its cases must show it both allowing and refusing")
+    if kind == "hook" and {case["allow" if mode == "refuse" else "remind"] for case in cases} != {True, False}:
+        raise PartError(f"part {name}: refused, its cases must show it both allowing and "
+                        f"{'refusing' if mode == 'refuse' else 'reminding'}")
     return cases
 
 
@@ -224,9 +240,12 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None):
                         f"but runs as {getattr(module, 'KIND', None)!r} and {getattr(module, 'EVENT', None)!r}")
     if not callable(getattr(module, "run" if kind == "check" else "decide", None)):
         raise PartError(f"part {name}: a {kind} needs a {'run' if kind == 'check' else 'decide'} function")
+    mode = getattr(module, "MODE", "refuse")
+    if kind == "hook" and mode not in MODES:
+        raise PartError(f"part {name}: a hook's MODE must be one of {MODES}, not {mode!r}")
 
     cases_file = relative[:-len(".py")] + ".cases.json"
-    cases = _read_cases(name, kind, pathlib.PurePosixPath(cases_file).name, _read(root, cases_file, snapshot))
+    cases = _read_cases(name, kind, pathlib.PurePosixPath(cases_file).name, _read(root, cases_file, snapshot), mode)
     if "tiers" in entry:
         raise PartError(f'part {name}: refused, it sets "tiers"; the tier binding is the manifest\'s top-level "tiers"')
     config = {key: value for key, value in entry.items() if key != "use"}

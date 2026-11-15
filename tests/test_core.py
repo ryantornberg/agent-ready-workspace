@@ -218,12 +218,15 @@ class RunnerTests(Folder):
         self.git("commit", "-q", "-am", "edit")
         self.assertEqual(self.ws("check", "--changed-from", base)[0], 1)
 
-    def test_hooks_refuse_with_exit_2_and_a_reason(self):
+    def test_hooks_refuse_with_exit_2_and_a_reason_and_remind_with_exit_0(self):
         self.workspace({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
         code, output = self.ws("hook", "before-shell", stdin='{"version": 1, "command": "git add -A"}')
+        self.assertEqual(code, 0)
+        self.assertIn("Reminder: no_stage_all: This command stages more than it names", output)
+        self.assertEqual(self.ws("hook", "before-shell", stdin='{"version": 1, "command": "git add a.md"}'), (0, ""))
+        code, output = self.ws("hook", "before-edit", stdin='{"version": 1, "path": "src/old/x.cs"}')
         self.assertEqual(code, 2)
-        self.assertIn("Refused by no_stage_all", output)
-        self.assertEqual(self.ws("hook", "before-shell", stdin='{"version": 1, "command": "git add a.md"}')[0], 0)
+        self.assertIn("Refused by shelved", output)
         self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "src/old/x.cs"}')[0], 2)
         self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "src/new/x.cs"}')[0], 0)
 
@@ -233,7 +236,11 @@ class RunnerTests(Folder):
         self.assertEqual(self.ws("hook", "before-edit", "--tool", "claude-code", stdin=payload)[0], 2)
         payload = claude("Bash", command="git commit -am x")
         self.workspace({"use": "no_stage_all"})
-        self.assertEqual(self.ws("hook", "before-shell", "--tool", "claude-code", stdin=payload)[0], 2)
+        code, output = self.ws("hook", "before-shell", "--tool", "claude-code", stdin=payload)
+        self.assertEqual(code, 0)
+        context = json.loads(output)["hookSpecificOutput"]
+        self.assertEqual(context["hookEventName"], "PreToolUse")
+        self.assertIn("git commit -a stages every tracked change", context["additionalContext"])
 
     def test_a_part_whose_case_fails_is_refused_on_every_command_not_only_selftest(self):
         self.workspace({"use": "links"})
@@ -311,7 +318,8 @@ class NoSelfLockTests(Folder):
         if "files" in cases[0]:
             cases[0]["expect"] = ["a finding no part ever returns"]
         else:
-            cases[0]["allow"] = not cases[0]["allow"]
+            answer = "allow" if "allow" in cases[0] else "remind"
+            cases[0][answer] = not cases[0][answer]
         self.write(f"parts/{name}.cases.json", json.dumps(cases))
 
     def commit(self, message="base"):
@@ -596,7 +604,7 @@ class FailClosedTests(Folder):
         # A running session keeps the wiring it started with, which named no --tool. The upgrade must not lock it out.
         self.hooks({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
         self.assertEqual(self.answer("before-shell", claude("Bash", command="ls")), 0)
-        self.assertEqual(self.answer("before-shell", claude("Bash", command="git add -A")), 2)
+        self.assertEqual(self.answer("before-shell", claude("Bash", command="git add -A")), 0)   # a reminder
         self.assertEqual(self.answer("before-edit", claude("Edit", file_path=str(self.root / "src/old/x.cs"))), 2)
         self.assertEqual(self.answer("before-shell", claude("Bash", cmd="ls")), 2)
         # A named tool reads only its own payload.
@@ -711,15 +719,16 @@ class FailClosedTests(Folder):
     def test_the_wiring_refuses_when_python_is_missing(self):
         empty = self.root / "empty-bin"
         empty.mkdir()
+        # The edit is outside every working copy, so the test records nothing in this repository's edit ledger.
         for event, payload in (("before-shell", claude("Bash", command="ls")),
-                               ("before-edit", claude("Edit", file_path=str(ROOT / "README.md")))):
+                               ("before-edit", claude("Edit", file_path=str(self.root / "notes.md")))):
             with self.subTest(event=event):
                 ran = self.run_wiring(event, payload, ROOT)
                 self.assertEqual(ran.returncode, 0, ran.stderr)                    # with Python: allowed
                 ran = self.run_wiring(event, payload, ROOT, path=str(empty))
                 self.assertEqual(ran.returncode, 2, ran.stderr)                    # without: refused, not 0 or 1
                 self.assertIn(b"Python", ran.stderr)
-        ran = self.run_wiring("before-shell", claude("Bash", command="git add -A"), ROOT)
+        ran = self.run_wiring("before-edit", claude("Edit", file_path=str(ROOT / "src/orders-service-v1/OrderService.cs")), ROOT)
         self.assertEqual(ran.returncode, 2, ran.stderr)
         ran = self.run_wiring("before-shell", claude("Bash", command="ls"), self.root)   # no launcher there at all
         self.assertEqual(ran.returncode, 2, ran.stderr)
@@ -759,6 +768,220 @@ class FailClosedTests(Folder):
         code, output = self.ws("hook", "before-handoff", stdin='{"version": 1, "prompt": "Tier: worker"}')
         self.assertEqual(code, 2)
         self.assertIn("top-level", output)
+
+
+class StagingAtTheCommitTests(Folder):
+    """M1 slice 5: the commit compares what is staged with what the session's edit tools wrote; the shell hook reminds."""
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "edit_ledger"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        for name in ("ws.py", ".githooks/pre-commit", ".githooks/commit-msg", ".githooks/post-commit"):
+            self.write(name, (ROOT / name).read_text(encoding="utf-8"))
+            (self.root / name).chmod(0o755)
+        for source in (ROOT / "wslib").glob("*.*"):
+            self.write(f"wslib/{source.name}", source.read_text(encoding="utf-8"))
+        self.write("a.md", "mine\n")
+        self.write("theirs.md", "theirs\n")
+        self.git("init", "-q")
+        self.git("config", "core.hooksPath", ".githooks")
+        self.commit_all()
+        home = self.root.parent / f"{self.root.name}-home"   # no real deny list, and no real git config, in the hooks
+        environment = mock.patch.dict(os.environ, {"HOME": str(home), "USERPROFILE": str(home), "WS_DENY_LIST": ""})
+        environment.start()
+        self.addCleanup(environment.stop)
+
+    def commit_all(self):
+        self.git("add", "--", *[p.relative_to(self.root).as_posix() for p in self.root.rglob("*")
+                                if p.is_file() and ".git" not in p.parts])
+        self.git("commit", "-q", "--no-verify", "-m", "base")
+
+    def run_git(self, *args, cwd=None):
+        """git with the fixture's own hooks, which run this branch's ws.py on the fixture."""
+        return subprocess.run(["git", "-C", str(cwd or self.root), "-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                               "-c", "commit.gpgsign=false", *args], capture_output=True, text=True)
+
+    def edit(self, path, cwd=None):
+        """An agent's edit tool writes path: the hook is asked first, as the agent tool asks it."""
+        payload = claude("Edit", cwd=cwd, file_path=str(path), old_string="a", new_string="b")
+        code, output = self.ws("hook", "before-edit", "--tool", "claude-code", stdin=payload)
+        self.assertEqual(code, 0, output)
+        pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(path).write_text("edited by the agent\n", encoding="utf-8")
+
+    def ledger(self, folder=None):
+        file = (folder or self.root / ".git") / "ws-ledger"
+        return file.read_text(encoding="utf-8").split() if file.exists() else None
+
+    # Criterion 12
+    def test_each_edit_is_recorded_in_the_ledger_of_the_working_copy_that_holds_it(self):
+        self.assertIsNone(self.ledger())
+        self.edit(self.root / "a.md")
+        self.assertEqual(self.ledger(), ['"a.md"'])
+        self.edit(self.root / "a.md")                                              # once only
+        self.assertEqual(self.ledger(), ['"a.md"'])
+        linked = self.root.parent / f"{self.root.name}-linked"
+        self.addCleanup(shutil.rmtree, linked, True)
+        self.git("worktree", "add", "-q", "-b", "other", str(linked))
+        self.edit(linked / "theirs.md")                                            # a linked working copy keeps its own
+        self.assertEqual(self.ledger(), ['"a.md"'])
+        self.assertEqual(self.ledger(self.root / ".git/worktrees" / linked.name), ['"theirs.md"'])
+        outside = self.root.parent / f"{self.root.name}-scratch"
+        outside.mkdir()
+        self.addCleanup(shutil.rmtree, outside, True)
+        self.edit(outside / "notes.md")                                            # no working copy of this repository
+        self.assertEqual(self.ledger(), ['"a.md"'])
+        code, output = self.ws("hook", "before-edit", stdin='{"version": 1, "path": "src/old/x.cs"}')
+        self.assertEqual(code, 2)                                                  # a refused edit is not recorded
+        self.assertEqual(self.ledger(), ['"a.md"'])
+
+    def test_with_a_ledger_open_a_commit_of_a_path_no_edit_tool_wrote_fails_whatever_staged_it(self):
+        self.edit(self.root / "a.md")
+        self.write("theirs.md", "another session's unsaved edit\n")
+        self.write("new.md", "another session's new file\n")
+        sweeps = [["add", "-A"], ["add", "."], ["add", "-u"], ["stage", "--all"], ["add", "theirs.md"],
+                  ["add", "--", "a.md", "new.md"], ["rm", "-q", "--cached", "theirs.md"]]
+        for sweep in sweeps:
+            with self.subTest(sweep=sweep):
+                self.assertEqual(self.run_git(*sweep).returncode, 0)
+                ran = self.run_git("commit", "-m", "fix")
+                self.assertNotEqual(ran.returncode, 0, ran.stdout)
+                self.assertIn("staged, but no edit tool", ran.stdout + ran.stderr)
+                self.git("reset", "-q")
+        for commit in (["commit", "-a", "-m", "fix"], ["commit", "-m", "fix", "--", "theirs.md"]):
+            with self.subTest(commit=commit):
+                ran = self.run_git(*commit)
+                self.assertNotEqual(ran.returncode, 0, ran.stdout)
+                self.assertIn("theirs.md:1: staged, but no edit tool", ran.stdout + ran.stderr)
+        self.assertEqual(self.run_git("rev-list", "--count", "HEAD").stdout.strip(), "1")   # nothing got through
+        self.git("add", "a.md")
+        ran = self.run_git("commit", "-m", "fix")
+        self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+        self.assertIsNone(self.ledger())                       # the commit took every recorded path, so it closed
+
+    def test_with_no_ledger_a_persons_own_commit_is_not_compared(self):
+        self.write("theirs.md", "the person's own edit\n")
+        self.git("add", "theirs.md")
+        ran = self.run_git("commit", "-m", "mine")
+        self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("With no ledger open, as for a person's own commit", readme, "the README must say so")
+
+    def test_a_partial_commit_keeps_the_ledger_open_for_the_rest(self):
+        self.edit(self.root / "a.md")
+        self.edit(self.root / "src/new.cs")
+        self.git("add", "a.md")
+        self.assertEqual(self.run_git("commit", "-m", "first").returncode, 0)
+        self.assertEqual(self.ledger(), ['"src/new.cs"'])
+        self.write("theirs.md", "another session's edit\n")
+        self.assertEqual(self.run_git("commit", "-a", "-m", "sweep").returncode, 1)
+        code, output = self.ws("ledger", "--close")
+        self.assertEqual(code, 0)
+        self.assertIn("closed", output)
+        self.assertEqual(self.run_git("commit", "-a", "-m", "the person's own").returncode, 0)
+
+    def test_a_session_that_writes_only_through_the_shell_is_still_compared(self):
+        self.write("a.md", "written by a shell command\n")
+        self.write("theirs.md", "another session's edit\n")
+        code, output = self.ws("hook", "before-shell", "--tool", "claude-code",
+                               stdin=claude("Bash", cwd=self.root, command="git add -A && git commit -m fix"))
+        self.assertEqual(code, 0)
+        self.assertIn("The edit ledger of this working copy is open", json.loads(output)["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(self.ledger(), [])
+        self.git("reset", "-q")
+        os.remove(self.root / ".git" / "ws-ledger")
+        code, output = self.ws("hook", "before-shell", stdin='{"version": 1, "command": "git add -A"}')
+        self.assertIn("Reminder: no_stage_all", output)
+        self.assertIsNone(self.ledger())          # a person trying the hook by hand names no folder, so opens nothing
+        self.ws("hook", "before-shell", "--tool", "claude-code", stdin=claude("Bash", cwd=self.root, command="git add ."))
+        self.git("add", "-A")
+        self.assertEqual(self.run_git("commit", "-m", "fix").returncode, 1)
+        self.git("reset", "-q")
+        with contextlib.chdir(self.root) if hasattr(contextlib, "chdir") else _chdir(self.root):
+            self.assertEqual(self.ws("ledger", "--add", "a.md")[0], 0)
+        self.git("add", "a.md")
+        ran = self.run_git("commit", "-m", "fix")
+        self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+
+    def test_a_pin_counts_as_edited_when_the_session_edited_inside_it(self):
+        product = self.root / "src/product"
+        product.mkdir(parents=True)
+        for args in (["init", "-q"], ["commit", "-q", "--allow-empty", "-m", "p"]):
+            subprocess.run(["git", "-C", str(product), "-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                            "-c", "commit.gpgsign=false", *args], check=True, capture_output=True)
+        self.edit(product / "Run.cs")
+        self.assertEqual(self.ledger(), ['"src/product/Run.cs"'])               # the workspace's ledger, not the code's
+        self.assertIsNone(self.ledger(product / ".git"))
+        self.git("add", "src/product")
+        ran = self.run_git("commit", "-m", "move the pin")
+        self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+
+    # Criterion 13
+    def test_staging_commands_that_name_their_files_or_another_repository_are_allowed(self):
+        quiet = ['git commit -m"add export handler"', "git add -u docs/parts.md"]
+        for command in quiet:
+            with self.subTest(command=command):
+                code, output = self.ws("hook", "before-shell", "--tool", "claude-code",
+                                       stdin=claude("Bash", cwd=self.root, command=command))
+                self.assertEqual((code, output), (0, ""))
+        fixture = self.root.parent / f"{self.root.name}-fixture"
+        fixture.mkdir()
+        self.addCleanup(shutil.rmtree, fixture, True)
+        (fixture / "x.txt").write_text("x\n", encoding="utf-8")
+        command = "git init -q && git add . && git commit -q -m fixture"
+        code, output = self.ws("hook", "before-shell", "--tool", "claude-code", stdin=claude("Bash", cwd=fixture, command=command))
+        self.assertEqual(code, 0, output)                      # allowed: a reminder at most
+        self.assertIsNone(self.ledger())                       # and the workspace's ledger stays closed
+        ran = subprocess.run(command, shell=True, cwd=fixture, capture_output=True, text=True,
+                             env=dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.invalid",
+                                      GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.invalid"))
+        self.assertEqual(ran.returncode, 0, ran.stderr)
+
+    # Criterion 14
+    def test_a_commit_message_or_identity_on_the_deny_list_is_refused(self):
+        self.workspace({"use": "edit_ledger"}, {"use": "deny_list"})
+        self.git("add", "workspace.json", "parts")
+        self.git("commit", "-q", "--no-verify", "-m", "add the deny list")
+        listed = self.root.parent / f"{self.root.name}-deny.txt"
+        listed.write_text("globex corp\n", encoding="utf-8")
+        self.addCleanup(listed.unlink)
+        os.environ["WS_DENY_LIST"] = str(listed)
+        attempts = [
+            (["commit", "--allow-empty", "-m", "Ship the export to Globex Corp"], "commit message:1:"),
+            (["commit", "--allow-empty", "-m", "fix", "--author", "A <a@globex-corp.example>"], "author:1:"),
+            (["-c", "user.email=c@globexcorp.example", "commit", "--allow-empty", "-m", "fix"], "committer:1:"),
+        ]
+        for args, where in attempts:
+            with self.subTest(where=where):
+                ran = self.run_git(*args)
+                self.assertNotEqual(ran.returncode, 0, ran.stdout)
+                self.assertIn(f"{where} matches line 1 of the private deny list", ran.stdout + ran.stderr)
+                self.assertNotIn("globex", (ran.stdout + ran.stderr).lower())
+        ran = self.run_git("commit", "--allow-empty", "-m", "fix the export")
+        self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+        self.assertEqual(self.run_git("rev-list", "--count", "HEAD").stdout.strip(), "3")
+
+    def test_the_message_check_cannot_be_switched_off_from_the_manifest(self):
+        self.workspace({"use": "deny_list", "terms": []})
+        message = self.root / "MSG"
+        message.write_text("x\n", encoding="utf-8")
+        self.git("add", "workspace.json", "parts")
+        identity = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.invalid",   # as git sets them for its hooks;
+                    "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.invalid"}   # CI has no identity
+        with mock.patch.dict(os.environ, identity):
+            code, output = self.ws("check", "--message", str(message))
+        self.assertEqual(code, 1)
+        self.assertIn("only its cases may", output)
+
+
+@contextlib.contextmanager
+def _chdir(folder):
+    before = os.getcwd()
+    os.chdir(folder)
+    try:
+        yield
+    finally:
+        os.chdir(before)
 
 
 class SymbolTests(unittest.TestCase):
@@ -1024,6 +1247,20 @@ class RepositoryTests(unittest.TestCase):
             if part.kind == "check":
                 errors = [f for f in part.run(snapshot) if f["level"] == "error"]
                 self.assertEqual(errors, [], part.name)
+
+
+def _this_repositorys_ledger():
+    file = ROOT / ".git" / "ws-ledger"
+    return file.read_bytes() if file.is_file() else None
+
+
+_LEDGER_BEFORE = _this_repositorys_ledger()
+
+
+def tearDownModule():
+    # No test may open or change the edit ledger of the repository the tests run in.
+    if _this_repositorys_ledger() != _LEDGER_BEFORE:
+        raise AssertionError("a test changed this repository's edit ledger, .git/ws-ledger")
 
 
 if __name__ == "__main__":

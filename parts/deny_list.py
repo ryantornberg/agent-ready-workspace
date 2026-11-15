@@ -19,6 +19,10 @@ entry also match when joined by spaces, a line break, "-" or "_", or nothing.
 A line starting "re:" is a regular expression, used as written. Blank lines
 and lines starting "#" are ignored.
 
+The commit-msg hook runs it on the commit message, the author and the
+committer as well, so a private name or address cannot reach the history
+through them.
+
 Every file in the snapshot is read, whatever its encoding. Text is normalised
 (NFKC, zero-width characters removed) before matching, and a copy with NUL
 bytes removed is also scanned, which catches UTF-16 with no byte-order mark.
@@ -42,6 +46,7 @@ from wslib.parts import finding
 from wslib.snapshot import Memory
 
 KIND = "check"
+COMMIT_MESSAGE = True   # `ws.py check --message` runs it on the commit message and the author and committer too
 VARIABLE = "WS_DENY_LIST"
 DEFAULT = "~/.config/agent-ready-workspace/deny-list.txt"
 CASE_ONLY = ("terms", "list")

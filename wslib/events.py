@@ -14,6 +14,10 @@ Two shapes are read, and nothing else:
 
 Anything else is refused: a hook that cannot tell what is about to happen fails closed.
 
+A reminder goes back the way the tool reads it: for Claude Code, as "additionalContext" in its
+JSON reply, which the agent sees next to the command's result; for the workspace's own shape, as
+plain text on standard output. Either way the call goes ahead.
+
 The event a part sees:
     before-shell     {"command": text}
     before-edit      {"path": text}   relative to the workspace when the file is inside it, else absolute.
@@ -132,6 +136,12 @@ ADAPTERS = {"claude-code": claude_code}
 
 def read(root, event, data, tool=None):
     """The event a part decides on, from the raw bytes or text a tool sent. Raises PartError on anything else."""
+    return read_call(root, event, data, tool)[0]
+
+
+def read_call(root, event, data, tool=None):
+    """(event, tool, cwd): the event, the adapter that read it (None for the workspace's shape), and the
+    folder the tool says the session runs in (None when it does not say)."""
     if event not in EVENTS:
         raise PartError(f"unknown event {event!r}; the events are {EVENTS}")
     if tool is not None and tool not in ADAPTERS:
@@ -147,4 +157,13 @@ def read(root, event, data, tool=None):
         raise PartError(f"hook input is not JSON: {type(error).__name__}")
     if tool is None and not (isinstance(payload, dict) and "version" in payload) and is_claude_code(payload):
         tool = "claude-code"
-    return (ADAPTERS[tool] if tool else versioned)(root, event, payload)
+    found = (ADAPTERS[tool] if tool else versioned)(root, event, payload)
+    cwd = payload.get("cwd") if tool else None
+    return found, tool, cwd if isinstance(cwd, str) and pathlib.Path(cwd).is_absolute() else None
+
+
+def remind(tool, text):
+    """What to print on standard output so the tool shows the agent a reminder and lets the call go ahead."""
+    if tool == "claude-code":
+        return json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": text}})
+    return f"Reminder: {text}"

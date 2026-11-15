@@ -1,8 +1,17 @@
-"""Hook: refuse a shell command that stages everything.
+"""Hook: remind the agent when a shell command stages everything.
 
 Another session, or the person, may have edits in the same folder. "Stage
 everything" sweeps those into this commit under the wrong message. Staging by
 name cannot.
+
+It reminds; it does not refuse. The commit check enforces the rule
+(parts/edit_ledger.py): it compares what is staged with what the session's
+edit tools wrote, whatever command staged it. The runner opens that ledger
+when this hook fires, so the comparison runs even for a session that wrote
+its files only through the shell. A command line cannot say which repository
+it stages in, or what a pathspec covers, so a refusal here was both too wide,
+as for `git add .` in a scratch repository, and too narrow, as for a script.
+See docs/decisions/0002-hooks-remind-the-commit-enforces.md.
 
 It reads the command line; it does not run a shell. It follows separators,
 new lines, subshells, `sh -c "..."`, `eval` and common wrappers, and it skips
@@ -19,12 +28,18 @@ import shlex
 
 KIND = "hook"
 EVENT = "before-shell"
+MODE = "remind"
 
 KEYWORDS = {"if", "then", "else", "elif", "do", "while", "until", "!", "{", "}", "fi", "done"}
 WRAPPERS = {"sudo", "command", "env", "exec", "time", "nohup", "timeout", "nice", "xargs", "builtin"}
 SHELLS = {"sh", "bash", "zsh", "dash", "ksh"}
 OPTIONS_WITH_A_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path"}
 EVERYTHING = re.compile(r"^(?::/\*?|[./*]+)$")   # .  ./  *  ./*  ../..  :/
+# Options that take a value, so the value is not read as a flag or a pathspec: -m"add a test" holds no -a.
+SHORT_VALUES = {"commit": "mFCct"}
+LONG_VALUES = {"commit": ("--message", "--file", "--reuse-message", "--reedit-message", "--template", "--author",
+                          "--date", "--cleanup", "--fixup", "--squash", "--trailer", "--pathspec-from-file"),
+               "add": ("--chmod", "--pathspec-from-file")}
 
 
 def _long(argument, option):
@@ -110,17 +125,43 @@ def git_calls(command, depth=0):
                 yield rest[0], rest[1:]
 
 
+def options(subcommand, arguments):
+    """(short flags, long options, pathspecs) of one git call, with each option's value set aside."""
+    takes, long_values = SHORT_VALUES.get(subcommand, ""), LONG_VALUES.get(subcommand, ())
+    short, longs, specs, rest = set(), [], [], list(arguments)
+    while rest:
+        argument = rest.pop(0)
+        if argument == "--":
+            specs += rest
+            break
+        if not argument.startswith("-") or argument == "-":
+            specs.append(argument)
+        elif argument.startswith("--"):
+            longs.append(argument)
+            if "=" not in argument and any(_long(argument, option) for option in long_values) and rest:
+                rest.pop(0)
+        else:
+            for position, flag in enumerate(argument[1:]):
+                short.add(flag)
+                if flag in takes:
+                    if position == len(argument) - 2 and rest:   # the value is the next word, not attached
+                        rest.pop(0)
+                    break
+    return short, longs, specs
+
+
 def stages_everything(command):
     """The reason a command stages more than it names, or None."""
     for subcommand, arguments in git_calls(command or ""):
-        short = set("".join(a[1:] for a in arguments if a.startswith("-") and not a.startswith("--")))
+        short, longs, specs = options(subcommand, arguments)
         if subcommand in ("add", "stage"):
-            if short & {"A", "u"} or any(_long(a, "--all") or _long(a, "--update") or EVERYTHING.match(a) for a in arguments):
+            every = short & {"A", "u"} or any(_long(a, "--all") or _long(a, "--update") for a in longs)
+            if any(EVERYTHING.match(a) for a in specs) or (every and not specs):
                 return "git add of everything"
         elif subcommand == "commit":
-            if "a" in short or any(_long(a, "--all") for a in arguments):
+            if "a" in short or any(_long(a, "--all") for a in longs):
                 return "git commit -a stages every tracked change"
-            if any(EVERYTHING.match(a) for a in arguments):
+            if any(EVERYTHING.match(a) for a in specs):
                 return "git commit of the whole folder"
     return None
 
@@ -128,5 +169,7 @@ def stages_everything(command):
 def decide(event, config):
     reason = stages_everything(event.get("command"))
     if reason:
-        return f"{reason}. Stage the files you changed, by name: another session may have edits in this folder."
+        return (f"This command stages more than it names ({reason}). Another session, or the person, may have "
+                "edits in this folder. Stage the files this session changed, by name, and check what is staged "
+                "with: git diff --cached --name-only")
     return None

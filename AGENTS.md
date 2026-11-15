@@ -33,7 +33,7 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 ## Rules
 
 - Mark every claim in a report as **verified** (you ran something and saw the result) or **inferred** (you reasoned your way there).
-- Stage files by name. Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder. A hook refuses these.
+- Stage files by name. Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder. The commit check refuses a staged file your edit tools did not write; record one you wrote another way with `python3 ws.py ledger --add PATH`.
 - Open a pull request as a draft. Publish and merge it only after CI passes on Linux, macOS and Windows. In this repository the maintainer lets agents do both; in a team's workspace, a person publishes.
 - If you had to ask a person something this workspace should have answered, add it to the [question log](docs/question-log.md) before you finish.
 - When a page you edit is past its review date, review the whole page and move the date. The commit check and CI both enforce this.

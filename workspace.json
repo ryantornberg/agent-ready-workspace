@@ -47,6 +47,9 @@
       "use": "no_stage_all"
     },
     {
+      "use": "edit_ledger"
+    },
+    {
       "use": "shelved",
       "paths": [
         "src/orders-service-v1"
