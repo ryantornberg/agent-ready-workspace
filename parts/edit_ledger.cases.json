@@ -1,0 +1,11 @@
+[
+  {"name": "a path the ledger holds passes", "files": {"a.md": "x"}, "staged": ["a.md"], "ledger": ["a.md", "b.md"], "expect": []},
+  {"name": "a path the ledger does not hold fails, whatever staged it", "files": {"a.md": "x", "theirs.md": "y"}, "staged": ["a.md", "theirs.md"], "ledger": ["a.md"], "expect": ["theirs.md"]},
+  {"name": "a staged deletion counts", "files": {"a.md": "x"}, "staged": ["a.md", "gone.md"], "ledger": ["a.md"], "expect": ["staged, but no edit tool"]},
+  {"name": "no ledger, as for a person's own commit, passes", "files": {"a.md": "x"}, "staged": ["a.md", "theirs.md"], "expect": []},
+  {"name": "an open ledger with nothing staged passes", "files": {"a.md": "x"}, "staged": [], "ledger": ["a.md"], "expect": []},
+  {"name": "a pin counts as edited when the ledger holds a path inside it", "files": {}, "staged": ["src/product"], "ledger": ["src/product/Billing/Run.cs"], "expect": []},
+  {"name": "a pin the session never edited inside fails", "files": {}, "staged": ["src/product"], "ledger": ["src/products-old/x.cs"], "expect": ["src/product"]},
+  {"name": "a path that only shares a prefix is not covered", "files": {}, "staged": ["docs/a.md.bak"], "ledger": ["docs/a.md"], "expect": ["staged, but no edit tool"]},
+  {"name": "a merge in progress warns and does not compare", "files": {}, "staged": ["theirs.md"], "ledger": ["a.md"], "replaying": "MERGE_HEAD", "expect": [{"message": "replays other work (MERGE_HEAD)", "level": "warning"}]}
+]

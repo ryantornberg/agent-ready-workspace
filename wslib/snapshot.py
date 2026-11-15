@@ -10,18 +10,31 @@ staged for a commit, or against an in-memory case in a test.
 
 Paths are POSIX-style and relative to the workspace root. `changed` is the set
 of paths the commit or push edits; checks that care (freshness) use it.
+
+For the commit check, an Index also says what the commit will change and who
+edited what: `staged` is every path the commit adds, changes or deletes;
+`ledger` is the set of paths the agent's edit tools wrote in this working copy,
+or None when no ledger is open (wslib/ledger.py); `replaying` names a merge,
+cherry-pick, revert or rebase in progress, or is None. A Memory snapshot takes
+the same three from a case. A Tree has no staged paths and no ledger.
 """
 import os
 import pathlib
 import subprocess
 
+from . import ledger as ledgers
+
 ALWAYS_SKIP = {".git", "node_modules", ".venv", "__pycache__"}
 
 
 class Snapshot:
-    def __init__(self, paths, changed=()):
+    def __init__(self, paths, changed=(), staged=None, ledger=None, replaying=None, ledger_problem=None):
         self._paths = frozenset(paths)
         self.changed = frozenset(changed)
+        self.staged = frozenset(self.changed if staged is None else staged)
+        self.ledger = None if ledger is None else frozenset(ledger)
+        self.replaying = replaying
+        self.ledger_problem = ledger_problem
 
     def paths(self, suffixes=None, under="", skip=()):
         """Sorted file paths, optionally by suffix, under a folder, minus skipped folders."""
@@ -61,8 +74,8 @@ class Snapshot:
 
 
 class Memory(Snapshot):
-    def __init__(self, files, changed=()):
-        super().__init__(files, changed)
+    def __init__(self, files, changed=(), staged=None, ledger=None, replaying=None):
+        super().__init__(files, changed, staged, ledger, replaying)
         self._files = files
 
     def _bytes(self, path):
@@ -120,8 +133,16 @@ class Index(Snapshot):
                     paths.extend(inside)
             else:
                 paths.append(path)
-        changed = _names(_git(self.root, "diff", "--cached", "--name-only", "-z", "--diff-filter=ACMR"))
-        super().__init__(paths, changed)
+        # One call gives both: every staged path, deletions included, and the ones the commit adds or changes.
+        status = _names(_git(self.root, "diff", "--cached", "--name-status", "--no-renames", "-z"))
+        staged = dict(zip(status[1::2], status[0::2]))
+        changed = [path for path, letter in staged.items() if letter[:1] in "ACMR"]
+        folder = ledgers.git_dir(self.root)
+        try:
+            ledger, problem = ledgers.read(folder), None
+        except ledgers.LedgerError as error:
+            ledger, problem = None, str(error)
+        super().__init__(paths, changed, staged, ledger, ledgers.replaying(folder), problem)
 
     def _bytes(self, path):
         if path in self._on_disk:
@@ -137,3 +158,24 @@ def changed_since(root, ref):
         return _names(_git(root, "diff", "--name-only", "-z", "--diff-filter=ACMR", f"{ref}...HEAD")), None
     except RuntimeError as error:
         return [], f"cannot compare with {ref}: {error}"
+
+
+class Message(Snapshot):
+    """A commit about to be made, as three files: its message, its author and its committer.
+
+    The identities are git's own view, `git var GIT_AUTHOR_IDENT` and `GIT_COMMITTER_IDENT`, which
+    take `--author`, the environment and the config into account. Each is the name and the email,
+    without the date. Not a Memory snapshot: a part never takes it for one of its cases.
+    """
+
+    FILES = ("commit message", "author", "committer")
+
+    def __init__(self, root, message):
+        self._files = {"commit message": message}
+        for name, variable in (("author", "GIT_AUTHOR_IDENT"), ("committer", "GIT_COMMITTER_IDENT")):
+            ident = _git(root, "var", variable).decode("utf-8", "surrogateescape").strip()
+            self._files[name] = (ident[:ident.rfind(">") + 1] if ">" in ident else ident).encode("utf-8", "surrogateescape")
+        super().__init__(self._files)
+
+    def _bytes(self, path):
+        return self._files[path]
