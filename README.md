@@ -65,7 +65,7 @@ git config core.hooksPath .githooks
 
 The commit check reads the staged pages and the staged manifest, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. The parts' own code runs from disk. CI runs the same checks on Linux, macOS and Windows and compares with the commit before the push, so a teammate who never installed the hook is still caught. The one exception is `deny_list`, which needs a private list that CI does not have. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed.
 
-These rules in [AGENTS.md](AGENTS.md) and the [definition of done](docs/definition-of-done.md) stay prose, because nothing here can check them: open pull requests only as drafts, write a goal and non-goals for larger work, log the questions you had to ask, compare build warnings with the base branch, and list the callers you checked. The eval tests two more: see a test fail before editing, and mark claims as verified.
+These rules in [AGENTS.md](AGENTS.md) and the [definition of done](docs/definition-of-done.md) stay prose, because nothing here can check them: open pull requests as drafts and merge only after CI passes, write a goal and non-goals for larger work, log the questions you had to ask, compare build warnings with the base branch, and list the callers you checked. The eval tests two more: see a test fail before editing, and mark claims as verified.
 
 ## Add a part
 

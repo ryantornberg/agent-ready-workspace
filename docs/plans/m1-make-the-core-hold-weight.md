@@ -206,7 +206,8 @@ Approved by: Ryan Tornberg, 2026-11-15.
 ## Changes after approval
 
 - 2026-11-15, the maintainer: agents may push slice branches to this repository. Merging into main still waits for CI to pass on all three systems. Agents push nothing to any other host.
-- 2026-11-15, the maintainer: agents open a draft pull request for each slice, which runs CI. The maintainer publishes it, as the contract requires.
+- 2026-11-15, the maintainer: agents open a draft pull request for each slice, which runs CI.
+- 2026-11-15, the maintainer: agents publish and merge a slice's pull request once CI passes on all three systems. The contract says so.
 
 ## Results
 

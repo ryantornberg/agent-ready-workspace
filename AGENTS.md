@@ -34,7 +34,7 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 
 - Mark every claim in a report as **verified** (you ran something and saw the result) or **inferred** (you reasoned your way there).
 - Stage files by name. Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder. A hook refuses these.
-- Open a pull request only as a draft. A person publishes it.
+- Open a pull request as a draft. Publish and merge it only after CI passes on Linux, macOS and Windows. In this repository the maintainer lets agents do both; in a team's workspace, a person publishes.
 - If you had to ask a person something this workspace should have answered, add it to the [question log](docs/question-log.md) before you finish.
 - When a page you edit is past its review date, review the whole page and move the date. The commit check and CI both enforce this.
 - A change to a playbook, or to the guidance tested with it, needs a new passing eval run on record. See [evals](evals/README.md).
