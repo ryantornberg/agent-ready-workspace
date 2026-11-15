@@ -776,7 +776,7 @@ class StagingAtTheCommitTests(Folder):
     def setUp(self):
         super().setUp()
         self.workspace({"use": "edit_ledger"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
-        for name in ("ws.py", ".githooks/pre-commit", ".githooks/commit-msg", ".githooks/post-commit"):
+        for name in ("ws.py", ".gitignore", ".githooks/pre-commit", ".githooks/commit-msg", ".githooks/post-commit"):
             self.write(name, (ROOT / name).read_text(encoding="utf-8"))
             (self.root / name).chmod(0o755)
         for source in (ROOT / "wslib").glob("*.*"):
@@ -902,6 +902,20 @@ class StagingAtTheCommitTests(Folder):
         self.git("add", "a.md")
         ran = self.run_git("commit", "-m", "fix")
         self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
+
+    def test_a_reminder_opens_the_ledger_only_when_the_working_copy_has_uncommitted_changes(self):
+        # The agent tool reports the folder the session started in, not where the command moves to. With nothing
+        # uncommitted there, a stage-everything command elsewhere has nothing of anyone's to sweep, so nothing opens.
+        command = "cd /tmp/scratch && git add ."
+        code, output = self.ws("hook", "before-shell", "--tool", "claude-code", stdin=claude("Bash", cwd=self.root, command=command))
+        self.assertEqual(code, 0)
+        self.assertIn("stages more than it names", output)
+        self.assertNotIn("ledger of this working copy is open", output, self.run_git("status", "--porcelain").stdout)
+        self.assertIsNone(self.ledger())
+        self.write("new.md", "someone's new file\n")                 # untracked counts: git add -A would take it
+        code, output = self.ws("hook", "before-shell", "--tool", "claude-code", stdin=claude("Bash", cwd=self.root, command=command))
+        self.assertIn("ledger of this working copy is open", output)
+        self.assertEqual(self.ledger(), [])
 
     def test_a_pin_counts_as_edited_when_the_session_edited_inside_it(self):
         product = self.root / "src/product"

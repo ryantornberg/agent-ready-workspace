@@ -85,7 +85,7 @@ A hook call loads only the hooks for its event. It does not run any check, or an
 
 Each `before-edit` call that every hook allows is recorded: the runner appends the path to the edit ledger of the working copy that holds the file. The ledger is the file `ws-ledger` in that working copy's git folder, so a linked working copy keeps its own. An edit in a code repository under `src/` goes in the workspace's ledger. An edit outside every working copy of this repository is not recorded. If the ledger cannot be written, the edit is refused.
 
-While a ledger is open, the `edit_ledger` check fails a commit that stages a path no edit tool wrote, whatever command staged it. A `before-shell` reminder opens the ledger too, even empty, in the working copy where the agent tool says its session runs. So a session that wrote its files only through the shell is still compared. The workspace's own event shape names no folder, so trying the hook by hand opens nothing.
+While a ledger is open, the `edit_ledger` check fails a commit that stages a path no edit tool wrote, whatever command staged it. A `before-shell` reminder opens the ledger too, even empty, in the working copy where the agent tool says its session runs, when that working copy has uncommitted changes. So a session that wrote its files only through the shell is still compared, and a command run in a scratch repository while the session's own working copy is clean opens nothing. The workspace's own event shape names no folder, so trying the hook by hand opens nothing.
 
 | Command | Does |
 |---|---|

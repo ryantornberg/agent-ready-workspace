@@ -7,8 +7,9 @@ name cannot.
 It reminds; it does not refuse. The commit check enforces the rule
 (parts/edit_ledger.py): it compares what is staged with what the session's
 edit tools wrote, whatever command staged it. The runner opens that ledger
-when this hook fires, so the comparison runs even for a session that wrote
-its files only through the shell. A command line cannot say which repository
+when this hook fires and the session's working copy has uncommitted changes,
+so the comparison runs even for a session that wrote its files only through
+the shell. A command line cannot say which repository
 it stages in, or what a pathspec covers, so a refusal here was both too wide,
 as for `git add .` in a scratch repository, and too narrow, as for a script.
 See docs/decisions/0002-hooks-remind-the-commit-enforces.md.
