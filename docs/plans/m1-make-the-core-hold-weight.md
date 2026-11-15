@@ -166,7 +166,7 @@ Run by the maintainer:
 ## Limits
 
 - Sessions are attended. A review loop runs while it converges.
-- Each slice is committed on its own local branch, named `m1/slice-<n>`, with files staged by name. Agents do not push.
+- Each slice is committed on its own branch, named `m1/slice-<n>`, with files staged by name. Agents push the branch to this repository; see "Changes after approval".
 - Where fix-a-bug says to open a draft pull request, stop at the local commit instead.
 - Each question the session had to ask the maintainer becomes a [question-log](../question-log.md) row before the slice ends.
 - Before slice 3, the maintainer starts Docker. Before slice 7, the maintainer confirms the `codex` command runs.
@@ -205,7 +205,7 @@ Approved by: Ryan Tornberg, 2026-11-15.
 
 ## Changes after approval
 
-None.
+- 2026-11-15, the maintainer: agents may push slice branches to this repository. Merging into main still waits for CI to pass on all three systems. Agents still open no pull request, issue or comment, and push nothing to any other host.
 
 ## Results
 
