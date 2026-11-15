@@ -25,7 +25,9 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 ## How work flows
 
 - A change that is small, easy to reverse, in one repository and under a day of work goes straight to [fix a bug](docs/playbooks/fix-a-bug.md).
-- Anything else gets a written goal and non-goals first, then a plan a person has read.
+- Anything else climbs the [size gate's ladder](docs/size-the-work.md): goal and non-goals first, then a [hand-off plan](docs/templates/hand-off-plan.md) a person has approved.
+- Every task you hand off names its tier. See [orchestration](docs/orchestration.md).
+- A change to scripts, parts, hooks or CI is machinery: [changing the machinery](docs/changing-the-machinery.md).
 - Work is done when it meets the [definition of done](docs/definition-of-done.md), not when the code compiles.
 
 ## Rules

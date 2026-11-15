@@ -9,6 +9,12 @@ Where each topic lives, and what the code calls the things people talk about. Ag
 | The rules every agent follows | [AGENTS.md](AGENTS.md) |
 | When work counts as done | [Definition of done](docs/definition-of-done.md) |
 | Fixing a small bug | [Fix a bug](docs/playbooks/fix-a-bug.md) |
+| How much process a change needs | [Size the work](docs/size-the-work.md) |
+| Which model and effort a task gets; delegating | [Orchestration](docs/orchestration.md) |
+| Writing a plan for larger work | [Hand-off plan template](docs/templates/hand-off-plan.md) |
+| The plan being built now | [M1 hand-off plan](docs/plans/m1-make-the-core-hold-weight.md) |
+| What a finished milestone records | [Milestone record template](docs/templates/milestone-record.md), [M1 record](docs/milestones/m1.md) |
+| Changing scripts, parts, hooks or CI | [Changing the machinery](docs/changing-the-machinery.md) |
 | Why code repositories are pinned, not copied | [Decision 0001](docs/decisions/0001-pin-code-repositories.md) |
 | Questions someone had to ask a person | [Question log](docs/question-log.md) |
 | Testing a playbook | [Evals](evals/README.md) |

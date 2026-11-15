@@ -1,0 +1,59 @@
+---
+last-reviewed: 2026-11-15
+---
+
+# Orchestration: tiers, models and delegation
+
+Which model and effort a piece of work gets, and how work is handed to a helper session. It is for any agent that plans work, delegates it or writes a hand-off plan, and for the person who approves the plan.
+
+**In short:** every task belongs to one of three tiers. One entry in the manifest binds each tier to a model and an effort level. Stakes raise the tier. Every handoff names its tier, and a helper returns conclusions, not files.
+
+## The three tiers
+
+| Tier | Does | For example |
+|---|---|---|
+| Driver | Judgment: design, review, deciding what to do next | Writing a hand-off plan; red-teaming a plan that changes a gate |
+| Worker | Bounded work against a written plan | Building one slice; a fix round; a test harness |
+| Mechanical | Reading, listing and sweeping | Finding every caller of a function; collecting check output |
+
+Pick the cheapest tier that fits. Lower the effort before you lower the model.
+
+## The binding
+
+The `tiers` entry in [workspace.json](../workspace.json) maps each tier to a model and an effort level. It is the only place a model name appears, so a model change is one edit. Read the current values there.
+
+Driver and worker may share a model and differ by effort. The tier name in the handoff is what tells them apart.
+
+The person chooses the model of the session they talk to. The binding governs everything that session hands off.
+
+## Stakes raise the tier
+
+A task runs at the driver tier, whatever its size, when it:
+
+- changes a gate: a check, a hook, a grader, CI or the commit hook;
+- changes the contract, [AGENTS.md](../AGENTS.md);
+- produces text that someone outside the team will read, such as an upstream pull request.
+
+Work *about* such a change is not stakes. Listing the callers of a hook is still mechanical.
+
+## Handing work off
+
+- **Every handoff names its tier.** A hand-off plan names one per slice. A delegated task starts its prompt with `Tier: driver`, `Tier: worker` or `Tier: mechanical`, and sets the model and effort from the binding.
+- **A delegated task carries** one tight question, the shape of the answer, and what is already ruled out.
+- **A helper returns conclusions**: file, line and finding. It never returns whole files. Anything that must outlive the session is written down.
+- **Delegating saves context, not tokens.** A helper reads widely so the main session does not have to. The bill drops only when the helper runs on a cheaper tier or at lower effort.
+- **Keep small work in the main session.** A handful of tool calls is cheaper done than delegated.
+- **One helper per job.** Run helpers in parallel only on independent work. Do not chain helpers on tightly coupled work, and do not redo work a helper returned.
+
+## Fresh context for critics
+
+A reviewer or a red team never shares the author's session. It gets the artifact and the sources, never the author's conclusions. A critic who is handed the author's reasoning tends to confirm it.
+
+## Limits
+
+- **An attended review loop** runs while it converges. It ends on a round that only finishes earlier work. It has no fixed round count.
+- **An unattended run** stops after three fix rounds. It then freezes and reports; nothing is published or merged.
+
+## What enforces this
+
+Today these rules are prose. A hook that refuses a delegated task with no tier is planned in the [M1 hand-off plan](plans/m1-make-the-core-hold-weight.md), slice 1. Until it lands, the person reading a hand-off plan checks that each slice names a tier.
