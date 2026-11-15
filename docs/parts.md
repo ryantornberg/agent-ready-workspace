@@ -58,7 +58,22 @@ def decide(event, config):
     return None
 ```
 
-`before-shell` events carry a `command`. `before-edit` events carry a `path`, relative to the workspace. Those are the two events. `python3 ws.py hook <event>` reads the event as JSON and exits 2 when a hook refuses. It also exits 2 when it cannot decide, such as on input it cannot read: a hook fails closed. [.claude/settings.json](../.claude/settings.json) wires both events into one agent tool; another tool needs its own few lines of wiring, and the parts stay the same.
+There are three events. The event a hook's `decide` gets:
+
+| Event | Fires | The event holds |
+|---|---|---|
+| `before-shell` | Before a shell command | `command`: the command line |
+| `before-edit` | Before an edit tool writes a file | `path`: relative to the workspace when the file is inside it, else absolute |
+| `before-handoff` | Before a task is handed to a helper session | `prompt`; and `model` and `effort` when the tool lets a task set them, `None` when left unset |
+
+`python3 ws.py hook <event>` reads the event as JSON on standard input and exits 2 when a hook refuses. It reads two shapes, and refuses everything else:
+
+- **The workspace's own shape**, with a version: `{"version": 1, "command": "git add a.md"}`, `{"version": 1, "path": "docs/a.md"}`, or `{"version": 1, "prompt": "Tier: worker ..."}`. It takes exactly the fields in the table, so a misspelt field is refused, not read as missing.
+- **An agent tool's own payload**, read by that tool's adapter in `wslib/events.py`: `python3 ws.py hook before-edit --tool claude-code`. A payload without the field its tool needs, or from a tool the adapter does not send to that event, is refused. With no `--tool`, a payload that is plainly Claude Code's is read by its adapter too. An agent tool keeps the hook wiring a session started with, so a running session with the older wiring is not locked out when the runner is upgraded under it.
+
+So a hook fails closed: whatever the runner cannot read, it refuses. Before a part sees a path, the runner follows symbolic links, and on a case-insensitive file system it treats a differently cased path to the workspace as inside it.
+
+[.claude/settings.json](../.claude/settings.json) wires the three events into one agent tool. Each line calls `wslib/launch.sh`, which runs `ws.py` with the first Python 3.9 or later it finds and exits 2 when there is none, and ends in `|| exit 2`, so a missing launcher refuses too. An agent tool blocks a call only on exit 2; anything else lets it through. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
 
 A hook call loads only the hooks for its event. It does not run any check, or any hook for the other event. So a check with a broken case cannot refuse a shell command or an edit, including the edit that repairs it. To know a part's kind without running it, the runner reads its `KIND` and `EVENT` lines. Write each as one plain line, such as `KIND = "hook"`. A part whose lines it cannot read refuses every hook call, because it might be a hook for that event. So does a missing part file, and a manifest it cannot read. Repair those from your own terminal, where the agent's hooks do not run. A hook call does not compare those lines with what the file sets when it runs; `check`, `selftest` and CI do, and refuse a part where they differ.
 
@@ -110,6 +125,8 @@ Otherwise `check` fails. Locally, the last commit's manifest decides which parts
 2. Add `{"use": "<name>"}` to `workspace.json`, with any settings the part reads from `config`.
 3. Run `python3 ws.py selftest`, then `python3 ws.py check`.
 
+A part's `config` is its manifest entry, plus the manifest's tier binding as `tiers`. The binding lives in one place, so an entry that sets `tiers` itself is refused.
+
 To use a part kept somewhere else, give its path: `{"use": "shared/parts/licences.py"}`. Its cases file sits next to it.
 
 ## The parts here
@@ -123,3 +140,4 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `deny_list` | check | A file or file name holds a term from a private list kept outside the repository. With no list it warns and checks nothing, so CI cannot run it. |
 | `no_stage_all` | hook, before-shell | A command stages everything instead of naming files. |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |
+| `handoff_tier` | hook, before-handoff | A delegated task names no tier on its first line, or sets a model or effort other than the manifest's binding for its tier, or leaves one unset that the tool lets it set. |

@@ -1,0 +1,14 @@
+[
+  {"name": "a tier, with the bound model and effort", "event": {"prompt": "Tier: mechanical\nList every caller of decide().", "model": "small", "effort": "low"}, "config": {"tiers": {"mechanical": {"model": "small", "effort": "low"}}}, "allow": true},
+  {"name": "no tier named", "event": {"prompt": "List every caller of decide().", "model": "small", "effort": "low"}, "config": {"tiers": {"mechanical": {"model": "small", "effort": "low"}}}, "allow": false},
+  {"name": "the tier named only on a later line", "event": {"prompt": "List the callers.\nTier: mechanical", "model": "small", "effort": "low"}, "config": {"tiers": {"mechanical": {"model": "small", "effort": "low"}}}, "allow": false},
+  {"name": "a word that is not a tier", "event": {"prompt": "Tier: urgent\nList the callers.", "model": "small", "effort": "low"}, "config": {"tiers": {"urgent": {"model": "small", "effort": "low"}}}, "allow": false},
+  {"name": "lower case, leading blank lines and a note after the tier", "event": {"prompt": "\n  tier: Worker - build slice 1\n", "model": "large", "effort": "medium"}, "config": {"tiers": {"worker": {"model": "large", "effort": "medium"}}}, "allow": true},
+  {"name": "a model off the binding", "event": {"prompt": "Tier: mechanical", "model": "large", "effort": "low"}, "config": {"tiers": {"mechanical": {"model": "small", "effort": "low"}}}, "allow": false},
+  {"name": "an effort off the binding", "event": {"prompt": "Tier: mechanical", "model": "small", "effort": "high"}, "config": {"tiers": {"mechanical": {"model": "small", "effort": "low"}}}, "allow": false},
+  {"name": "a model the tool exposes, left unset", "event": {"prompt": "Tier: mechanical", "model": null, "effort": "low"}, "config": {"tiers": {"mechanical": {"model": "small", "effort": "low"}}}, "allow": false},
+  {"name": "a tool that exposes neither setting", "event": {"prompt": "Tier: driver\nRed-team the plan."}, "config": {"tiers": {"driver": {"model": "large", "effort": "high"}}}, "allow": true},
+  {"name": "no binding for the tier", "event": {"prompt": "Tier: driver"}, "config": {"tiers": {"worker": {"model": "large", "effort": "medium"}}}, "allow": false},
+  {"name": "no binding at all", "event": {"prompt": "Tier: driver"}, "config": {}, "allow": false},
+  {"name": "a binding with no effort, for a tool that exposes it", "event": {"prompt": "Tier: driver", "model": "large", "effort": "high"}, "config": {"tiers": {"driver": {"model": "large"}}}, "allow": false}
+]

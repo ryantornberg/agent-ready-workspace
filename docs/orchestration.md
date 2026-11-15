@@ -56,4 +56,6 @@ A reviewer or a red team never shares the author's session. It gets the artifact
 
 ## What enforces this
 
-Today these rules are prose. A hook that refuses a delegated task with no tier is planned in the [M1 hand-off plan](plans/m1-make-the-core-hold-weight.md), slice 1. Until it lands, the person reading a hand-off plan checks that each slice names a tier.
+The `handoff_tier` hook refuses a delegated task whose prompt does not start with its tier. Where the agent tool lets a task set its model and effort, the hook also refuses a task that sets values other than the binding's for its tier, or leaves one unset, since an unset value inherits the calling session's. A tool that exposes neither setting needs only the tier line. See [parts](parts.md#the-parts-here).
+
+The rest is prose. The person reading a hand-off plan checks that each slice names a tier. Nothing checks that the tier fits the work.

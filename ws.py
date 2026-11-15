@@ -6,7 +6,8 @@
     python3 ws.py check                      # run the checks on the working folder
     python3 ws.py check --staged             # run them on exactly what is staged (the commit hook)
     python3 ws.py check --changed-from REF   # treat files edited since REF as changed (CI)
-    python3 ws.py hook before-shell          # decide one event, read as JSON on standard input
+    python3 ws.py hook before-shell          # decide one event in the workspace's shape, read as JSON on standard input
+    python3 ws.py hook before-edit --tool claude-code   # the same, from one agent tool's own payload
 
 Every command but selftest runs each part's cases as it loads the part, and refuses a part with a failing case.
 A hook call loads only the hooks for its event, so a broken check cannot refuse a shell command or an edit.
@@ -14,17 +15,20 @@ The commit check reads the staged manifest, parts and cases. A part an older man
 used, or be listed under "retired" with a reason: the last commit's manifest decides locally, and the base
 commit's manifest in CI.
 
+The events are before-shell, before-edit and before-handoff. A hook reads the workspace's versioned event
+shape, or one agent tool's payload through that tool's adapter (wslib/events.py), and refuses anything else.
+
 Exit codes: 0 clean; 1 a check found an error or a case failed; 2 a hook refused, or the setup is
 wrong. A hook that cannot decide exits 2 as well: it fails closed.
 """
 import argparse
-import json
 import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
+from wslib import events  # noqa: E402
 from wslib import parts as partlib  # noqa: E402
 from wslib import snapshot as snapshots  # noqa: E402
 
@@ -93,29 +97,6 @@ def command_check(root, args):
     return 1 if errors else 0
 
 
-def read_event(root, stream):
-    """Read a hook event. Accepts {"command": ...} or {"path": ...}, or an agent tool's payload with "tool_input"."""
-    try:
-        event = json.load(stream)
-    except json.JSONDecodeError as error:
-        raise partlib.PartError(f"hook input is not JSON: {error}")
-    if isinstance(event, dict) and isinstance(event.get("tool_input"), dict):
-        tool_input = event["tool_input"]
-        event = {"command": tool_input.get("command"), "path": tool_input.get("file_path") or tool_input.get("notebook_path")}
-    if not isinstance(event, dict):
-        raise partlib.PartError("hook input must be a JSON object")
-    for key in ("command", "path"):
-        if event.get(key) is not None and not isinstance(event[key], str):
-            raise partlib.PartError(f'hook input: "{key}" must be text')
-    path = event.get("path")
-    if path and pathlib.Path(path).is_absolute():
-        try:
-            event["path"] = pathlib.Path(path).resolve().relative_to(root).as_posix()
-        except ValueError:
-            pass  # outside the workspace: leave it absolute, so no rule about workspace paths matches
-    return event
-
-
 def command_hook(root, args):
     if args.event not in partlib.EVENTS:
         raise partlib.PartError(f"unknown event {args.event!r}; the events are {partlib.EVENTS}")
@@ -125,7 +106,8 @@ def command_hook(root, args):
         raise partlib.PartError(f"{error}. Every hook call is refused until the manifest is repaired. "
                                 "Repair it from your own terminal, where the agent's hooks do not run.")
     hooks = partlib.load_hooks(root, args.event, manifest)   # only this event's hooks: a broken check cannot lock it
-    event = read_event(root, sys.stdin)
+    stream = getattr(sys.stdin, "buffer", sys.stdin)
+    event = events.read(root, args.event, stream.read(), args.tool)
     for part in hooks:
         reason = part.decide(event)
         if reason is not None:
@@ -149,6 +131,7 @@ def main(argv=None):
     check.add_argument("--changed-from", metavar="REF")
     hook = commands.add_parser("hook")
     hook.add_argument("event")
+    hook.add_argument("--tool", help="read this agent tool's own payload through its adapter, such as claude-code")
     args = parser.parse_args(argv)
 
     root = pathlib.Path(args.root).resolve()
