@@ -23,16 +23,16 @@ python3 -m unittest discover -b tests
 Then watch it refuse something:
 
 ```
-echo '{"version": 1, "command": "git add -A"}' | python3 ws.py hook before-shell    # refused, exit 2
-echo '{"version": 1, "path": "src/orders-service-v1/OrderService.cs"}' | python3 ws.py hook before-edit
+echo '{"version": 1, "path": "src/orders-service-v1/OrderService.cs"}' | python3 ws.py hook before-edit   # refused, exit 2
 echo '{"version": 1, "prompt": "List every caller."}' | python3 ws.py hook before-handoff   # names no tier
 echo '{"command": "ls"}' | python3 ws.py hook before-shell                # no version: refused, it fails closed
+echo '{"version": 1, "command": "git add -A"}' | python3 ws.py hook before-shell    # a reminder, exit 0
 python3 tools/symbols.py ReconciliationWorker src                         # file and line
 ```
 
 Rename the class in `src/orders-api/ReconciliationWorker.cs` and `python3 ws.py check` fails, because the index still sends agents to the old name. Edit `docs/playbooks/fix-a-bug.md` and it fails again, because the playbook no longer matches its last passing eval run. Both changes are easy to undo with `git checkout`.
 
-To run the checks before every commit:
+To run the checks before every commit, and on every commit message:
 
 ```
 git config core.hooksPath .githooks
@@ -46,8 +46,8 @@ git config core.hooksPath .githooks
 | [INDEX.md](INDEX.md) | Topics, and a table that maps everyday words to the names the code uses. |
 | [workspace.json](workspace.json) | The manifest: which parts this workspace runs, and their settings. |
 | `ws.py`, `wslib/` | The runner and the small core the parts plug into. |
-| [parts/](docs/parts.md) | Five checks and three hooks, each one file plus its cases. |
-| [docs/](docs/definition-of-done.md) | The definition of done, one playbook, one decision record, the question log, the orchestration rules, and the templates and plan for the current milestone. |
+| [parts/](docs/parts.md) | Six checks and three hooks, each one file plus its cases. |
+| [docs/](docs/definition-of-done.md) | The definition of done, one playbook, two decision records, the question log, the orchestration rules, and the templates and plan for the current milestone. |
 | [evals/](evals/README.md) | One eval case, a broken sample repository, and five recorded runs each of a real model with and without the workspace's guidance. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
@@ -60,8 +60,9 @@ git config core.hooksPath .githooks
 | Whoever edits a page past its review date reviews it. | `freshness` check | Commit, CI |
 | An alias in the index names something the code still defines. | `aliases` check | Commit, CI |
 | A playbook, and the guidance tested with it, changes only with a new passing eval run. | `eval_record` check | Commit, CI |
-| No file holds a term from the maintainer's private deny list. | `deny_list` check | Commit, on a machine that has the list |
-| Files are staged by name, never all at once. | `no_stage_all` hook | Before a shell command |
+| No file, commit message, author or committer holds a term from the maintainer's private deny list. | `deny_list` check | Commit, on a machine that has the list |
+| A commit holds only files the agent session wrote. | `edit_ledger` check, against the paths the edit tools wrote | Commit, while an agent session has edits waiting |
+| Files are staged by name, never all at once. | `no_stage_all` hook, a reminder that never refuses | Before a shell command |
 | A shelved folder is not edited. | `shelved` hook | Before an edit |
 | A task handed to a helper names its tier, and runs at the model and effort the manifest binds to it. | `handoff_tier` hook | Before a helper starts |
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | The runner and `wslib/launch.sh` | Every hook call |
@@ -117,7 +118,8 @@ Add a part when the same mistake shows up twice.
 - **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, headings produced by HTML tags, or the second candidate in a `srcset`. It checks links inside HTML comments and indented code blocks, and it reads `a[0][1]` in prose as a reference link; put such text in backticks. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
 - **The checks prove that nothing is dangling. They cannot prove a page is true.** A page that contradicts last week's decision passes every one.
 - **The hooks are wired for one agent tool**, Claude Code ([.claude/settings.json](.claude/settings.json)), through one adapter. Another tool's payload is refused until it has an adapter in `wslib/events.py` and its own few lines of wiring. The wiring runs `wslib/launch.sh`, which needs a POSIX shell; on Windows that is the bash that comes with Git. When it finds no Python, or is missing itself, every call is refused.
-- **`no_stage_all` reads a command line; it does not run a shell.** It follows separators, new lines, subshells, `sh -c`, `eval` and common wrappers, and it skips heredoc bodies and quoted text. A command built by a script, held in a variable, hidden in an alias or piped into a shell gets past it, and it cannot tell that `git add src` names a whole folder. The eval's check on what was actually committed does not depend on it.
+- **`edit_ledger` knows only what the edit tools wrote.** The runner records each path an agent's edit tool is allowed to write, in a ledger kept inside the working copy's git folder. With no ledger open, as for a person's own commit, the commit is not compared. While one is open, a file a shell command or a generator wrote must be recorded by name, with `python3 ws.py ledger --add PATH`, and a person's own commit is refused until the agent commits its edits or the person runs `python3 ws.py ledger --close`. A commit closes the paths it holds through the post-commit hook. It guards against accidents: `git commit --no-verify` skips it, CI has no ledger to compare with, and during a merge, cherry-pick, revert or rebase it warns instead. See [decision 0002](docs/decisions/0002-hooks-remind-the-commit-enforces.md).
+- **`no_stage_all` reads a command line, and only reminds.** It follows separators, new lines, subshells, `sh -c`, `eval` and common wrappers, and it skips heredoc bodies and quoted text. A command built by a script, held in a variable, hidden in an alias or piped into a shell gets past it, and it cannot tell that `git add src` names a whole folder. When it fires, the agent sees the reminder next to the command's result, and the runner opens the edit ledger of the session's working copy. The eval's check on what was actually committed does not depend on it.
 - **`shelved` guards the edit tools only.** A shell command that writes into the folder, such as `sed -i` or `git mv`, does not pass through it. An edit through a symbolic link into the folder is refused, because the runner follows links; an edit through a hard link to one of its files is not.
 - **`handoff_tier` sees only the tool's delegation call.** It reads the tier from the first line of the prompt and compares the model and effort the task sets. A helper that runs at the caller's model whatever it sets, such as a fork of the session, gets past the model comparison, and a helper started some other way, such as from a script, is not seen at all.
 - **`aliases` is strict about its table and loose about what counts.** Each row needs exactly two columns, the second one plain name in backticks; a linked name or a second table under the heading is an error. Any definition of that name under `src/` satisfies it, including a method that happens to share the name.

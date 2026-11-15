@@ -43,6 +43,8 @@ The snapshot is the only way a check reads files. That is what lets one check ru
 
 A finding is an error unless it says `level="warning"`. An error fails the commit.
 
+A check that sets `COMMIT_MESSAGE = True` also runs from the commit-msg hook, `python3 ws.py check --message FILE`. Its snapshot then holds three files: `commit message`, `author` and `committer`, each identity as git will record it. `deny_list` is the one here.
+
 ## A hook
 
 A hook gets one event and returns `None` to allow it, or the reason to refuse.
@@ -71,11 +73,28 @@ There are three events. The event a hook's `decide` gets:
 - **The workspace's own shape**, with a version: `{"version": 1, "command": "git add a.md"}`, `{"version": 1, "path": "docs/a.md"}`, or `{"version": 1, "prompt": "Tier: worker ..."}`. It takes exactly the fields in the table, so a misspelt field is refused, not read as missing.
 - **An agent tool's own payload**, read by that tool's adapter in `wslib/events.py`: `python3 ws.py hook before-edit --tool claude-code`. A payload without the field its tool needs, or from a tool the adapter does not send to that event, is refused. With no `--tool`, a payload that is plainly Claude Code's is read by its adapter too. An agent tool keeps the hook wiring a session started with, so a running session with the older wiring is not locked out when the runner is upgraded under it.
 
-So a hook fails closed: whatever the runner cannot read, it refuses. Before a part sees a path, the runner follows symbolic links, and on a case-insensitive file system it treats a differently cased path to the workspace as inside it.
+So a hook fails closed: whatever the runner cannot read, it refuses.
+
+A hook that sets `MODE = "remind"` never refuses. When its `decide` returns a reason, the call goes ahead and the agent is shown the reason as a reminder: through Claude Code's `additionalContext`, next to the command's result, or as plain text on standard output for the workspace's own shape. Use it where the real check comes later, as `no_stage_all` does before the commit. Before a part sees a path, the runner follows symbolic links, and on a case-insensitive file system it treats a differently cased path to the workspace as inside it.
 
 [.claude/settings.json](../.claude/settings.json) wires the three events into one agent tool. Each line calls `wslib/launch.sh`, which runs `ws.py` with the first Python 3.9 or later it finds and exits 2 when there is none, and ends in `|| exit 2`, so a missing launcher refuses too. An agent tool blocks a call only on exit 2; anything else lets it through. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
 
 A hook call loads only the hooks for its event. It does not run any check, or any hook for the other event. So a check with a broken case cannot refuse a shell command or an edit, including the edit that repairs it. To know a part's kind without running it, the runner reads its `KIND` and `EVENT` lines. Write each as one plain line, such as `KIND = "hook"`. A part whose lines it cannot read refuses every hook call, because it might be a hook for that event. So does a missing part file, and a manifest it cannot read. Repair those from your own terminal, where the agent's hooks do not run. A hook call does not compare those lines with what the file sets when it runs; `check`, `selftest` and CI do, and refuse a part where they differ.
+
+## The edit ledger
+
+Each `before-edit` call that every hook allows is recorded: the runner appends the path to the edit ledger of the working copy that holds the file. The ledger is the file `ws-ledger` in that working copy's git folder, so a linked working copy keeps its own. An edit in a code repository under `src/` goes in the workspace's ledger. An edit outside every working copy of this repository is not recorded. If the ledger cannot be written, the edit is refused.
+
+While a ledger is open, the `edit_ledger` check fails a commit that stages a path no edit tool wrote, whatever command staged it. A `before-shell` reminder opens the ledger too, even empty, in the working copy where the agent tool says its session runs. So a session that wrote its files only through the shell is still compared. The workspace's own event shape names no folder, so trying the hook by hand opens nothing.
+
+| Command | Does |
+|---|---|
+| `python3 ws.py ledger` | Says whether the ledger is open, and lists its paths. |
+| `python3 ws.py ledger --add PATH ...` | Records files this session wrote another way, such as with a shell command or a generator. |
+| `python3 ws.py ledger --close` | Closes it, for a person's own commit. |
+| `python3 ws.py ledger --committed` | Drops the last commit's paths, and closes the ledger when none are left. The post-commit hook runs it. |
+
+[Decision 0002](decisions/0002-hooks-remind-the-commit-enforces.md) says why staging is checked at the commit.
 
 ## Cases
 
@@ -87,6 +106,8 @@ A check case gives files and the findings to expect. Every finding the check ret
 
 An expectation written as text is an error. A warning is expected by saying so, as `{"message": "...", "level": "warning"}`. So a check whose errors are demoted to warnings fails its own cases, and cannot quietly stop failing commits.
 
+A check that reads the commit's state takes it from the case: `"staged"` lists every staged path, deletions included (default: `"changed"`); `"ledger"` lists the edit ledger's paths, and leaving it out means no ledger is open; `"replaying"` names a merge or rebase in progress.
+
 A case runs with the settings in its own `config`, never with the manifest's. Changing a setting in the manifest therefore cannot fail a part's cases.
 
 A hook case gives an event and the answer.
@@ -95,11 +116,14 @@ A hook case gives an event and the answer.
 {"name": "plain listing is allowed", "event": {"command": "ls"}, "allow": true}
 ```
 
+A hook with `MODE = "remind"` states `"remind": true` or `"remind": false` instead of `"allow"`.
+
 The runner refuses to load:
 
 - a part with no cases file;
 - a check with no case in which it finds something;
-- a hook whose cases do not show it both allowing and refusing;
+- a hook whose cases do not show it both allowing and refusing, or, for a reminder, both reminding and staying quiet;
+- a hook whose `MODE` is neither `"refuse"` nor `"remind"`;
 - a hook whose `EVENT` is not one the runner knows;
 - a part whose `KIND` or `EVENT` line is missing, repeated, or differs from what the file sets when it runs;
 - a part whose file is outside the workspace, through `..`, an absolute path or a symbolic link;
@@ -137,7 +161,8 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `freshness` | check | A commit edits a page that is past its review date. |
 | `aliases` | check | The index maps a phrase to a name the code no longer defines. |
 | `eval_record` | check | A playbook, its guidance or its eval case changed since the last passing eval run, or a playbook has no case. |
-| `deny_list` | check | A file or file name holds a term from a private list kept outside the repository. With no list it warns and checks nothing, so CI cannot run it. |
-| `no_stage_all` | hook, before-shell | A command stages everything instead of naming files. |
+| `deny_list` | check | A file or file name holds a term from a private list kept outside the repository, and so, from the commit-msg hook, does the commit message, the author or the committer. With no list it warns and checks nothing, so CI cannot run it. |
+| `edit_ledger` | check | While the edit ledger is open, a commit stages a path that no edit tool of the agent session wrote. |
+| `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |
 | `handoff_tier` | hook, before-handoff | A delegated task names no tier on its first line, or sets a model or effort other than the manifest's binding for its tier, or leaves one unset that the tool lets it set. |
