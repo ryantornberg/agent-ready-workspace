@@ -23,9 +23,11 @@ python3 -m unittest discover -b tests
 Then watch it refuse something:
 
 ```
-echo '{"command": "git add -A"}' | python3 ws.py hook before-shell     # refused, exit 2
-echo '{"path": "src/orders-service-v1/OrderService.cs"}' | python3 ws.py hook before-edit
-python3 tools/symbols.py ReconciliationWorker src                      # file and line
+echo '{"version": 1, "command": "git add -A"}' | python3 ws.py hook before-shell    # refused, exit 2
+echo '{"version": 1, "path": "src/orders-service-v1/OrderService.cs"}' | python3 ws.py hook before-edit
+echo '{"version": 1, "prompt": "List every caller."}' | python3 ws.py hook before-handoff   # names no tier
+echo '{"command": "ls"}' | python3 ws.py hook before-shell                # no version: refused, it fails closed
+python3 tools/symbols.py ReconciliationWorker src                         # file and line
 ```
 
 Rename the class in `src/orders-api/ReconciliationWorker.cs` and `python3 ws.py check` fails, because the index still sends agents to the old name. Edit `docs/playbooks/fix-a-bug.md` and it fails again, because the playbook no longer matches its last passing eval run. Both changes are easy to undo with `git checkout`.
@@ -44,7 +46,7 @@ git config core.hooksPath .githooks
 | [INDEX.md](INDEX.md) | Topics, and a table that maps everyday words to the names the code uses. |
 | [workspace.json](workspace.json) | The manifest: which parts this workspace runs, and their settings. |
 | `ws.py`, `wslib/` | The runner and the small core the parts plug into. |
-| [parts/](docs/parts.md) | Five checks and two hooks, each one file plus its cases. |
+| [parts/](docs/parts.md) | Five checks and three hooks, each one file plus its cases. |
 | [docs/](docs/definition-of-done.md) | The definition of done, one playbook, one decision record, the question log, the orchestration rules, and the templates and plan for the current milestone. |
 | [evals/](evals/README.md) | One eval case, a broken sample repository, and five recorded runs each of a real model with and without the workspace's guidance. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
@@ -61,6 +63,8 @@ git config core.hooksPath .githooks
 | No file holds a term from the maintainer's private deny list. | `deny_list` check | Commit, on a machine that has the list |
 | Files are staged by name, never all at once. | `no_stage_all` hook | Before a shell command |
 | A shelved folder is not edited. | `shelved` hook | Before an edit |
+| A task handed to a helper names its tier, and runs at the model and effort the manifest binds to it. | `handoff_tier` hook | Before a helper starts |
+| A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | The runner and `wslib/launch.sh` | Every hook call |
 | A part's own cases pass, at the level each finding states. | The runner | Every command that loads the part. A hook call loads only the hooks for its event. |
 | A part leaves the manifest only when it is retired with a reason. | The runner | Commit, CI |
 
@@ -112,9 +116,10 @@ Add a part when the same mistake shows up twice.
 - **`symbols.py` reads C#, TypeScript and JavaScript one line at a time.** It finds types, methods, constructors, properties, functions and constants declared on one line in the usual style. It is a lookup for names you already know, not a parser. It misses a declaration split across lines or behind an attribute; C# fields, events, delegates, indexers and operators; TypeScript class fields, getters, one-line method bodies and CommonJS exports; Python module-level constants; and anything generated at build time. It can report a declaration that sits inside a multi-line string.
 - **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, headings produced by HTML tags, or the second candidate in a `srcset`. It checks links inside HTML comments and indented code blocks, and it reads `a[0][1]` in prose as a reference link; put such text in backticks. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
 - **The checks prove that nothing is dangling. They cannot prove a page is true.** A page that contradicts last week's decision passes every one.
-- **The hooks are wired for one agent tool** ([.claude/settings.json](.claude/settings.json)), and that wiring calls `python3`, which a stock Windows machine may not have. The parts do not depend on it; another tool needs a few lines to call `ws.py hook`.
+- **The hooks are wired for one agent tool**, Claude Code ([.claude/settings.json](.claude/settings.json)), through one adapter. Another tool's payload is refused until it has an adapter in `wslib/events.py` and its own few lines of wiring. The wiring runs `wslib/launch.sh`, which needs a POSIX shell; on Windows that is the bash that comes with Git. When it finds no Python, or is missing itself, every call is refused.
 - **`no_stage_all` reads a command line; it does not run a shell.** It follows separators, new lines, subshells, `sh -c`, `eval` and common wrappers, and it skips heredoc bodies and quoted text. A command built by a script, held in a variable, hidden in an alias or piped into a shell gets past it, and it cannot tell that `git add src` names a whole folder. The eval's check on what was actually committed does not depend on it.
-- **`shelved` guards the edit tools only.** A shell command that writes into the folder, such as `sed -i` or `git mv`, does not pass through it, and neither does an edit through a symbolic link that points into it.
+- **`shelved` guards the edit tools only.** A shell command that writes into the folder, such as `sed -i` or `git mv`, does not pass through it. An edit through a symbolic link into the folder is refused, because the runner follows links; an edit through a hard link to one of its files is not.
+- **`handoff_tier` sees only the tool's delegation call.** It reads the tier from the first line of the prompt and compares the model and effort the task sets. A helper that runs at the caller's model whatever it sets, such as a fork of the session, gets past the model comparison, and a helper started some other way, such as from a script, is not seen at all.
 - **`aliases` is strict about its table and loose about what counts.** Each row needs exactly two columns, the second one plain name in backticks; a linked name or a second table under the heading is an error. Any definition of that name under `src/` satisfies it, including a method that happens to share the name.
 - **The commit check reads a submodule from its checkout on disk**, not from the commit the index pins. Run `git submodule update` before committing a pin change, and initialise submodules before the first check.
 - **`eval_record` trusts the record file.** It shows that someone ran the case on the current wording. It cannot stop a person from editing the record by hand. Changing a playbook's wording means running the eval again, which needs the agent tool and costs a few cents; moving its review date does not.
