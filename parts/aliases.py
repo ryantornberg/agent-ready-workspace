@@ -8,9 +8,17 @@ Each row's second column holds one simple name in backticks, such as
 A constructor does not count as a definition: rename a class and leave its
 constructor behind, and the alias is still dangling.
 
+The contract pages named in "contract", such as AGENTS.md, are held to the
+same rule: a name in backticks there must still be defined. Only names that
+read as code are taken: one word of letters and digits that mixes upper and
+lower case, such as `AccountFreeze` or `quarterlyExport`. A word in one case,
+such as `main` or `KIND`, a name with an underscore, a path and a command are
+left alone, because a contract names branches, settings and commands too.
+
 Config: "index" (default INDEX.md), "heading" (default "Search aliases"),
 "code" (default src): the folder the names must be defined under;
-"exclude": folders under it that do not count, such as shelved code.
+"exclude": folders under it that do not count, such as shelved code;
+"contract": pages whose backticked code names must be defined (default none).
 """
 import re
 
@@ -19,6 +27,16 @@ from wslib.parts import finding
 
 KIND = "check"
 NAME = re.compile(r"^`([A-Za-z_$][\w$]*)`$")
+SPAN = re.compile(r"(?<!`)`([A-Za-z][A-Za-z0-9]*)`(?!`)")
+
+
+def code_names(text):
+    """(line, name) for each backticked name in a page's prose that reads as code: mixed case, letters and digits."""
+    for number, line in markdown.prose_lines(text):
+        for match in SPAN.finditer(line):
+            name = match.group(1)
+            if name != name.lower() and name != name.upper():
+                yield number, name
 
 
 def run(snapshot, config):
@@ -27,9 +45,11 @@ def run(snapshot, config):
     code = config.get("code", "src")
     excluded = tuple(folder.strip("/") + "/" for folder in config.get("exclude", ()))
 
-    text = snapshot.read(index) if snapshot.is_file(index) else None
-    if text is None:
+    if not snapshot.is_file(index):
         return [finding(index, 1, "the index is missing, so its aliases cannot be checked")]
+    text = snapshot.read(index)
+    if text is None:
+        return [finding(index, 1, f"the index {snapshot.not_utf8(index)}, so its aliases cannot be checked")]
 
     found, rows, inside, header_seen = [], [], False, False
     for number, line in markdown.prose_lines(text):
@@ -55,4 +75,15 @@ def run(snapshot, config):
                if kind != "constructor" and not path.startswith(excluded)}
     found.extend(finding(index, number, f"alias points at {name}, which is not defined under {code}/")
                  for number, name in rows if name not in defined)
+
+    for page in config.get("contract", ()):
+        if not snapshot.is_file(page):
+            found.append(finding(page, 1, "the contract page is missing, so its names cannot be checked"))
+            continue
+        text = snapshot.read(page)
+        if text is None:
+            found.append(finding(page, 1, f"the contract page {snapshot.not_utf8(page)}, so its names cannot be checked"))
+            continue
+        found.extend(finding(page, number, f"the contract names {name}, which is not defined under {code}/")
+                     for number, name in code_names(text) if name not in defined)
     return found

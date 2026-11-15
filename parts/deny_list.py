@@ -28,8 +28,9 @@ Every file in the snapshot is read, whatever its encoding. Text is normalised
 bytes removed is also scanned, which catches UTF-16 with no byte-order mark.
 
 Limits: compressed or encrypted files are not opened. A list holding only
-"re:" entries does not match itself if committed. The snapshot skips
-node_modules, .venv and __pycache__ folders.
+"re:" entries does not match itself if committed. The working-folder check
+does not read an untracked file that git ignores, or one under node_modules,
+.venv or __pycache__; a tracked or staged file there is read.
 
 Config, for cases only, and refused anywhere else: "terms": the list's lines;
 "list": a path to read instead, "" meaning no list. The manifest is public:

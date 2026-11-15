@@ -1,3 +1,7 @@
+---
+last-reviewed: 2026-11-15
+---
+
 # Agent contract
 
 The rules every coding agent reads before it works here, whichever tool it runs in. The team and its order system are invented; replace the facts with your own and keep the shape.

@@ -28,7 +28,8 @@ A check case:  {"name", "files": {path: text}, "changed": [paths], "config": {},
                Each expectation is text in an error, or {"message": text, "level": "warning"}.
                "expect": [] means the case must produce no findings. Every finding must be expected.
                For the commit's own state, a case may also give "staged": [paths], "ledger": [paths]
-               and "replaying": text (see wslib/snapshot.py).
+               and "replaying": text; "repositories": [folders] names code repositories, and
+               "symlinks": [paths] names symbolic links (see wslib/snapshot.py).
 A hook case:   {"name", "event": {...}, "config": {}, "allow": true|false}
                A hook with MODE = "remind" states "remind": true|false instead of "allow".
 
@@ -100,7 +101,8 @@ class Part:
             try:
                 if self.kind == "check":
                     memory = snapshots.Memory(case["files"], case.get("changed", ()), case.get("staged"),
-                                              case.get("ledger"), case.get("replaying"))
+                                              case.get("ledger"), case.get("replaying"), case.get("repositories", ()),
+                                              case.get("symlinks", ()))
                     got = [(f["message"], f["level"]) for f in self.run(memory, config)]
                     want = [_expected(item) for item in case["expect"]]
                     missing = [f"{text} ({level})" for text, level in want
@@ -193,7 +195,8 @@ def _read_cases(name, kind, cases_file, text, mode="refuse"):
                 and all(isinstance(item, str) or (isinstance(item, dict) and set(item) == {"message", "level"}
                                                   and isinstance(item["message"], str) and item["level"] in LEVELS)
                         for item in case["expect"])
-            well_formed = well_formed and all(isinstance(case.get(key, []), list) for key in ("staged", "ledger")) \
+            well_formed = well_formed and all(isinstance(case.get(key, []), list)
+                                              for key in ("staged", "ledger", "repositories", "symlinks")) \
                 and isinstance(case.get("replaying", ""), str)
         else:
             answer, other = ("allow", "remind") if mode == "refuse" else ("remind", "allow")
@@ -325,10 +328,17 @@ def required_parts(root, ref=None):
         shown = _git(root, "show", f"{ref}:./{MANIFEST}")
     except RuntimeError as error:
         return set(), f"cannot read the manifest at {ref}: {error}"
+    return required_from(shown.stdout, ref)
+
+
+def required_from(data, where):
+    """The part names in a manifest's bytes, as (names, problem). None, for no manifest there, requires nothing."""
+    if data is None:
+        return set(), None
     try:
-        return used_names(shown.stdout.decode("utf-8-sig")), None
+        return used_names(data.decode("utf-8-sig")), None
     except (ValueError, UnicodeDecodeError) as error:
-        return set(), f"cannot read the part names in the manifest at {ref}: {error}"
+        return set(), f"cannot read the part names in the manifest at {where}: {error}"
 
 
 def dropped_parts(manifest, required, where):

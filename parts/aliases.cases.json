@@ -91,5 +91,36 @@
     "expect": [
       "alias points at AccountFreeze"
     ]
+  },
+  {
+    "name": "a code name in the contract that the code no longer defines fails; other backticked words do not",
+    "files": {
+      "INDEX.md": "## Search aliases\n\n| You say | The code says |\n|---|---|\n| a hold | `AccountFreeze` |\n",
+      "AGENTS.md": "# Contract\n\n`src/orders-api` is live. A hold means `AccountFreeze`. The nightly job is `ReconciliationWorker`.\nPush to `main`; set `KIND` and `max_age_days`; run `git add -A` never.\n\n```\n`NotChecked` inside a fence\n```\n",
+      "src/api/Freeze.cs": "public class AccountFreeze { }\n"
+    },
+    "config": {
+      "contract": [
+        "AGENTS.md"
+      ]
+    },
+    "expect": [
+      "the contract names ReconciliationWorker, which is not defined under src/"
+    ]
+  },
+  {
+    "name": "a contract page that is missing is an error",
+    "files": {
+      "INDEX.md": "## Search aliases\n\n| You say | The code says |\n|---|---|\n| a hold | `AccountFreeze` |\n",
+      "src/api/Freeze.cs": "public class AccountFreeze { }\n"
+    },
+    "config": {
+      "contract": [
+        "AGENTS.md"
+      ]
+    },
+    "expect": [
+      "the contract page is missing"
+    ]
   }
 ]

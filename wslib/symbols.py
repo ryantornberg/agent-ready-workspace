@@ -117,7 +117,7 @@ def scan(snapshot, under=""):
         relative = path[len(under.strip("/")) + 1:] if under.strip("/") else path
         if any(("/" + relative).find("/" + skip) >= 0 for skip in SKIP_DIRS):
             continue
-        text = snapshot.read(path)
+        text = snapshot.read_text(path)   # code in Windows-1252 or UTF-16 is read too
         if text is None:
             continue
         for line, kind, name in symbols_in(path, text):

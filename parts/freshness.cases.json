@@ -8,7 +8,10 @@
       "today": "2026-06-30"
     },
     "expect": [
-      {"message": "last reviewed 2025-01-01, more than 180 days ago", "level": "warning"}
+      {
+        "message": "last reviewed 2025-01-01, more than 180 days ago",
+        "level": "warning"
+      }
     ]
   },
   {
@@ -125,6 +128,67 @@
     },
     "expect": [
       "last-reviewed is not a date: 20200101"
+    ]
+  },
+  {
+    "name": "a page named in require must carry a date, like a folder's pages",
+    "files": {
+      "AGENTS.md": "# Agent contract\n",
+      "INDEX.md": "# Index\n",
+      "README.md": "# Readme\n"
+    },
+    "config": {
+      "require": [
+        "AGENTS.md",
+        "INDEX.md"
+      ],
+      "today": "2026-06-30"
+    },
+    "expect": [
+      "no last-reviewed date; pages here must carry one",
+      "no last-reviewed date; pages here must carry one"
+    ]
+  },
+  {
+    "name": "a date one day ahead of today in UTC passes, two days ahead fails",
+    "files": {
+      "ahead.md": "---\nlast-reviewed: 2026-07-01\n---\n# Ahead\n",
+      "far.md": "---\nlast-reviewed: 2026-07-02\n---\n# Far\n"
+    },
+    "config": {
+      "today": "2026-06-30"
+    },
+    "expect": [
+      "last-reviewed 2026-07-02 is in the future"
+    ]
+  },
+  {
+    "name": "pages inside a code repository and symbolic links are not read",
+    "files": {
+      "docs/a.md": "---\nlast-reviewed: 2026-06-01\n---\n# A\n",
+      "docs/link.md": "a.md",
+      "src/product/docs/old.md": "---\nlast-reviewed: 2001-01-01\n---\n# Old\n",
+      "src/product/docs/plain.md": "# Plain\n",
+      "docs/plain.md": "# Plain\n"
+    },
+    "changed": [
+      "src/product/docs/old.md"
+    ],
+    "repositories": [
+      "src/product"
+    ],
+    "symlinks": [
+      "docs/link.md"
+    ],
+    "config": {
+      "require": [
+        "docs",
+        "src"
+      ],
+      "today": "2026-06-30"
+    },
+    "expect": [
+      "no last-reviewed date; pages here must carry one"
     ]
   }
 ]
