@@ -23,7 +23,7 @@ A command line does not hold the answer. The commit does: it holds exactly the p
 - **The runner records each path an edit tool is allowed to write**, in a ledger for the working copy that holds the file, inside its git folder.
 - **The commit check compares.** While a ledger is open, a staged path that no edit tool wrote fails the `edit_ledger` check. This covers every way of staging, including `git commit -a` and a script.
 - **A commit closes what it holds.** The post-commit hook removes the committed paths from the ledger, and deletes the ledger when it is empty. With no ledger, as for a person's own commit, nothing is compared.
-- **The shell hook reminds.** `no_stage_all` still reads the command line. When it sees a command that stages everything, the agent is told so next to the command's result, and the call goes ahead. The runner also opens the ledger at that moment, even empty, so a session that wrote its files only through the shell still has its commit compared.
+- **The shell hook reminds.** `no_stage_all` still reads the command line. When it sees a command that stages everything, the agent is told so next to the command's result, and the call goes ahead. The runner also opens the ledger at that moment, even empty, when the session's working copy has uncommitted changes. So a session that wrote its files only through the shell still has its commit compared.
 - **A file written another way is named.** A file a shell command or a generator wrote is recorded with `python3 ws.py ledger --add PATH`. Naming it is the same act as staging it by name.
 
 ## What it gave up
@@ -31,7 +31,7 @@ A command line does not hold the answer. The commit does: it holds exactly the p
 - **A refusal before the damage.** The index can hold another session's edits for a moment, until the commit is refused and the agent unstages them. Nothing reaches the history.
 - **One more step for shell-written files.** An agent that writes a file with a heredoc and then commits it must record it first. The refusal says how.
 - **A person can be refused.** While an agent's edits wait uncommitted, a person's own commit in the same working copy is compared too. The refusal says how to close the ledger.
-- **A reminder can open the wrong ledger.** The agent tool reports the folder the session started in, not the folder a command moves to. So `cd` into a scratch repository and `git add .` opens the ledger of the session's own working copy, empty, until the agent commits there or a person closes it.
+- **A reminder can open the wrong ledger.** The agent tool reports the folder the session started in, not the folder a command moves to. So `cd` into a scratch repository and `git add .` can open the ledger of the session's own working copy, empty, until the agent commits there or a person closes it. It opens only when that working copy has uncommitted changes: a clean one has nothing of anyone's to sweep.
 - **It stops accidents, not intent.** `git commit --no-verify`, or closing the ledger by hand, gets past it. CI cannot run it, because CI has no ledger.
 
 ## Options rejected
