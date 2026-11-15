@@ -9,6 +9,10 @@
     python3 ws.py hook before-shell          # decide one event, read as JSON on standard input
 
 Every command but selftest runs each part's cases as it loads the part, and refuses a part with a failing case.
+A hook call loads only the hooks for its event, so a broken check cannot refuse a shell command or an edit.
+The commit check reads the staged manifest, parts and cases. A part an older manifest used must still be
+used, or be listed under "retired" with a reason: the last commit's manifest decides locally, and the base
+commit's manifest in CI.
 
 Exit codes: 0 clean; 1 a check found an error or a case failed; 2 a hook refused, or the setup is
 wrong. A hook that cannot decide exits 2 as well: it fails closed.
@@ -44,28 +48,46 @@ def command_selftest(root, _args):
 
 
 def command_check(root, args):
-    manifest = None
     if args.staged:
+        # The commit decides: its manifest, its parts and their cases, not the files on disk.
         snapshot = snapshots.Index(root)
-        if snapshot.is_file("workspace.json"):  # the manifest being committed decides, not the one on disk
-            manifest = partlib.parse_manifest(snapshot.read("workspace.json") or "", "staged workspace.json")
+        if not snapshot.is_file(partlib.MANIFEST):
+            raise partlib.PartError(f"no {partlib.MANIFEST} is staged, so the commit cannot be checked")
+        manifest = partlib.parse_manifest(snapshot.read(partlib.MANIFEST) or "", f"staged {partlib.MANIFEST}")
+        parts = partlib.load_all(root, manifest, snapshot=snapshot)
+        required, problem = partlib.required_parts(root)
+        where = "the last commit"
     else:
+        manifest = partlib.load_manifest(root)
         snapshot = snapshots.Tree(root, args.changed)
+        required, problem = partlib.required_parts(root)
+        where = "the last commit"
         if args.changed_from is not None:
-            since, problem = snapshots.changed_since(root, args.changed_from)
-            if problem:
+            since, changed_problem = snapshots.changed_since(root, args.changed_from)
+            if changed_problem:
                 # Fail closed: with nothing to compare against, every file counts as changed.
-                print(f"warning: {problem}; every file is treated as changed")
+                print(f"warning: {changed_problem}; every file is treated as changed")
                 since = list(snapshot.paths())
             snapshot = snapshots.Tree(root, list(args.changed) + since)
+            if not args.changed_from or set(args.changed_from) == {"0"}:
+                required, problem = set(), None
+                print("warning: no base commit, so no part is required to stay in the manifest")
+            else:
+                required, problem = partlib.required_parts(root, args.changed_from)
+                where = args.changed_from
+        parts = partlib.load_all(root, manifest)
 
+    findings = [(found, "runner") for found in partlib.dropped_parts(manifest, required, where)]
+    if problem:
+        # Fail closed: the parts that must stay cannot be known.
+        findings.append((partlib.finding(partlib.MANIFEST, 1, f"{problem}, so the required parts are unknown"), "runner"))
+    for part in parts:
+        if part.kind == "check":
+            findings += [(found, part.name) for found in part.run(snapshot)]
     errors = 0
-    for part in partlib.load_all(root, manifest):
-        if part.kind != "check":
-            continue
-        for found in part.run(snapshot):
-            errors += found["level"] == "error"
-            print(f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{part.name}]")
+    for found, by in findings:
+        errors += found["level"] == "error"
+        print(f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{by}]")
     if errors:
         print(f"\n{errors} error(s).")
     return 1 if errors else 0
@@ -97,13 +119,18 @@ def read_event(root, stream):
 def command_hook(root, args):
     if args.event not in partlib.EVENTS:
         raise partlib.PartError(f"unknown event {args.event!r}; the events are {partlib.EVENTS}")
+    try:
+        manifest = partlib.load_manifest(root)
+    except partlib.PartError as error:
+        raise partlib.PartError(f"{error}. Every hook call is refused until the manifest is repaired. "
+                                "Repair it from your own terminal, where the agent's hooks do not run.")
+    hooks = partlib.load_hooks(root, args.event, manifest)   # only this event's hooks: a broken check cannot lock it
     event = read_event(root, sys.stdin)
-    for part in partlib.load_all(root):
-        if part.kind == "hook" and part.event == args.event:
-            reason = part.decide(event)
-            if reason is not None:
-                print(f"Refused by {part.name}: {reason}", file=sys.stderr)
-                return 2
+    for part in hooks:
+        reason = part.decide(event)
+        if reason is not None:
+            print(f"Refused by {part.name}: {reason}", file=sys.stderr)
+            return 2
     return 0
 
 

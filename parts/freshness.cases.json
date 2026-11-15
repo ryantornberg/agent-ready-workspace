@@ -8,7 +8,7 @@
       "today": "2026-06-30"
     },
     "expect": [
-      "last reviewed 2025-01-01, more than 180 days ago"
+      {"message": "last reviewed 2025-01-01, more than 180 days ago", "level": "warning"}
     ]
   },
   {

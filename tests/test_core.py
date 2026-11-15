@@ -153,7 +153,7 @@ class LoaderTests(Folder):
     def test_a_failing_case_is_reported_by_name(self):
         part = self.part("never", 'KIND = "check"\ndef run(snapshot, config):\n    return []\n',
                          [{"name": "should find it", "files": {"a.md": "x"}, "expect": ["something"]}])
-        self.assertEqual(part.failed_cases(), ["should find it: missing ['something'], unexpected []"])
+        self.assertEqual(part.failed_cases(), ["should find it: missing ['something (error)'], unexpected []"])
 
     def test_a_case_that_crashes_the_part_is_a_failed_case(self):
         part = self.part("boom", 'KIND = "check"\ndef run(snapshot, config):\n    raise ValueError("no")\n',
@@ -290,6 +290,212 @@ class RunnerTests(Folder):
         self.assertEqual(code, 2)
         self.assertIn("refused, it has no cases file", output)
         self.assertEqual(self.ws("hook", "before-shell", stdin="not json")[0], 2)
+
+
+class NoSelfLockTests(Folder):
+    """M1 slice 2: a broken part cannot lock the session that repairs it, and the checks cannot be quietly switched off."""
+
+    def break_cases(self, name):
+        cases = json.loads((self.root / f"parts/{name}.cases.json").read_text(encoding="utf-8"))
+        if "files" in cases[0]:
+            cases[0]["expect"] = ["a finding no part ever returns"]
+        else:
+            cases[0]["allow"] = not cases[0]["allow"]
+        self.write(f"parts/{name}.cases.json", json.dumps(cases))
+
+    def commit(self, message="base"):
+        self.git("add", "--", *[p.relative_to(self.root).as_posix() for p in self.root.rglob("*")
+                                if p.is_file() and ".git" not in p.parts])
+        self.git("commit", "-q", "-m", message)
+        return self.git("rev-parse", "HEAD").stdout.strip()
+
+    # Criterion 1
+    def test_changing_a_documented_setting_leaves_the_parts_own_cases_passing(self):
+        settings = [("freshness", {"max_age_days": 1}), ("freshness", {"require": ["docs", "notes"]}),
+                    ("freshness", {"skip": ["docs"]}), ("aliases", {"code": "lib"}), ("aliases", {"heading": "Words"}),
+                    ("aliases", {"index": "docs/INDEX.md"}), ("aliases", {"exclude": ["src/api"]}),
+                    ("links", {"skip": ["docs"]}), ("eval_record", {"playbooks": "docs"}),
+                    ("eval_record", {"cases": "tests/cases"}), ("shelved", {"paths": []})]
+        for name, setting in settings:
+            with self.subTest(part=name, setting=setting):
+                self.workspace({"use": name, **setting})
+                code, output = self.ws("list")
+                self.assertEqual(code, 0, output)
+
+    # Criterion 2
+    def test_a_broken_check_case_does_not_lock_the_hooks(self):
+        self.workspace({"use": "links"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        self.break_cases("links")
+        code, output = self.ws("hook", "before-shell", stdin='{"command": "ls"}')
+        self.assertEqual(code, 0, output)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": "parts/links.cases.json"}')[0], 0)
+        self.assertEqual(self.ws("selftest")[0], 1)
+        self.assertNotEqual(self.ws("check")[0], 0)
+
+    def test_a_broken_hook_case_refuses_its_own_event_only(self):
+        self.workspace({"use": "links"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        self.break_cases("no_stage_all")
+        code, output = self.ws("hook", "before-shell", stdin='{"command": "ls"}')
+        self.assertEqual(code, 2)
+        self.assertIn("no_stage_all", output)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"path": "parts/no_stage_all.cases.json"}')[0], 0)
+
+    def test_a_check_that_will_not_even_import_does_not_lock_the_hooks(self):
+        self.workspace({"use": "links"}, {"use": "no_stage_all"})
+        self.write("parts/links.py", (ROOT / "parts/links.py").read_text(encoding="utf-8") + "\ndef broken(:\n")
+        self.assertEqual(self.ws("hook", "before-shell", stdin='{"command": "ls"}')[0], 0)
+        self.assertEqual(self.ws("check")[0], 2)
+
+    def test_a_part_whose_kind_cannot_be_read_without_running_it_fails_closed(self):
+        self.workspace({"use": "links"}, {"use": "no_stage_all"})
+        source = (ROOT / "parts/no_stage_all.py").read_text(encoding="utf-8")
+        for body in (source.replace('KIND = "hook"', 'KIND = "ho" + "ok"'),         # computed: unreadable
+                     source.replace('KIND = "hook"', 'KIND = "check"\nKIND = "hook"'),  # declared twice
+                     None):                                                         # file missing
+            with self.subTest(body=body and body[:0]):
+                if body is None:
+                    (self.root / "parts/no_stage_all.py").unlink()
+                else:
+                    self.write("parts/no_stage_all.py", body)
+                self.assertEqual(self.ws("hook", "before-shell", stdin='{"command": "git add -A"}')[0], 2)
+                self.assertEqual(self.ws("hook", "before-shell", stdin='{"command": "ls"}')[0], 2)
+
+    def test_a_declared_kind_that_differs_from_the_running_one_is_refused(self):
+        self.workspace({"use": "no_stage_all"})
+        source = (ROOT / "parts/no_stage_all.py").read_text(encoding="utf-8")
+        self.write("parts/no_stage_all.py", source + '\nglobals()["KIND"] = "check"\n')
+        code, output = self.ws("selftest")
+        self.assertNotEqual(code, 0)
+        self.assertIn("declares", output)
+
+    # Criterion 3
+    def test_a_half_written_manifest_refuses_every_hook_call_and_names_the_manifest(self):
+        self.workspace({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        self.write("workspace.json", '{"parts": [{"use": "no_stage_all"}, {"use": "she')
+        for event, payload in (("before-shell", '{"command": "ls"}'), ("before-edit", '{"path": "workspace.json"}')):
+            code, output = self.ws("hook", event, stdin=payload)
+            self.assertEqual(code, 2, event)
+            self.assertIn("workspace.json", output)
+            self.assertIn("your own terminal", output)
+
+    # Criterion 4
+    def test_a_part_outside_the_workspace_is_refused(self):
+        outside = self.root.parent / f"{self.root.name}-outside"
+        outside.mkdir()
+        self.addCleanup(lambda: __import__("shutil").rmtree(outside))
+        (outside / "sneaky.py").write_text('KIND = "check"\ndef run(snapshot, config):\n    return []\n', encoding="utf-8")
+        (outside / "sneaky.cases.json").write_text('[{"name": "c", "files": {}, "expect": ["x"]}]', encoding="utf-8")
+        for use in (f"../{outside.name}/sneaky.py", str(outside / "sneaky.py")):
+            with self.subTest(use=use):
+                self.write("workspace.json", json.dumps({"parts": [{"use": use}]}))
+                code, output = self.ws("list")
+                self.assertEqual(code, 2)
+                self.assertIn("outside the workspace", output)
+        try:
+            (self.root / "parts").mkdir(exist_ok=True)
+            (self.root / "parts/linked.py").symlink_to(outside / "sneaky.py")
+        except OSError:
+            self.skipTest("symlinks are not available here")
+        self.write("workspace.json", json.dumps({"parts": [{"use": "linked"}]}))
+        code, output = self.ws("list")
+        self.assertEqual(code, 2)
+        self.assertIn("outside the workspace", output)
+
+    # Criterion 5
+    def test_a_check_demoted_to_warnings_fails_its_own_cases(self):
+        self.workspace({"use": "links"})
+        source = (ROOT / "parts/links.py").read_text(encoding="utf-8").replace(
+            "from wslib.parts import finding\n",
+            "from wslib.parts import finding as _finding\n\n\ndef finding(path, line, message, level='error'):\n"
+            "    return _finding(path, line, message, level='warning')\n")
+        self.write("parts/links.py", source)
+        code, output = self.ws("selftest")
+        self.assertEqual(code, 1)
+        self.assertIn("(error)", output)
+
+    def test_a_case_states_the_level_it_expects(self):
+        self.write("parts/warns.py", 'from wslib.parts import finding\nKIND = "check"\n'
+                   'def run(snapshot, config):\n    return [finding("a.md", 1, "soft", level="warning")]\n')
+        self.write("workspace.json", json.dumps({"parts": [{"use": "warns"}]}))
+        self.write("parts/warns.cases.json", json.dumps([{"name": "w", "files": {}, "expect": [{"message": "soft", "level": "warning"}]}]))
+        self.assertEqual(self.ws("selftest")[0], 0)
+        self.write("parts/warns.cases.json", json.dumps([{"name": "w", "files": {}, "expect": ["soft"]}]))
+        self.assertEqual(self.ws("selftest")[0], 1)
+        self.write("parts/warns.cases.json", json.dumps([{"name": "w", "files": {}, "expect": [{"message": "soft", "level": "loud"}]}]))
+        self.assertEqual(self.ws("selftest")[0], 2)
+
+    def test_a_finding_with_an_unknown_level_is_an_error_not_a_quiet_pass(self):
+        self.write("parts/odd.py", 'KIND = "check"\ndef run(snapshot, config):\n'
+                   '    return [{"path": "a.md", "line": 1, "message": "x", "level": "Error"}]\n')
+        self.write("parts/odd.cases.json", json.dumps([{"name": "c", "files": {}, "expect": ["x"]}]))
+        self.write("workspace.json", json.dumps({"parts": [{"use": "odd"}]}))
+        self.assertEqual(self.ws("check")[0], 2)
+
+    def test_the_repository_cases_state_every_warning_they_expect(self):
+        cases = json.loads((ROOT / "parts/freshness.cases.json").read_text(encoding="utf-8"))
+        stale = next(c for c in cases if c["name"].startswith("a stale page nobody edited"))
+        self.assertEqual([e["level"] for e in stale["expect"]], ["warning"])
+
+    # Criterion 6
+    def test_a_manifest_that_drops_a_part_fails_locally_unless_it_is_retired(self):
+        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.git("init", "-q")
+        self.commit()
+        self.write("workspace.json", json.dumps({"parts": [{"use": "links"}]}))
+        code, output = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn("freshness", output)
+        self.git("add", "workspace.json")
+        self.assertEqual(self.ws("check", "--staged")[0], 1)
+        self.write("workspace.json", json.dumps({"parts": [{"use": "links"}],
+                                                 "retired": [{"use": "freshness", "why": "no dated pages here"}]}))
+        self.git("add", "workspace.json")
+        self.assertEqual(self.ws("check")[0], 0)
+        self.assertEqual(self.ws("check", "--staged")[0], 0)
+        for retired in ([{"use": "freshness", "why": ""}], [{"use": "freshness"}], ["freshness"]):
+            self.write("workspace.json", json.dumps({"parts": [{"use": "links"}], "retired": retired}))
+            self.assertEqual(self.ws("check")[0], 2, retired)
+
+    def test_ci_requires_the_parts_of_the_base_branch(self):
+        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.git("init", "-q")
+        base = self.commit()
+        self.write("workspace.json", json.dumps({"parts": [{"use": "links"}]}))
+        self.commit("drop freshness")
+        code, output = self.ws("check", "--changed-from", base)
+        self.assertEqual(code, 1)
+        self.assertIn("freshness", output)
+
+    def test_only_part_names_are_read_from_the_older_manifest(self):
+        self.workspace({"use": "links"})
+        self.write("workspace.json", json.dumps({"parts": [{"use": "links", "legacy": 1}, "junk", {"nouse": 1}], "zzz": 1}))
+        self.git("init", "-q")
+        base = self.commit()
+        self.write("workspace.json", json.dumps({"tiers": {}, "parts": [{"use": "links", "newer": True}]}))
+        self.commit("new keys")
+        self.assertEqual(self.ws("check", "--changed-from", base)[0], 0)
+        self.assertEqual(self.ws("check")[0], 0)
+
+    def test_an_unstaged_edit_to_a_parts_cases_does_not_change_the_staged_check(self):
+        self.workspace({"use": "links"})
+        self.git("init", "-q")
+        self.commit()
+        self.write("a.md", "[gone](nope.md)\n")
+        self.git("add", "a.md")
+        before = self.ws("check", "--staged")
+        self.break_cases("links")                                  # unstaged
+        self.write("parts/links.py", "this is not python (\n")     # unstaged
+        self.assertEqual(self.ws("check", "--staged"), before)
+        self.assertEqual(before[0], 1)
+
+    def test_a_commit_with_no_staged_manifest_is_refused(self):
+        self.workspace({"use": "links"})
+        self.git("init", "-q")
+        self.commit()
+        self.git("rm", "-q", "--cached", "workspace.json")
+        code, output = self.ws("check", "--staged")
+        self.assertEqual(code, 2)
+        self.assertIn("workspace.json", output)
 
 
 class SymbolTests(unittest.TestCase):
@@ -539,9 +745,9 @@ class DenyListTests(Folder):
             self.workspace({"use": "deny_list", **setting})
             self.write("a.md", "globex corp\n")
             code, out = self.ws("check")
-            # Refused either way: by the part itself, or (until manifest settings stop leaking into cases) at load.
-            self.assertNotEqual(code, 0, setting)
-            self.assertRegex(out, "only its cases may|refused", setting)
+            # The cases run with their own settings only, so the part loads, and then refuses the manifest's.
+            self.assertEqual(code, 1, setting)
+            self.assertIn("only its cases may", out, setting)
 
 
 class RepositoryTests(unittest.TestCase):
