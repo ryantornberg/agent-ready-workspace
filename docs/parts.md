@@ -1,5 +1,5 @@
 ---
-last-reviewed: 2026-11-14
+last-reviewed: 2026-11-15
 ---
 
 # Parts
@@ -60,6 +60,8 @@ def decide(event, config):
 
 `before-shell` events carry a `command`. `before-edit` events carry a `path`, relative to the workspace. Those are the two events. `python3 ws.py hook <event>` reads the event as JSON and exits 2 when a hook refuses. It also exits 2 when it cannot decide, such as on input it cannot read: a hook fails closed. [.claude/settings.json](../.claude/settings.json) wires both events into one agent tool; another tool needs its own few lines of wiring, and the parts stay the same.
 
+A hook call loads only the hooks for its event. It does not run any check, or any hook for the other event. So a check with a broken case cannot refuse a shell command or an edit, including the edit that repairs it. To know a part's kind without running it, the runner reads its `KIND` and `EVENT` lines. Write each as one plain line, such as `KIND = "hook"`. A part whose lines it cannot read refuses every hook call, because it might be a hook for that event. So does a missing part file, and a manifest it cannot read. Repair those from your own terminal, where the agent's hooks do not run. A hook call does not compare those lines with what the file sets when it runs; `check`, `selftest` and CI do, and refuse a part where they differ.
+
 ## Cases
 
 A check case gives files and the findings to expect. Every finding the check returns must be expected, so a case also proves what the check leaves alone.
@@ -67,6 +69,10 @@ A check case gives files and the findings to expect. Every finding the check ret
 ```json
 {"name": "an empty page fails", "files": {"a.md": "", "b.md": "# B"}, "expect": ["this page is empty"]}
 ```
+
+An expectation written as text is an error. A warning is expected by saying so, as `{"message": "...", "level": "warning"}`. So a check whose errors are demoted to warnings fails its own cases, and cannot quietly stop failing commits.
+
+A case runs with the settings in its own `config`, never with the manifest's. Changing a setting in the manifest therefore cannot fail a part's cases.
 
 A hook case gives an event and the answer.
 
@@ -80,9 +86,23 @@ The runner refuses to load:
 - a check with no case in which it finds something;
 - a hook whose cases do not show it both allowing and refusing;
 - a hook whose `EVENT` is not one the runner knows;
+- a part whose `KIND` or `EVENT` line is missing, repeated, or differs from what the file sets when it runs;
+- a part whose file is outside the workspace, through `..`, an absolute path or a symbolic link;
 - any part with a case that fails.
 
-A rule written only in prose gets broken, and a check nobody tests stops checking. The cases run on every command, so a part cannot quietly stop working between commits. `python3 ws.py selftest` runs them all and lists each failure, where the other commands stop at the first.
+A rule written only in prose gets broken, and a check nobody tests stops checking. The cases run on every command that loads the part, so a part cannot quietly stop working between commits. `python3 ws.py selftest` runs them all and lists each failure, where the other commands stop at the first.
+
+The commit check, `check --staged`, reads the staged manifest, the staged parts and their staged cases. An edit you have not staged cannot change its result.
+
+## Removing a part
+
+A part the last commit's manifest uses must stay in the manifest, or be listed under `retired` with the reason:
+
+```json
+"retired": [{"use": "no_stage_all", "why": "the commit check now compares staged paths with the session's edits"}]
+```
+
+Otherwise `check` fails. Locally, the last commit's manifest decides which parts are required. In CI, the manifest on the base branch decides. Only the `use` names are read from that older manifest, so keys added to the manifest later do not break the comparison. When CI has no base commit, as on a first push, no part is required, and it says so as a warning.
 
 ## Adding a part
 

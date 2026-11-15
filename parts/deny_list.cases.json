@@ -7,7 +7,7 @@
   {"name": "a listed term in a file name fails, and the name is not printed", "files": {"plans/acme-rollout.md": "# Rollout\n"}, "config": {"terms": ["acme"]}, "expect": ["the file name matches line 1 of the private deny list"]},
   {"name": "a regular-expression entry matches a ticket pattern and nothing wider", "files": {"a.md": "Fixes TICK-123.\n", "b.md": "A TICKET-9 is fine.\n"}, "config": {"terms": ["re:\\bTICK-\\d+\\b"]}, "expect": ["matches line 1 of the private deny list"]},
   {"name": "files with no listed term pass", "files": {"a.md": "# Orders\nThe nightly job reconciles.\n", "src/x.cs": "class X { }\n"}, "config": {"terms": ["acme", "re:\\bTICK-\\d+\\b"]}, "expect": []},
-  {"name": "no list is reported as a warning, and nothing is checked", "files": {"a.md": "acme\n"}, "config": {"list": ""}, "expect": ["no private deny list"]},
+  {"name": "no list is reported as a warning, and nothing is checked", "files": {"a.md": "acme\n"}, "config": {"list": ""}, "expect": [{"message": "no private deny list", "level": "warning"}]},
   {"name": "a list that cannot be read is an error, not a pass", "files": {"a.md": "acme\n"}, "config": {"list": "/nonexistent/deny-list-for-a-case.txt"}, "expect": ["the private deny list cannot be read"]},
   {"name": "a list with no entries is an error, not a pass", "files": {"a.md": "acme\n"}, "config": {"terms": ["# only a comment", ""]}, "expect": ["holds no entries"]},
   {"name": "a bad regular expression is an error, not a pass", "files": {"a.md": "acme\n"}, "config": {"terms": ["re:("]}, "expect": ["line 1 of the deny list is not a valid regular expression"]}

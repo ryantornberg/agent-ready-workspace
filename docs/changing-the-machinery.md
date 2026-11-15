@@ -35,15 +35,15 @@ Everything else is a doc.
    ```
 
 4. **Commit on the branch**, staging files by name.
-5. **The person pushes the branch.** CI runs on three systems.
+5. **Push the branch and open a draft pull request.** CI runs on three systems. In this repository an agent may push; in a team's workspace, a person does.
 6. **Merge once CI is green.** A red run on any one system blocks the merge.
 
 A hook that refuses a direct push of machinery to the main branch is planned. Until then this path is kept by hand.
 
 ## Traps
 
-- **The hooks guard the session that edits them.** A part with a failing case is refused, and today every command loads every part. A broken case can then refuse every shell and edit call, including the one that repairs it. This happened while building M1's first slice. The [M1 hand-off plan](plans/m1-make-the-core-hold-weight.md) fixes it in slice 2. Until then:
-  - change a part's code and its cases in one step, and run the cases before the next tool call;
-  - if the session is locked out, the person repairs the file from their own terminal, where the agent's hooks do not run.
-- **The staged manifest decides what the commit check runs.** A manifest that drops a part, staged with the change, switches that part off for the commit. Stage the manifest only when the change means it.
+- **The hooks guard the session that edits them.** A part with a failing case is refused. A hook call loads only the hooks for its event, so a broken check no longer refuses anything, and a broken hook refuses only its own event: with a broken shell hook, the edit tools still work. Three things still refuse every hook call, because the runner cannot tell whether a hook would refuse: a manifest it cannot read, a part file that is missing, and a part whose `KIND` line it cannot read. [Parts](parts.md#a-hook) says how a part declares its kind.
+  - Change a part's code and its cases in one step, and run `python3 ws.py selftest` before the next tool call.
+  - If the session is locked out, the person repairs the file from their own terminal, where the agent's hooks do not run.
+- **A part leaves the manifest only by being retired.** A manifest that drops a part the last commit used fails `check`, and in CI the base branch's manifest decides. List the part under `retired` with a reason. See [removing a part](parts.md#removing-a-part).
 - **A check you cannot run in CI.** The `deny_list` check reads a private list from the file `WS_DENY_LIST` names, or from `~/.config/agent-ready-workspace/deny-list.txt`. CI has no list, so it warns and checks nothing. Commit on a machine that has the list.
