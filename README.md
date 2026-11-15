@@ -57,8 +57,8 @@ git config core.hooksPath .githooks
 | Rule | Enforced by | When |
 |---|---|---|
 | A link points at a real file and heading. | `links` check | Commit, CI |
-| Whoever edits a page past its review date reviews it. | `freshness` check | Commit, CI |
-| An alias in the index names something the code still defines. | `aliases` check | Commit, CI |
+| Whoever edits a page past its review date reviews it. `AGENTS.md`, `INDEX.md` and every page under `docs/` carry a date. | `freshness` check | Commit, CI |
+| An alias in the index, and a code name in backticks in `AGENTS.md`, name something the code still defines. | `aliases` check | Commit, CI |
 | A playbook, and the guidance tested with it, changes only with a new passing eval run. | `eval_record` check | Commit, CI |
 | No file, commit message, author or committer holds a term from the maintainer's private deny list. | `deny_list` check | Commit, on a machine that has the list |
 | A commit holds only files the agent session wrote. | `edit_ledger` check, against the paths the edit tools wrote | Commit, while an agent session has edits waiting |
@@ -69,7 +69,7 @@ git config core.hooksPath .githooks
 | A part's own cases pass, at the level each finding states. | The runner | Every command that loads the part. A hook call loads only the hooks for its event. |
 | A part leaves the manifest only when it is retired with a reason. | The runner | Commit, CI |
 
-The commit check reads the staged pages, the staged manifest and the staged parts with their cases, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. The core in `wslib/` still runs from disk. CI runs the same checks on Linux, macOS and Windows and compares with the commit before the push, so a teammate who never installed the hook is still caught. The one exception is `deny_list`, which needs a private list that CI does not have. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed.
+The commit check reads the staged pages, the staged manifest and the staged parts with their cases, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. It reads them all in one batch, so it starts three git processes however many files the workspace holds. The working-folder check, `check`, starts from the same git listing and adds the untracked files git does not ignore, so the two see the same files. The page checks read the pages the workspace owns: a page inside a code repository under `src/`, and a symbolic link, are left out. A page that is not UTF-8 is an error; code in Windows-1252 or UTF-16 is read. The core in `wslib/` still runs from disk. CI runs the same checks on Linux, macOS and Windows and compares with the commit before the push, so a teammate who never installed the hook is still caught. The one exception is `deny_list`, which needs a private list that CI does not have. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed.
 
 These rules in [AGENTS.md](AGENTS.md) and the [definition of done](docs/definition-of-done.md) stay prose, because nothing here can check them: open pull requests as drafts and merge only after CI passes, write a goal and non-goals for larger work, log the questions you had to ask, compare build warnings with the base branch, and list the callers you checked. The eval tests two more: see a test fail before editing, and mark claims as verified.
 
@@ -105,7 +105,7 @@ In the recorded runs, five of each on a small model, every run with the guidance
 ## Use it for your own team
 
 1. Replace the facts in `AGENTS.md` with the ones a model gets wrong about your code. Leave out anything it gets right from the code alone.
-2. Put your code repositories under `src/` as submodules, and remove the samples. Add `submodules: true` to the checkout step in `.github/workflows/ci.yml`.
+2. Put your code repositories under `src/` as submodules, and remove the samples. Add `submodules: true` to the checkout step in `.github/workflows/ci.yml`. The checks do not read the pages inside them, so their own links and dates do not fail yours.
 3. Fill the alias table from the words your team actually says.
 4. Write a playbook for the task you repeat most, and one eval case for it.
 5. Start the question log. Each entry is a gap; fix the page, then note the fix.
@@ -122,7 +122,7 @@ Add a part when the same mistake shows up twice.
 - **`no_stage_all` reads a command line, and only reminds.** It follows separators, new lines, subshells, `sh -c`, `eval` and common wrappers, and it skips heredoc bodies and quoted text. A command built by a script, held in a variable, hidden in an alias or piped into a shell gets past it, and it cannot tell that `git add src` names a whole folder. When it fires, the agent sees the reminder next to the command's result, and the runner opens the edit ledger of the session's working copy if that copy has uncommitted changes. The eval's check on what was actually committed does not depend on it.
 - **`shelved` guards the edit tools only.** A shell command that writes into the folder, such as `sed -i` or `git mv`, does not pass through it. An edit through a symbolic link into the folder is refused, because the runner follows links; an edit through a hard link to one of its files is not.
 - **`handoff_tier` sees only the tool's delegation call.** It reads the tier from the first line of the prompt and compares the model and effort the task sets. A helper that runs at the caller's model whatever it sets, such as a fork of the session, gets past the model comparison, and a helper started some other way, such as from a script, is not seen at all.
-- **`aliases` is strict about its table and loose about what counts.** Each row needs exactly two columns, the second one plain name in backticks; a linked name or a second table under the heading is an error. Any definition of that name under `src/` satisfies it, including a method that happens to share the name.
+- **`aliases` is strict about its table and loose about what counts.** Each row needs exactly two columns, the second one plain name in backticks; a linked name or a second table under the heading is an error. Any definition of that name under `src/` satisfies it, including a method that happens to share the name. In `AGENTS.md` it takes only backticked words that mix upper and lower case, such as `AccountFreeze`, so `main`, `KIND`, `max_age_days`, paths and commands are not checked.
 - **The commit check reads a submodule from its checkout on disk**, not from the commit the index pins. Run `git submodule update` before committing a pin change, and initialise submodules before the first check.
 - **`eval_record` trusts the record file.** It shows that someone ran the case on the current wording. It cannot stop a person from editing the record by hand. Changing a playbook's wording means running the eval again, which needs the agent tool and costs a few cents; moving its review date does not.
 - **Review dates run out.** Every dated page here was reviewed on the same day. About six months later a first push or a force push, where CI treats every file as changed, fails until the pages are reviewed and their dates moved.
