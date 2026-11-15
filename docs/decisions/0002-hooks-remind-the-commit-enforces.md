@@ -31,6 +31,7 @@ A command line does not hold the answer. The commit does: it holds exactly the p
 - **A refusal before the damage.** The index can hold another session's edits for a moment, until the commit is refused and the agent unstages them. Nothing reaches the history.
 - **One more step for shell-written files.** An agent that writes a file with a heredoc and then commits it must record it first. The refusal says how.
 - **A person can be refused.** While an agent's edits wait uncommitted, a person's own commit in the same working copy is compared too. The refusal says how to close the ledger.
+- **A reminder can open the wrong ledger.** The agent tool reports the folder the session started in, not the folder a command moves to. So `cd` into a scratch repository and `git add .` opens the ledger of the session's own working copy, empty, until the agent commits there or a person closes it.
 - **It stops accidents, not intent.** `git commit --no-verify`, or closing the ledger by hand, gets past it. CI cannot run it, because CI has no ledger.
 
 ## Options rejected
