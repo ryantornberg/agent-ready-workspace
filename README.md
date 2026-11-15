@@ -44,8 +44,8 @@ git config core.hooksPath .githooks
 | [INDEX.md](INDEX.md) | Topics, and a table that maps everyday words to the names the code uses. |
 | [workspace.json](workspace.json) | The manifest: which parts this workspace runs, and their settings. |
 | `ws.py`, `wslib/` | The runner and the small core the parts plug into. |
-| [parts/](docs/parts.md) | Four checks and two hooks, each one file plus its cases. |
-| [docs/](docs/definition-of-done.md) | The definition of done, one playbook, one decision record, the question log. |
+| [parts/](docs/parts.md) | Five checks and two hooks, each one file plus its cases. |
+| [docs/](docs/definition-of-done.md) | The definition of done, one playbook, one decision record, the question log, the orchestration rules, and the templates and plan for the current milestone. |
 | [evals/](evals/README.md) | One eval case, a broken sample repository, and five recorded runs each of a real model with and without the workspace's guidance. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
@@ -58,11 +58,12 @@ git config core.hooksPath .githooks
 | Whoever edits a page past its review date reviews it. | `freshness` check | Commit, CI |
 | An alias in the index names something the code still defines. | `aliases` check | Commit, CI |
 | A playbook, and the guidance tested with it, changes only with a new passing eval run. | `eval_record` check | Commit, CI |
+| No file holds a term from the maintainer's private deny list. | `deny_list` check | Commit, on a machine that has the list |
 | Files are staged by name, never all at once. | `no_stage_all` hook | Before a shell command |
 | A shelved folder is not edited. | `shelved` hook | Before an edit |
 | A part's own cases pass. | The runner | Every command: a part with a failing case is refused |
 
-The commit check reads the staged pages and the staged manifest, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. The parts' own code runs from disk. CI runs the same checks on Linux, macOS and Windows and compares with the commit before the push, so a teammate who never installed the hook is still caught. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed.
+The commit check reads the staged pages and the staged manifest, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. The parts' own code runs from disk. CI runs the same checks on Linux, macOS and Windows and compares with the commit before the push, so a teammate who never installed the hook is still caught. The one exception is `deny_list`, which needs a private list that CI does not have. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed.
 
 These rules in [AGENTS.md](AGENTS.md) and the [definition of done](docs/definition-of-done.md) stay prose, because nothing here can check them: open pull requests only as drafts, write a goal and non-goals for larger work, log the questions you had to ask, compare build warnings with the base branch, and list the callers you checked. The eval tests two more: see a test fail before editing, and mark claims as verified.
 

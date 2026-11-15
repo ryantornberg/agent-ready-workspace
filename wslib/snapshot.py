@@ -49,6 +49,13 @@ class Snapshot:
         except (UnicodeDecodeError, OSError, RuntimeError):
             return None
 
+    def read_bytes(self, path):
+        """The file's bytes, or None when it cannot be read. For checks that must see every file, whatever its encoding."""
+        try:
+            return self._bytes(path)
+        except (OSError, RuntimeError, KeyError):
+            return None
+
     def _bytes(self, path):
         raise NotImplementedError
 
