@@ -1,6 +1,6 @@
 ---
 last-reviewed: 2026-11-15
-status: draft
+status: approved
 ---
 
 # M1, make the core hold weight: hand-off plan
@@ -201,7 +201,7 @@ A fresh session, at the driver tier, attacked this plan and slice 0 on 2026-11-1
 
 ## Approval
 
-Not yet approved.
+Approved by: Ryan Tornberg, 2026-11-15.
 
 ## Changes after approval
 
