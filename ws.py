@@ -25,8 +25,9 @@ shape, or one agent tool's payload through that tool's adapter (wslib/events.py)
 A hook with MODE = "remind" never refuses: the agent is shown its reason and the call goes ahead.
 
 An allowed edit is recorded in the edit ledger of the working copy that holds it (wslib/ledger.py). A
-before-shell reminder opens the ledger of the folder the agent tool says its session runs in. While a
-ledger is open, the commit check fails a staged path no edit tool wrote (parts/edit_ledger.py).
+before-shell reminder opens the ledger of the folder the agent tool says its session runs in, when that
+working copy has uncommitted changes. While a ledger is open, the commit check fails a staged path no edit
+tool wrote (parts/edit_ledger.py).
 
 Exit codes: 0 clean; 1 a check found an error or a case failed; 2 a hook refused, or the setup is
 wrong. A hook that cannot decide exits 2 as well: it fails closed.
@@ -157,8 +158,9 @@ def command_hook(root, args):
         ledgers.record(root, event["path"])   # cannot record: refused, so no edit escapes the commit check
     if reminders and args.event == "before-shell" and cwd:
         # The command may stage files this session did not write. The commit check compares only while a ledger is
-        # open, so open it, even empty: an agent that wrote files only through the shell must then name them.
-        # Only an agent tool says where its session runs; a person trying the hook by hand opens nothing.
+        # open, so open it, even empty, when the working copy has uncommitted changes: an agent that wrote files only
+        # through the shell must then name them. Only an agent tool says where its session runs; a person trying the
+        # hook by hand opens nothing.
         if ledgers.open_at(root, cwd):
             reminders.append("The edit ledger of this working copy is open. The commit check refuses any staged "
                              "path that the agent's edit tools did not write; record a file written another way "

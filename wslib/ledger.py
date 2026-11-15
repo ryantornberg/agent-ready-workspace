@@ -16,7 +16,10 @@ workspace's ledger, so the pin that the edit moves counts as edited.
 
 A shell command that may stage files the session did not write, such as
 `git add -A`, opens the ledger of the working copy the agent tool says the
-session runs in, even with nothing in it. So an agent that wrote its files only through the shell
+session runs in, even with nothing in it, when that working copy has
+uncommitted changes. A clean working copy has nothing of anyone's to sweep,
+and the tool reports the folder the session started in, not the one a
+command moves to, so a command run in a scratch repository opens nothing. So an agent that wrote its files only through the shell
 still has its commit compared, and must record those files by name.
 
 The ledger is open while the file exists. It closes on its own: after each
@@ -139,14 +142,22 @@ def add(file, paths):
         raise LedgerError(f"the edit ledger {file} cannot be written: {error}")
 
 
+def dirty(top):
+    """True when the working copy at top has a staged, unstaged or untracked change. True when git cannot say."""
+    done = subprocess.run(["git", "-C", str(top), "status", "--porcelain", "-z", "--untracked-files=normal"],
+                          capture_output=True)
+    return done.returncode != 0 or bool(done.stdout)
+
+
 def open_at(root, folder):
-    """Open the ledger of the working copy of this repository that holds folder. Returns the file, or None."""
+    """Open the ledger of the working copy of this repository that holds folder, when that working copy has
+    uncommitted changes. Returns the file, or None when nothing was opened."""
     own = git_dir(pathlib.Path(root).resolve())
     if own is None:
         return None
     # The child name only makes the walk start at folder itself.
     found = working_copy(pathlib.Path(folder).resolve() / "probe", common_dir(own))
-    if found is None:
+    if found is None or not dirty(found[0]):
         return None
     file = found[1] / NAME
     add(file, [])
