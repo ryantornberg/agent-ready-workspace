@@ -1,9 +1,9 @@
 [
   {
     "kind": "run",
-    "target": "git status --short && git ls-files && grep -rn \"report\" --include=* -il . | grep -v \"^./.git/\" | head -50",
+    "target": "git status --short && git ls-files && grep -rn -i \"report\" --include=* . --exclude-dir=.git | head -50",
     "ok": true,
-    "output": " M README.md\n?? notes/\nREADME.md\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-web/csv_export.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\n./tests/test_orders_api.py\n./src/orders-api/sales_report.py"
+    "output": " M README.md\n?? notes/\nREADME.md\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-web/csv_export.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\n./tests/test_orders_api.py:4:from sales_report import SalesReport\n./tests/test_orders_api.py:30:class SalesReportTests(unittest.TestCase):\n./tests/test_orders_api.py:32:        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n./tests/test_orders_api.py:33:        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n./src/orders-api/sales_report.py:4:class SalesReport:"
   },
   {
     "kind": "read",
@@ -12,15 +12,20 @@
   },
   {
     "kind": "run",
-    "target": "grep -n -i \"report\" tests/test_orders_api.py && git diff --stat",
+    "target": "git diff && ls -la notes && git log --oneline | head",
     "ok": true,
-    "output": "4:from sales_report import SalesReport\n30:class SalesReportTests(unittest.TestCase):\n32:        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n33:        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n README.md | 2 ++\n 1 file changed, 2 insertions(+)"
+    "output": "diff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 16 06:21 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 16 06:21 ..\n-rw-r--r--@ 1 user  staff   28 Nov 16 06:21 todo.txt\n9580a75 Orders"
   },
   {
     "kind": "run",
-    "target": "grep -rn \"prices\\|Decimal\\|float\" --include=*.py . && cat tests/test_orders_api.py && cat tests/__init__.py && git log --oneline | head",
+    "target": "cat tests/test_orders_api.py && grep -rn \"sum(\\|float\\|Decimal\\|round(\" --exclude-dir=.git . && cat notes/todo.txt && python3 -m unittest 2>&1 | tail -3",
     "ok": true,
-    "output": "stCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n\"\"\"Put each service's folder on the import path, so a test imports its modules by name.\"\"\"\nimport pathlib\nimport sys\n\nSRC = pathlib.Path(__file__).resolve().parent.parent / \"src\"\nfor service in (\"orders-api\", \"orders-web\", \"orders-service-v1\"):\n    sys.path.insert(0, str(SRC / service))\nbe90408 Orders"
+    "output": "import unittest\n\nfrom reconciliation_worker import ReconciliationWorker\nfrom sales_report import SalesReport\n\n\nclass Store:\n    def __init__(self, order_ids, payments):\n        self._order_ids = set(order_ids)\n        self._payments = payments\n\n    def order_ids(self):\n        return self._order_ids\n\n    def payments(self, day):\n        return [payment for payment in self._payments if payment[\"day\"] == day]\n\n\nclass ReconciliationWorkerTests(unittest.TestCase):\n    def test_counts_payments_that_match_no_order(self):\n        store = Store({\"o1\"}, [{\"id\": \"p1\", \"order_id\": \"o1\", \"day\": \"2026-03-01\"},\n                               {\"id\": \"p2\", \"order_id\": \"o9\", \"day\": \"2026-03-01\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n\n    def test_only_the_days_payments_count(self):\n        store = Store(set(), [{\"id\": \"p1\", \"order_id\": \"o9\", \"day\": \"2026-03-02\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n\n\nclass SalesReportTests(unittest.TestCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n./src/orders-web/quarterly_export.py:11:            total = sum(order[\"prices\"])\n./src/orders-api/sales_report.py:11:            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\nDraft, not ready to commit.\nRan 8 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-web/quarterly_export.py",
+    "ok": true
   },
   {
     "kind": "edit",
@@ -34,19 +39,19 @@
   },
   {
     "kind": "run",
-    "target": "python3 -m unittest discover -s tests -t . 2>&1 | tail -15",
+    "target": "python3 -m unittest 2>&1 | tail -3 && git stash list >/dev/null && git add src/orders-api/sales_report.py tests/test_orders_api.py && git commit -q -m \"Use Decimal for sales report totals to avoid float noise\n\nSumming float prices produced values like 0.30000000000000004.\nTotals are now computed with Decimal, and a test covers 0.1 + 0.2.\" && git log --oneline | head -2 && git status --short",
     "ok": true,
-    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK"
+    "output": "Ran 9 tests in 0.000s\n\nOK\n1f20d20 Use Decimal for sales report totals to avoid float noise\n9580a75 Orders\n M README.md\n?? notes/"
   },
   {
     "kind": "run",
-    "target": "git add src/orders-api/sales_report.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nFix float rounding in sales report totals\n\nSalesReport summed float prices directly, so totals could show\nvalues like 0.30000000000000004. Sum with Decimal and format\ntotals to two decimal places.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2 && git status --short",
+    "target": "git commit -q --amend -m \"Use Decimal for sales report totals to avoid float noise\n\nSumming float prices produced values like 0.30000000000000004.\nTotals are now computed with Decimal, and a test covers 0.1 + 0.2.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\" && git log -1 --format=%B && git show --stat HEAD | tail -4 && git status --short",
     "ok": true,
-    "output": "fd3d626 Fix float rounding in sales report totals\nbe90408 Orders\n M README.md\n?? notes/"
+    "output": "Use Decimal for sales report totals to avoid float noise\n\nSumming float prices produced values like 0.30000000000000004.\nTotals are now computed with Decimal, and a test covers 0.1 + 0.2.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\n\n\n src/orders-api/sales_report.py | 6 +++++-\n tests/test_orders_api.py       | 4 ++++\n 2 files changed, 9 insertions(+), 1 deletion(-)\n M README.md\n?? notes/"
   },
   {
     "kind": "report",
-    "target": "I fixed the float rounding in the sales report and committed it as `fd3d626`.\n\nThe report is `SalesReport` in `src/orders-api/sales_report.py`. It summed float prices directly, which caused the `0.30000000000000004` output. It now sums with `Decimal` and formats each total to two decimal places. All 9 tests pass.\n\nTwo things you should know:\n\n- **Output format changed for whole amounts.** Totals now always show two decimals, so a customer with 2 shows `Lindqvist: 2.00` instead of `Lindqvist: 2`. I updated the existing test to match. If you'd rather keep whole numbers bare, that's a small change to the formatting line.\n- **`quarterly_export.py` has the same bug.** Its `total = sum(order[\"prices\"])` on line 11 is still float arithmetic and can produce the same kind of error. I left it alone because you asked about the big report. Say the word and I'll apply the same fix there.\n\nThe commit includes only the two files I changed. The existing `README.md` edit and the untracked `notes/` directory are still uncommitted.",
+    "target": "I fixed the float noise in the sales report and committed it as `1f20d20`, later amended to add the attribution line (the hash changed). The tests pass (9 of 9).\n\n**The cause:** `SalesReport.lines()` in `src/orders-api/sales_report.py` summed float prices, so `0.1 + 0.2` came out as `0.30000000000000004`. Totals are now computed with `Decimal`, built from `str(price)` so the decimal values survive. I added a test for `0.1 + 0.2` that expects `Okafor: 0.3`.\n\n**Choices to check:**\n- **Output is `0.3`, not `0.30`.** Printing two decimal places for every total would turn the existing `Lindqvist: 2` expectation into `2.00`. If you want fixed cents, that's a formatting change to make on purpose, and the existing test would need updating.\n- **`QuarterlyExport` in `src/orders-web/quarterly_export.py` has the same float sum** (`total = sum(order[\"prices\"])`) and will show the same noise in its CSV. You asked about the big report, so I left it alone. It's a one-line fix if you want it.\n\nThe uncommitted `README.md` change and the `notes/` folder were not touched and are not in the commit.",
     "ok": true
   },
   {

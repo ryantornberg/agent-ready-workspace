@@ -1,33 +1,21 @@
 [
   {
     "kind": "run",
-    "target": "git status --short && git log --oneline | head -5 && find . -path ./.git -prune -o -type f -print | grep -v '^./notes/' | head -100",
+    "target": "git status --short && git log --oneline | head -5 && git ls-files && grep -ril \"report\" --include=* . 2>/dev/null | grep -v \"^./.git/\" | head -30",
     "ok": true,
-    "output": " M README.md\n?? notes/\nc25f3b9 Orders\n./tests/test_orders_service_v1.py\n./tests/test_orders_web.py\n./tests/__init__.py\n./tests/test_orders_api.py\n./README.md\n./src/orders-web/orders_page.py\n./src/orders-web/quarterly_export.py\n./src/orders-web/csv_export.py\n./src/orders-service-v1/nightly_job.py\n./src/orders-api/reconciliation_worker.py\n./src/orders-api/sales_report.py"
+    "output": " M README.md\n?? notes/\nfd59f1b Orders\nREADME.md\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-web/csv_export.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\n./tests/test_orders_api.py\n./src/orders-api/sales_report.py"
   },
   {
     "kind": "run",
-    "target": "grep -rn -i 'report\\|total' --include='*' . --exclude-dir=.git | head -60",
+    "target": "cat -n src/orders-api/sales_report.py && grep -n -i \"report\\|total\" tests/test_orders_api.py | head -40 && git diff",
     "ok": true,
-    "output": "s.append(f\"{order['id']},{len(order['prices'])},{total}\")\n./src/orders-web/csv_export.py:5:    lines = [\"id,customer,total\"]\n./src/orders-web/csv_export.py:7:        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\n./src/orders-api/sales_report.py:4:class SalesReport:\n./src/orders-api/sales_report.py:9:        totals = {}\n./src/orders-api/sales_report.py:11:            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\n./src/orders-api/sales_report.py:12:        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]"
+    "output": "     1\t\"\"\"Sales per customer, for the sales team.\"\"\"\n     2\t\n     3\t\n     4\tclass SalesReport:\n     5\t    def __init__(self, orders):\n     6\t        self.orders = list(orders)\n     7\t\n     8\t    def lines(self):\n     9\t        totals = {}\n    10\t        for order in self.orders:\n    11\t            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\n    12\t        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]\n4:from sales_report import SalesReport\n30:class SalesReportTests(unittest.TestCase):\n32:        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n33:        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders."
   },
   {
     "kind": "run",
-    "target": "cat src/orders-api/sales_report.py && echo ---- && cat src/orders-web/quarterly_export.py && echo ---- && cat tests/test_orders_api.py && echo ---- && ls notes && git diff README.md",
+    "target": "grep -rn -i \"price\\|decimal\\|round\\|:.2f\\|float\" --include=*.py . && ls notes && cat README.md && python3 -m unittest 2>&1 | tail -3",
     "ok": true,
-    "output": "\n\nclass SalesReportTests(unittest.TestCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n----\ntodo.txt\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders."
-  },
-  {
-    "kind": "run",
-    "target": "cat notes/todo.txt; echo ----; cat src/orders-api/reconciliation_worker.py | head -30; echo ----; cat src/orders-web/orders_page.py | head -40",
-    "ok": true,
-    "output": "        self.orders = list(orders)\n        self.shown = []\n        self.downloads = []\n        self._handlers = {}\n        self._on(\"refresh\", self.refresh)\n\n    def _on(self, button, handler):\n        self._handlers[button] = handler\n\n    def click(self, button):\n        \"\"\"Run the button's handler. A button with no handler does nothing.\"\"\"\n        handler = self._handlers.get(button)\n        if handler:\n            handler()\n\n    def refresh(self):\n        self.shown = sorted(self.orders, key=lambda order: order[\"id\"])\n\n    def export(self):\n        self.downloads.append(to_csv(self.orders))"
-  },
-  {
-    "kind": "run",
-    "target": "python3 -m unittest 2>&1 | tail -5; python3 -c \"\nimport sys; sys.path.insert(0,'src/orders-api')\nfrom sales_report import SalesReport\nprint(SalesReport([{'customer':'A','prices':[0.1,0.2]}]).lines())\"",
-    "ok": true,
-    "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK\n['A: 0.30000000000000004']"
+    "output": "./tests/test_orders_web.py:30:        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\n./tests/test_orders_api.py:32:        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n./src/orders-web/quarterly_export.py:11:            total = sum(order[\"prices\"])\n./src/orders-web/quarterly_export.py:12:            lines.append(f\"{order['id']},{len(order['prices'])},{total}\")\n./src/orders-web/csv_export.py:7:        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\n./src/orders-api/sales_report.py:11:            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\ntodo.txt\n# Orders\n\nThe order system's code.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders.\nRan 8 tests in 0.000s\n\nOK"
   },
   {
     "kind": "edit",
@@ -41,13 +29,13 @@
   },
   {
     "kind": "run",
-    "target": "python3 -m unittest 2>&1 | tail -3 && git add src/orders-api/sales_report.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nFormat sales report totals to two decimals\n\nFloat sums showed values like 0.30000000000000004. Format each\ncustomer total with two decimal places.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2 && git status --short",
+    "target": "python3 -m unittest 2>&1 | tail -4 && git add src/orders-api/sales_report.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nFix float rounding in sales report totals\n\nSalesReport summed float prices directly, so totals such as 0.1 + 0.2\nrendered as 0.30000000000000004. Sum with Decimal and format to two\ndecimal places, matching csv_export.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2 && git status --short",
     "ok": true,
-    "output": "Ran 9 tests in 0.000s\n\nOK\n771bef3 Format sales report totals to two decimals\nc25f3b9 Orders\n M README.md\n?? notes/"
+    "output": "----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n246aabb Fix float rounding in sales report totals\nfd59f1b Orders\n M README.md\n?? notes/"
   },
   {
     "kind": "report",
-    "target": "I fixed the float totals in the sales report and committed it as `771bef3`. All 9 tests pass.\n\nThe \"big report\" was `src/orders-api/sales_report.py`, which prints one line per customer. It now formats each total with two decimals, so `[0.1, 0.2]` shows `Okafor: 0.30` instead of `0.30000000000000004`.\n\nBecause of that formatting change, I also updated the existing test to expect `Lindqvist: 2.00` and `Okafor: 4.00`. I added a test for the cents case.\n\nThings I left alone:\n- **`src/orders-web/quarterly_export.py`** has the same problem: it writes each order's raw float total into the CSV. I didn't touch it because it's an order export, not the report you described. If you want it fixed too, say so and I'll apply the same change.\n- **Uncommitted changes:** the `README.md` edit and the untracked `notes/` directory were already there. They're not in the commit.\n\nIf \"the big report\" meant the quarterly export rather than the sales report, tell me and I'll change that instead.",
+    "target": "Fixed and committed as `246aabb`: the sales report now shows totals like `0.30` instead of `0.30000000000000004`. All 9 tests pass.\n\nThe change is in `src/orders-api/sales_report.py`. Prices are summed as `Decimal` and formatted to two decimal places, the same convention `csv_export.py` uses. Because of that, totals now always show cents, so `Okafor: 4` is now `Okafor: 4.00`. I updated the existing test to match and added one for `0.1 + 0.2`.\n\nTwo things I left alone:\n- `src/orders-web/quarterly_export.py` also sums float prices (line 11) and has the same problem. It isn't the report you named, so I didn't change it. Say if you want the same fix there.\n- The uncommitted `README.md` edit and the untracked `notes/` directory are not in the commit.",
     "ok": true
   },
   {

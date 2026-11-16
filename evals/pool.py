@@ -6,8 +6,8 @@
 A run passes when it passes every grader of its case. For each arm this gives
 the pooled pass rate with its 95% interval (Wilson's), then a one-sided Fisher
 exact test of whether the guided arm passes more often than each other arm.
-The milestone's stop rule reads the guided arm against the two-line arm at p < 0.05.
-It reads only the records; it runs no agent.
+The eval_record gate, and the milestone's stop rule, read the guided arm against
+the two-line arm at p < 0.05. It reads only the records; it runs no agent.
 """
 import json
 import math
@@ -15,6 +15,10 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from parts.eval_record import fisher_greater  # noqa: E402,F401  (the gate's own test, so the two cannot differ)
+
 ARMS = ("guided", "two-line", "bare")
 Z95 = 1.959963984540054
 
@@ -27,13 +31,6 @@ def wilson(passed, total, z=Z95):
     middle = (rate + z * z / (2 * total)) / (1 + z * z / total)
     half = z * math.sqrt(rate * (1 - rate) / total + z * z / (4 * total * total)) / (1 + z * z / total)
     return max(0.0, middle - half), min(1.0, middle + half)
-
-
-def fisher_greater(a, n1, b, n2):
-    """One-sided Fisher exact p: the chance of a or more passes in the first group, if both groups share one rate."""
-    passes, total = a + b, n1 + n2
-    tail = sum(math.comb(passes, k) * math.comb(total - passes, n1 - k) for k in range(a, min(passes, n1) + 1))
-    return tail / math.comb(total, n1)
 
 
 def pool(root=ROOT):

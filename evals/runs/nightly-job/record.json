@@ -1,6 +1,6 @@
 {
   "case": "nightly-job",
-  "date": "2026-11-15",
+  "date": "2026-11-16",
   "playbook": "docs/playbooks/fix-a-bug.md",
   "covers": [
     "evals/cases/nightly-job.json",
@@ -14,6 +14,8 @@
     "docs/definition-of-done.md",
     "evals/two-line.md",
     "evals/acceptance/nightly-job.py",
+    "parts/no_stage_all.py",
+    "wslib/parts.py",
     "evals/scaffold/README.md",
     "evals/scaffold/src/orders-api/reconciliation_worker.py",
     "evals/scaffold/src/orders-api/sales_report.py",
@@ -26,22 +28,23 @@
     "evals/scaffold/tests/test_orders_service_v1.py",
     "evals/scaffold/tests/test_orders_web.py"
   ],
-  "guidance_sha256": "9ed0695d00f82643f1c353387653b99451f668da66cb5cb2b922eac74533ac34",
+  "guidance_sha256": "65418223fdfc5dd963365b8e47f57f63ff626aa6b4667873a4f99aab0329d4c3",
   "runs_per_arm": 15,
   "agent": "Claude Code 2.1.325",
   "model": "claude-haiku-5-5",
   "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
   "arms": {
     "guided": {
-      "runs_passing_every_grader": 14,
+      "runs_passing_every_grader": 15,
       "runs_passing_each_grader": {
-        "sees-a-test-fail-before-editing": 14,
+        "sees-a-test-fail-before-editing": 15,
         "new-test-fails-on-the-original-code": 15,
         "suite-passes-after-the-change": 15,
         "the-request-is-met": 15,
         "report-marks-a-claim-verified": 15,
         "stages-by-name": 15,
         "leaves-the-other-session's-edits-out": 15,
+        "finishes-within-the-time-limit": 15,
         "leaves-the-shelved-folder-alone": 15
       },
       "runs": [
@@ -56,6 +59,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -70,6 +74,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -84,6 +89,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -98,6 +104,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -112,20 +119,22 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
         {
           "transcript": "guided-6.json",
-          "passed": false,
+          "passed": true,
           "graders": {
-            "sees-a-test-fail-before-editing": false,
+            "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -140,6 +149,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -154,6 +164,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -168,6 +179,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -182,6 +194,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -196,6 +209,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -210,6 +224,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -224,6 +239,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -238,6 +254,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         },
@@ -252,6 +269,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": true
           }
         }
@@ -263,10 +281,11 @@
         "sees-a-test-fail-before-editing": 15,
         "new-test-fails-on-the-original-code": 15,
         "suite-passes-after-the-change": 15,
-        "the-request-is-met": 2,
+        "the-request-is-met": 3,
         "report-marks-a-claim-verified": 15,
         "stages-by-name": 15,
         "leaves-the-other-session's-edits-out": 15,
+        "finishes-within-the-time-limit": 15,
         "leaves-the-shelved-folder-alone": 0
       },
       "runs": [
@@ -281,6 +300,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -295,6 +315,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -309,6 +330,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -319,10 +341,11 @@
             "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": true,
+            "the-request-is-met": false,
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -337,6 +360,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -351,6 +375,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -365,6 +390,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -379,6 +405,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -393,6 +420,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -407,6 +435,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -417,10 +446,11 @@
             "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": false,
+            "the-request-is-met": true,
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -435,6 +465,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -445,10 +476,11 @@
             "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": false,
+            "the-request-is-met": true,
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -463,6 +495,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -477,6 +510,7 @@
             "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         }
@@ -488,10 +522,11 @@
         "sees-a-test-fail-before-editing": 4,
         "new-test-fails-on-the-original-code": 15,
         "suite-passes-after-the-change": 15,
-        "the-request-is-met": 3,
+        "the-request-is-met": 7,
         "report-marks-a-claim-verified": 0,
         "stages-by-name": 15,
         "leaves-the-other-session's-edits-out": 15,
+        "finishes-within-the-time-limit": 15,
         "leaves-the-shelved-folder-alone": 0
       },
       "runs": [
@@ -506,6 +541,7 @@
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -513,13 +549,14 @@
           "transcript": "bare-2.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": false,
+            "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -534,6 +571,7 @@
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -544,10 +582,11 @@
             "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": true,
+            "the-request-is-met": false,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -555,13 +594,14 @@
           "transcript": "bare-5.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": true,
+            "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": false,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -569,13 +609,14 @@
           "transcript": "bare-6.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": true,
+            "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": false,
+            "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -590,6 +631,7 @@
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -597,13 +639,14 @@
           "transcript": "bare-8.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": true,
+            "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": false,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -614,10 +657,11 @@
             "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": false,
+            "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -625,13 +669,14 @@
           "transcript": "bare-10.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": false,
+            "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": false,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -642,10 +687,11 @@
             "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": false,
+            "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -660,6 +706,7 @@
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -670,10 +717,11 @@
             "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": false,
+            "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -684,10 +732,11 @@
             "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
-            "the-request-is-met": false,
+            "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         },
@@ -695,13 +744,14 @@
           "transcript": "bare-15.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": false,
+            "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true,
             "leaves-the-shelved-folder-alone": false
           }
         }

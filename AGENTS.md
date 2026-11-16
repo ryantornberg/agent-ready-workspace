@@ -1,5 +1,5 @@
 ---
-last-reviewed: 2026-11-15
+last-reviewed: 2026-11-16
 ---
 
 # Agent contract
@@ -41,4 +41,4 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 - Open a pull request as a draft. Publish and merge it only after CI passes on Linux, macOS and Windows. In this repository the maintainer lets agents do both; in a team's workspace, a person publishes.
 - If you had to ask a person something this workspace should have answered, add it to the [question log](docs/question-log.md) before you finish.
 - When a page you edit is past its review date, review the whole page and move the date. The commit check and CI both enforce this.
-- A change to a playbook, to this file, to `INDEX.md`, or to anything else the eval covers, needs a new eval run on record that shows the guidance beating the bare model. The run costs real agent time, so batch such edits. See [evals](evals/README.md).
+- A change to a playbook, to this file, to `INDEX.md`, or to anything else the eval covers, needs a new eval run on record in which the guidance beats both the bare model and a two-line instruction. The run costs real agent time, so batch such edits. See [evals](evals/README.md).

@@ -1,5 +1,5 @@
 ---
-last-reviewed: 2026-11-15
+last-reviewed: 2026-11-16
 ---
 
 # Parts
@@ -200,7 +200,7 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `links` | check | A link points at a missing file or heading, or a line is too long to read: over 10,000 characters. |
 | `freshness` | check | A commit edits a page that is past its review date, a required page has no date, or a date is more than a day ahead of today in UTC. |
 | `aliases` | check | The index maps a phrase to a name the code no longer defines, or a contract page names one in backticks. |
-| `eval_record` | check | Anything an eval case depends on changed since its last recorded run: the case, its scaffold and acceptance test, the files each arm is given (`AGENTS.md` and `INDEX.md` among them), or the harness and graders. It also fails when a record has fewer than five runs in an arm, when the guided arm passes no grader more often than the bare arm, or when a playbook has no case. |
+| `eval_record` | check | Anything an eval case depends on changed since its last recorded run: the case, its scaffold and acceptance test, the files each arm is given (`AGENTS.md` and `INDEX.md` among them), or the harness and graders. It also fails when a record has fewer than five runs in an arm; when, counting runs that pass every grader, the guided arm has no more of them than the bare arm; when, pooled across the records, the guided arm does not beat the two-line arm by a one-sided Fisher exact test at p < 0.05; or when a playbook has no case. The hash also covers the code of a hook a grader runs. |
 | `deny_list` | check | A file or file name holds a term from a private list kept outside the repository, and so, from the commit-msg hook, does the commit message, the author or the committer. With no list it warns and checks nothing, so CI cannot run it. |
 | `edit_ledger` | check | While the edit ledger is open, a commit stages a path that no edit tool of the agent session wrote. |
 | `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |

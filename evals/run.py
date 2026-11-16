@@ -27,7 +27,9 @@ permissions are bypassed only there: the sandbox must start, or the run does not
 The agent gets project settings only, an empty git configuration and a minimal
 environment, so the operator's instructions, identity, shell aliases and
 variables reach no arm. A transcript that still holds the operator's user name,
-home folder or git identity is refused, and nothing is written.
+home folder, git identity or the machine's temporary folder is refused, and
+nothing is written. The harness's own git calls read none of the operator's git
+config, so a global ignore file cannot hide a change from the graders.
 
 Each finished run is written at once, as evals/runs/<case>/<arm>-<n>.json. A
 run in which the agent never started (an outage, a usage limit) is not a trial:
@@ -44,6 +46,7 @@ give it a sandbox of its own or a container; nothing else knows which agent ran.
 Exit 0 when the record passes the eval_record gate.
 """
 import argparse
+import atexit
 import concurrent.futures
 import datetime
 import getpass
@@ -71,7 +74,6 @@ OTHER_SESSION = {
 }
 EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 READ_TOOLS = {"Read", "Grep", "Glob"}
-OUTPUT_TAIL = 600   # characters of each command's output kept in the transcript
 SANDBOX = "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)"
 # Settings passed to the agent. Bash runs inside the operating-system sandbox: writes only to its
 # folder and the temporary folder, no network, no reading the home folder, and no way to ask to
@@ -90,6 +92,22 @@ SETTINGS = {
 # taken out of every transcript, and a transcript that still holds it is refused.
 KEPT_ENVIRONMENT = ("PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "TERM", "TMPDIR")
 REQUIRED_ARMS = ("guided", "two-line", "bare")
+# Paths that name this machine without naming its user: its temporary folders, and the agent tool's own.
+MACHINE_PATHS = re.compile(r"/(?:private/)?var/folders/|/(?:private/)?tmp/claude-\d")
+_CLEAN_GIT = []
+
+
+def clean_git_env():
+    """The environment for the harness's own git calls: an empty global config and no default ignore or
+    attributes file, so the operator's git settings cannot hide a change from the graders or alter a commit."""
+    if not _CLEAN_GIT:
+        home = pathlib.Path(tempfile.mkdtemp(prefix="eval-git-"))
+        atexit.register(shutil.rmtree, home, True)
+        (home / "gitconfig").write_text("", encoding="utf-8")
+        (home / "config").mkdir()
+        _CLEAN_GIT.append({**os.environ, "GIT_CONFIG_GLOBAL": str(home / "gitconfig"), "GIT_CONFIG_NOSYSTEM": "1",
+                           "XDG_CONFIG_HOME": str(home / "config")})
+    return _CLEAN_GIT[0]
 
 
 def sh(folder, *command, check=True, env=None):
@@ -101,7 +119,7 @@ def sh(folder, *command, check=True, env=None):
 
 def git(folder, *args, check=True):
     return sh(folder, "git", "-c", "user.name=eval", "-c", "user.email=eval@example.invalid",
-              "-c", "commit.gpgsign=false", *args, check=check)
+              "-c", "commit.gpgsign=false", *args, check=check, env=clean_git_env())
 
 
 def load_arms(root=ROOT):
@@ -117,8 +135,15 @@ def load_case(name, root=ROOT):
 
 
 def prepare(folder, case, files, root=ROOT):
-    """Build the repository the agent starts in. files: the arm's {destination: source}. Returns the starting commit."""
-    shutil.copytree(root / case["scaffold_dir"], folder, dirs_exist_ok=True, ignore=shutil.ignore_patterns("__pycache__"))
+    """Build the repository the agent starts in. files: the arm's {destination: source}. Returns the starting commit.
+
+    The scaffold's files are the ones the eval hash covers, no more: a file git ignores, such as a .DS_Store,
+    is neither hashed nor given to the agent."""
+    scaffold = case["scaffold_dir"].strip("/") + "/"
+    for path in snapshots.Tree(root).paths():
+        if path.startswith(scaffold):
+            (folder / path[len(scaffold):]).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(root / path, folder / path[len(scaffold):])
     for destination, source in files.items():
         (folder / destination).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(root / source, folder / destination)
@@ -188,15 +213,28 @@ def result_text(content):
     return content or ""
 
 
+def temporary_folders():
+    """The machine's temporary folder, under each name it goes by."""
+    found = {tempfile.gettempdir(), os.environ.get("TMPDIR", "").rstrip("/")}
+    found |= {os.path.realpath(path) for path in found if path}
+    return sorted((path for path in found if len(path) > 2), key=len, reverse=True)
+
+
 def to_transcript(log, folder):
-    """Convert a Claude Code stream-json log into transcript actions. Returns (actions, model, version, error)."""
+    """Convert a Claude Code stream-json log into transcript actions. Returns (actions, model, version, error).
+
+    A command's whole output is kept, as the agent saw it: a failing test followed by more output still counts."""
     prefixes = sorted({str(folder), str(folder.resolve())}, key=len, reverse=True)
+    temps = [re.compile(re.escape(path) + r"(?![\w.-])") for path in temporary_folders()]
 
     def local(text):
-        """Remove what would identify the machine: the temporary folder, the home folder and the user name."""
+        """Remove what would identify the machine: the run's folder, the home folder, the temporary folder and the user name."""
         for prefix in prefixes:
             text = text.replace(prefix + "/", "").replace(prefix, ".")
         text = text.replace(str(pathlib.Path.home()), "~")
+        for temp in temps:
+            text = temp.sub("$TMPDIR", text)
+        text = re.sub(r"(?:/private)?/tmp/claude-\d+", "$TMPDIR", text)
         return re.sub(rf"\b{re.escape(getpass.getuser())}\b", "user", text)
 
     actions, pending, model, version, report, error = [], {}, None, None, "", None
@@ -231,7 +269,7 @@ def to_transcript(log, folder):
                     action = pending[block["tool_use_id"]]
                     action["ok"] = not block.get("is_error", False)
                     if action["kind"] == "run":
-                        action["output"] = local(result_text(block.get("content")))[-OUTPUT_TAIL:]
+                        action["output"] = local(result_text(block.get("content")))
         elif event.get("type") == "result":
             report = event.get("result") or ""
             if event.get("is_error"):
@@ -241,13 +279,20 @@ def to_transcript(log, folder):
 
 
 def operator_identity():
-    """Strings that must never reach a transcript: the user name, the home folder and the git identity."""
-    found = {getpass.getuser(), str(pathlib.Path.home())}
+    """Strings that must never reach a transcript: the user name, the home folder, the machine's temporary
+    folder and the git identity. The git identity is read from the operator's own config, on purpose."""
+    found = {getpass.getuser(), str(pathlib.Path.home()), *temporary_folders()}
     for key in ("user.name", "user.email"):
         value = subprocess.run(["git", "config", "--global", key], capture_output=True, text=True).stdout.strip()
         if value:
             found.add(value)
     return [value for value in found if len(value) > 2]
+
+
+def leaks(actions):
+    """What in a transcript would identify the operator or this machine. Empty when it is safe to write."""
+    text = json.dumps(actions).lower()
+    return [secret for secret in operator_identity() if secret.lower() in text] + MACHINE_PATHS.findall(text)
 
 
 def suite_passes(folder):
@@ -260,11 +305,16 @@ def _copy(folder, scratch, name):
     return copy
 
 
+def _not_cache(lines):
+    """Paths that are not Python's byte-code cache, which running a suite writes beside the code it imports."""
+    return [line for line in lines if line.strip() and "__pycache__/" not in line and not line.rstrip('"').endswith(".pyc")]
+
+
 def _changed(folder, start, path):
-    """Whether a path differs from the starting commit, in the commit or on disk."""
-    committed = git(folder, "diff", "--name-only", start, "HEAD", "--", path).stdout.strip()
-    on_disk = git(folder, "status", "--porcelain", "--untracked-files=all", "--", path).stdout.strip()
-    return bool(committed or on_disk)
+    """Whether a path differs from the starting commit, in the commit or on disk. Python's cache does not count."""
+    committed = git(folder, "diff", "--name-only", start, "HEAD", "--", path).stdout.splitlines()
+    on_disk = git(folder, "status", "--porcelain", "--untracked-files=all", "--", path).stdout.splitlines()
+    return bool(_not_cache(committed) or _not_cache(on_disk))
 
 
 def inspect(folder, start, case, root=ROOT):
@@ -322,8 +372,7 @@ def run_once(case, model, files, timeout):
             raise NotATrial(error or "the agent printed nothing")
         actions.extend(inspect(folder, start, case))
         actions.append({"kind": "state", "target": "the agent finished within the time limit", "ok": finished})
-    leaked = [secret for secret in operator_identity() if secret.lower() in json.dumps(actions).lower()]
-    if leaked:
+    if leaks(actions):
         raise RuntimeError("a transcript holds the operator's identity; nothing was written")
     return actions, used_model, version
 
