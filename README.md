@@ -51,6 +51,7 @@ git config core.hooksPath .githooks
 | [docs/](docs/definition-of-done.md) | The definition of done, one playbook, three decision records, the question log, the orchestration rules, and the templates and plan for the current milestone. |
 | [evals/](evals/README.md) | Three eval cases in a small sample order system, and 45 recorded runs per arm of a real model: with the workspace's guidance, with a two-line instruction instead, and with neither. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
+| [EVIDENCE.md](EVIDENCE.md), [CHANGELOG.md](CHANGELOG.md) | What each claim rests on and how to re-run it; what changed in each version. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
 
 ## What is checked, and by what
@@ -102,7 +103,7 @@ Save the cases as `parts/no_empty_pages.cases.json`, add `{"use": "no_empty_page
 
 [evals/](evals/README.md) asks whether the guidance changes what an agent does, and whether it beats something cheaper. It gives a real model one-line requests in a small order system, in three arms: with the workspace's guidance, with a two-line instruction that asks for the playbook's two habits, and with neither. One request is the Export bug. The other two use the team's own words, "the nightly job" and "the big report", where the tempting fix sits in the shelved folder or in another report.
 
-In the recorded runs, fifteen per arm in each of the three cases on a small model, 43 of 45 guided runs passed every grader, 14 of 45 two-line runs and none of the 45 bare runs. The two lines produced the habits they ask for as reliably as the playbook. The difference came from the facts: every two-line and bare run that heard "the nightly job" changed the shelved folder, and 27 of 30 that heard "the big report" changed the wrong report, while every guided run changed the right code. The cases were built so that those facts matter, by the same hand as the guidance, so this shows that the contract and the index reach the agent, not how often real work turns on them. [evals/README.md](evals/README.md#the-recorded-runs) has the table, the intervals and the transcripts.
+In the recorded runs, fifteen per arm in each of the three cases on a small model, 43 of 45 guided runs passed every grader, 14 of 45 two-line runs and none of the 45 bare runs. The two lines produced the habits they ask for as reliably as the playbook. The difference came from the facts: every two-line and bare run that heard "the nightly job" changed the shelved folder, and 27 of 30 that heard "the big report" changed the wrong report, while every guided run changed the right code. The cases were built so that those facts matter, by the same hand as the guidance, so this shows that the contract and the index reach the agent, not how often real work turns on them. Two graders were stricter than the habits they check: read fairly, the counts are 44 or 45, 17 and 0 of 45, and the conclusion stands. [evals/README.md](evals/README.md#the-recorded-runs) has the table, the intervals, the transcripts and the defects that the next recording fixes.
 
 ## Use it for your own team
 
@@ -111,6 +112,8 @@ In the recorded runs, fifteen per arm in each of the three cases on a small mode
 3. Fill the alias table from the words your team actually says.
 4. Write a playbook for the task you repeat most, and one eval case for it.
 5. Start the question log. Each entry is a gap; fix the page, then note the fix.
+
+Steps 1 and 3 change what the eval's guided arm is given, so `eval_record` fails until the eval runs again. The three sample cases test the invented order system, so replace them with cases from your own code in step 4 and record those with `evals/run.py`.
 
 Add a part when the same mistake shows up twice.
 
@@ -133,7 +136,7 @@ Add a part when the same mistake shows up twice.
 - **`aliases` is strict about its table and loose about what counts.** Each row needs exactly two columns, the second one plain name in backticks; a linked name or a second table under the heading is an error. Any definition of that name under `src/` satisfies it, including a method that happens to share the name. In `AGENTS.md` it takes only backticked words that mix upper and lower case, such as `AccountFreeze`, so `main`, `KIND`, `max_age_days`, paths and commands are not checked.
 - **The commit check reads a submodule from its checkout on disk**, not from the commit the index pins. Run `git submodule update` before committing a pin change, and initialise submodules before the first check.
 - **`eval_record` trusts the record file.** It shows that someone ran the cases on the current wording. It cannot stop a person from editing the record by hand; CI's re-grade catches a grade that does not follow from its transcript, not a transcript written by hand. Changing a playbook, `AGENTS.md`, `INDEX.md` or the harness means running all three cases again, 135 agent runs; moving a page's review date in its front matter does not.
-- **Review dates run out.** Every dated page here was reviewed on the same day. About six months later a first push or a force push, where CI treats every file as changed, fails until the pages are reviewed and their dates moved.
+- **Review dates run out.** Every dated page here was reviewed within two days of the others. About six months later a first push or a force push, where CI treats every file as changed, fails until the pages are reviewed and their dates moved.
 - **The eval is three cases on one model, fifteen runs per arm in each.** `evals/run.py` drives one agent tool, Claude Code, inside that tool's own sandbox; another tool would need a sandbox or a container, and none is built. The guided arm is given the pages, not the hooks.
 
 ## License

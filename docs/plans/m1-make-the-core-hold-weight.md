@@ -217,6 +217,12 @@ Approved by: Ryan Tornberg, 2026-11-15.
   - **Why a replay test:** every other criterion is a named test that can fail later. A recording alone cannot. The replay runs in CI on three systems, so a change to the adapter that would misread Codex fails there.
   - **Why the several-file patch:** Codex edits through one patch tool, and one patch can add, change, delete or move several files. Deciding only the first path would let a shelved edit through as the second.
   - **Why a scratch clone:** the sweep needs a file the session did not write, and a refused commit leaves the index staged. In a scratch clone neither touches the main checkout or its ledger. The live run of the session's own hooks still happens in the main checkout before the push.
+- 2026-11-15, **proposed by the M1 close-out session, waiting on the maintainer:** a revision to criterion 29. Not built.
+  - **Criterion 29's last two sentences would become:** "The gate accepts a record only with five or more runs per arm for each affected case. It refuses a record in which, for any affected case, the guided arm passes every grader in no more runs than the bare arm. It also refuses the records when, pooled across the cases, the guided arm does not pass every grader more often than the two-line arm by a one-sided Fisher exact test at p < 0.05."
+  - **Why "passing" goes:** read literally, "five or more passing runs per arm" asks the bare arm to pass, which an eval of guidance that helps cannot meet. Slice 3 read it as five or more runs per arm, and its record says so.
+  - **Why whole runs, not "any grader":** the bare arm is never asked for the report format that one grader checks, so the guided arm beats it on that grader whatever else happens. The red team showed a record in which no guided run passed and the gate still accepted it.
+  - **Why the two-line arm, pooled:** that is the comparison the stop rule makes, by hand, with `evals/pool.py`. In the gate, a later change cannot lose it quietly. Per case it would be too strict: a case that tests only the playbook's habits, like fix-a-bug, may tie with two lines that ask for the same habits, and that tie is a finding, not a failure.
+  - **Cost:** `parts/eval_record.py` is outside the eval's hash, so this needs no new recording. Today's records pass it: 15, 14 and 14 guided runs pass every grader against 0 bare runs in each case, and pooled against two-line p = 4e-11.
 
 ## Results
 
