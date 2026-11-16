@@ -109,7 +109,7 @@ Criteria 1 to 31 are each a named test in `tests/` or a case in `parts/*.cases.j
 
 **Second tool (slice 7)**
 
-25. A recorded Codex CLI run shows `git add -A` refused and an edit to the shelved folder refused. Codex's edits reach the slice-5 ledger.
+25. A recorded Codex CLI run, in a scratch clone of the workspace, shows the reminder on `git add -A` next to the command's result, the sweep refused at the commit, and an edit to the shelved folder refused. The files Codex wrote with its patch tool reach the slice-5 ledger, and their commit passes. A test replays every hook payload the run recorded and gets the same answers. A patch that touches several files is refused when any one of them is in the shelved folder, a move into it included, and then records none of them.
 
 **An eval that can lose (slice 3)**
 
@@ -211,7 +211,7 @@ Approved by: Ryan Tornberg, 2026-11-15.
 - 2026-11-15, the maintainer approved two revisions to slice 3. Criteria 29 and 31 and the Docker line under "Limits" now carry them.
   - **Criterion 29 gains a sentence:** "The gate also refuses a record in which, for any affected case, the guided arm passes no grader more often than the bare arm." Why: today `eval_record` checks only that the guided arm passed. A playbook the bare model follows just as well still ships, which contradicts the eval page's rule that guidance stays only while it beats the bare model. The stop rule's Fisher test still decides the milestone's pooled result; this sentence is the cheap check on every change.
   - **Criterion 31 becomes:** "The agent runs inside the agent tool's own operating-system sandbox where the tool has one, and inside a container where it does not. Its permissions are bypassed only inside one of the two. A recorded transcript holds none of the operator's environment: no home folder, user name, shell alias or git identity." Why: Claude Code's sandbox already confines writes to the run's folder, hides the home folder and limits the network. A container is then needed only for a tool without one. The Limits line "Before slice 3, the maintainer starts Docker" applies only if a container turns out to be needed.
-- 2026-11-15, proposed, waiting on the maintainer's approval. A revision to criterion 25. Slice 7 is not built until it is approved or struck.
+- 2026-11-15, the maintainer approved a revision to criterion 25, which now carries it.
   - **Criterion 25 becomes:** "A recorded Codex CLI run, in a scratch clone of the workspace, shows the reminder on `git add -A` next to the command's result, the sweep refused at the commit, and an edit to the shelved folder refused. The files Codex wrote with its patch tool reach the slice-5 ledger, and their commit passes. A test replays every hook payload the run recorded and gets the same answers. A patch that touches several files is refused when any one of them is in the shelved folder, a move into it included, and then records none of them."
   - **Why the reminder, not a refusal:** since slice 5 the shell hook never refuses `git add -A`; the commit check does. [Decision 0002](../decisions/0002-hooks-remind-the-commit-enforces.md) gives the reasons. The criterion as approved predates it.
   - **Why a replay test:** every other criterion is a named test that can fail later. A recording alone cannot. The replay runs in CI on three systems, so a change to the adapter that would misread Codex fails there.
