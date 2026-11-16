@@ -7,6 +7,8 @@ A part is one Python file. It declares what it is and exposes one function:
                        def decide(event, config) -> None to allow, or the reason to refuse
                        MODE = "remind" (optional): the hook never refuses. Its reason is shown
                        to the agent as a reminder and the call goes ahead. The default is "refuse".
+    A check may set PHASES, the phases it runs in: "commit", "ci" and "nightly". The default is
+    ("commit", "ci"). `ws.py check --phase nightly` runs only the checks whose PHASES hold "nightly".
 
 KIND and EVENT are each one plain line of their own, such as KIND = "hook".
 The runner reads those lines without running the file, so a hook call loads
@@ -20,9 +22,16 @@ fails, is refused. A check that nobody tests can stop finding things, and a
 hook can stop firing, and nobody notices. A case runs with its own "config"
 only, never the manifest's settings, so changing a setting cannot fail a case.
 
-A part's config is its manifest entry without "use", plus the manifest's tier
-binding as "tiers" when the manifest has one. The binding lives in one place:
+A part's config is its manifest entry without "use" and "why", plus the manifest's
+tier binding as "tiers" when the manifest has one. The binding lives in one place:
 an entry that sets "tiers" itself is refused.
+
+The manifest holds four keys and no others: "version", which must equal the
+engine's VERSION; "tiers", which binds each of the three tiers to a model and an
+effort; "parts"; and "retired". Every entry in "parts" and "retired" gives a "why".
+A hook call checks only what its answer depends on: the version, the parts and the
+tier binding. A missing "why" or an unknown key fails every other command, so it
+cannot reach a commit, and it does not lock the session out.
 
 A check case:  {"name", "files": {path: text}, "changed": [paths], "config": {}, "expect": [...]}
                Each expectation is text in an error, or {"message": text, "level": "warning"}.
@@ -43,12 +52,17 @@ import re
 import subprocess
 import types
 
+from . import VERSION
 from . import snapshot as snapshots
 
 KINDS = ("check", "hook")
 EVENTS = ("before-shell", "before-edit", "before-handoff")
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")
+PHASES = ("commit", "ci", "nightly")
+DEFAULT_PHASES = ("commit", "ci")
+TIERS = ("driver", "worker", "mechanical")
+TOP_LEVEL = ("version", "tiers", "parts", "retired")
 MANIFEST = "workspace.json"
 
 
@@ -71,6 +85,7 @@ class Part:
         self.kind = module.KIND
         self.event = getattr(module, "EVENT", None)
         self.mode = getattr(module, "MODE", "refuse")
+        self.phases = tuple(getattr(module, "PHASES", DEFAULT_PHASES)) if self.kind == "check" else ()
 
     def run(self, snapshot, config=None):
         try:
@@ -124,25 +139,65 @@ class Part:
         return failures
 
 
-def parse_manifest(text, where=MANIFEST):
+def _gives_a_reason(entry):
+    return isinstance(entry.get("why"), str) and bool(entry["why"].strip())
+
+
+def parse_manifest(text, where=MANIFEST, hook=False):
+    """The manifest, or PartError naming what is wrong with it.
+
+    hook=True checks only what a hook's answer depends on: the version, the parts and the tier binding.
+    """
     try:
         manifest = json.loads(text)
     except json.JSONDecodeError as error:
         raise PartError(f"{where}: {error}")
-    parts = manifest.get("parts") if isinstance(manifest, dict) else None
+    if not isinstance(manifest, dict):
+        raise PartError(f"{where}: the manifest must be a JSON object")
+    # The version first: a manifest written for another engine may mean something else by its settings.
+    if "version" not in manifest:
+        raise PartError(f'{where}: gives no "version", and this engine is {VERSION}; add "version": "{VERSION}"')
+    if manifest["version"] != VERSION:
+        raise PartError(f'{where}: "version" is {json.dumps(manifest["version"])}, but this engine is {VERSION}. '
+                        "Upgrade the engine and the manifest's version together, in one merge or from your own terminal")
+    parts = manifest.get("parts")
     if not isinstance(parts, list) or not parts:
         raise PartError(f'{where}: "parts" must be a non-empty list')
     retired = manifest.get("retired", [])
     if not isinstance(retired, list) or not all(
-            isinstance(r, dict) and isinstance(r.get("use"), str) and isinstance(r.get("why"), str) and r["why"].strip()
-            for r in retired):
+            isinstance(r, dict) and isinstance(r.get("use"), str) and _gives_a_reason(r) for r in retired):
         raise PartError(f'{where}: each "retired" entry needs a "use" and a "why" that gives the reason')
+    if "tiers" in manifest:
+        _check_tiers(manifest["tiers"], where)
+    if hook:
+        return manifest
+    unknown = sorted(set(manifest) - set(TOP_LEVEL))
+    if unknown:
+        raise PartError(f'{where}: unknown key "{unknown[0]}"; a manifest holds only {", ".join(TOP_LEVEL)}')
+    for entry in parts:
+        if isinstance(entry, dict) and isinstance(entry.get("use"), str) and not _gives_a_reason(entry):
+            raise PartError(f'{where}: part {pathlib.PurePosixPath(entry["use"]).stem} needs a "why": the reason '
+                            "this workspace runs it, in a sentence")
     return manifest
 
 
-def load_manifest(root):
+def _check_tiers(tiers, where):
+    """The tier binding must bind each of the three tiers, and only those, to a model and an effort."""
+    if not isinstance(tiers, dict):
+        raise PartError(f'{where}: "tiers" must map each of {", ".join(TIERS)} to a model and an effort')
+    for tier in sorted(set(tiers) - set(TIERS)):
+        raise PartError(f'{where}: "tiers" names "{tier}", which is not a tier; the tiers are {", ".join(TIERS)}')
+    for tier in TIERS:
+        binding = tiers.get(tier)
+        for setting in ("model", "effort"):
+            value = binding.get(setting) if isinstance(binding, dict) else None
+            if not isinstance(value, str) or not value.strip():
+                raise PartError(f'{where}: "tiers" gives the {tier} tier no {setting}')
+
+
+def load_manifest(root, hook=False):
     try:
-        return parse_manifest((pathlib.Path(root) / MANIFEST).read_text(encoding="utf-8"))
+        return parse_manifest((pathlib.Path(root) / MANIFEST).read_text(encoding="utf-8"), hook=hook)
     except FileNotFoundError:
         raise PartError(f"no {MANIFEST} in {root}")
 
@@ -246,12 +301,16 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None):
     mode = getattr(module, "MODE", "refuse")
     if kind == "hook" and mode not in MODES:
         raise PartError(f"part {name}: a hook's MODE must be one of {MODES}, not {mode!r}")
+    phases = getattr(module, "PHASES", DEFAULT_PHASES)
+    if kind == "check" and (not isinstance(phases, (tuple, list)) or not phases
+                            or not all(isinstance(phase, str) and phase in PHASES for phase in phases)):
+        raise PartError(f"part {name}: a check's PHASES must list one or more of {PHASES}, not {phases!r}")
 
     cases_file = relative[:-len(".py")] + ".cases.json"
     cases = _read_cases(name, kind, pathlib.PurePosixPath(cases_file).name, _read(root, cases_file, snapshot), mode)
     if "tiers" in entry:
         raise PartError(f'part {name}: refused, it sets "tiers"; the tier binding is the manifest\'s top-level "tiers"')
-    config = {key: value for key, value in entry.items() if key != "use"}
+    config = {key: value for key, value in entry.items() if key not in ("use", "why")}
     if tiers is not None:
         config["tiers"] = tiers
     part = Part(name, module, cases, config)

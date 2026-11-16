@@ -4,8 +4,13 @@ The patterns read one line at a time after comments are blanked out. They find
 declarations written on one line in the usual style. The README lists what
 they miss. That is the trade: no index to build, and nothing to go stale.
 """
+import argparse
 import ast
+import pathlib
 import re
+import sys
+
+from . import snapshot as snapshots
 
 SKIP_DIRS = ("node_modules/", "bin/", "obj/", "dist/", "build/")
 
@@ -19,7 +24,8 @@ _CS_NOT_A_TYPE = _CS_MODIFIERS | {"return", "await", "throw", "new", "else", "yi
 
 CS_TYPE = re.compile(rf"^\s*(?:{_CS_MOD}\s+)*(record\s+struct|record\s+class|class|interface|record|struct|enum)\s+([A-Za-z_]\w*)")
 CS_METHOD = re.compile(rf"^\s*((?:{_CS_MOD}\s+)*)({_CS_TYPE})\s+([A-Za-z_]\w*)\s*(?:<[^()]*>)?\s*\(")
-CS_CTOR = re.compile(rf"^\s*(?:{_CS_MOD}\s+)+([A-Za-z_]\w*)\s*\(")
+# A constructor takes only these modifiers. Not "new", so "new Order(1)," in an initializer is not one.
+CS_CTOR = re.compile(r"^\s*(?:(?:public|internal|private|protected|static|extern|unsafe)\s+)+([A-Za-z_]\w*)\s*\(")
 CS_PROPERTY = re.compile(rf"^\s*(?:{_CS_MOD}\s+)+{_CS_TYPE}\s+([A-Za-z_]\w*)\s*(?:\{{|=>)")
 
 _TS_NAME = r"([A-Za-z_$][\w$]*)"
@@ -127,3 +133,27 @@ def scan(snapshot, under=""):
 def find(snapshot, name, under="", contains=False):
     wanted = name.lower()
     return sorted(s for s in scan(snapshot, under) if (wanted in s[3].lower() if contains else s[3] == name))
+
+
+def main(argv=None):
+    """The command line, tools/symbols.py: print "path:line  kind  name". Exit 0 when found, 1 when not, 2 when
+    the folder does not exist."""
+    parser = argparse.ArgumentParser(description="Find where a name is defined.")
+    parser.add_argument("name")
+    parser.add_argument("root", nargs="?", default=".")
+    parser.add_argument("--contains", action="store_true", help="match any name containing NAME, ignoring case")
+    args = parser.parse_args(argv)
+
+    try:
+        tree = snapshots.Tree(args.root)
+    except NotADirectoryError:
+        print(f"no such folder: {args.root}", file=sys.stderr)
+        return 2
+    prefix = pathlib.PurePath(args.root).as_posix().rstrip("/")
+    hits = find(tree, args.name, contains=args.contains)
+    for path, line, kind, name in hits:
+        print(f"{path if prefix in ('', '.') else prefix + '/' + path}:{line}  {kind}  {name}")
+    if not hits:
+        print(f"no definition of {args.name!r} under {args.root}", file=sys.stderr)
+    return 0 if hits else 1
+

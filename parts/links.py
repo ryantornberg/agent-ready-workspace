@@ -3,7 +3,8 @@
 It reads the pages the workspace owns. A page inside a code repository under the
 workspace, such as a submodule in src/, links by that repository's own layout and
 is not read; a link into one still resolves. A symbolic link is not read as a page.
-A page that is not UTF-8 is an error, not skipped.
+A page that is not UTF-8 is an error, not skipped. So is a line over 10,000
+characters, which the reader does not parse.
 
 Config: "skip": folders whose pages are not checked (finished work, fixtures).
 """
@@ -26,9 +27,9 @@ def run(snapshot, config):
         if text is None:
             found.append(finding(page, 1, f"{snapshot.not_utf8(page)}, so its links were not checked; save it as UTF-8"))
             continue
-        for line, target, undefined_label in markdown.links(text):
-            if undefined_label is not None:
-                found.append(finding(page, line, f"reference [{undefined_label}] is never defined"))
+        for line, target, problem in markdown.links(text):
+            if problem is not None:
+                found.append(finding(page, line, problem))
                 continue
             resolved = markdown.resolve(page, target)
             if resolved is None:

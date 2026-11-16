@@ -5,6 +5,7 @@ and by test_every_part_passes_its_own_cases below.
 
 Run: python3 -m unittest discover -b tests
 """
+import ast
 import contextlib
 import datetime
 import io
@@ -25,6 +26,7 @@ sys.path.insert(0, str(ROOT / "evals"))
 sys.path.insert(0, str(ROOT / "tools"))
 
 import grade  # noqa: E402
+import wslib  # noqa: E402
 import symbols as symbols_cli  # noqa: E402
 import ws  # noqa: E402
 from wslib import parts as partlib  # noqa: E402
@@ -32,6 +34,15 @@ from wslib import snapshot as snapshots  # noqa: E402
 from wslib import symbols  # noqa: E402
 
 STALE = "---\nlast-reviewed: 2020-01-01\n---\n# Old\n"
+ENGINE = getattr(wslib, "VERSION", None)
+TIERS = {"driver": {"model": "opus", "effort": "high"}, "worker": {"model": "opus", "effort": "medium"},
+         "mechanical": {"model": "haiku", "effort": "low"}}
+
+
+def manifest(parts, **top):
+    """A manifest's text as the engine wants it: the engine's version, and a "why" on every part."""
+    entries = [dict(entry, why=entry.get("why", "a test needs it")) if isinstance(entry, dict) else entry for entry in parts]
+    return json.dumps({"version": ENGINE, **top, "parts": entries})
 
 
 def claude(tool, cwd=None, **tool_input):
@@ -71,7 +82,7 @@ class Folder(unittest.TestCase):
 
     def workspace(self, *entries):
         """A workspace that borrows this repository's real parts."""
-        self.write("workspace.json", json.dumps({"parts": list(entries)}))
+        self.write("workspace.json", manifest(entries))
         for entry in entries:
             for suffix in (".py", ".cases.json"):
                 source = ROOT / "parts" / (entry["use"] + suffix)
@@ -257,7 +268,7 @@ class RunnerTests(Folder):
         for body in ('KIND = "check"\ndef run(snapshot, config):\n    return None\n',
                      'KIND = "check"\ndef run(snapshot, config):\n    raise KeyError("boom")\n',
                      'KIND = "check"\ndef run(:\n'):
-            self.write("workspace.json", json.dumps({"parts": [{"use": "odd"}]}))
+            self.write("workspace.json", manifest([{"use": "odd"}]))
             self.write("parts/odd.py", body)
             self.write("parts/odd.cases.json", cases)
             self.assertEqual(self.ws("check")[0], 2, body)
@@ -294,7 +305,7 @@ class RunnerTests(Folder):
         self.git("init", "-q")
         self.write("a.md", "[gone](nope.md)\n")
         self.git("add", ".")
-        self.write("workspace.json", json.dumps({"parts": [{"use": "freshness"}]}))   # unstaged: drops the links check
+        self.write("workspace.json", manifest([{"use": "freshness"}]))   # unstaged: drops the links check
         self.write("parts/freshness.py", (ROOT / "parts/freshness.py").read_text(encoding="utf-8"))
         self.write("parts/freshness.cases.json", (ROOT / "parts/freshness.cases.json").read_text(encoding="utf-8"))
         code, output = self.ws("check", "--staged")
@@ -408,7 +419,7 @@ class NoSelfLockTests(Folder):
         (outside / "sneaky.cases.json").write_text('[{"name": "c", "files": {}, "expect": ["x"]}]', encoding="utf-8")
         for use in (f"../{outside.name}/sneaky.py", str(outside / "sneaky.py")):
             with self.subTest(use=use):
-                self.write("workspace.json", json.dumps({"parts": [{"use": use}]}))
+                self.write("workspace.json", manifest([{"use": use}]))
                 code, output = self.ws("list")
                 self.assertEqual(code, 2)
                 self.assertIn("outside the workspace", output)
@@ -417,7 +428,7 @@ class NoSelfLockTests(Folder):
             (self.root / "parts/linked.py").symlink_to(outside / "sneaky.py")
         except OSError:
             self.skipTest("symlinks are not available here")
-        self.write("workspace.json", json.dumps({"parts": [{"use": "linked"}]}))
+        self.write("workspace.json", manifest([{"use": "linked"}]))
         code, output = self.ws("list")
         self.assertEqual(code, 2)
         self.assertIn("outside the workspace", output)
@@ -437,7 +448,7 @@ class NoSelfLockTests(Folder):
     def test_a_case_states_the_level_it_expects(self):
         self.write("parts/warns.py", 'from wslib.parts import finding\nKIND = "check"\n'
                    'def run(snapshot, config):\n    return [finding("a.md", 1, "soft", level="warning")]\n')
-        self.write("workspace.json", json.dumps({"parts": [{"use": "warns"}]}))
+        self.write("workspace.json", manifest([{"use": "warns"}]))
         self.write("parts/warns.cases.json", json.dumps([{"name": "w", "files": {}, "expect": [{"message": "soft", "level": "warning"}]}]))
         self.assertEqual(self.ws("selftest")[0], 0)
         self.write("parts/warns.cases.json", json.dumps([{"name": "w", "files": {}, "expect": ["soft"]}]))
@@ -449,7 +460,7 @@ class NoSelfLockTests(Folder):
         self.write("parts/odd.py", 'KIND = "check"\ndef run(snapshot, config):\n'
                    '    return [{"path": "a.md", "line": 1, "message": "x", "level": "Error"}]\n')
         self.write("parts/odd.cases.json", json.dumps([{"name": "c", "files": {}, "expect": ["x"]}]))
-        self.write("workspace.json", json.dumps({"parts": [{"use": "odd"}]}))
+        self.write("workspace.json", manifest([{"use": "odd"}]))
         self.assertEqual(self.ws("check")[0], 2)
 
     def test_the_repository_cases_state_every_warning_they_expect(self):
@@ -462,26 +473,25 @@ class NoSelfLockTests(Folder):
         self.workspace({"use": "links"}, {"use": "freshness"})
         self.git("init", "-q")
         self.commit()
-        self.write("workspace.json", json.dumps({"parts": [{"use": "links"}]}))
+        self.write("workspace.json", manifest([{"use": "links"}]))
         code, output = self.ws("check")
         self.assertEqual(code, 1)
         self.assertIn("freshness", output)
         self.git("add", "workspace.json")
         self.assertEqual(self.ws("check", "--staged")[0], 1)
-        self.write("workspace.json", json.dumps({"parts": [{"use": "links"}],
-                                                 "retired": [{"use": "freshness", "why": "no dated pages here"}]}))
+        self.write("workspace.json", manifest([{"use": "links"}], retired=[{"use": "freshness", "why": "no dated pages here"}]))
         self.git("add", "workspace.json")
         self.assertEqual(self.ws("check")[0], 0)
         self.assertEqual(self.ws("check", "--staged")[0], 0)
         for retired in ([{"use": "freshness", "why": ""}], [{"use": "freshness"}], ["freshness"]):
-            self.write("workspace.json", json.dumps({"parts": [{"use": "links"}], "retired": retired}))
+            self.write("workspace.json", manifest([{"use": "links"}], retired=retired))
             self.assertEqual(self.ws("check")[0], 2, retired)
 
     def test_ci_requires_the_parts_of_the_base_branch(self):
         self.workspace({"use": "links"}, {"use": "freshness"})
         self.git("init", "-q")
         base = self.commit()
-        self.write("workspace.json", json.dumps({"parts": [{"use": "links"}]}))
+        self.write("workspace.json", manifest([{"use": "links"}]))
         self.commit("drop freshness")
         code, output = self.ws("check", "--changed-from", base)
         self.assertEqual(code, 1)
@@ -492,7 +502,7 @@ class NoSelfLockTests(Folder):
         self.write("workspace.json", json.dumps({"parts": [{"use": "links", "legacy": 1}, "junk", {"nouse": 1}], "zzz": 1}))
         self.git("init", "-q")
         base = self.commit()
-        self.write("workspace.json", json.dumps({"tiers": {}, "parts": [{"use": "links", "newer": True}]}))
+        self.write("workspace.json", manifest([{"use": "links", "newer": True}], tiers=TIERS))
         self.commit("new keys")
         self.assertEqual(self.ws("check", "--changed-from", base)[0], 0)
         self.assertEqual(self.ws("check")[0], 0)
@@ -522,8 +532,7 @@ class NoSelfLockTests(Folder):
 class FailClosedTests(Folder):
     """M1 slice 1: a hook refuses whatever it cannot read, and the wiring refuses when it cannot run the hook."""
 
-    TIERS = {"driver": {"model": "opus", "effort": "high"}, "worker": {"model": "opus", "effort": "medium"},
-             "mechanical": {"model": "haiku", "effort": "low"}}
+    TIERS = TIERS
 
     def hooks(self, *entries, tiers=None):
         self.workspace(*entries)
@@ -1211,6 +1220,208 @@ class AdoptionPathTests(Folder):
         code, output = self.ws("check")
         self.assertEqual(code, 1)
         self.assertIn("is in the future", output)
+
+
+class ShapeForGrowthTests(Folder):
+    """M1 slice 6: the engine in one folder, a version the manifest must match, checks chosen by phase, a reason on
+    every manifest entry, CI with read-only permissions and a weekly run, and two parser fixes."""
+
+    def check_part(self, name, message, phases=None):
+        """A check that always finds `message`, declared for these phases (None: the default)."""
+        body = 'from wslib.parts import finding\nKIND = "check"\n'
+        if phases is not None:
+            body += f"PHASES = {tuple(phases)!r}\n"
+        body += f'\n\ndef run(snapshot, config):\n    return [finding("a.md", 1, {message!r})]\n'
+        self.write(f"parts/{name}.py", body)
+        self.write(f"parts/{name}.cases.json", json.dumps([{"name": "finds", "files": {}, "expect": [message]}]))
+
+    def edited(self, change, *parts, **top):
+        """Write a manifest for these parts, after change(manifest) has edited it, and stage it."""
+        body = json.loads(manifest(parts or [{"use": "links"}], **top))
+        change(body)
+        self.write("workspace.json", json.dumps(body))
+        self.git("add", "workspace.json")
+
+    def refused(self, says, commands=(["list"], ["selftest"], ["check"], ["check", "--staged"])):
+        for command in commands:
+            with self.subTest(command=command):
+                code, output = self.ws(*command)
+                self.assertEqual(code, 2, output)
+                self.assertIn(says, output)
+
+    # The engine in one folder
+    def test_the_engine_is_one_folder_and_the_files_outside_it_only_call_into_it(self):
+        for shim in ("ws.py", "tools/symbols.py"):
+            with self.subTest(shim=shim):
+                tree = ast.parse((ROOT / shim).read_text(encoding="utf-8"))
+                defined = [node.name for node in ast.walk(tree)
+                           if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+                self.assertEqual(defined, [], f"{shim} defines code; the engine's code lives in wslib/")
+                imported = {node.module.split(".")[0] for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)}
+                imported |= {alias.name.split(".")[0] for node in ast.walk(tree) if isinstance(node, ast.Import)
+                             for alias in node.names}
+                self.assertLessEqual(imported, {"wslib", "pathlib", "sys"}, shim)
+
+    # Criterion 20
+    def test_version_prints_the_engine_version(self):
+        ran = subprocess.run([sys.executable, str(ROOT / "ws.py"), "--version"], capture_output=True, text=True)
+        self.assertEqual(ran.returncode, 0, ran.stderr)
+        self.assertRegex(ENGINE or "", r"^\d+\.\d+\.\d+$")
+        self.assertEqual(ran.stdout.strip(), ENGINE)
+        self.assertEqual(json.loads((ROOT / "workspace.json").read_text(encoding="utf-8")).get("version"), ENGINE)
+
+    def test_the_manifest_version_must_match_the_engine(self):
+        self.workspace({"use": "links"}, {"use": "shelved", "paths": ["src/old"]})
+        self.git("init", "-q")
+        self.git("add", ".")
+        self.assertEqual(self.ws("check", "--staged")[0], 0)
+        for version in ("0.0.1", "", 2, None):
+            with self.subTest(version=version):
+                self.edited(lambda body: body.pop("version") if version is None else body.update(version=version),
+                            {"use": "links"}, {"use": "shelved", "paths": ["src/old"]})
+                self.refused(f"this engine is {ENGINE}")
+                # The settings may not mean what this engine reads, so a hook call fails closed too.
+                code, output = self.ws("hook", "before-edit", stdin='{"version": 1, "path": "a.md"}')
+                self.assertEqual(code, 2)
+                self.assertIn(f"this engine is {ENGINE}", output)
+
+    # Criterion 21
+    def test_check_phase_nightly_runs_only_nightly_parts(self):
+        self.check_part("plain", "found by the plain part")
+        self.check_part("night", "found by the nightly part", phases=["nightly"])
+        self.check_part("always", "found by the every-phase part", phases=["commit", "ci", "nightly"])
+        self.write("workspace.json", manifest([{"use": "plain"}, {"use": "night"}, {"use": "always"}]))
+        code, output = self.ws("check", "--phase", "nightly")
+        self.assertEqual(code, 1)
+        self.assertNotIn("plain part", output)
+        self.assertIn("found by the nightly part", output)
+        self.assertIn("found by the every-phase part", output)
+        self.git("init", "-q")
+        self.git("add", ".")
+        for command in (["check"], ["check", "--phase", "commit"], ["check", "--phase", "ci"], ["check", "--staged"]):
+            with self.subTest(command=command):
+                code, output = self.ws(*command)
+                self.assertEqual(code, 1)
+                self.assertIn("found by the plain part", output)
+                self.assertNotIn("nightly part", output)
+                self.assertIn("found by the every-phase part", output)
+        code, output = self.ws("selftest")                       # every part's cases run, whatever its phases
+        self.assertEqual(code, 0)
+        self.assertIn("night: 1 of 1 cases", output)
+        code, output = self.ws("list")
+        self.assertIn("check in nightly", output)
+
+    def test_a_phase_is_one_the_runner_knows(self):
+        for phases in (["weekly"], [], "nightly"):
+            with self.subTest(phases=phases):
+                self.check_part("odd", "x", phases=phases)
+                if isinstance(phases, str):
+                    self.write("parts/odd.py", (self.root / "parts/odd.py").read_text(encoding="utf-8")
+                               .replace("PHASES = ('n', 'i', 'g', 'h', 't', 'l', 'y')", 'PHASES = "nightly"'))
+                self.write("workspace.json", manifest([{"use": "odd"}]))
+                code, output = self.ws("check")
+                self.assertEqual(code, 2)
+                self.assertIn("PHASES", output)
+        with self.assertRaises(SystemExit):
+            self.ws("check", "--phase", "weekly")
+
+    # Criterion 22
+    def test_a_manifest_entry_with_no_why_is_refused(self):
+        self.workspace({"use": "links"}, {"use": "no_stage_all"})
+        self.git("init", "-q")
+        self.git("add", ".")
+        for why in (None, "", "   ", 5):
+            with self.subTest(why=why):
+                self.edited(lambda body: body["parts"][1].pop("why") if why is None else body["parts"][1].update(why=why),
+                            {"use": "links"}, {"use": "no_stage_all"})
+                self.refused('part no_stage_all needs a "why"')
+
+    def test_an_unknown_top_level_key_is_refused(self):
+        self.workspace({"use": "links"})
+        self.git("init", "-q")
+        self.git("add", ".")
+        for key in ("tier", "Parts", "phases", "verison"):
+            with self.subTest(key=key):
+                self.edited(lambda body: body.update({key: {}}))
+                self.refused(f'unknown key "{key}"')
+
+    def test_a_tier_binding_with_no_model_or_effort_is_refused(self):
+        self.workspace({"use": "links"}, {"use": "handoff_tier"})
+        self.git("init", "-q")
+        self.git("add", ".")
+        broken = []
+        for tier in TIERS:
+            for setting in ("model", "effort"):
+                for value in (None, "", 5):
+                    tiers = json.loads(json.dumps(TIERS))
+                    if value is None:
+                        del tiers[tier][setting]
+                    else:
+                        tiers[tier][setting] = value
+                    broken.append((tiers, f"the {tier} tier"))
+            tiers = json.loads(json.dumps(TIERS))
+            del tiers[tier]
+            broken.append((tiers, f"the {tier} tier"))
+        broken += [({**TIERS, "lead": {"model": "opus", "effort": "max"}}, '"lead"'), ([], '"tiers"'), ("opus", '"tiers"')]
+        # A task for the driver tier, which is bound in every broken binding but the ones that drop it.
+        task = '{"version": 1, "prompt": "Tier: driver\\nReview it.", "model": "opus", "effort": "high"}'
+        for tiers, says in broken:
+            with self.subTest(tiers=tiers):
+                self.edited(lambda body: body.update(tiers=tiers), {"use": "links"}, {"use": "handoff_tier"})
+                self.refused(says)
+                self.assertEqual(self.ws("hook", "before-handoff", stdin=task)[0], 2)
+        self.edited(lambda body: body.update(tiers=TIERS), {"use": "links"}, {"use": "handoff_tier"})
+        self.assertEqual(self.ws("hook", "before-handoff", stdin=task)[0], 0)
+        self.edited(lambda body: None, {"use": "links"}, {"use": "handoff_tier"})   # no binding at all: a workspace
+        self.assertEqual(self.ws("check", "--staged")[0], 0)                       # may have none
+        self.assertEqual(self.ws("hook", "before-handoff", stdin=task)[0], 2)     # and then no task is let through
+
+    def test_a_missing_why_or_an_unknown_key_does_not_lock_the_hooks(self):
+        self.workspace({"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        self.git("init", "-q")
+        self.edited(lambda body: (body["parts"][1].pop("why"), body.update(notes="half done")),
+                    {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        self.assertEqual(self.ws("hook", "before-shell", stdin='{"version": 1, "command": "ls"}')[0], 0)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "workspace.json"}')[0], 0)
+        self.assertEqual(self.ws("hook", "before-edit", stdin='{"version": 1, "path": "src/old/x.cs"}')[0], 2)
+        self.assertEqual(self.ws("check")[0], 2)
+
+    def test_this_repositorys_manifest_gives_a_why_for_every_part(self):
+        body = json.loads((ROOT / "workspace.json").read_text(encoding="utf-8"))
+        for entry in body["parts"] + body.get("retired", []):
+            self.assertTrue(isinstance(entry.get("why"), str) and len(entry["why"].split()) >= 4, entry["use"])
+
+    # Criterion 23
+    def test_ci_has_a_permissions_block_and_a_weekly_schedule(self):
+        text = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertRegex(text, r"(?m)^permissions:\n(?:  .*\n)*?  contents: read$")
+        self.assertNotRegex(text, r":\s*write\b")
+        cron = re.search(r'(?m)^  schedule:\n    - cron: "([^"]+)"', text)
+        self.assertIsNotNone(cron, "no schedule trigger under on:")
+        minute, hour, day, month, weekday = cron.group(1).split()
+        self.assertEqual((day, month), ("*", "*"))
+        self.assertRegex(f"{minute} {hour} {weekday}", r"^\d+ \d+ [0-6]$")
+        self.assertIn("ws.py check --phase nightly", text)
+
+    # Criterion 24
+    def test_the_link_reader_reports_a_line_over_10000_characters(self):
+        self.workspace({"use": "links"})
+        too_long = ("[gone](nope.md) " + "x " * 5000).rstrip()
+        fits = "[also gone](nope2.md) ".ljust(10_000, "y")
+        self.write("a.md", f"# A\n\n{too_long}\n\n{fits}\n")
+        code, output = self.ws("check")
+        self.assertEqual(code, 1)
+        self.assertIn(f"error: a.md:3: line 3 is {len(too_long):,} characters, over the 10,000 the link reader reads", output)
+        self.assertNotIn("nope.md", output)
+        self.assertIn("error: a.md:5: link to missing file: nope2.md", output)
+
+    def test_symbols_does_not_read_a_new_expression_as_a_constructor(self):
+        text = "\n".join(["public class Basket", "{", "    public Basket(int size) { }",
+                          "    private readonly List<Order> orders = new List<Order>", "    {",
+                          "        new Order(1),", "        new Order(2)", "    };", "}"])
+        found = [(kind, name) for _, kind, name in symbols.symbols_in("Basket.cs", text)]
+        self.assertIn(("constructor", "Basket"), found)
+        self.assertNotIn(("constructor", "Order"), found)
 
 
 @contextlib.contextmanager
