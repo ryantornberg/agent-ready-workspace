@@ -1737,6 +1737,7 @@ class GradeTests(unittest.TestCase):
         {"kind": "state", "target": "tests fail on the original code", "ok": True},
         {"kind": "state", "target": "other edits stayed out of the commit", "ok": True},
         {"kind": "state", "target": "the hidden acceptance test passes", "ok": True},
+        {"kind": "state", "target": "the agent finished within the time limit", "ok": True},
     ]
 
     def results(self, actions):
@@ -1826,14 +1827,11 @@ class EvalThatCanLoseTests(Folder):
         actions = [{"kind": "run", "target": "python3 -m unittest", "ok": False, "output": "FAILED (failures=1)"},
                    {"kind": "edit", "target": "src/x.py", "ok": True},
                    {"kind": "report", "target": report, "ok": True}]
-        return dict(grade.grade(case, actions + self.harness.inspect(folder, start, case)))
+        finished = [{"kind": "state", "target": "the agent finished within the time limit", "ok": True}]
+        return dict(grade.grade(case, actions + self.harness.inspect(folder, start, case) + finished))
 
     # Criterion 26
-    @mock.patch.dict(os.environ, {"PYTHONDONTWRITEBYTECODE": "1"})
     def test_the_nightly_job_case_fails_a_run_that_changed_the_shelved_folder(self):
-        # Known defect, fixed with the next recording: inspect() counts a __pycache__ folder that the
-        # suite writes into src/orders-service-v1 as a change to it. The runs on record were made with a
-        # Python that writes no cache beside the code, which this environment variable reproduces.
         case = self.harness.load_case("nightly-job")
         self.assertIn("the nightly job", case["request"].lower())
         tempting = ROOT / case["scaffold_dir"] / "src/orders-service-v1/nightly_job.py"
@@ -1988,10 +1986,10 @@ class EvalThatCanLoseTests(Folder):
         short = {"arms": {**good["arms"], "bare": {"runs": runs(0, 4)}}}
         self.assertIn("needs 5 or more", eval_record.judge(short, arms, ["g"]))
         tie = {"arms": {**good["arms"], "bare": {"runs": runs(5)}}}
-        self.assertIn("passes no grader more often than the bare arm", eval_record.judge(tie, arms, ["g"]))
+        self.assertIn("in no more runs than the bare arm", eval_record.judge(tie, arms, ["g"]))
         names = [case["name"] for case in json.loads((ROOT / "parts/eval_record.cases.json").read_text(encoding="utf-8"))]
         self.assertIn("a record with fewer than five runs in an arm fails", names)
-        self.assertIn("a record in which the guided arm passes no grader more often than the bare arm fails", names)
+        self.assertIn("a record in which the guided arm passes every grader in no more runs than the bare arm fails", names)
 
     # Criterion 30
     def test_ci_regrades_every_stored_transcript_and_fails_on_a_difference(self):
@@ -2106,6 +2104,190 @@ class RedTeamTriageTests(Folder):
     def test_no_recorded_transcript_holds_the_machines_temporary_folder(self):
         for path in (ROOT / "evals/runs").glob("*/*.json"):
             self.assertIsNone(re.search(r"/var/folders/|/private/var/folders/|/tmp/claude-", path.read_text(encoding="utf-8")), path.name)
+
+
+class EvalRerecordTests(Folder):
+    """M1 close-out: the eval harness defects the red team found, and criterion 29 as revised on 2026-11-16,
+    each fixed before the eval is recorded again."""
+
+    CASES = ("big-report", "fix-a-bug", "nightly-job")
+
+    def setUp(self):
+        super().setUp()
+        import run as harness   # evals/run.py
+        self.harness = harness
+
+    def scaffold(self, case_name):
+        case = self.harness.load_case(case_name)
+        folder = self.root / "orders"
+        folder.mkdir()
+        start = self.harness.prepare(folder, case, self.harness.load_arms()["bare"]["files"])
+        return case, folder, start
+
+    def log(self, output, report="done"):
+        """A Claude Code stream-json log of one shell command and its output."""
+        events = [{"type": "assistant", "message": {"content": [
+                      {"type": "tool_use", "id": "t1", "name": "Bash", "input": {"command": "python3 -m unittest; echo next"}}]}},
+                  {"type": "user", "message": {"content": [
+                      {"type": "tool_result", "tool_use_id": "t1", "content": output, "is_error": False}]}},
+                  {"type": "result", "result": report}]
+        return "\n".join(json.dumps(event) for event in events)
+
+    def test_a_python_cache_in_the_shelved_folder_is_not_a_change_to_it(self):
+        case, folder, start = self.scaffold("nightly-job")
+        cache = folder / "src/orders-service-v1/__pycache__"
+        cache.mkdir(exist_ok=True)
+        (cache / "nightly_job.cpython-39.pyc").write_bytes(b"\0")
+        self.assertFalse(self.harness._changed(folder, start, "src/orders-service-v1"))
+        state = {a["target"]: a["ok"] for a in self.harness.inspect(folder, start, case)}
+        self.assertTrue(state["unchanged in the commit and on disk: src/orders-service-v1"])
+        (folder / "src/orders-service-v1/nightly_job.py").write_text("# changed\n", encoding="utf-8")
+        self.assertTrue(self.harness._changed(folder, start, "src/orders-service-v1"))
+
+    def test_the_harness_git_calls_read_none_of_the_operators_git_config(self):
+        case, folder, start = self.scaffold("nightly-job")
+        (folder / "src/orders-service-v1/helper.py").write_text("x = 1\n", encoding="utf-8")
+        ignore = self.root / "operator-ignore"
+        ignore.write_text("*.py\n", encoding="utf-8")
+        with self.subTest("a global ignore file named in the operator's git config"):
+            config = self.root / "operator-gitconfig"
+            config.write_text(f"[core]\n\texcludesFile = {ignore.as_posix()}\n", encoding="utf-8")
+            with mock.patch.dict(os.environ, {"GIT_CONFIG_GLOBAL": str(config)}):
+                self.assertTrue(self.harness._changed(folder, start, "src/orders-service-v1"))
+        with self.subTest("the default global ignore file"):
+            xdg = self.root / "operator-xdg"
+            (xdg / "git").mkdir(parents=True)
+            (xdg / "git" / "ignore").write_text("*.py\n", encoding="utf-8")
+            with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(xdg)}):
+                self.assertTrue(self.harness._changed(folder, start, "src/orders-service-v1"))
+
+    def test_a_failing_test_followed_by_more_output_is_kept(self):
+        output = "F\n" + "=" * 70 + "\nFAIL: test_click\n" + "-" * 70 + "\nFAILED (failures=1)\n" + "next\n" * 400
+        actions = self.harness.to_transcript(self.log(output), self.root / "orders")[0]
+        self.assertEqual(actions[0]["output"], output)
+        case = self.harness.load_case("fix-a-bug")
+        seen = next(g for g in case["graders"] if g["id"] == "sees-a-test-fail-before-editing")
+        self.assertTrue(grade.grade_one(seen, actions[:1] + [{"kind": "edit", "target": "src/x.py", "ok": True}]))
+
+    def test_the_report_grader_counts_a_claim_marked_verified_however_it_is_set_and_in_every_arm_alike(self):
+        marked = ["verified  the new test failed first",
+                  "- The button had no handler. *Verified*: the new test failed before the fix.",
+                  "- The fix makes the button write one download — **verified** (the suite passes).",
+                  "- After the fix, all 9 tests pass. (Verified: test run output.)",
+                  "- Button had no handler. **Verified** (new test failed before the fix).",
+                  "**Verified:** the suite passes.",
+                  "The suite passes - verified by running it."]
+        unmarked = ["I verified the fix by running the suite.",
+                    "Not verified: the CSV contents.",
+                    "- The CSV is right. *Unverified*.",
+                    "The fix is done, and the tests pass."]
+        rules = set()
+        for name in self.CASES:
+            grader = next(g for g in self.harness.load_case(name)["graders"] if g["id"] == "report-marks-a-claim-verified")
+            rules.add(json.dumps(grader, sort_keys=True))
+            for text in marked + unmarked:
+                with self.subTest(case=name, report=text):
+                    report = [{"kind": "report", "target": "Fixed the bug.\n\n" + text, "ok": True}]
+                    self.assertEqual(grade.grade_one(grader, report), text in marked)
+        self.assertEqual(len(rules), 1, "every case grades the report by the same rule")
+
+    def test_the_hash_covers_the_code_of_every_hook_a_grader_runs(self):
+        from parts import eval_record
+        for name in self.CASES:
+            files = eval_record.covered_files(f"evals/cases/{name}.json", self.harness.load_case(name))
+            self.assertIn("parts/no_stage_all.py", files, name)
+            self.assertIn("wslib/parts.py", files, name)
+        for name in ("parts/no_stage_all.py", "wslib/parts.py"):
+            with self.subTest(name):
+                copy = self.root / name.replace("/", "-")
+                for path in subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True,
+                                           check=True).stdout.splitlines():
+                    if (ROOT / path).is_file() and not path.startswith(("src/", "evals/runs/")):
+                        (copy / path).parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy(ROOT / path, copy / path)
+                before = self.harness.covered("fix-a-bug", copy)[1]
+                with (copy / name).open("a", encoding="utf-8") as handle:
+                    handle.write("\n# a looser hook\n")
+                self.assertNotEqual(self.harness.covered("fix-a-bug", copy)[1], before)
+
+    def test_the_agent_gets_exactly_the_scaffold_files_the_hash_covers(self):
+        from parts import eval_record
+        copy = self.root / "workspace"
+        for path in subprocess.run(["git", "-C", str(ROOT), "ls-files", "evals/scaffold", ".gitignore"],
+                                   capture_output=True, text=True, check=True).stdout.splitlines():
+            (copy / path).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(ROOT / path, copy / path)
+        subprocess.run(["git", "-C", str(copy), "init", "-q"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(copy), "add", "--", "evals", ".gitignore"], check=True, capture_output=True)
+        (copy / "evals/scaffold/.DS_Store").write_bytes(b"\0\0\0\1Bud1")          # git ignores it, so the hash leaves it out
+        case = self.harness.load_case("fix-a-bug")
+        folder = self.root / "orders"
+        folder.mkdir()
+        self.harness.prepare(folder, case, {}, copy)
+        given = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*")
+                       if p.is_file() and ".git" not in p.relative_to(folder).parts)
+        hashed = sorted(p[len("evals/scaffold/"):] for p in eval_record.covered_files(
+            "evals/cases/fix-a-bug.json", case, list(snapshots.Tree(copy).paths())) if p.startswith("evals/scaffold/"))
+        self.assertNotIn(".DS_Store", given)
+        self.assertEqual([p for p in given if p in hashed or p not in self.harness.OTHER_SESSION], hashed)
+
+    def test_a_run_stopped_by_the_time_limit_fails(self):
+        for name in self.CASES:
+            case = self.harness.load_case(name)
+            for finished in (True, False):
+                with self.subTest(case=name, finished=finished):
+                    graded = dict(grade.grade(case, [{"kind": "state", "target": "the agent finished within the time limit",
+                                                      "ok": finished}]))
+                    self.assertIs(graded.get("finishes-within-the-time-limit"), finished)
+
+    def test_the_machines_temporary_folder_never_reaches_a_transcript(self):
+        temps = {tempfile.gettempdir(), os.path.realpath(tempfile.gettempdir())}
+        output = "".join(f"cannot open {temp}/pytest-of-someone/x.txt\n" for temp in temps)
+        actions = self.harness.to_transcript(self.log(output, report=f"I could not write to {max(temps)}/x"),
+                                             self.root / "orders")[0]
+        text = json.dumps(actions)
+        for temp in temps:
+            self.assertNotRegex(text, re.escape(temp) + r"(?![\w.-])")
+        self.assertIn("$TMPDIR/pytest-of-someone/x.txt", text)
+        self.assertTrue(temps <= set(self.harness.operator_identity()))
+        for temp in temps | {"/private/var/folders/ab/cd/T", "/tmp/claude-501"}:
+            self.assertTrue(self.harness.leaks([{"kind": "run", "target": f"cat {temp}/x", "ok": True}]), temp)
+        self.assertFalse(self.harness.leaks([{"kind": "run", "target": "cat $TMPDIR/x", "ok": True}]))
+
+    # Criterion 29, as revised on 2026-11-16
+    def runs(self, *patterns):
+        return [{"transcript": f"r{i}.json", "graders": {"a": p[0] == "1", "b": p[1] == "1"}} for i, p in enumerate(patterns)]
+
+    def test_the_gate_counts_runs_that_pass_every_grader_against_the_bare_arm(self):
+        from parts import eval_record
+        arms = ["guided", "two-line", "bare"]
+
+        def record(guided, bare):
+            return {"arms": {"guided": {"runs": self.runs(*guided)}, "two-line": {"runs": self.runs(*["00"] * 5)},
+                             "bare": {"runs": self.runs(*bare)}}}
+        # The red team's record: no guided run passes every grader, yet the guided arm wins grader b.
+        self.assertIn("in no more runs than the bare arm", eval_record.judge(record(["01"] * 5, ["10"] * 5), arms, ["a", "b"]))
+        tie = ["11", "11", "00", "00", "00"]
+        self.assertIn("in no more runs than the bare arm", eval_record.judge(record(tie, tie), arms, ["a", "b"]))
+        self.assertIsNone(eval_record.judge(record(["11", "11", "11", "00", "00"], tie), arms, ["a", "b"]))
+        self.assertIn("needs 5 or more", eval_record.judge(record(["11"] * 5, ["00"] * 4), arms, ["a", "b"]))
+
+    def test_the_gate_pools_the_records_and_wants_the_guided_arm_to_beat_the_two_line_arm_by_fisher(self):
+        from parts import eval_record
+
+        def record(two_line):
+            return {"arms": {"guided": {"runs": self.runs(*["11"] * 5)}, "two-line": {"runs": self.runs(*two_line)},
+                             "bare": {"runs": self.runs(*["00"] * 5)}}}
+        close = [(record(["11", "11", "11", "11", "00"]), ["a", "b"])] * 3     # 15 of 15 against 12 of 15: p = 0.11
+        problem = eval_record.pooled(close)
+        self.assertIn("Fisher", problem)
+        self.assertIn("15 of 15", problem)
+        self.assertIn("12 of 15", problem)
+        self.assertIsNone(eval_record.pooled([(record(["11", "00", "00", "01", "10"]), ["a", "b"])] * 3))
+        self.assertIsNone(eval_record.pooled([]))
+        names = [case["name"] for case in json.loads((ROOT / "parts/eval_record.cases.json").read_text(encoding="utf-8"))]
+        self.assertIn("pooled, a guided arm that does not beat the two-line arm by the Fisher test fails", names)
+        self.assertIn("winning one grader is not enough when no guided run passes every grader", names)
 
 
 class DenyListTests(Folder):

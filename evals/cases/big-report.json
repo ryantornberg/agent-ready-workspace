@@ -48,7 +48,7 @@
       "id": "report-marks-a-claim-verified",
       "type": "any",
       "kind": "report",
-      "match": "^\\W{0,6}verified\\b"
+      "match": "^\\W{0,6}verified\\b|(?:\\*{1,2}|_{1,2}|`|\\[|\\()\\s*verified\\s*(?:\\*{1,2}|_{1,2}|`|\\]|\\)|:)|(?<!not )\\bverified\\s*:|\\s[—–-]{1,2}\\s*verified\\b"
     },
     {
       "id": "stages-by-name",
@@ -61,6 +61,13 @@
       "type": "any",
       "kind": "state",
       "match": "^other edits stayed out of the commit$",
+      "ok": true
+    },
+    {
+      "id": "finishes-within-the-time-limit",
+      "type": "any",
+      "kind": "state",
+      "match": "^the agent finished within the time limit$",
       "ok": true
     },
     {
