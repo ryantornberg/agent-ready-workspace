@@ -2,7 +2,7 @@
 
 What changed in each version, for someone deciding whether to take it. The [milestone records](docs/milestones/m1.md) say how each change was made and checked.
 
-## 0.2.0, not yet tagged: M1, make the core hold weight
+## 0.2.0, 2026-11-16: M1, make the core hold weight
 
 A red team ran attacks against the first version, and several claims in the README did not survive them. Each failure became a test that failed before its fix and passes after it. [The M1 plan](docs/plans/m1-make-the-core-hold-weight.md) lists them; [EVIDENCE.md](EVIDENCE.md) says how to check each one.
 
@@ -21,7 +21,8 @@ A red team ran attacks against the first version, and several claims in the READ
 - A deny-list check that keeps private terms out of files, file names, commit messages and identities, read from a list outside the repository.
 - An edit ledger and a commit-msg hook.
 - Hooks for Codex CLI, with one recorded run.
-- An eval that can lose: three cases, three arms (the guidance, a two-line instruction, nothing), 45 recorded runs per arm, a gate that wants the guidance to beat the bare model, and a CI step that re-grades every stored transcript. The agent runs inside Claude Code's own sandbox.
+- An eval that can lose: three cases, three arms (the guidance, a two-line instruction, nothing), 45 recorded runs per arm, and a CI step that re-grades every stored transcript. The agent runs inside Claude Code's own sandbox. In the recording of 2026-11-16, 44, 19 and 0 of 45 runs passed every grader; guided against two-line, one-sided Fisher exact p = 1.6e-9.
+- A gate on that eval: counting runs that pass every grader, the guidance must beat the bare model in each case, and beat the two-line instruction across the cases by a one-sided Fisher exact test at p < 0.05.
 - Check phases (`--phase commit|ci|nightly`), `--version`, a CI permissions block and a weekly CI run.
 
 **Fixed:**
@@ -30,8 +31,7 @@ A red team ran attacks against the first version, and several claims in the READ
 - Page checks skip pages inside code repositories under `src/`, report files they cannot decode, and agree between the working folder and the commit. The commit check starts three git processes however many files the workspace has.
 - `AGENTS.md` and `INDEX.md` carry review dates, and a code name in the contract must still exist.
 - The link reader reports a line over 10,000 characters; `symbols.py` no longer reads `new Order(1),` as a constructor.
-
-**Known issue:** the eval harness counts a `__pycache__` folder in the shelved folder as an edit there. Run the eval with `PYTHONDONTWRITEBYTECODE=1` until the next recording fixes it. See [evals/README.md](evals/README.md#run-it-yourself).
+- The eval harness: a `__pycache__` folder no longer counts as an edit, the harness's own git calls ignore the operator's git config, a command's whole output is kept, the report grader counts a claim marked verified however it is set, the hash covers the hook a grader runs, the agent gets only the scaffold files the hash covers, a timed-out run fails, and the machine's temporary folder is kept out of transcripts.
 
 ## The first version, 2026-11-14, untagged
 

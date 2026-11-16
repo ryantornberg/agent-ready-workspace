@@ -52,44 +52,56 @@ And one more each:
 
 ## The recorded runs
 
-Recorded on 2026-11-15 with Claude Code on `claude-haiku-5-5`, fifteen runs per arm in each case, so 45 per arm in all. The number was set before any run was graded. Each case's runs are in `runs/<case>/`, with a `record.json` that holds every run's grades.
+Recorded on 2026-11-16 with Claude Code 2.1.325 on `claude-haiku-5-5`, fifteen runs per arm in each case, so 45 per arm in all. The number was set before any run was graded, and so was every grader's rule. Each case's runs are in `runs/<case>/`, with a `record.json` that holds every run's grades.
 
 Runs passing every grader of their case, with the 95% interval (Wilson):
 
 | Case | Guided | Two-line | Bare |
 |---|---|---|---|
-| big-report | 14 of 15: 93% (70% to 99%) | 2 of 15: 13% (4% to 38%) | 0 of 15: 0% (0% to 20%) |
-| fix-a-bug | 15 of 15: 100% (80% to 100%) | 12 of 15: 80% (55% to 93%) | 0 of 15: 0% (0% to 20%) |
-| nightly-job | 14 of 15: 93% (70% to 99%) | 0 of 15: 0% (0% to 20%) | 0 of 15: 0% (0% to 20%) |
-| **Pooled** | **43 of 45: 96% (85% to 99%)** | **14 of 45: 31% (20% to 46%)** | **0 of 45: 0% (0% to 8%)** |
+| big-report | 14 of 15: 93% (70% to 99%) | 4 of 15: 27% (11% to 52%) | 0 of 15: 0% (0% to 20%) |
+| fix-a-bug | 15 of 15: 100% (80% to 100%) | 15 of 15: 100% (80% to 100%) | 0 of 15: 0% (0% to 20%) |
+| nightly-job | 15 of 15: 100% (80% to 100%) | 0 of 15: 0% (0% to 20%) | 0 of 15: 0% (0% to 20%) |
+| **Pooled** | **44 of 45: 98% (88% to 100%)** | **19 of 45: 42% (29% to 57%)** | **0 of 45: 0% (0% to 8%)** |
 
-Guided against two-line, one-sided Fisher exact test: p = 4e-11. Guided against bare, one-sided Fisher exact test: p = 1e-23.
+Guided against two-line, one-sided Fisher exact test: p = 1.6e-09. Guided against bare, one-sided Fisher exact test: p = 4.4e-25.
 
-The stop rule compares the guided arm with the two-line arm on the pooled rate, with a one-sided Fisher exact test at p < 0.05. The guided arm passes it.
+The stop rule, and now the gate, compare the guided arm with the two-line arm on the pooled rate, with a one-sided Fisher exact test at p < 0.05. The guided arm passes it.
 
 Runs passing each grader, of 15:
 
 | Grader | fix-a-bug: guided, two-line, bare | nightly-job | big-report |
 |---|---|---|---|
-| `sees-a-test-fail-before-editing` | 15, 15, 1 | 14, 15, 4 | 14, 15, 0 |
-| `new-test-fails-on-the-original-code` | 15, 15, 13 | 15, 15, 15 | 15, 15, 15 |
+| `sees-a-test-fail-before-editing` | 15, 15, 1 | 15, 15, 4 | 14, 15, 1 |
+| `new-test-fails-on-the-original-code` | 15, 15, 15 | 15, 15, 15 | 14, 15, 15 |
 | `suite-passes-after-the-change` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
-| `the-request-is-met` | 15, 15, 15 | 15, 2, 3 | 15, 3, 2 |
-| `report-marks-a-claim-verified` | 15, 12, 0 | 15, 15, 0 | 15, 15, 0 |
+| `the-request-is-met` | 15, 15, 15 | 15, 3, 7 | 15, 5, 5 |
+| `report-marks-a-claim-verified` | 15, 15, 0 | 15, 15, 0 | 15, 15, 0 |
 | `stages-by-name` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `leaves-the-other-session's-edits-out` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
+| `finishes-within-the-time-limit` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `leaves-the-shelved-folder-alone` | | 15, 0, 0 | |
-| `leaves-the-other-report-alone` | | | 15, 2, 1 |
+| `leaves-the-other-report-alone` | | | 15, 4, 4 |
 
 What this does and does not show:
 
-- **The guided arm's lead comes from the workspace's facts.** In nightly-job, every two-line and bare run changed `nightly_job.py` in the shelved folder; five of the thirty also fixed the live worker. In big-report, 27 of the 30 changed `SalesReport`. Every guided run in those two cases left the shelved folder and the other report alone, and met the request. All 15 guided big-report runs opened `INDEX.md`, where "the big report" is mapped; in nightly-job 14 did, and the fact is also in `AGENTS.md`, which every guided run is given.
-- **On the playbook's habits alone, two lines match it.** In fix-a-bug the two-line arm saw a test fail first in all 15 runs, as the guided arm did, and passed 12 of 15. Its three misses are the grader's: each report did mark its claims verified, as `*Verified*:` or `— **verified**`, but not at the start of the line, where `report-marks-a-claim-verified` looks. The definition of done, which only the guided arm is given, shows that line shape; the two lines do not. Counting a report that marks its claims anywhere, two-line fix-a-bug is 15 of 15 and pooled two-line is 17 of 45 (25% to 52%), and guided against two-line is still p = 2e-9. Across the three cases the two lines produced the test-first habit as reliably as the playbook. The guidance earns its place here through what it knows about this code, not through those two instructions.
-- **The bare arm's 0 of 45 is not only a format it was never asked for.** Leaving out the report grader, the bare arm passes 1 of 45; leaving out both habit graders, 14 of 45, against 17 for two-line and 45 for guided. On the graders that check what the code and the commit ended up as, the two lines add little over nothing, and the facts add the rest.
-- **Both guided failures are the grader's.** In each, the agent ran the new test in a chained command and saw it fail, but the `FAILED` line fell outside the last 600 characters of output that `run.py` keeps, so `sees-a-test-fail-before-editing` did not see it. For big-report this was checked by re-running the command; nightly-job's run has the same shape. Read that way, guided is 44 of 45 for certain and 45 of 45 by inference.
+- **The guided arm's lead comes from the workspace's facts.** In nightly-job, every two-line and bare run changed `nightly_job.py` in the shelved folder; ten of the thirty also fixed the live worker. In big-report, 22 of the 30 changed `SalesReport`. Every guided run in those two cases left the shelved folder and the other report alone, and met the request. All 15 guided big-report runs opened `INDEX.md`, where "the big report" is mapped; in nightly-job 14 did, and the fact is also in `AGENTS.md`, which every guided run is given.
+- **On the playbook's habits alone, two lines match it.** In fix-a-bug the two-line arm passed 15 of 15, as the guided arm did. Across the three cases the two lines produced the test-first habit and marked claims as reliably as the playbook. The guidance earns its place here through what it knows about this code, not through those two instructions.
+- **On the outcome, two lines add nothing over nothing.** Leaving out both habit graders, which check how the agent worked rather than what it left, the bare arm passes 19 of 45 and the two-line arm 19 of 45, against 44 for guided. The bare arm's 0 of 45 comes from the habits it was never asked for and from the traps.
+- **The one guided failure is the agent's.** In big-report run 10 the agent found the right file through `INDEX.md`, fixed it and committed, but wrote no test, so `sees-a-test-fail-before-editing` and `new-test-fails-on-the-original-code` both fail. The fix itself met the request.
 - **The cases were built so that the facts matter.** The traps were written by the same hand as the guidance, in one small scaffold. The result shows that the contract and the index carry their facts to the agent; it does not show how often real work turns on such a fact. One model, one agent tool, fifteen runs per arm in each case.
 
-The earlier recording, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14), is in the git history.
+The recording of 2026-11-15, under the harness before the fixes below, gave 43, 14 and 0 of 45, and is in the git history. So is the first one, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14).
+
+**What changed in the harness for this recording**, each with a test in `tests/test_core.py` (`EvalRerecordTests`) that failed before the change. The red team found the first seven in the earlier recording.
+
+- A `__pycache__` folder no longer counts as a change to the shelved folder, and the harness's own git calls read none of the operator's git config or global ignore file.
+- A command's whole output is kept, as the agent saw it. Before, only the last 600 characters were, which hid a failing test followed by more output; both guided failures in the earlier recording were this.
+- `report-marks-a-claim-verified` counts a claim marked verified however it is set, not only at the start of a line. The rule was fixed before any run and is the same in every arm. The two-line arm's three misses in the earlier recording were the old rule.
+- The hash covers `parts/no_stage_all.py` and the part loader, which the `stages-by-name` grader runs.
+- The agent is given exactly the scaffold files the hash covers, so a file git ignores, such as a `.DS_Store`, is neither hashed nor given.
+- A run stopped by the time limit fails `finishes-within-the-time-limit`.
+- `run.py` takes the machine's temporary folder out of every transcript, and refuses one that still holds it.
+- The gate is stricter; see [the gate](#the-gate).
 
 ## How the agent is confined
 
@@ -106,25 +118,15 @@ python3 evals/pool.py
 python3 evals/grade.py --recorded
 ```
 
-`run.py` needs the Claude Code command line tool, signed in. It writes each run as it finishes; a run in which the agent never started, such as one stopped by a usage limit, is not counted, and `--resume` runs only the missing ones. It refuses to write a transcript that contains your user name, home folder or git identity, and it refuses to start when both `~/.bashrc` and `~/.zshrc` exist, because Claude Code would load your aliases from one of them. To use another agent, replace `agent_command`, `agent_env` and `to_transcript` in `run.py`, and give that agent a sandbox or a container.
-
-**Known defects, fixed with the next recording.** Each fix changes `run.py`, `grade.py` or a case, which the hash covers, so each waits for the next full recording of 135 runs. Until then the published counts stand, read with these in mind.
-
-- `run.py` counts a `__pycache__` folder that the suite writes into `src/orders-service-v1` as a change to the shelved folder. The runs on record were made with the macOS system Python, which keeps its cache elsewhere, so none was written. With a Python that writes its cache beside the code, every nightly-job run would fail `leaves-the-shelved-folder-alone`; run the eval with `PYTHONDONTWRITEBYTECODE=1`.
-- `run.py` keeps the last 600 characters of each command's output, so a failing test followed by more output in the same command is not seen. Both guided failures are this.
-- `report-marks-a-claim-verified` looks for "verified" at the start of a line, the shape the definition of done shows, so it fails a report that marks its claims another way. The two-line arm's three misses are this.
-- The `stages-by-name` grader runs `parts/no_stage_all.py` through the part loader, and neither is in the hash. A looser hook would pass every stored run without a new recording, and CI's re-grade would not notice, because every stored run already passes it.
-- `run.py` copies every file in the scaffold folder, but the hash leaves out files git ignores, such as a `.DS_Store`.
-- A run stopped by the time limit gets a state line, but no grader reads it. No recorded run was stopped.
-- `run.py` refuses a transcript that holds the operator's user name, home folder or git identity, but not the machine's temporary folder. Two transcripts held it, in an error message, and it was replaced with `$TMPDIR` after the recording; their grades did not change.
+`run.py` needs the Claude Code command line tool, signed in. It writes each run as it finishes; a run in which the agent never started, such as one stopped by a usage limit, is not counted, and `--resume` runs only the missing ones. It refuses to write a transcript that contains your user name, home folder, git identity or the machine's temporary folder, and it refuses to start when both `~/.bashrc` and `~/.zshrc` exist, because Claude Code would load your aliases from one of them. To use another agent, replace `agent_command`, `agent_env` and `to_transcript` in `run.py`, and give that agent a sandbox or a container.
 
 `pool.py` prints the table above from the records. `grade.py` needs no agent: with a case and a transcript it grades one run, and with `--recorded` it re-grades every stored transcript and fails when a grade differs from its record. CI runs that on every push. It trusts the transcripts: a transcript is evidence only when `run.py` recorded it, because the "state" lines are whatever the file says they are.
 
 ## The gate
 
-Each `record.json` stores one hash over what a run depends on, with the two gaps listed above: the case, its acceptance test, the scaffold, `arms.json` and every file it gives an agent, among them `AGENTS.md` and `INDEX.md`, and the harness, `run.py` and `grade.py`. A page's review date is left out of the hash, but only in its front matter. The [`eval_record` check](../docs/parts.md#the-parts-here) compares the hash on every commit and in CI. Edit any of those files and the commit fails until every case has been run again.
+Each `record.json` stores one hash over what a run depends on: the case, its acceptance test, the scaffold, `arms.json` and every file it gives an agent, among them `AGENTS.md` and `INDEX.md`, the harness, `run.py` and `grade.py`, and the code of every workspace hook a grader runs, `parts/no_stage_all.py`, with the loader that runs it, `wslib/parts.py`. A page's review date is left out of the hash, but only in its front matter. The [`eval_record` check](../docs/parts.md#the-parts-here) compares the hash on every commit and in CI. Edit any of those files and the commit fails until every case has been run again.
 
-A record passes the gate when each arm has five or more runs, and the guided arm passes at least one grader more often than the bare arm. A playbook the bare model follows just as well fails it. In practice that is a weak bar: the bare arm is never asked to mark its claims, so `report-marks-a-claim-verified` alone lets the guided arm beat it. The gate does not compare the guided arm with the two-line arm, and nothing but the milestone's stop rule, run by hand with `pool.py`, does. A stricter gate, approved on 2026-11-16, is in the [M1 plan](../docs/plans/m1-make-the-core-hold-weight.md#changes-after-approval) and is built with the next recording.
+A run counts when it passes every grader of its case. A record passes the gate when each arm has five or more runs, and the guided arm has more such runs than the bare arm. Then, pooled across the records that pass, the guided arm must beat the two-line arm by a one-sided Fisher exact test at p < 0.05. So a playbook the bare model follows just as well fails, and so does guidance that two lines would match. The two-line comparison is pooled, not per case, because a case that tests only the playbook's habits, like fix-a-bug, can tie with two lines that ask for the same habits; that tie is a finding, not a failure. The gate is criterion 29 of the [M1 plan](../docs/plans/m1-make-the-core-hold-weight.md#changes-after-approval), as revised on 2026-11-16.
 
 The gate trusts the record file. It shows that someone ran the cases on this wording; it cannot stop a person from editing the record by hand. CI's re-grade catches a grade that does not follow from its transcript, not a transcript that was written by hand.
 

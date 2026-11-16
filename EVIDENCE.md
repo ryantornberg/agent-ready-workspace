@@ -2,13 +2,13 @@
 
 What this workspace claims, what shows it, and how to check it yourself. A claim is listed only when a command, a test or a record backs it. The [milestone record](docs/milestones/m1.md) has how each was built and what went wrong on the way.
 
-Last run: 2026-11-15, at the merge of M1's slice 3 (pull request #9). CI ran the first three commands below on Linux, macOS and Windows: [the run on `main`](https://github.com/ryantornberg/agent-ready-workspace/actions/runs/43792179708).
+Last run: 2026-11-16, at the eval's second recording, on the branch `m1/eval-rerecord`. CI runs the first three commands below on Linux, macOS and Windows on every pull request and every push to `main`; the [M1 milestone record](docs/milestones/m1.md#the-eval-recorded-again) links the run.
 
 ## The checks and hooks
 
 | Claim | Evidence | Re-run |
 |---|---|---|
-| Every part passes its own cases, and the runner refuses one that does not. | 9 parts, 164 cases | `python3 ws.py selftest` |
+| Every part passes its own cases, and the runner refuses one that does not. | 9 parts, 167 cases | `python3 ws.py selftest` |
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | `FailClosedTests`: an empty event, a renamed field, a command given as a list, an upper-cased path, a symbolic link into the shelved folder, no Python on the path | `python3 -m unittest tests.test_core.FailClosedTests` |
 | A broken check cannot lock out the session that repairs it, and a manifest edit cannot switch the checks off. | `NoSelfLockTests` | `python3 -m unittest tests.test_core.NoSelfLockTests` |
 | A commit holds only the files the agent session wrote, whatever command staged them. | `StagingAtTheCommitTests`; [decision 0002](docs/decisions/0002-hooks-remind-the-commit-enforces.md) | `python3 -m unittest tests.test_core.StagingAtTheCommitTests` |
@@ -20,10 +20,10 @@ Last run: 2026-11-15, at the merge of M1's slice 3 (pull request #9). CI ran the
 
 | Claim | Evidence | Re-run |
 |---|---|---|
-| With the workspace's guidance, a small model passes more often than with a two-line instruction or with nothing. | 135 recorded runs on `claude-haiku-5-5`, 45 per arm across three cases: 43, 14 and 0 passed every grader. One-sided Fisher exact test, guided against two-line: p = 4e-11. Two graders were stricter than the habits they check; read fairly, 44 or 45, 17 and 0, and p is below 2e-9. [evals/README.md](evals/README.md#the-recorded-runs) | `python3 evals/pool.py` reads the records. A new recording is `python3 evals/run.py CASE --runs 15` per case: 135 agent runs. |
-| The lead comes from the contract's and the index's facts, not the playbook's two habits. | Two-line arm: test first in 45 of 45 runs; shelved folder left alone in 0 of 15; right report fixed in 3 of 15 | The per-grader counts in each `evals/runs/*/record.json` |
+| With the workspace's guidance, a small model passes more often than with a two-line instruction or with nothing. | 135 runs on `claude-haiku-5-5`, recorded 2026-11-16, 45 per arm across three cases: 44, 19 and 0 passed every grader, with 95% intervals of 88% to 100%, 29% to 57% and 0% to 8%. One-sided Fisher exact test, guided against two-line: p = 1.6e-9. [evals/README.md](evals/README.md#the-recorded-runs) | `python3 evals/pool.py` reads the records. A new recording is `python3 evals/run.py CASE --runs 15` per case: 135 agent runs. |
+| The lead comes from the contract's and the index's facts, not the playbook's two habits. | Two-line arm: test first in 45 of 45 runs and 15 of 15 passing on the Export bug, as the guided arm; shelved folder left alone in 0 of 15; other report left alone in 4 of 15 | The per-grader counts in each `evals/runs/*/record.json` |
 | Every stored grade follows from its transcript. | CI re-grades all 135 transcripts on every push | `python3 evals/grade.py --recorded` |
-| A change to a playbook, the contract, the index or the harness fails the commit until the eval runs again, and a record in which the guidance does not beat the bare model fails too. | `eval_record`'s cases; `EvalThatCanLoseTests` | `python3 -m unittest tests.test_core.EvalThatCanLoseTests` |
+| A change to a playbook, the contract, the index, the harness or a hook a grader runs fails the commit until the eval runs again. A record fails too when, counting runs that pass every grader, the guidance does not beat the bare model in each case, or does not beat a two-line instruction across the cases by a one-sided Fisher exact test at p < 0.05. | `eval_record`'s cases; `EvalThatCanLoseTests`; `EvalRerecordTests` | `python3 -m unittest tests.test_core.EvalThatCanLoseTests tests.test_core.EvalRerecordTests` |
 | The agent runs inside Claude Code's own sandbox, and none of the operator's environment reaches it. | A probe run held on nine points: no write outside the run's folder, no home folder, no network, no global git identity, none of the operator's aliases, no Read of a home-folder file; Python and a commit still worked. The transcripts are scanned by a test. | `python3 evals/run.py --probe` (one agent run) |
 
 ## Outside checks
