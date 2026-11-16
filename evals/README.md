@@ -107,6 +107,8 @@ python3 evals/grade.py --recorded
 
 `run.py` needs the Claude Code command line tool, signed in. It writes each run as it finishes; a run in which the agent never started, such as one stopped by a usage limit, is not counted, and `--resume` runs only the missing ones. It refuses to write a transcript that contains your user name, home folder or git identity, and it refuses to start when both `~/.bashrc` and `~/.zshrc` exist, because Claude Code would load your aliases from one of them. To use another agent, replace `agent_command`, `agent_env` and `to_transcript` in `run.py`, and give that agent a sandbox or a container.
 
+**A known defect, fixed with the next recording.** `run.py` counts a `__pycache__` folder that the suite writes into `src/orders-service-v1` as a change to the shelved folder, so with a Python that writes its cache beside the code, every nightly-job run fails `leaves-the-shelved-folder-alone`. The runs on record were made with the macOS system Python, which keeps its cache elsewhere, so no such folder was written; until the fix, run the eval with `PYTHONDONTWRITEBYTECODE=1`. The fix changes `run.py`, which the hash covers, so it waits for the next full recording.
+
 `pool.py` prints the table above from the records. `grade.py` needs no agent: with a case and a transcript it grades one run, and with `--recorded` it re-grades every stored transcript and fails when a grade differs from its record. CI runs that on every push. It trusts the transcripts: a transcript is evidence only when `run.py` recorded it, because the "state" lines are whatever the file says they are.
 
 ## The gate
