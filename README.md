@@ -14,7 +14,8 @@ The longer description of the pattern is at [ryantornberg.com/workspace](https:/
 ## Try it
 
 ```
-python3 ws.py list          # the parts this workspace uses
+python3 ws.py --version     # the engine's version, which the manifest must name
+python3 ws.py list          # the parts this workspace uses, and the phases each check runs in
 python3 ws.py selftest      # every part's own cases
 python3 ws.py check         # run the checks on this repository
 python3 -m unittest discover -b tests
@@ -45,9 +46,9 @@ git config core.hooksPath .githooks
 | [AGENTS.md](AGENTS.md) | The contract: the rules and facts every agent reads, in one file for every tool. |
 | [INDEX.md](INDEX.md) | Topics, and a table that maps everyday words to the names the code uses. |
 | [workspace.json](workspace.json) | The manifest: which parts this workspace runs, and their settings. |
-| `ws.py`, `wslib/` | The runner and the small core the parts plug into. |
+| `ws.py`, `wslib/` | The engine. `wslib/` holds all of its code: the runner and the small core the parts plug into. `ws.py` only starts it. |
 | [parts/](docs/parts.md) | Six checks and three hooks, each one file plus its cases. |
-| [docs/](docs/definition-of-done.md) | The definition of done, one playbook, two decision records, the question log, the orchestration rules, and the templates and plan for the current milestone. |
+| [docs/](docs/definition-of-done.md) | The definition of done, one playbook, three decision records, the question log, the orchestration rules, and the templates and plan for the current milestone. |
 | [evals/](evals/README.md) | One eval case, a broken sample repository, and five recorded runs each of a real model with and without the workspace's guidance. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
@@ -68,8 +69,9 @@ git config core.hooksPath .githooks
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | The runner and `wslib/launch.sh` | Every hook call |
 | A part's own cases pass, at the level each finding states. | The runner | Every command that loads the part. A hook call loads only the hooks for its event. |
 | A part leaves the manifest only when it is retired with a reason. | The runner | Commit, CI |
+| The manifest names the engine's version, gives a reason for every part, binds every tier to a model and an effort, and holds no unknown key. | The runner | Every command. A hook call checks the version and the tiers only, so a missing reason cannot lock a session out. |
 
-The commit check reads the staged pages, the staged manifest and the staged parts with their cases, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. It reads them all in one batch, so it starts three git processes however many files the workspace holds. The working-folder check, `check`, starts from the same git listing and adds the untracked files git does not ignore, so the two see the same files. The page checks read the pages the workspace owns: a page inside a code repository under `src/`, and a symbolic link, are left out. A page that is not UTF-8 is an error; code in Windows-1252 or UTF-16 is read. The core in `wslib/` still runs from disk. CI runs the same checks on Linux, macOS and Windows and compares with the commit before the push, so a teammate who never installed the hook is still caught. The one exception is `deny_list`, which needs a private list that CI does not have. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed.
+The commit check reads the staged pages, the staged manifest and the staged parts with their cases, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. It reads them all in one batch, so it starts three git processes however many files the workspace holds. The working-folder check, `check`, starts from the same git listing and adds the untracked files git does not ignore, so the two see the same files. The page checks read the pages the workspace owns: a page inside a code repository under `src/`, and a symbolic link, are left out. A page that is not UTF-8 is an error; code in Windows-1252 or UTF-16 is read. The core in `wslib/` still runs from disk. CI runs the same checks on Linux, macOS and Windows, with a token that can only read, and compares with the commit before the push, so a teammate who never installed the hook is still caught. The one exception is `deny_list`, which needs a private list that CI does not have. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed. CI also runs once a week with no push, to catch what changes without a commit, and runs the checks for the nightly phase then.
 
 These rules in [AGENTS.md](AGENTS.md) and the [definition of done](docs/definition-of-done.md) stay prose, because nothing here can check them: open pull requests as drafts and merge only after CI passes, write a goal and non-goals for larger work, log the questions you had to ask, compare build warnings with the base branch, and list the callers you checked. The eval tests two more: see a test fail before editing, and mark claims as verified.
 
@@ -94,7 +96,7 @@ def run(snapshot, config):
 [{"name": "an empty page fails", "files": {"a.md": "", "b.md": "# B"}, "expect": ["this page is empty"]}]
 ```
 
-Save the cases as `parts/no_empty_pages.cases.json`, add `{"use": "no_empty_pages"}` to `workspace.json`, and it runs at commit and in CI. Without the cases file, or with a case that fails, the runner refuses to load it.
+Save the cases as `parts/no_empty_pages.cases.json`, add `{"use": "no_empty_pages", "why": "an empty page tells an agent nothing"}` to `workspace.json`, and it runs at commit and in CI. A check that sets `PHASES = ("nightly",)` runs only in `python3 ws.py check --phase nightly`. Without the cases file, or with a case that fails, the runner refuses to load it.
 
 ## The eval
 
@@ -115,7 +117,7 @@ Add a part when the same mistake shows up twice.
 ## Limits
 
 - **`symbols.py` reads C#, TypeScript and JavaScript one line at a time.** It finds types, methods, constructors, properties, functions and constants declared on one line in the usual style. It is a lookup for names you already know, not a parser. It misses a declaration split across lines or behind an attribute; C# fields, events, delegates, indexers and operators; TypeScript class fields, getters, one-line method bodies and CommonJS exports; Python module-level constants; and anything generated at build time. It can report a declaration that sits inside a multi-line string.
-- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, headings produced by HTML tags, or the second candidate in a `srcset`. It checks links inside HTML comments and indented code blocks, and it reads `a[0][1]` in prose as a reference link; put such text in backticks. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
+- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, headings produced by HTML tags, or the second candidate in a `srcset`. It checks links inside HTML comments and indented code blocks, and it reads `a[0][1]` in prose as a reference link; put such text in backticks. A line over 10,000 characters is reported as an error, not read. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
 - **The checks prove that nothing is dangling. They cannot prove a page is true.** A page that contradicts last week's decision passes every one.
 - **The hooks are wired for one agent tool**, Claude Code ([.claude/settings.json](.claude/settings.json)), through one adapter. Another tool's payload is refused until it has an adapter in `wslib/events.py` and its own few lines of wiring. The wiring runs `wslib/launch.sh`, which needs a POSIX shell; on Windows that is the bash that comes with Git. When it finds no Python, or is missing itself, every call is refused.
 - **`edit_ledger` knows only what the edit tools wrote.** The runner records each path an agent's edit tool is allowed to write, in a ledger kept inside the working copy's git folder. With no ledger open, as for a person's own commit, the commit is not compared. While one is open, a file a shell command or a generator wrote must be recorded by name, with `python3 ws.py ledger --add PATH`, and a person's own commit is refused until the agent commits its edits or the person runs `python3 ws.py ledger --close`. A commit closes the paths it holds through the post-commit hook. It guards against accidents: `git commit --no-verify` skips it, CI has no ledger to compare with, and during a merge, cherry-pick, revert or rebase it warns instead. See [decision 0002](docs/decisions/0002-hooks-remind-the-commit-enforces.md).
