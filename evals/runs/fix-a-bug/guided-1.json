@@ -1,0 +1,83 @@
+[
+  {
+    "kind": "run",
+    "target": "cat docs/playbooks/fix-a-bug.md && echo ---- && cat INDEX.md | head -80 && echo ---- && grep -ril \"export\" src docs --include=* | head -50 && echo ---- && git status --short && ls -R src | head -60",
+    "ok": true,
+    "output": "hing, so map it here. The `aliases` check fails when a name in the right-hand column is no longer defined under `src/`.\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |\n----\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ndocs/playbooks/fix-a-bug.md\n----\n M README.md\n?? notes/\norders-api\norders-service-v1\norders-web\n\nsrc/orders-api:\nreconciliation_worker.py\nsales_report.py\n\nsrc/orders-service-v1:\nnightly_job.py\n\nsrc/orders-web:\ncsv_export.py\norders_page.py\nquarterly_export.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/orders_page.py && echo ---- && cat src/orders-web/quarterly_export.py && echo ---- && cat src/orders-web/csv_export.py && echo ---- && cat src/README.md && echo ---- && cat definition 2>/dev/null; cat docs/definition-of-done.md; echo ----; ls tests test 2>/dev/null; cat workspace.json; ls -a; git log --oneline | head",
+    "ok": true,
+    "output": "**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked.\n----\ntests:\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py\ncat: workspace.json: No such file or directory\n.\n..\n.claude\n.git\nAGENTS.md\nCLAUDE.md\ndocs\nINDEX.md\nnotes\nREADME.md\nsrc\ntests\n814b8c6 Orders"
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_web.py && echo ---- && cat src/orders-web/*.py >/dev/null && ls notes && git diff --stat && cat .claude/settings.json 2>/dev/null | head -30; grep -rn \"export\" tests | head; cd tests/.. && python3 -m pytest -q tests/test_orders_web.py 2>&1 | tail -5",
+    "ok": true,
+    "output": "v\ntests/test_orders_web.py:5:from quarterly_export import QuarterlyExport\ntests/test_orders_web.py:19:    def test_export_writes_one_download(self):\ntests/test_orders_web.py:21:        page.export()\ntests/test_orders_web.py:30:        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\ntests/test_orders_web.py:31:        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\ntests/test_orders_web.py:32:        self.assertEqual(len(export.to_csv().splitlines()), 3)\n/Library/Developer/CommandLineTools/usr/bin/python3: No module named pytest"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web -v 2>&1 | tail -25",
+    "ok": true,
+    "output": "after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web:src/orders-api:src/orders-service-v1 python3 -m unittest discover -s tests -t . -v 2>&1 | tail -30; echo ----; grep -rn \"\\.export\\b\\|\\.click(\\|OrdersPage\" --include=*.py . | grep -v \"^./.git/\"; echo ----; ls ws.py tools 2>/dev/null; git status --short",
+    "ok": true,
+    "output": "s(unittest.TestCase):\n./tests/test_orders_web.py:15:        page = OrdersPage(ORDERS)\n./tests/test_orders_web.py:16:        page.click(\"refresh\")\n./tests/test_orders_web.py:20:        page = OrdersPage(ORDERS)\n./tests/test_orders_web.py:21:        page.export()\n./tests/test_orders_web.py:25:        page = OrdersPage(ORDERS)\n./tests/test_orders_web.py:26:        page.click(\"export\")\n./src/orders-web/orders_page.py:5:class OrdersPage:\n./src/orders-web/orders_page.py:12:        self._on(\"export\", self.export)\n----\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/"
+  },
+  {
+    "kind": "run",
+    "target": "git remote -v; git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nFix Export button doing nothing on the orders page\n\nOrdersPage registered only the \"refresh\" handler, so click(\"export\")\nfound no handler and silently did nothing. Register the export handler\nalongside refresh, and add a test that clicks the button rather than\ncalling export() directly.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit show --stat HEAD | head -20; git status --short",
+    "ok": true,
+    "output": "91e7086186\nAuthor: eval <eval@example.invalid>\nDate:   Sun Nov 15 18:57:35 2026 -0700\n\n    Fix Export button doing nothing on the orders page\n    \n    OrdersPage registered only the \"refresh\" handler, so click(\"export\")\n    found no handler and silently did nothing. Register the export handler\n    alongside refresh, and add a test that clicks the button rather than\n    calling export() directly.\n    \n    Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `eb0db72` on `main`.\n\n**Cause:** `OrdersPage.__init__` registered only the \"refresh\" handler. `click(\"export\")` found no handler and returned without doing anything. The existing tests called `page.export()` directly, so they never exercised the button.\n\n**Fix:** one line in `src/orders-web/orders_page.py` registers `export` alongside `refresh`. I also added `test_export_button_writes_one_download` to `tests/test_orders_web.py`, which clicks the button the way a user does.\n\nReport, following the definition of done:\n\n```\nFixed: the Export button had no registered handler, so clicking it did nothing.\n\nverified  Added the click-based test; it failed with \"0 != 1\" before the fix.\nverified  After the one-line fix, the full suite passes: 9 tests, OK\n          (tests/ run with PYTHONPATH covering src/orders-web, orders-api, orders-service-v1).\ninferred  The button is wired only through OrdersPage.click; nothing else in src/ calls\n          export() or click(). Checked by grep over the repo.\n\nNot done:\n- No running app in this workspace, so I did not check the button in a browser.\n- No remote is configured, so no draft pull request was opened.\n- The existing README.md edit and the untracked notes/ folder were already there.\n  I did not stage or commit them.\n```\n\nSomething to check: the search aliases map \"the big report\" to `QuarterlyExport`, but no button uses it. The Export button writes `to_csv(self.orders)`, which is the orders CSV and not the quarterly one. I left that alone because it is a separate question.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

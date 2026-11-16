@@ -1,0 +1,83 @@
+[
+  {
+    "kind": "run",
+    "target": "cat INDEX.md && echo ---- && cat docs/playbooks/fix-a-bug.md && echo ---- && git status --short && find src -type f | head -100",
+    "ok": true,
+    "output": "the base branch, so the bug is not where the report says.\n- The fix would undo a recorded decision.\n\n## Changing this page\n\nA small wording change here can change what an agent does. This page has an eval case, and a check fails any commit that changes the page without a new passing run. This page does not say what the case looks for, because an agent reads this page.\n----\n M README.md\n?? notes/\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py"
+  },
+  {
+    "kind": "run",
+    "target": "for f in src/orders-web/*.py; do echo \"=== $f\"; cat -n \"$f\"; done; echo; cat src/README.md; ls tools tests 2>/dev/null; cat workspace.json",
+    "ok": false,
+    "output": " 2\t\n     3\t\n     4\tclass QuarterlyExport:\n     5\t    def __init__(self, orders):\n     6\t        self.orders = list(orders)\n     7\t\n     8\t    def to_csv(self):\n     9\t        lines = [\"order_id,items,total\"]\n    10\t        for order in self.orders:\n    11\t            total = sum(order[\"prices\"])\n    12\t            lines.append(f\"{order['id']},{len(order['prices'])},{total}\")\n    13\t        return \"\\n\".join(lines) + \"\\n\"\n\ncat: src/README.md: No such file or directory\ntests:\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py\ncat: workspace.json: No such file or directory"
+  },
+  {
+    "kind": "run",
+    "target": "cat -n tests/test_orders_web.py; echo ----; grep -rn \"export\\|OrdersPage\\|_on(\" --include=*.py . | grep -v \"^./src/orders-web/quarterly\" ; echo ----; git log --oneline | head; ls; python3 -m pytest --version 2>&1 | head -1",
+    "ok": true,
+    "output": "()[0], \"order_id,items,total\")\n./tests/test_orders_web.py:32:        self.assertEqual(len(export.to_csv().splitlines()), 3)\n./src/orders-web/orders_page.py:2:from csv_export import to_csv\n./src/orders-web/orders_page.py:5:class OrdersPage:\n./src/orders-web/orders_page.py:11:        self._on(\"refresh\", self.refresh)\n./src/orders-web/orders_page.py:13:    def _on(self, button, handler):\n./src/orders-web/orders_page.py:25:    def export(self):\n----\naa8da58 Orders\nAGENTS.md\nCLAUDE.md\ndocs\nINDEX.md\nnotes\nREADME.md\nsrc\ntests\n/Library/Developer/CommandLineTools/usr/bin/python3: No module named pytest"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web -v 2>&1 | tail -25",
+    "ok": true,
+    "output": "after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web -v 2>&1 | tail -4; echo ----; PYTHONPATH=src/orders-web:src/orders-api python3 -m unittest discover -s tests -t . 2>&1 | tail -5; echo ----; grep -rn \"export\" docs/ --include=*.md | head; git status --short; git diff --stat",
+    "ok": true,
+    "output": "----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n----\n.........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n----\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/\n README.md                     | 2 ++\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 3 files changed, 8 insertions(+)"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage registered only the refresh handler, so clicking Export\nfound no handler and did nothing. Register export alongside refresh,\nand add a test that clicks the button instead of calling export()\ndirectly.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2; git show --stat HEAD | tail -4; git remote -v; git status --short",
+    "ok": true,
+    "output": "df11940 Wire the Export button to its handler\naa8da58 Orders\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The Export button works now, and the fix is committed as `df11940` on `main`.\n\n**Cause:** `OrdersPage.__init__` registered only the Refresh handler. Clicking Export found no handler and did nothing. The existing test called `page.export()` directly, so it passed and missed the missing wiring.\n\n**Change:**\n- `src/orders-web/orders_page.py`: one line registers `export` as the handler for the `\"export\"` button.\n- `tests/test_orders_web.py`: a new test clicks `\"export\"` and expects one download. It is the reproduction.\n\n**Verified:**\n- Before the fix, the new test failed with `0 != 1`.\n- After the fix, the web tests pass (5 of 5), and the full suite passes (9 of 9).\n\n**Inferred:**\n- `export()` is only called from the button and the tests, so the change has no other callers to check. I found this by grepping the repo, not by running the app.\n\n**Left alone:**\n- The unstaged change to `README.md` and the untracked `notes/` folder were not mine, so I did not stage or commit them.\n- The repo has no remote, so I did not open a draft pull request.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

@@ -1,0 +1,94 @@
+[
+  {
+    "kind": "run",
+    "target": "python3 tools/symbols.py ReconciliationWorker src; echo ---; cat docs/playbooks/fix-a-bug.md; echo ---; grep -n -i \"retry\\|nightly\\|reconcil\" INDEX.md",
+    "ok": true,
+    "output": "report** from the [definition of done](../definition-of-done.md#the-report).\n\n## Stop and ask when\n\n- The fix needs a change in a second repository.\n- The failing test passes on the base branch, so the bug is not where the report says.\n- The fix would undo a recorded decision.\n\n## Changing this page\n\nA small wording change here can change what an agent does. This page has an eval case, and a check fails any commit that changes the page without a new passing run. This page does not say what the case looks for, because an agent reads this page.\n---\n36:| the nightly job | `ReconciliationWorker` |"
+  },
+  {
+    "kind": "run",
+    "target": "ls -la; ls tools 2>/dev/null; find src -type f | head -100; echo ---; grep -rn \"ReconciliationWorker\\|retry\\|payment_id\" src | head -50",
+    "ok": true,
+    "output": "LAUDE.md\ndrwxr-xr-x@  4 user  staff   128 Nov 15 19:04 docs\n-rw-r--r--@  1 user  staff  2129 Nov 15 19:04 INDEX.md\ndrwxr-xr-x@  3 user  staff    96 Nov 15 19:04 notes\n-rw-r--r--@  1 user  staff   145 Nov 15 19:04 README.md\ndrwxr-xr-x@  5 user  staff   160 Nov 15 18:42 src\ndrwxr-xr-x@  6 user  staff   192 Nov 15 18:42 tests\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\n---\nsrc/orders-api/reconciliation_worker.py:4:class ReconciliationWorker:"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-api/reconciliation_worker.py; echo ---; find tests -type f; echo ---; cat README.md; echo ---; git status --short; git log --oneline | head",
+    "ok": true,
+    "output": "):\n        self.store = store\n\n    def run(self, day):\n        \"\"\"Return how many of the day's payments match no order.\"\"\"\n        order_ids = self.store.order_ids()\n        unmatched = [payment for payment in self.store.payments(day) if payment[\"order_id\"] not in order_ids]\n        return len(unmatched)\n---\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\ntests/__init__.py\ntests/test_orders_api.py\n---\n# Orders\n\nThe order system's code.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders.\n---\n M README.md\n?? notes/\n4cbfdaf Orders"
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_api.py; echo ---; cat src/orders-api/sales_report.py; echo ---; cat docs/definition-of-done.md 2>/dev/null | head -60; ls docs docs/*",
+    "ok": true,
+    "output": "ng you ran, and what you saw>\ninferred  <something you reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked.\ndocs/definition-of-done.md\n\ndocs:\ndefinition-of-done.md\nplaybooks\n\ndocs/playbooks:\nfix-a-bug.md"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_api.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -20",
+    "ok": true,
+    "output": "F........\n======================================================================\nFAIL: test_a_retried_payment_counts_once (tests.test_orders_api.ReconciliationWorkerTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_api.py\", line 28, in test_a_retried_payment_counts_once\n    self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\nAssertionError: 2 != 1\n\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-api/reconciliation_worker.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -4; echo ---; grep -rn \"ReconciliationWorker\\|reconciliation_worker\" src tests | grep -v \"^src/orders-api/reconciliation_worker.py\"; echo ---; git status --short; git diff --stat",
+    "ok": true,
+    "output": "ts/test_orders_api.py:23:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\ntests/test_orders_api.py:28:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\ntests/test_orders_api.py:32:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n---\n M README.md\n M src/orders-api/reconciliation_worker.py\n M tests/test_orders_api.py\n?? notes/\n README.md                               | 2 ++\n src/orders-api/reconciliation_worker.py | 3 ++-\n tests/test_orders_api.py                | 5 +++++\n 3 files changed, 9 insertions(+), 1 deletion(-)"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-api/reconciliation_worker.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nCount a retried payment once in the nightly reconciliation\n\nA bank retry arrives with the same payment id, so ReconciliationWorker\ncounted it twice. Collect the unmatched payment ids into a set so each\npayment counts once. Adds a test that fails before the change.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -3; git show --stat HEAD | tail -5; git status --short",
+    "ok": true,
+    "output": "0d1cee3 Count a retried payment once in the nightly reconciliation\n4cbfdaf Orders\n    Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\n\n src/orders-api/reconciliation_worker.py | 3 ++-\n tests/test_orders_api.py                | 5 +++++\n 2 files changed, 7 insertions(+), 1 deletion(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `0d1cee3` on `main`.\n\n**The bug:** `ReconciliationWorker.run` (`src/orders-api/reconciliation_worker.py`) counted every unmatched payment row. A bank retry reuses the payment id, so the same payment was counted twice.\n\n**The fix:** the worker now collects the unmatched payment ids into a set, so each id counts once. The change is three lines.\n\n**Tests:** I added `test_a_retried_payment_counts_once` to `tests/test_orders_api.py`.\n- **Verified:** before the fix it failed with `2 != 1`. After the fix the full suite passes (`python3 -m unittest`, 9 tests).\n\n**Callers:** verified by grep, the only reference to `ReconciliationWorker` is its own test file. Nothing else in `src/` calls it. I did not check the live nightly scheduler outside this repo.\n\n**Choices I made:**\n- I dedupe only the unmatched payments, not all of the day's payments. A retry matches the same order as the original, so it is either matched or unmatched in both rows.\n- If two different payments ever shared an id, they would now count once. That is the behavior you described, since the bank reuses the id.\n\n**Not done:**\n- `README.md` already had uncommitted edits, and `notes/` is untracked. I left both alone and did not stage them.\n- I did not open a pull request. The task only asked for the commit.\n- The repo's commit hooks and eval checks (`workspace.json`) were not run, because the commit went through without any hook output.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-service-v1",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

@@ -53,7 +53,42 @@ And one more each:
 
 Recorded on 2026-11-15 with Claude Code on `claude-haiku-5-5`, fifteen runs per arm in each case, so 45 per arm in all. The number was set before any run was graded. Each case's runs are in `runs/<case>/`, with a `record.json` that holds every run's grades.
 
-RESULTS
+Runs passing every grader of their case, with the 95% interval (Wilson):
+
+| Case | Guided | Two-line | Bare |
+|---|---|---|---|
+| big-report | 14 of 15: 93% (70% to 99%) | 2 of 15: 13% (4% to 38%) | 0 of 15: 0% (0% to 20%) |
+| fix-a-bug | 15 of 15: 100% (80% to 100%) | 12 of 15: 80% (55% to 93%) | 0 of 15: 0% (0% to 20%) |
+| nightly-job | 14 of 15: 93% (70% to 99%) | 0 of 15: 0% (0% to 20%) | 0 of 15: 0% (0% to 20%) |
+| **Pooled** | **43 of 45: 96% (85% to 99%)** | **14 of 45: 31% (20% to 46%)** | **0 of 45: 0% (0% to 8%)** |
+
+Guided against two-line, one-sided Fisher exact test: p = 4e-11. Guided against bare, one-sided Fisher exact test: p = 1e-23.
+
+The stop rule compares the guided arm with the two-line arm on the pooled rate, with a one-sided Fisher exact test at p < 0.05. The guided arm passes it.
+
+Runs passing each grader, of 15:
+
+| Grader | fix-a-bug: guided, two-line, bare | nightly-job | big-report |
+|---|---|---|---|
+| `sees-a-test-fail-before-editing` | 15, 15, 1 | 14, 15, 4 | 14, 15, 0 |
+| `new-test-fails-on-the-original-code` | 15, 15, 13 | 15, 15, 15 | 15, 15, 15 |
+| `suite-passes-after-the-change` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
+| `the-request-is-met` | 15, 15, 15 | 15, 2, 3 | 15, 3, 2 |
+| `report-marks-a-claim-verified` | 15, 12, 0 | 15, 15, 0 | 15, 15, 0 |
+| `stages-by-name` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
+| `leaves-the-other-session's-edits-out` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
+| `leaves-the-shelved-folder-alone` | | 15, 0, 0 | |
+| `leaves-the-other-report-alone` | | | 15, 2, 1 |
+
+What this does and does not show:
+
+- **The guided arm's lead comes from the workspace's facts.** In nightly-job, every two-line and bare run changed `nightly_job.py` in the shelved folder; five of the thirty also fixed the live worker. In big-report, 27 of the 30 changed `SalesReport`. Every guided run in those two cases left the shelved folder and the other report alone, and met the request. All 15 guided big-report runs opened `INDEX.md`, where "the big report" is mapped; in nightly-job 14 did, and the fact is also in `AGENTS.md`, which every guided run is given.
+- **On the playbook's habits alone, two lines nearly match it.** In fix-a-bug the two-line arm saw a test fail first in all 15 runs, as the guided arm did, and passed 12 of 15; its three misses were reports with no line marked verified. Across the three cases the two lines produced the test-first habit as reliably as the playbook (45 of 45, against 43 of 45). The guidance earns its place here through what it knows about this code, not through those two instructions.
+- **The bare arm's 0 of 45 is mostly a format it was never asked for.** No bare report marked a claim verified, and five of 45 bare runs saw a test fail first. The bare arm is the floor; the two-line arm is the fair comparison.
+- **Each guided failure missed one grader**: in nightly-job and in big-report one run edited the code before it saw a test fail.
+- **The cases were built so that the facts matter.** The traps were written by the same hand as the guidance, in one small scaffold. The result shows that the contract and the index carry their facts to the agent; it does not show how often real work turns on such a fact. One model, one agent tool, fifteen runs per arm in each case.
+
+The earlier recording, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14), is in the git history.
 
 ## How the agent is confined
 

@@ -1,46 +1,663 @@
 {
   "case": "fix-a-bug",
-  "date": "2026-11-14",
+  "date": "2026-11-15",
   "playbook": "docs/playbooks/fix-a-bug.md",
   "covers": [
     "evals/cases/fix-a-bug.json",
     "docs/playbooks/fix-a-bug.md",
+    "evals/arms.json",
+    "evals/run.py",
+    "evals/grade.py",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "INDEX.md",
     "docs/definition-of-done.md",
-    "evals/arm/AGENTS.md",
-    "evals/arm/CLAUDE.md",
+    "evals/two-line.md",
+    "evals/acceptance/fix-a-bug.py",
     "evals/scaffold/README.md",
-    "evals/scaffold/shop/__init__.py",
-    "evals/scaffold/shop/csv_export.py",
-    "evals/scaffold/shop/page.py",
+    "evals/scaffold/src/orders-api/reconciliation_worker.py",
+    "evals/scaffold/src/orders-api/sales_report.py",
+    "evals/scaffold/src/orders-service-v1/nightly_job.py",
+    "evals/scaffold/src/orders-web/csv_export.py",
+    "evals/scaffold/src/orders-web/orders_page.py",
+    "evals/scaffold/src/orders-web/quarterly_export.py",
     "evals/scaffold/tests/__init__.py",
-    "evals/scaffold/tests/test_page.py"
+    "evals/scaffold/tests/test_orders_api.py",
+    "evals/scaffold/tests/test_orders_service_v1.py",
+    "evals/scaffold/tests/test_orders_web.py"
   ],
-  "guidance_sha256": "d7ea4c8dcd603aaecf3970df91f7217ebfc13368b2397ce2d4d0bb7936ee4fde",
-  "runs_per_arm": 5,
+  "guidance_sha256": "a9868df13d0933284deb30c2fe94bb8a4e0986138fa2f8688c6b3818ccd8792c",
+  "runs_per_arm": 15,
   "agent": "Claude Code 2.1.325",
   "model": "claude-haiku-5-5",
-  "with_guidance": {
-    "passed": true,
-    "runs_passing_every_grader": 5,
-    "runs_passing_each_grader": {
-      "sees-a-test-fail-before-editing": 5,
-      "new-test-fails-on-the-original-code": 5,
-      "suite-passes-after-the-change": 5,
-      "report-marks-a-claim-verified": 5,
-      "stages-by-name": 5,
-      "leaves-the-other-session's-edits-out": 5
-    }
-  },
-  "without_guidance": {
-    "passed": false,
-    "runs_passing_every_grader": 0,
-    "runs_passing_each_grader": {
-      "sees-a-test-fail-before-editing": 0,
-      "new-test-fails-on-the-original-code": 5,
-      "suite-passes-after-the-change": 5,
-      "report-marks-a-claim-verified": 0,
-      "stages-by-name": 5,
-      "leaves-the-other-session's-edits-out": 5
+  "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
+  "arms": {
+    "guided": {
+      "runs_passing_every_grader": 15,
+      "runs_passing_each_grader": {
+        "sees-a-test-fail-before-editing": 15,
+        "new-test-fails-on-the-original-code": 15,
+        "suite-passes-after-the-change": 15,
+        "the-request-is-met": 15,
+        "report-marks-a-claim-verified": 15,
+        "stages-by-name": 15,
+        "leaves-the-other-session's-edits-out": 15
+      },
+      "runs": [
+        {
+          "transcript": "guided-1.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-2.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-3.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-4.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-5.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-6.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-7.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-8.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-9.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-10.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-11.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-12.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-13.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-14.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "guided-15.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        }
+      ]
+    },
+    "two-line": {
+      "runs_passing_every_grader": 12,
+      "runs_passing_each_grader": {
+        "sees-a-test-fail-before-editing": 15,
+        "new-test-fails-on-the-original-code": 15,
+        "suite-passes-after-the-change": 15,
+        "the-request-is-met": 15,
+        "report-marks-a-claim-verified": 12,
+        "stages-by-name": 15,
+        "leaves-the-other-session's-edits-out": 15
+      },
+      "runs": [
+        {
+          "transcript": "two-line-1.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-2.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-3.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-4.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-5.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-6.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-7.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-8.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-9.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-10.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-11.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-12.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-13.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-14.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "two-line-15.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        }
+      ]
+    },
+    "bare": {
+      "runs_passing_every_grader": 0,
+      "runs_passing_each_grader": {
+        "sees-a-test-fail-before-editing": 1,
+        "new-test-fails-on-the-original-code": 13,
+        "suite-passes-after-the-change": 15,
+        "the-request-is-met": 15,
+        "report-marks-a-claim-verified": 0,
+        "stages-by-name": 15,
+        "leaves-the-other-session's-edits-out": 15
+      },
+      "runs": [
+        {
+          "transcript": "bare-1.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-2.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-3.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-4.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-5.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-6.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-7.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-8.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": false,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-9.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-10.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-11.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": false,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-12.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-13.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-14.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        },
+        {
+          "transcript": "bare-15.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true
+          }
+        }
+      ]
     }
   }
 }

@@ -1,0 +1,95 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && cat INDEX.md && echo ---- && cat docs/playbooks/fix-a-bug.md && echo ---- && find src -type f | head -100 && echo ---- && grep -ril export src docs | head -50",
+    "ok": true,
+    "output": "ndo a recorded decision.\n\n## Changing this page\n\nA small wording change here can change what an agent does. This page has an eval case, and a check fails any commit that changes the page without a new passing run. This page does not say what the case looks for, because an agent reads this page.\n----\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\n----\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ndocs/playbooks/fix-a-bug.md"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/orders_page.py && echo ---- && cat src/orders-web/quarterly_export.py && echo ---- && cat src/orders-web/csv_export.py && echo ---- && cat src/README.md && echo ---- && cat docs/definition-of-done.md && echo ---- && cat workspace.json && ls -la; ls tests 2>/dev/null; git log --oneline | head; git diff --stat",
+    "ok": true,
+    "output": "der in self.orders:\n            total = sum(order[\"prices\"])\n            lines.append(f\"{order['id']},{len(order['prices'])},{total}\")\n        return \"\\n\".join(lines) + \"\\n\"\n----\n\"\"\"Turn orders into CSV text.\"\"\"\n\n\ndef to_csv(orders):\n    lines = [\"id,customer,total\"]\n    for order in orders:\n        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\n    return \"\\n\".join(lines) + \"\\n\"\n----\ncat: src/README.md: No such file or directory\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py\n95c72c6 Orders\n README.md | 2 ++\n 1 file changed, 2 insertions(+)"
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_web.py && echo ---- && cat docs/definition-of-done.md && echo ---- && cat workspace.json && echo ---- && ls notes && git diff README.md && ls tests/ && (python3 -m pytest --version 2>&1 | head -1)",
+    "ok": false,
+    "output": "ou ran, and what you saw>\nverified  <something you ran, and what you saw>\ninferred  <something you reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked.\n----\ncat: workspace.json: No such file or directory"
+  },
+  {
+    "kind": "run",
+    "target": "cd src/orders-web && python3 -I -m unittest -v test_orders_web 2>&1 | tail -30; cd ../.. && ls tests && cd tests && python3 -I -m unittest -v test_orders_web 2>&1 | tail -30",
+    "ok": true,
+    "output": "=================\nERROR: test_orders_web (unittest.loader._FailedTest)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_orders_web\nTraceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 154, in loadTestsFromName\n    module = __import__(module_name)\nModuleNotFoundError: No module named 'test_orders_web'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)"
+  },
+  {
+    "kind": "run",
+    "target": "cd . && PYTHONPATH=src/orders-web python3 -m unittest -v tests.test_orders_web 2>&1 | tail -30; echo ----; git log -1 --format=%H -- src/orders-web; grep -rn \"export\" tests/test_orders_web.py | head -3; grep -rn \"_on(\" src | head",
+    "ok": true,
+    "output": "geTests) ... ok\ntest_one_line_per_order_after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n----\n95c72c6b7a4e277aae60614a4a5b80af6e499e3f\ntests/test_orders_web.py:3:from csv_export import to_csv\ntests/test_orders_web.py:5:from quarterly_export import QuarterlyExport\ntests/test_orders_web.py:19:    def test_export_writes_one_download(self):\nsrc/orders-web/orders_page.py:11:        self._on(\"refresh\", self.refresh)\nsrc/orders-web/orders_page.py:13:    def _on(self, button, handler):"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web 2>&1 | tail -15",
+    "ok": true,
+    "output": ".F...\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest -v tests.test_orders_web 2>&1 | tail -10; echo ----; PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_api tests.test_orders_service_v1 2>&1 | tail -4; echo ----; grep -rn \"to_csv\\|export\" src --include=*.py | grep -v \"^src/orders-web/orders_page.py\\|quarterly\" ; echo ----; ls tools 2>/dev/null; cat docs/changing-the-machinery.md >/dev/null 2>&1; git status --short",
+    "ok": true,
+    "output": "\ntest_export_writes_one_download (tests.test_orders_web.OrdersPageTests) ... ok\ntest_refresh_button_sorts_the_table (tests.test_orders_web.OrdersPageTests) ... ok\ntest_one_line_per_order_after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n----\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n----\nsrc/orders-web/csv_export.py:4:def to_csv(orders):\n----\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nWire the orders page Export button to its handler\n\nThe Export button had no handler: OrdersPage only registered\n\"refresh\", so click(\"export\") did nothing. Register export in\n__init__ and add a test that clicks the button, since the existing\ntest called page.export() directly and never exercised the wiring.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git remote -v; git status --short",
+    "ok": true,
+    "output": "3af77cc Wire the orders page Export button to its handler\n95c72c6 Orders\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `3af77cc` (\"Wire the orders page Export button to its handler\").\n\n**The cause:** `OrdersPage.__init__` registered only the `refresh` handler. `click(\"export\")` found no handler and did nothing. The existing export test called `page.export()` directly, so it passed and never touched the button.\n\n**The change:**\n- `src/orders-web/orders_page.py`: one line, `self._on(\"export\", self.export)`.\n- `tests/test_orders_web.py`: a new test, `test_export_button_writes_one_download`, that clicks `\"export\"` and checks for one download.\n\nReport, per the fix-a-bug playbook:\n\nFixed: the Export button's handler was never registered, so clicking it did nothing.\n\nverified: the new button test failed before the fix (`AssertionError: 0 != 1`).\nverified: after the fix, all 5 web tests pass, and the API and v1 suites pass (4 tests).\nverified: `export` is only called from `OrdersPage`; the one other `to_csv` caller is `csv_export.py` itself. Nothing else in `src/` references the orders page's export.\ninferred: the button works in the real app. There is no running app here, so I did not click it in one.\n\nNot done:\n- The change is one commit on local `main`. There's no git remote, so I did not open a pull request.\n- I left the existing `README.md` edit and the untracked `notes/` folder out of the commit. They were already in the working tree and aren't part of this fix.\n- The `quarterly_export.py` \"big report\" code is separate from the orders page Export button, so I did not touch it.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

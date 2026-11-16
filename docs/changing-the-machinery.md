@@ -15,7 +15,7 @@ Docs change freely. The scripts, hooks and CI that check them take a stricter pa
 | `ws.py`, `wslib/` | The engine: `wslib/` holds its code, and `ws.py` starts it. See [decision 0003](decisions/0003-the-engine-in-one-folder.md). |
 | `parts/` | Every check and hook, and their cases |
 | `tools/` | Lookups such as `symbols.py` |
-| `evals/*.py`, `evals/cases/` | The eval harness, the graders and the cases |
+| `evals/*.py`, `evals/cases/`, `evals/acceptance/`, `evals/arms.json` | The eval harness, the graders, the cases with their hidden acceptance tests, and what each arm is given. A change to most of these needs the eval run again; see [evals](../evals/README.md#the-gate). |
 | `workspace.json` | The manifest: which parts run, and the tier binding |
 | `.githooks/`, `.github/`, `.claude/settings.json`, `.codex/hooks.json` | The commit hook, CI and the agent tools' wiring |
 | `tests/` | The tests of all of the above |

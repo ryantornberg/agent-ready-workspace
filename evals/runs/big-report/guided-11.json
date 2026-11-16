@@ -1,0 +1,106 @@
+[
+  {
+    "kind": "run",
+    "target": "cat INDEX.md && echo ---- && cat docs/playbooks/fix-a-bug.md && echo ---- && git status --short && find src -type f | head -50",
+    "ok": true,
+    "output": "the base branch, so the bug is not where the report says.\n- The fix would undo a recorded decision.\n\n## Changing this page\n\nA small wording change here can change what an agent does. This page has an eval case, and a check fails any commit that changes the page without a new passing run. This page does not say what the case looks for, because an agent reads this page.\n----\n M README.md\n?? notes/\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py"
+  },
+  {
+    "kind": "run",
+    "target": "grep -rn -i \"total\" src --include=* | head -40; echo ----; python3 tools/symbols.py report src 2>&1 | head -20",
+    "ok": true,
+    "output": "rs-web/csv_export.py:5:    lines = [\"id,customer,total\"]\nsrc/orders-web/csv_export.py:7:        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\nsrc/orders-api/sales_report.py:9:        totals = {}\nsrc/orders-api/sales_report.py:11:            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\nsrc/orders-api/sales_report.py:12:        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]\n----\n/Library/Developer/CommandLineTools/usr/bin/python3: can't open file 'tools/symbols.py': [Errno 2] No such file or directory"
+  },
+  {
+    "kind": "run",
+    "target": "cat -n src/orders-web/quarterly_export.py && echo ---- && cat -n src/orders-web/csv_export.py && echo ---- && grep -rn \"QuarterlyExport\\|quarterly_export\" . --exclude-dir=.git | head -20; echo ----; find . -path ./.git -prune -o \\( -iname \"*test*\" -print \\); cat src/README.md | head -30; git log --oneline | head",
+    "ok": true,
+    "output": "    8\t    return \"\\n\".join(lines) + \"\\n\"\n----\n./tests/test_orders_web.py:5:from quarterly_export import QuarterlyExport\n./tests/test_orders_web.py:28:class QuarterlyExportTests(unittest.TestCase):\n./tests/test_orders_web.py:30:        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\n./INDEX.md:38:| the big report | `QuarterlyExport` |\n./src/orders-web/quarterly_export.py:4:class QuarterlyExport:\n----\n./tests\n./tests/test_orders_service_v1.py\n./tests/test_orders_web.py\n./tests/test_orders_api.py\ncat: src/README.md: No such file or directory\nb7de4dc Orders"
+  },
+  {
+    "kind": "run",
+    "target": "cat -n tests/test_orders_web.py; echo ----; ls; ls tests; cat workspace.json 2>/dev/null | head -60",
+    "ok": true,
+    "output": "7\t\n    28\tclass QuarterlyExportTests(unittest.TestCase):\n    29\t    def test_one_line_per_order_after_the_header(self):\n    30\t        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\n    31\t        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\n    32\t        self.assertEqual(len(export.to_csv().splitlines()), 3)\n    33\t\n    34\t\n    35\tif __name__ == \"__main__\":\n    36\t    unittest.main()\n----\nAGENTS.md\nCLAUDE.md\ndocs\nINDEX.md\nnotes\nREADME.md\nsrc\ntests\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py"
+  },
+  {
+    "kind": "run",
+    "target": "grep -rn -i \"unittest\\|pytest\\|PYTHONPATH\" docs README.md AGENTS.md CLAUDE.md 2>/dev/null | head; echo ----; cd src/orders-web 2>/dev/null; cd - >/dev/null; PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -5",
+    "ok": true,
+    "output": "README.md:5:Run the tests with `python3 -m unittest`.\n----\n....\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -12",
+    "ok": true,
+    "output": "Traceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 36, in test_total_is_rounded_to_cents\n    self.assertEqual(export.to_csv().splitlines()[1], \"A1,2,0.30\")\nAssertionError: 'A1,2,0.30000000000000004' != 'A1,2,0.30'\n- A1,2,0.30000000000000004\n+ A1,2,0.30\n\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/quarterly_export.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -15; echo ----; for f in tests/test_*.py; do echo \"$f:\"; PYTHONPATH=$(ls -d src/*/ | tr '\\n' ':') python3 -m unittest \"${f%.py}\" 2>&1 | tail -1; done; echo ----; PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -3",
+    "ok": true,
+    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n----\ntests/test_orders_api.py:\nFAILED (errors=1)\ntests/test_orders_service_v1.py:\nFAILED (errors=1)\ntests/test_orders_web.py:\nFAILED (errors=1)\n----\nRan 5 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/quarterly_export.py tests/test_orders_web.py && git diff --cached --stat && git commit -q -F - <<'EOF'\nRound QuarterlyExport totals to cents\n\nThe quarterly CSV printed raw float sums, so prices of 0.1 and 0.2\ncame out as 0.30000000000000004. Format the total with two decimal\nplaces, matching csv_export.to_csv.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -3 && git status --short",
+    "ok": true,
+    "output": " src/orders-web/quarterly_export.py | 2 +-\n tests/test_orders_web.py           | 4 ++++\n 2 files changed, 5 insertions(+), 1 deletion(-)\n28180e0 Round QuarterlyExport totals to cents\nb7de4dc Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "run",
+    "target": "git remote -v; echo \"exit=$?\"",
+    "ok": true,
+    "output": "exit=0"
+  },
+  {
+    "kind": "report",
+    "target": "The big report's totals are fixed and committed as `28180e0` on `main`.\n\n\"The big report\" is `QuarterlyExport` (per the INDEX.md alias table). Its `to_csv` printed the raw float sum, so prices of 0.1 and 0.2 came out as `0.30000000000000004`. The fix formats the total with `.2f`, the same as `csv_export.py` already does.\n\n- **Verified:** I added `test_total_is_rounded_to_cents` to `tests/test_orders_web.py` and ran it before the fix. It failed with `'A1,2,0.30000000000000004' != 'A1,2,0.30'`. After the one-line change in `src/orders-web/quarterly_export.py`, `python3 -m unittest` from the repo root passes all 9 tests.\n- **Verified:** The only caller of `QuarterlyExport` is its own test, found by grep. Nothing else in the repo calls it.\n- **Inferred:** The fix is correct for every amount. Two-decimal formatting covers the currency case, but a price with more than two decimal places would now be rounded in the export. I did not check whether that matters for your data.\n\nI staged only the two files I changed. `README.md` (modified) and `notes/` (untracked) were already in the working tree and I left them alone.\n\nThere is no git remote, so I did not open a draft PR.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-api/sales_report.py",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

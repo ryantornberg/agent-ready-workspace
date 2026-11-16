@@ -1,0 +1,88 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && git ls-files && echo --- && git diff && echo --- && ls -la notes/ && grep -ril \"report\" --exclude-dir=.git . | head -50",
+    "ok": true,
+    "output": "s-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\n---\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\n---\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 15 19:06 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 15 19:06 ..\n-rw-r--r--@ 1 user  staff   28 Nov 15 19:06 todo.txt\n./tests/test_orders_api.py\n./src/orders-api/sales_report.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-api/sales_report.py && echo --- && cat tests/test_orders_api.py && echo --- && cat notes/todo.txt",
+    "ok": true,
+    "output": "re).run(\"2026-03-01\"), 1)\n\n    def test_only_the_days_payments_count(self):\n        store = Store(set(), [{\"id\": \"p1\", \"order_id\": \"o9\", \"day\": \"2026-03-02\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n\n\nclass SalesReportTests(unittest.TestCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n---\nDraft, not ready to commit."
+  },
+  {
+    "kind": "run",
+    "target": "grep -rn \"prices\\|sum(\\|total\\|Decimal\\|float\" --include=*.py . ; git log --oneline | head; python3 -m unittest 2>&1 | tail -3",
+    "ok": true,
+    "output": "         lines.append(f\"{order['id']},{len(order['prices'])},{total}\")\n./src/orders-web/csv_export.py:5:    lines = [\"id,customer,total\"]\n./src/orders-web/csv_export.py:7:        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\n./src/orders-api/sales_report.py:9:        totals = {}\n./src/orders-api/sales_report.py:11:            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\n./src/orders-api/sales_report.py:12:        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]\n5c1a92a Orders\nRan 8 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/quarterly_export.py; echo ---; cat src/orders-web/csv_export.py",
+    "ok": true,
+    "output": "e line each, as CSV.\"\"\"\n\n\nclass QuarterlyExport:\n    def __init__(self, orders):\n        self.orders = list(orders)\n\n    def to_csv(self):\n        lines = [\"order_id,items,total\"]\n        for order in self.orders:\n            total = sum(order[\"prices\"])\n            lines.append(f\"{order['id']},{len(order['prices'])},{total}\")\n        return \"\\n\".join(lines) + \"\\n\"\n---\n\"\"\"Turn orders into CSV text.\"\"\"\n\n\ndef to_csv(orders):\n    lines = [\"id,customer,total\"]\n    for order in orders:\n        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\n    return \"\\n\".join(lines) + \"\\n\""
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-api/sales_report.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_api.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -15",
+    "ok": true,
+    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-api/sales_report.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nFix float artifacts in sales report totals\n\nSum prices as Decimal and format totals to two decimal places so\nvalues like 0.1 + 0.2 show as 0.30 instead of 0.30000000000000004.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
+    "ok": true,
+    "output": "918c614 Fix float artifacts in sales report totals\n5c1a92a Orders\n\n src/orders-api/sales_report.py | 8 ++++++--\n tests/test_orders_api.py       | 6 +++++-\n 2 files changed, 11 insertions(+), 3 deletions(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "I fixed the float artifacts in the per-customer totals and committed it as `918c614`.\n\nI took \"the big report\" to mean `src/orders-api/sales_report.py`, since it's the report that shows totals. Totals are now summed as `Decimal` and printed with two decimal places, so `0.1 + 0.2` shows as `0.30`. I also added a regression test for that case. All 9 tests pass.\n\n`src/orders-web/quarterly_export.py` has the same bug in its per-order `total` column. I left it alone because you asked about the report. If the export is the report you meant, I can apply the same fix there.\n\nThe commit only includes the two files I changed. The existing edit to `README.md` and the untracked `notes/` folder are still uncommitted.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-api/sales_report.py",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]
