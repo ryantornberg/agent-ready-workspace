@@ -26,7 +26,8 @@ The maintainer, 2026-11-16:
 - "The workspace is supposed to have rules for using multiple playwright browsers. Check [the work workspace]. This is one of the many features I wanted moved to the workspace."
 - "First write the porting plan."
 - "You'll have to dig into the workspace for possible features. I'm constantly modifying it so I don't have a particular list."
-- Turned on GitHub's branch rule for main: all five CI jobs required, the branch must be current with main, direct pushes by the owner still allowed, force pushes and deletion blocked.
+- Turned on GitHub's branch rule for main: all five CI jobs required, direct pushes by the owner still allowed, force pushes and deletion blocked.
+- Turned off "require branches to be up to date" the same day, so each doc push to main does not send every open pull request through a catch-up merge and a fresh CI run. CI on main catches a bad combination after the merge.
 - Asked how to pay for the eval re-recording ("We're fine in my claude subscription right now"); slice 0 is the answer this draft proposes.
 
 Carried from M1, 2026-11-15:
