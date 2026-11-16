@@ -54,6 +54,21 @@ def claude(tool, cwd=None, **tool_input):
     return json.dumps(payload)
 
 
+def codex(tool, cwd, **tool_input):
+    """A Codex CLI PreToolUse payload, in the shape a recorded run of codex-cli 0.169.0 sent it."""
+    payload = {"session_id": "s", "turn_id": "t", "transcript_path": None, "hook_event_name": "PreToolUse",
+               "model": "m", "permission_mode": "bypassPermissions", "tool_name": tool, "tool_input": tool_input,
+               "tool_use_id": "u"}
+    if cwd is not None:
+        payload["cwd"] = str(cwd)
+    return json.dumps(payload)
+
+
+def patch(*lines):
+    """The text of a Codex patch: what its apply_patch tool sends as tool_input.command."""
+    return "\n".join(("*** Begin Patch", *lines, "*** End Patch"))
+
+
 class Folder(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -1432,6 +1447,186 @@ def _chdir(folder):
         yield
     finally:
         os.chdir(before)
+
+
+class SecondToolTests(Folder):
+    """M1 slice 7: the hooks run under Codex CLI, through their own adapter, and a recorded run shows it (criterion 25)."""
+
+    RECORD = ROOT / "tests" / "records" / "codex-cli-run.json"
+    SCRATCH = "/scratch/ws"   # the recorded run's folder, as the record names it
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "edit_ledger"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/old"]})
+        self.write("notes/b.md", "b\n")
+        self.git("init", "-q")
+        self.git("add", "workspace.json", "parts", "notes")
+        self.git("commit", "-q", "--no-verify", "-m", "base")
+
+    def hook(self, event, payload, tool="codex"):
+        return self.ws("hook", event, *(["--tool", tool] if tool else []), stdin=payload)
+
+    def ledger(self):
+        file = self.root / ".git" / "ws-ledger"
+        return {json.loads(line) for line in file.read_text(encoding="utf-8").splitlines()} if file.exists() else None
+
+    def test_the_shell_tool_is_read_and_the_reminder_goes_back_the_way_codex_reads_it(self):
+        code, output = self.hook("before-shell", codex("Bash", self.root, command="ls"))
+        self.assertEqual((code, output), (0, ""))
+        self.write("theirs.md", "another session's edit\n")
+        code, output = self.hook("before-shell", codex("Bash", self.root, command="git add -A && git commit -m x"))
+        self.assertEqual(code, 0, output)
+        reply = json.loads(output)["hookSpecificOutput"]
+        self.assertEqual(reply["hookEventName"], "PreToolUse")
+        self.assertIn("no_stage_all", reply["additionalContext"])
+        self.assertIn("ledger", reply["additionalContext"])
+        self.assertEqual(self.ledger(), set())   # opened, empty: the commit is now compared
+
+    def test_a_patch_is_decided_file_by_file_and_records_nothing_when_one_is_refused(self):
+        refused = [
+            ["*** Add File: notes/a.md", "+a", "*** Update File: src/old/Order.cs", "@@", "-x", "+y"],
+            ["*** Add File: src/old/New.cs", "+x"],
+            ["*** Delete File: src/old/Order.cs"],
+            ["*** Update File: notes/b.md", "*** Move to: src/old/b.md", "@@", "-b", "+b"],
+            ["*** Update File: src/old/Order.cs", "*** Move to: notes/order.md", "@@", "-x", "+x"],
+            ["*** Add File: notes/a.md", "+a", "   *** Add File: src/old/Lenient.cs  ", "+x"],
+            [f"*** Add File: {(self.root / 'src/old/Absolute.cs').as_posix()}", "+x"],
+            ["*** Add File: notes/../src/OLD/Upper.cs", "+x"],
+        ]
+        for lines in refused:
+            with self.subTest(patch=lines):
+                code, output = self.hook("before-edit", codex("apply_patch", self.root, command=patch(*lines)))
+                self.assertEqual(code, 2, output)
+                self.assertIn("shelved", output)
+        self.assertIsNone(self.ledger())
+        allowed = patch("*** Add File: notes/a.md", "+a", "*** Update File: notes/b.md", "@@", "-b", "+b2",
+                        "*** Update File: notes/c.md", "*** Move to: notes/d.md", "@@", "-c", "+c",
+                        "*** Delete File: notes/e.md")
+        code, output = self.hook("before-edit", codex("apply_patch", self.root, command=allowed))
+        self.assertEqual(code, 0, output)
+        self.assertEqual(self.ledger(), {"notes/a.md", "notes/b.md", "notes/c.md", "notes/d.md", "notes/e.md"})
+        code, output = self.hook("before-edit", codex("apply_patch", self.root / "notes", command=patch("*** Add File: f.md", "+f")))
+        self.assertEqual(code, 0, output)
+        self.assertIn("notes/f.md", self.ledger())
+
+    def test_a_payload_the_adapter_cannot_read_is_refused(self):
+        here = str(self.root)
+        refused = [
+            ("before-edit", codex("apply_patch", here, command="*** Add File: notes/a.md\n+a")),       # no Begin Patch
+            ("before-edit", codex("apply_patch", here, command=patch("@@", "-a", "+b"))),              # no file named
+            ("before-edit", codex("apply_patch", here, command=patch("*** Add File: ", "+a"))),         # an empty path
+            ("before-edit", codex("apply_patch", here, command="")),
+            ("before-edit", codex("apply_patch", here, command=["*** Begin Patch"])),
+            ("before-edit", codex("apply_patch", here, patch=patch("*** Add File: notes/a.md", "+a"))),
+            ("before-edit", codex("apply_patch", None, command=patch("*** Add File: notes/a.md", "+a"))),
+            ("before-edit", codex("apply_patch", "relative/dir", command=patch("*** Add File: notes/a.md", "+a"))),
+            ("before-edit", codex("Edit", here, file_path=str(self.root / "notes/a.md"))),
+            ("before-edit", codex("Bash", here, command="ls")),
+            ("before-shell", codex("apply_patch", here, command=patch("*** Add File: notes/a.md", "+a"))),
+            ("before-shell", codex("Bash", here, cmd="ls")),
+            ("before-shell", codex("Bash", here, command=["ls"])),
+            ("before-shell", json.dumps({"hook_event_name": "PostToolUse", "tool_name": "Bash", "cwd": here,
+                                         "tool_input": {"command": "ls"}})),
+            ("before-handoff", codex("spawn_agent", here, message="Tier: worker\nBuild it.")),
+            ("before-shell", '{"version": 1, "command": "ls"}'),
+        ]
+        for event, payload in refused:
+            with self.subTest(event=event, payload=payload[-120:]):
+                self.assertEqual(self.hook(event, payload)[0], 2)
+        # Codex's patch tool, read by any other adapter, is refused too: no adapter guesses at another's payload.
+        payload = codex("apply_patch", here, command=patch("*** Add File: notes/a.md", "+a"))
+        self.assertEqual(self.hook("before-edit", payload, "claude-code")[0], 2)
+        self.assertEqual(self.hook("before-edit", payload, None)[0], 2)
+        code, output = self.hook("before-handoff", codex("spawn_agent", here, message="Tier: worker\nBuild it."))
+        self.assertIn("subagent", output)
+        self.assertIsNone(self.ledger())
+
+    def codex_wiring(self):
+        """{event: (matcher, hook)} from Codex's project hooks file."""
+        settings = json.loads((ROOT / ".codex/hooks.json").read_text(encoding="utf-8"))
+        found = {}
+        for entry in settings["hooks"]["PreToolUse"]:
+            for hook in entry["hooks"]:
+                event = re.search(r"\bhook (before-[a-z]+)\b", hook["command"]).group(1)
+                found[event] = (entry["matcher"], hook)
+        return found
+
+    def test_the_wiring_sends_every_tool_the_adapter_reads_and_every_event_has_wiring(self):
+        from wslib import events
+        wiring = self.codex_wiring()
+        self.assertEqual(set(wiring), set(partlib.EVENTS))
+        for event, tools in events.CODEX_TOOLS.items():
+            matcher, hook = wiring[event]
+            for tool in [*tools, *events.CODEX_REFUSED.get(event, ())]:
+                with self.subTest(event=event, tool=tool):
+                    self.assertTrue(re.search(matcher, tool), f"{matcher!r} does not send {tool} to {event}")
+            self.assertIn("--tool codex", hook["command"])
+            self.assertTrue(hook["command"].rstrip().endswith("|| exit 2"), hook["command"])
+            # Codex lets a call go ahead when its hook times out; its default wait is ten minutes.
+            self.assertLessEqual(hook.get("timeout", 600), 30)
+        self.assertFalse(re.search(wiring["before-shell"][0], "BashOutput"))
+
+    def run_codex_wiring(self, event, payload, cwd, path=None):
+        shell = FailClosedTests.shell(self)
+        if not shell:
+            self.skipTest("no POSIX shell here")
+        environment = dict(os.environ)
+        environment.pop("CLAUDE_PROJECT_DIR", None)   # Codex sets no such variable: the wiring finds the workspace itself
+        if path is not None:
+            environment["PATH"] = path
+        return subprocess.run([shell, "-c", self.codex_wiring()[event][1]["command"]], input=payload.encode("utf-8"),
+                              capture_output=True, env=environment, cwd=cwd)
+
+    def test_the_wiring_finds_the_workspace_from_a_subfolder_and_refuses_when_it_cannot_run(self):
+        shelved = codex("apply_patch", ROOT, command=patch("*** Update File: src/orders-service-v1/OrderService.cs", "@@", "-a", "+b"))
+        ran = self.run_codex_wiring("before-edit", shelved, ROOT / "docs")
+        self.assertEqual(ran.returncode, 2, ran.stderr)
+        self.assertIn(b"shelved", ran.stderr)
+        # Outside every working copy of this repository, so nothing reaches this repository's own ledger.
+        outside = codex("apply_patch", self.root.parent, command=patch(f"*** Add File: {self.root.name}-notes.md", "+a"))
+        ran = self.run_codex_wiring("before-edit", outside, ROOT / "docs")
+        self.assertEqual(ran.returncode, 0, ran.stderr)
+        empty = self.root / "empty-bin"
+        empty.mkdir()
+        ran = self.run_codex_wiring("before-shell", codex("Bash", ROOT, command="ls"), ROOT, path=str(empty))
+        self.assertEqual(ran.returncode, 2, ran.stderr)
+        ran = self.run_codex_wiring("before-shell", codex("Bash", ROOT, command="ls"), self.root.parent)   # no workspace
+        self.assertEqual(ran.returncode, 2, ran.stderr)
+
+    def record(self):
+        return json.loads(self.RECORD.read_text(encoding="utf-8"))
+
+    def test_the_recorded_run_replays_with_the_same_answers(self):
+        record = self.record()
+        self.assertTrue(record["calls"], "the record holds no hook calls")
+        self.workspace({"use": "edit_ledger"}, {"use": "no_stage_all"}, {"use": "shelved", "paths": ["src/orders-service-v1"]})
+        self.write("theirs.md", "another session's edit\n")
+        seen = {"refused": 0, "reminded": 0, "allowed edits": 0}
+        for number, call in enumerate(record["calls"], 1):
+            payload = json.dumps(call["payload"]).replace(self.SCRATCH, self.root.as_posix())
+            code, output = self.hook(call["event"], payload)
+            with self.subTest(call=number, event=call["event"]):
+                self.assertEqual(code, call["answer"], output)
+                self.assertEqual("additionalContext" in output, call["reminded"], output)
+            seen["refused"] += code == 2
+            seen["reminded"] += call["reminded"]
+            seen["allowed edits"] += code == 0 and call["event"] == "before-edit"
+        self.assertEqual(self.ledger(), set(record["ledger_before_the_sweep"]))
+        # What criterion 25 asks the run to show: a reminder on the sweep, a refused edit, and an edit recorded.
+        self.assertTrue(all(seen.values()), seen)
+        sweep = [c for c in record["calls"] if c["reminded"]]
+        self.assertTrue(any("git add -A" in c["payload"]["tool_input"]["command"] for c in sweep))
+        commits = [step for step in record["transcript"] if step.get("type") == "command_execution"
+                   and "git commit" in step.get("command", "")]
+        self.assertTrue(any(step["exit_code"] != 0 and "edit_ledger" in step["output"] for step in commits), commits)
+        self.assertTrue(any(step["exit_code"] == 0 for step in commits), commits)
+
+    def test_the_recorded_run_holds_nothing_private(self):
+        text = self.RECORD.read_text(encoding="utf-8")
+        for marker in ("/Users/", "/home/", "/private/", "/tmp/", "\\Users\\", "C:/", "session_id\": \"0", "thread_id"):
+            self.assertNotIn(marker, text)
+        for address in re.findall(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", text):
+            self.assertTrue(address.endswith(".invalid"), address)
 
 
 class SymbolTests(unittest.TestCase):

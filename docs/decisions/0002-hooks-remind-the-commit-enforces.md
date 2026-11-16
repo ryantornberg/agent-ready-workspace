@@ -38,4 +38,4 @@ A command line does not hold the answer. The commit does: it holds exactly the p
 
 - **Keep refusing, and teach the parser where a command runs.** It would track `cd`, `git -C` and the session's folder, and still could not follow a variable or a script. That is the parser growth this record ends.
 - **Record shell writes too.** A shell command's writes cannot be read from its text, and a tracer for every command is out of proportion to the risk.
-- **Close the ledger at the end of the session.** Claude Code can run a hook then, but no other tool here can yet, and a crashed session would leave it open. Closing on commit needs nothing but git.
+- **Close the ledger at the end of the session.** Claude Code can run a hook then, and Codex documents one, but a crashed session would leave it open. Closing on commit needs nothing but git.
