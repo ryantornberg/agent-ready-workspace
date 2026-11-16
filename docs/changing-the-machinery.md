@@ -17,7 +17,7 @@ Docs change freely. The scripts, hooks and CI that check them take a stricter pa
 | `tools/` | Lookups such as `symbols.py` |
 | `evals/*.py`, `evals/cases/` | The eval harness, the graders and the cases |
 | `workspace.json` | The manifest: which parts run, and the tier binding |
-| `.githooks/`, `.github/`, `.claude/settings.json` | The commit hook, CI and the agent tool's wiring |
+| `.githooks/`, `.github/`, `.claude/settings.json`, `.codex/hooks.json` | The commit hook, CI and the agent tools' wiring |
 | `tests/` | The tests of all of the above |
 
 Everything else is a doc.
