@@ -2036,6 +2036,7 @@ class EvalThatCanLoseTests(Folder):
         self.assertIn("Read(~/**)", settings["permissions"]["deny"])
         self.assertEqual(command[command.index("--setting-sources") + 1], "project")
 
+    @unittest.skipIf(os.name == "nt", "Claude Code's sandbox runs on macOS and Linux only, so run.py chooses no Windows shell")
     def test_the_agent_gets_none_of_the_operators_environment(self):
         home = self.root / "home"   # a home folder with no shell start-up file, unlike a CI runner's
         home.mkdir()
