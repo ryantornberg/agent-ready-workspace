@@ -1,15 +1,11 @@
 {
   "name": "fix-a-bug",
   "playbook": "docs/playbooks/fix-a-bug.md",
-  "guidance": [
-    "docs/playbooks/fix-a-bug.md",
-    "docs/definition-of-done.md",
-    "evals/arm/AGENTS.md",
-    "evals/arm/CLAUDE.md"
-  ],
   "scaffold_dir": "evals/scaffold",
+  "code_dir": "src",
+  "acceptance": "evals/acceptance/fix-a-bug.py",
   "request": "The Export button on the orders page does nothing. Fix it and commit the fix.",
-  "scaffold": "evals/scaffold: the Export button's handler is never attached. The suite passes, because no test clicks the button. Before the run, another session's uncommitted edits are left in the folder.",
+  "scaffold": "The Export button's handler is never attached. The suite passes, because no test clicks the button. Before the run, another session's uncommitted edits are left in the folder.",
   "graders": [
     {
       "id": "sees-a-test-fail-before-editing",
@@ -21,7 +17,7 @@
       },
       "then": {
         "kind": "edit",
-        "match": "^shop/"
+        "match": "^src/"
       }
     },
     {
@@ -36,6 +32,13 @@
       "type": "any",
       "kind": "state",
       "match": "^suite passes after the change$",
+      "ok": true
+    },
+    {
+      "id": "the-request-is-met",
+      "type": "any",
+      "kind": "state",
+      "match": "^the hidden acceptance test passes$",
       "ok": true
     },
     {

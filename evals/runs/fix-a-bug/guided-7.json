@@ -1,0 +1,89 @@
+[
+  {
+    "kind": "run",
+    "target": "cat docs/playbooks/fix-a-bug.md && echo ---- && cat INDEX.md && echo ---- && git status --short && find src -type f | head -100 && echo ---- && grep -ril \"export\" src | head -50",
+    "ok": true,
+    "output": "r the everyday word finds nothing, so map it here. The `aliases` check fails when a name in the right-hand column is no longer defined under `src/`.\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |\n----\n M README.md\n?? notes/\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\n----\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py"
+  },
+  {
+    "kind": "run",
+    "target": "for f in src/orders-web/*.py; do echo \"==== $f\"; cat -n \"$f\"; done; echo ----; cat src/README.md; echo ----; cat docs/definition-of-done.md; echo ----; ls; ls tests test 2>/dev/null; cat workspace.json 2>/dev/null | head -60",
+    "ok": true,
+    "output": "ou reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked.\n----\nAGENTS.md\nCLAUDE.md\ndocs\nINDEX.md\nnotes\nREADME.md\nsrc\ntests\ntests:\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat -n tests/test_orders_web.py; echo ----; ls notes; echo ----; cat docs/changing-the-machinery.md | head -5; echo ----; cd src/orders-web && git -C ../.. log --oneline -3 -- src/orders-web; cd ../..; python3 -m pytest tests/test_orders_web.py -q 2>&1 | tail -15",
+    "ok": true,
+    "output": "unittest.TestCase):\n    29\t    def test_one_line_per_order_after_the_header(self):\n    30\t        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\n    31\t        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\n    32\t        self.assertEqual(len(export.to_csv().splitlines()), 3)\n    33\t\n    34\t\n    35\tif __name__ == \"__main__\":\n    36\t    unittest.main()\n----\ntodo.txt\n----\ncat: docs/changing-the-machinery.md: No such file or directory\n----\n2b00d19 Orders\n/Library/Developer/CommandLineTools/usr/bin/python3: No module named pytest"
+  },
+  {
+    "kind": "run",
+    "target": "cd /private/var/675 2>/dev/null; cd . && cat README.md | head -40; echo ----; ls -a; cat workspace.json 2>/dev/null | head -40; echo ----; cat notes/todo.txt | head -20; echo ----; PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -5",
+    "ok": true,
+    "output": "# Orders\n\nThe order system's code.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders.\n----\n.\n..\n.claude\n.git\nAGENTS.md\nCLAUDE.md\ndocs\nINDEX.md\nnotes\nREADME.md\nsrc\ntests\n----\nDraft, not ready to commit.\n----\n....\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -12; echo ----; python3 -m unittest 2>&1 | tail -4",
+    "ok": true,
+    "output": "=====================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)\n----\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -4; echo ----; PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -3; echo ----; grep -rn \"to_csv\\|\\.export(\\|click(\" src tests | grep -v \"def \"; echo ----; git diff --stat; git status --short",
+    "ok": true,
+    "output": ".click(\"export\")\ntests/test_orders_web.py:30:        self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])\ntests/test_orders_web.py:36:        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\ntests/test_orders_web.py:37:        self.assertEqual(len(export.to_csv().splitlines()), 3)\n----\n README.md                     | 2 ++\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 3 files changed, 8 insertions(+)\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/"
+  },
+  {
+    "kind": "run",
+    "target": "git remote -v; echo \"remotes: $?\"; git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage registered only the refresh button, so clicking Export\nfound no handler and did nothing. Register export the same way.\n\nAdd a test that clicks \"export\" (the existing test called export()\ndirectly, which hid the missing registration).\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2; git show --stat HEAD | tail -4; git status --short",
+    "ok": true,
+    "output": "remotes: 0\ne4b25a0 Wire the Export button to its handler\n2b00d19 Orders\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The Export button is fixed and committed as `e4b25a0`.\n\n**Cause:** `OrdersPage.__init__` registered only the `refresh` handler. `export()` existed, but clicking `\"export\"` found no handler and did nothing. The existing test called `page.export()` directly, so it never exercised the button and passed anyway.\n\n**Change:**\n- `src/orders-web/orders_page.py`: registers `export` the same way `refresh` is registered.\n- `tests/test_orders_web.py`: adds `test_export_button_writes_one_download`, which clicks `\"export\"`.\n\n**Report**\n\nFixed: the Export button had no handler registered, so clicking it did nothing.\n\n- verified: the new test failed before the fix with `AssertionError: 0 != 1`.\n- verified: `python3 -m unittest` (the command in the README) runs 9 tests, all passing, after the fix.\n- verified: the commit contains only the two files above.\n- inferred: the button works in the real page. The sample code has no UI to click, so the test calls `click(\"export\")` on the page object.\n- verified: the only callers of `export` and `to_csv` are in `orders_page.py` and the tests. `refresh` and `QuarterlyExport` are unaffected.\n\nNot done:\n- **Running-app check:** there is no running app in this workspace, so I could not check the button in a browser.\n- **Pull request:** the repository has no remote, so I did not open a draft PR.\n- **Open question:** `notes/todo.txt` asks whether Export should include cancelled orders. The fix exports `self.orders` unchanged, so that question is still open.\n- **Left alone:** `README.md` already had uncommitted changes when I started, and `notes/` is untracked. I did not stage either.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

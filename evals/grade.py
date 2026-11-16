@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Grade one recorded agent run against an eval case.
 
-    python3 evals/grade.py evals/cases/fix-a-bug.json evals/runs/fix-a-bug/with.json
+    python3 evals/grade.py evals/cases/fix-a-bug.json evals/runs/fix-a-bug/guided-1.json
+    python3 evals/grade.py --recorded      # re-grade every stored transcript against its record; CI runs this
 
 A transcript is the ordered list of what one run did:
 
@@ -27,6 +28,7 @@ is optional. "match" is searched in the target and "output" in the output,
 ignoring case, with ^ and $ matching at line ends.
 
 Exit 0 when every grader passes, 1 when one fails, 2 when the case or transcript is malformed.
+With --recorded: exit 0 when every stored grade matches a fresh one, 1 when one differs.
 """
 import json
 import pathlib
@@ -104,8 +106,58 @@ def grade(case, actions, root=ROOT):
     return [(g["id"], grade_one(g, actions, root)) for g in case["graders"]]
 
 
+def regrade_records(root=ROOT):
+    """Re-grade every stored transcript. Returns a list of differences from what the records say."""
+    differences = []
+    runs = root / "evals" / "runs"
+    for record_path in sorted(runs.glob("*/record.json")):
+        where = record_path.relative_to(root).as_posix()
+        try:
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+            case = json.loads((root / "evals" / "cases" / f"{record['case']}.json").read_text(encoding="utf-8"))
+            arms = record["arms"].items()
+        except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+            differences.append(f"{where}: cannot be read with its case: {error}")
+            continue
+        ids = [g["id"] for g in case["graders"]]
+        for arm, given in arms:
+            fresh_runs = []
+            for run in given.get("runs", []):
+                try:
+                    actions = json.loads((record_path.parent / run["transcript"]).read_text(encoding="utf-8"))
+                    fresh = dict(grade(case, actions, root))
+                except (OSError, ValueError, KeyError, TypeError, Malformed, partlib.PartError) as error:
+                    differences.append(f"{where}: {arm} {run.get('transcript')}: cannot be graded: {error}")
+                    continue
+                fresh_runs.append(fresh)
+                for grader_id in ids:
+                    if run.get("graders", {}).get(grader_id) != fresh[grader_id]:
+                        differences.append(f"{where}: {arm} {run['transcript']}: {grader_id} is recorded as "
+                                           f"{run.get('graders', {}).get(grader_id)} and grades as {fresh[grader_id]}")
+                if run.get("passed") != all(fresh.values()):
+                    differences.append(f"{where}: {arm} {run['transcript']}: passed is recorded as {run.get('passed')}")
+            counts = {g: sum(r[g] for r in fresh_runs) for g in ids}
+            if given.get("runs_passing_each_grader") != counts:
+                differences.append(f"{where}: {arm}: the counts per grader differ from the runs")
+            if given.get("runs_passing_every_grader") != sum(all(r.values()) for r in fresh_runs):
+                differences.append(f"{where}: {arm}: the count of runs passing every grader differs from the runs")
+        stored = sorted(p.name for p in record_path.parent.glob("*.json") if p.name != "record.json")
+        listed = sorted(run.get("transcript") for _, given in arms for run in given.get("runs", []))
+        if stored != listed:
+            differences.append(f"{where}: the transcripts on disk are not the ones the record lists")
+    if not differences and not any(runs.glob("*/record.json")):
+        differences.append("no eval record found under evals/runs")
+    return differences
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
+    if argv == ["--recorded"]:
+        differences = regrade_records()
+        for line in differences:
+            print(line)
+        print(f"re-graded every stored transcript: {'no' if not differences else len(differences)} difference(s)")
+        return 1 if differences else 0
     if len(argv) != 2:
         print(__doc__)
         return 2

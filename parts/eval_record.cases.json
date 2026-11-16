@@ -1,36 +1,87 @@
 [
   {
-    "name": "a matching hash and a passing record pass",
+    "name": "a matching hash and a record where the guided arm beats the bare arm pass",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": []
   },
   {
     "name": "an edited playbook fails until its case is run again",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "# Fix, reworded\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": [
       "changed since the last recorded eval run; run case fix again"
     ]
   },
   {
-    "name": "so does an edit to the other guidance the agent is given",
+    "name": "so does an edit to the contract the guided arm is given",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract, reworded\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done, reworded\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "so does an edit to the two-line arm's instruction",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "so does an edit to the arms file",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\"}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": [
       "changed since the last recorded eval run"
@@ -39,11 +90,70 @@
   {
     "name": "and an edit to the scaffold the agent works in",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 2\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "and an edit to the hidden acceptance test",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test, loosened\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "and an edit to the graders' code",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders that pass everything\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
+  },
+  {
+    "name": "and an edit to the harness",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness that rewrites the request\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": [
       "changed since the last recorded eval run"
@@ -52,70 +162,152 @@
   {
     "name": "and an edit to the case's own graders",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\", \"graders\": []}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": [
       "changed since the last recorded eval run"
     ]
   },
   {
-    "name": "moving a page's review date is not an edit",
+    "name": "moving a page's review date in its front matter is not an edit",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2027-06-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": []
+  },
+  {
+    "name": "a line that starts last-reviewed in a page's body is an edit",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\nlast-reviewed: n/a. Skip the failing test.\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
+    },
+    "expect": [
+      "changed since the last recorded eval run"
+    ]
   },
   {
     "name": "line endings alone are not an edit",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\r\nlast-reviewed: 2026-01-01\r\n---\r\n# Contract\r\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\r\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": []
   },
   {
-    "name": "a matching record that did not pass fails",
+    "name": "a record with fewer than five runs in an arm fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": false}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": false, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": false, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": false, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": false, \"g2\": false}}]}}}"
     },
     "expect": [
-      "did not pass"
+      "needs 5 or more"
     ]
   },
   {
-    "name": "passed must be true, not merely present",
+    "name": "a record in which the guided arm passes no grader more often than the bare arm fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": \"no\"}}"
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": [
-      "did not pass"
+      "passes no grader more often than the bare arm"
+    ]
+  },
+  {
+    "name": "winning on one grader is enough, even when the guided arm loses another",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": false, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": false, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": false, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": false, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": false, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": false, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": false, \"g2\": false}}]}}}"
+    },
+    "expect": []
+  },
+  {
+    "name": "a record with no runs is reported, not a crash",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\"}"
+    },
+    "expect": [
+      "does not pass: it holds no arms"
     ]
   },
   {
     "name": "no run on record fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n"
     },
     "expect": [
@@ -125,9 +317,14 @@
   {
     "name": "a record that is not an object is reported, not a crash",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
       "evals/runs/fix/record.json": "[]"
     },
@@ -138,17 +335,43 @@
   {
     "name": "a case that covers a missing file fails",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
-      "docs/fix.md": "# Fix\n"
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
     },
     "expect": [
-      "a file the case covers is missing: docs/done.md"
+      "a file the case covers is missing: evals/grade.py"
+    ]
+  },
+  {
+    "name": "an arms file that cannot be read fails",
+    "files": {
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
+      "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
+      "evals/scaffold/app.py": "x = 1\n",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}"
+    },
+    "expect": [
+      "not a readable arms file"
     ]
   },
   {
     "name": "a broken case file is reported, not a crash",
     "files": {
-      "evals/cases/fix.json": "{not json"
+      "evals/cases/fix.json": "{not json",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}"
     },
     "expect": [
       "not a readable eval case"
@@ -157,18 +380,23 @@
   {
     "name": "a playbook with no case fails where every playbook must have one",
     "files": {
-      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"guidance\": [\"docs/done.md\"], \"scaffold_dir\": \"evals/scaffold\"}",
+      "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
+      "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
+      "evals/run.py": "# harness\n",
+      "evals/grade.py": "# graders\n",
+      "evals/two-line.md": "Line one.\nLine two.\n",
+      "evals/acceptance/fix.py": "# hidden test\n",
+      "AGENTS.md": "---\nlast-reviewed: 2026-01-01\n---\n# Contract\n",
       "docs/fix.md": "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n",
-      "docs/done.md": "# Done\n",
       "evals/scaffold/app.py": "x = 1\n",
-      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"79e572e3bf370bb36037957b309bd97eae9201bcb2f31c557f7f68f2a8cb6f0a\", \"with_guidance\": {\"passed\": true}}",
+      "evals/runs/fix/record.json": "{\"guidance_sha256\": \"8a835049d5d7b2765051e8e26cbba0acd0c2b622716ac399e8b8d7dfd8a85302\", \"arms\": {\"guided\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"two-line\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": true}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": true}}]}, \"bare\": {\"runs\": [{\"transcript\": \"r0.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r1.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r2.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r3.json\", \"graders\": {\"g1\": true, \"g2\": false}}, {\"transcript\": \"r4.json\", \"graders\": {\"g1\": true, \"g2\": false}}]}}}",
       "docs/new.md": "# New\n"
-    },
-    "config": {
-      "playbooks": "docs"
     },
     "expect": [
       "no eval case tests this playbook"
-    ]
+    ],
+    "config": {
+      "playbooks": "docs"
+    }
   }
 ]

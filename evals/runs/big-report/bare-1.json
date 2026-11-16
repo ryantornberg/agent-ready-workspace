@@ -1,0 +1,97 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && git ls-files && grep -rn -i \"report\" --include=* . 2>/dev/null | grep -v \"^./.git/\" | head -50",
+    "ok": true,
+    "output": "orders-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\n./tests/test_orders_api.py:4:from sales_report import SalesReport\n./tests/test_orders_api.py:30:class SalesReportTests(unittest.TestCase):\n./tests/test_orders_api.py:32:        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n./tests/test_orders_api.py:33:        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\nBinary file ./.git/index matches\n./src/orders-api/sales_report.py:4:class SalesReport:"
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-api/sales_report.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "git diff && ls -la notes && cat README.md && cat tests/test_orders_api.py",
+    "ok": true,
+    "output": "rtEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n\n    def test_only_the_days_payments_count(self):\n        store = Store(set(), [{\"id\": \"p1\", \"order_id\": \"o9\", \"day\": \"2026-03-02\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n\n\nclass SalesReportTests(unittest.TestCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()"
+  },
+  {
+    "kind": "run",
+    "target": "cat notes/todo.txt; echo ---; grep -n -i \"total\\|float\\|round\\|price\\|sum(\" src -r; echo ---; cat src/orders-api/reconciliation_worker.py | head -5; cd . && git log --oneline | head",
+    "ok": true,
+    "output": "  lines = [\"id,customer,total\"]\nsrc/orders-web/csv_export.py:7:        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\nsrc/orders-api/sales_report.py:9:        totals = {}\nsrc/orders-api/sales_report.py:11:            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\nsrc/orders-api/sales_report.py:12:        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]\n---\n\"\"\"Runs once a night and counts the day's payments that match no order.\"\"\"\n\n\nclass ReconciliationWorker:\n    def __init__(self, store):\nc5b9a75 Orders"
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-web/quarterly_export.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-service-v1/nightly_job.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-api/sales_report.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_api.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-api:src/orders-service-v1:src/orders-web python3 -m unittest 2>&1 | tail -20",
+    "ok": true,
+    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-api/sales_report.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nFix float artifacts in sales report totals\n\nSum prices as Decimal and format totals to two decimal places, so\ntotals like 0.1 + 0.2 show as 0.30 instead of 0.30000000000000004.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
+    "ok": true,
+    "output": "e59ed35 Fix float artifacts in sales report totals\nc5b9a75 Orders\n\n src/orders-api/sales_report.py | 13 +++++++++++--\n tests/test_orders_api.py       |  6 +++++-\n 2 files changed, 16 insertions(+), 3 deletions(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "I fixed the float artifacts in the sales report and committed it as `e59ed35`.\n\nI took \"big report\" to mean `SalesReport` in `src/orders-api/sales_report.py`, which totals prices per customer. If you meant the quarterly CSV export in `src/orders-web/quarterly_export.py`, it has the same issue and I can fix it too.\n\n- **Fix:** prices are now summed as `Decimal` and formatted to two decimal places, so `0.1 + 0.2` shows as `0.30`. Whole-number totals now also show two decimals, e.g. `Lindqvist: 2.00` instead of `Lindqvist: 2`.\n- **Tests:** I updated the existing expectation to the new format and added a regression test for `[0.1, 0.2]` \u2192 `0.30`. All 9 tests pass.\n- **Test command:** I ran the tests with `PYTHONPATH` set to the `src` subdirectories, because the test imports need them. The README's bare `python3 -m unittest` may not find those modules.\n- **Left alone:** the uncommitted README note and the `notes/` directory are still unstaged, and the commit contains only the two files above.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-api/sales_report.py",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

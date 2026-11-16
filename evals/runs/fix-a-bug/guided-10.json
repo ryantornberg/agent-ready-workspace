@@ -1,0 +1,101 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && ls -R src | head -100 && grep -rni \"export\" --include=* -l . | grep -v \"^./.git/\" | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\norders-api\norders-service-v1\norders-web\n\nsrc/orders-api:\nreconciliation_worker.py\nsales_report.py\n\nsrc/orders-service-v1:\nnightly_job.py\n\nsrc/orders-web:\ncsv_export.py\norders_page.py\nquarterly_export.py\n./tests/test_orders_web.py\n./docs/playbooks/fix-a-bug.md\n./README.md\n./INDEX.md\n./src/orders-web/orders_page.py\n./src/orders-web/quarterly_export.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat INDEX.md && cat src/README.md 2>/dev/null | head -50",
+    "ok": true,
+    "output": "eone had to ask a person | [Question log](docs/question-log.md) |\n| Testing a playbook | [Evals](evals/README.md) |\n| Adding a check or a hook | [Parts](docs/parts.md) |\n| The sample code | [src](src/README.md) |\n\n## Search aliases\n\nPeople and code use different words for the same thing. A search for the everyday word finds nothing, so map it here. The `aliases` check fails when a name in the right-hand column is no longer defined under `src/`.\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/orders_page.py && echo ---- && cat src/orders-web/csv_export.py && echo ---- && cat src/orders-web/quarterly_export.py && echo ---- && cat tests/test_orders_web.py && echo ---- && cat docs/playbooks/fix-a-bug.md && echo ---- && cat docs/definition-of-done.md",
+    "ok": true,
+    "output": " was wrong, in one sentence>\n\nverified  <something you ran, and what you saw>\nverified  <something you ran, and what you saw>\ninferred  <something you reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked."
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -20",
+    "ok": true,
+    "output": ".F...\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py -v 2>&1 | tail -15; echo ---; cat workspace.json; echo ---; grep -rn \"unittest\\|pytest\" docs/parts.md README.md 2>/dev/null | head; echo ---; grep -rn \"aliases\\|export\" INDEX.md | head -3; echo ---; python3 tools/symbols.py export src 2>&1 | head",
+    "ok": true,
+    "output": "ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n---\ncat: workspace.json: No such file or directory\n---\nREADME.md:5:Run the tests with `python3 -m unittest`.\n---\nINDEX.md:30:## Search aliases\nINDEX.md:32:People and code use different words for the same thing. A search for the everyday word finds nothing, so map it here. The `aliases` check fails when a name in the right-hand column is no longer defined under `src/`.\n---\n/Library/Developer/CommandLineTools/usr/bin/python3: can't open file 'tools/symbols.py': [Errno 2] No such file or directory"
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest discover -s tests -v 2>&1 | tail -4; echo ---; grep -rn \"\\.export()\\|click(\\|to_csv\\|OrdersPage\" --include=*.py . | grep -v \"^./.git/\"; echo ---; git diff -- src/orders-web/orders_page.py tests/test_orders_web.py",
+    "ok": true,
+    "output": "/tests/test_orders_web.py\nindex dd55b7b..4a46f4b 100644\n--- a/tests/test_orders_web.py\n+++ b/tests/test_orders_web.py\n@@ -21,6 +21,11 @@ class OrdersPageTests(unittest.TestCase):\n         page.export()\n         self.assertEqual(len(page.downloads), 1)\n \n+    def test_export_button_writes_one_download(self):\n+        page = OrdersPage(ORDERS)\n+        page.click(\"export\")\n+        self.assertEqual(len(page.downloads), 1)\n+\n     def test_csv_has_a_header_and_a_row_per_order(self):\n         self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])"
+  },
+  {
+    "kind": "run",
+    "target": "ls tests; PYTHONPATH=src/orders-web python3 -m unittest discover -s tests 2>&1 | grep -A8 \"^ERROR\" | head -40; echo ---; git stash list | head -2; git show HEAD --stat | head -20",
+    "ok": true,
+    "output": "finition-of-done.md              | 39 +++++++++++++++++++++++++++++\n docs/playbooks/fix-a-bug.md             | 26 +++++++++++++++++++\n src/orders-api/reconciliation_worker.py | 12 +++++++++\n src/orders-api/sales_report.py          | 12 +++++++++\n src/orders-service-v1/nightly_job.py    |  6 +++++\n src/orders-web/csv_export.py            |  8 ++++++\n src/orders-web/orders_page.py           | 26 +++++++++++++++++++\n src/orders-web/quarterly_export.py      | 13 ++++++++++\n tests/__init__.py                       |  7 ++++++\n tests/test_orders_api.py                | 37 +++++++++++++++++++++++++++"
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web:src/orders-api:src/orders-service-v1 python3 -m unittest discover -s tests -t . 2>&1 | tail -4; echo ---; git stash push -q -- src/orders-web/orders_page.py && PYTHONPATH=src/orders-web:src/orders-api:src/orders-service-v1 python3 -m unittest discover -s tests -t . 2>&1 | tail -3; git stash pop -q && git diff --stat",
+    "ok": true,
+    "output": "----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n---\nRan 9 tests in 0.000s\n\nFAILED (failures=1)\n README.md                     | 2 ++\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 3 files changed, 8 insertions(+)"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git diff --cached --stat && git remote -v && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage registered a handler only for \"refresh\", so clicking\n\"export\" hit the no-handler branch and wrote no download. Register\nexport() alongside refresh, and add a test that clicks the button\nrather than calling export() directly.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git status --short",
+    "ok": true,
+    "output": " src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n79ab475 Wire the Export button to its handler\n7420ba0 Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `79ab475` (\"Wire the Export button to its handler\").\n\n**Cause:** `OrdersPage.__init__` registered a handler only for `\"refresh\"`. Clicking `\"export\"` found no handler and did nothing. The existing export test called `page.export()` directly, so it never went through the button and passed anyway.\n\n**Change:**\n- `src/orders-web/orders_page.py`: register `export` as the handler for the `\"export\"` button.\n- `tests/test_orders_web.py`: added `test_export_button_writes_one_download`, which clicks the button.\n\nFollowing the fix-a-bug playbook, I wrote the test first and saw it fail (`0 != 1`) before making the fix.\n\nverified: the new test failed before the fix and passes after it.\nverified: the full suite passes with all three `src` folders on the path (9 tests). Running only `orders-web` gives import errors in the other test modules, so that isn't a valid run.\nverified: with the fix stashed, the suite fails on the new test, so the test really covers the bug.\ninferred: the Export button in the real app now downloads the CSV. I only exercised the Python `OrdersPage` class, not a running UI.\ninferred: `to_csv` and `OrdersPage.export` have no other callers in the repo, so the change has no side effects elsewhere. I checked this with grep.\n\n**Not done:**\n- I did not check the button in a running app; this repo has no app to launch.\n- There is no git remote, so I did not open a pull request.\n- I left the existing `README.md` change and the untracked `notes/` folder alone, and staged only the two files I edited.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

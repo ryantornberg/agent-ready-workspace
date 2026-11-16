@@ -1,0 +1,83 @@
+[
+  {
+    "kind": "run",
+    "target": "cat docs/playbooks/fix-a-bug.md && echo ---- && cat INDEX.md && echo ---- && git status --short && find src -type f | head -100 && grep -rni \"export\" src --include=* -l | head -50",
+    "ok": true,
+    "output": "ch for the everyday word finds nothing, so map it here. The `aliases` check fails when a name in the right-hand column is no longer defined under `src/`.\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |\n----\n M README.md\n?? notes/\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/orders_page.py && echo ---- && cat src/orders-web/csv_export.py && echo ---- && cat src/orders-web/quarterly_export.py && echo ---- && ls -la src/orders-web tests 2>/dev/null; find . -path ./.git -prune -o -type f -print | grep -i test; cat workspace.json | head -60",
+    "ok": true,
+    "output": "page.py\n-rw-r--r--@ 1 user  staff  399 Nov 15 18:42 quarterly_export.py\n\ntests:\ntotal 32\n-rw-r--r--@  1 user  staff   288 Nov 15 18:42 __init__.py\ndrwxr-xr-x@  6 user  staff   192 Nov 15 18:42 .\ndrwxr-xr-x@ 12 user  staff   384 Nov 15 18:58 ..\n-rw-r--r--@  1 user  staff  1308 Nov 15 18:42 test_orders_api.py\n-rw-r--r--@  1 user  staff   743 Nov 15 18:42 test_orders_service_v1.py\n-rw-r--r--@  1 user  staff  1202 Nov 15 18:42 test_orders_web.py\n./tests/test_orders_service_v1.py\n./tests/test_orders_web.py\n./tests/__init__.py\n./tests/test_orders_api.py\ncat: workspace.json: No such file or directory"
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_web.py && echo ---- && cat tests/__init__.py && echo ---- && cat src/README.md && echo ---- && grep -rn \"OrdersPage\\|to_csv\\|click(\" --include=*.py . | grep -v \"^./.git\"; echo ----; cat docs/definition-of-done.md | head -80",
+    "ok": true,
+    "output": " was wrong, in one sentence>\n\nverified  <something you ran, and what you saw>\nverified  <something you ran, and what you saw>\ninferred  <something you reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked."
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest tests.test_orders_web -v 2>&1 | tail -30",
+    "ok": true,
+    "output": "after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest tests.test_orders_web -v 2>&1 | tail -12; echo ----; python3 -m unittest discover -s tests -t . 2>&1 | tail -8; echo ----; cat evals/README.md 2>/dev/null | head -30; ls; ls tools 2>/dev/null",
+    "ok": false,
+    "output": "ton_writes_one_download (tests.test_orders_web.OrdersPageTests) ... ok\ntest_export_writes_one_download (tests.test_orders_web.OrdersPageTests) ... ok\ntest_refresh_button_sorts_the_table (tests.test_orders_web.OrdersPageTests) ... ok\ntest_one_line_per_order_after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n----\n.........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n----\nAGENTS.md\nCLAUDE.md\ndocs\nINDEX.md\nnotes\nREADME.md\nsrc\ntests"
+  },
+  {
+    "kind": "run",
+    "target": "git remote -v; echo ----; git status --short; echo ----; git add src/orders-web/orders_page.py tests/test_orders_web.py && git diff --cached --stat && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage registered only the refresh button, so click(\"export\")\nfound no handler and did nothing. Register export alongside refresh,\nand add a test that clicks the button instead of calling export()\ndirectly.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2; git status --short",
+    "ok": true,
+    "output": "----\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/\n----\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\naf875ef Wire the Export button to its handler\nda66a44 Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `af875ef` (\"Wire the Export button to its handler\").\n\n**Cause:** `OrdersPage.__init__` registered only the `refresh` button. `click(\"export\")` found no handler and silently did nothing. The existing export test called `page.export()` directly, so it never exercised the button and passed anyway.\n\n**Change:**\n- `src/orders-web/orders_page.py`: register `export` next to `refresh`.\n- `tests/test_orders_web.py`: added `test_export_button_writes_one_download`, which clicks the button.\n\n**Report**\n- verified: the new test failed before the fix (`AssertionError: 0 != 1`) and passes after it.\n- verified: the full suite (`python3 -m unittest discover -s tests -t .`) runs 9 tests, all passing.\n- verified: only `OrdersPage` callers are in the tests, so nothing else calls the changed code.\n- inferred: the Export button works in the real app. This sample has no running app, so I could not check it in the UI.\n- Not done: no pull request. The repo has no remote. I left `README.md` (modified) and `notes/` (untracked) alone; they were not mine.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

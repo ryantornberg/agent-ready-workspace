@@ -1,0 +1,88 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && find . -path ./.git -prune -o -type f -print | head -100 && grep -rniE \"total|report\" --include=*.py --include=*.js --include=*.ts src | head -50",
+    "ok": true,
+    "output": "        lines.append(f\"{order['id']},{len(order['prices'])},{total}\")\nsrc/orders-web/csv_export.py:5:    lines = [\"id,customer,total\"]\nsrc/orders-web/csv_export.py:7:        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\nsrc/orders-api/sales_report.py:4:class SalesReport:\nsrc/orders-api/sales_report.py:9:        totals = {}\nsrc/orders-api/sales_report.py:11:            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\nsrc/orders-api/sales_report.py:12:        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]"
+  },
+  {
+    "kind": "run",
+    "target": "cat docs/playbooks/fix-a-bug.md && cat INDEX.md | head -80",
+    "ok": true,
+    "output": "eone had to ask a person | [Question log](docs/question-log.md) |\n| Testing a playbook | [Evals](evals/README.md) |\n| Adding a check or a hook | [Parts](docs/parts.md) |\n| The sample code | [src](src/README.md) |\n\n## Search aliases\n\nPeople and code use different words for the same thing. A search for the everyday word finds nothing, so map it here. The `aliases` check fails when a name in the right-hand column is no longer defined under `src/`.\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |"
+  },
+  {
+    "kind": "run",
+    "target": "cat -n src/orders-web/quarterly_export.py && echo ---- && cat -n src/orders-web/csv_export.py && echo ---- && grep -rn \"QuarterlyExport\\|quarterly\" --include=*.py . && echo ---- && cat tests/test_orders_web.py && echo ---- && cat workspace.json | head -60 && echo ---- && cat docs/definition-of-done.md",
+    "ok": true,
+    "output": " was wrong, in one sentence>\n\nverified  <something you ran, and what you saw>\nverified  <something you ran, and what you saw>\ninferred  <something you reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked."
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/__init__.py; grep -n -i \"test\\|run\" README.md src/README.md | head -30; PYTHONPATH=src/orders-web:src/orders-api python3 -m unittest tests.test_orders_web 2>&1 | tail -25",
+    "ok": true,
+    "output": "============================\nFAIL: test_totals_are_shown_to_two_decimal_places (tests.test_orders_web.QuarterlyExportTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 36, in test_totals_are_shown_to_two_decimal_places\n    self.assertEqual(export.to_csv().splitlines()[1], \"A1,2,0.30\")\nAssertionError: 'A1,2,0.30000000000000004' != 'A1,2,0.30'\n- A1,2,0.30000000000000004\n+ A1,2,0.30\n\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/quarterly_export.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -15; echo \"exit=$?\"; grep -rn \"sum(\\|quarterly_export\\|QuarterlyExport\" --include=*.py src tests; echo ---; git diff -- src tests",
+    "ok": true,
+    "output": "rs_web.py b/tests/test_orders_web.py\nindex dd55b7b..f8c5a45 100644\n--- a/tests/test_orders_web.py\n+++ b/tests/test_orders_web.py\n@@ -31,6 +31,10 @@ class QuarterlyExportTests(unittest.TestCase):\n         self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\n         self.assertEqual(len(export.to_csv().splitlines()), 3)\n \n+    def test_totals_are_shown_to_two_decimal_places(self):\n+        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [0.1, 0.2]}])\n+        self.assertEqual(export.to_csv().splitlines()[1], \"A1,2,0.30\")\n+\n \n if __name__ == \"__main__\":\n     unittest.main()"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/quarterly_export.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nShow quarterly export totals to two decimal places\n\nQuarterlyExport wrote the raw float sum of each order's prices, so\n[0.1, 0.2] was exported as 0.30000000000000004. Format the total with\n.2f, as csv_export does.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git remote -v && git status --short",
+    "ok": true,
+    "output": "0a321c7 Show quarterly export totals to two decimal places\na4b52fa Orders\n\n src/orders-web/quarterly_export.py | 2 +-\n tests/test_orders_web.py           | 4 ++++\n 2 files changed, 5 insertions(+), 1 deletion(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `0a321c7`.\n\n\"The big report\" is `QuarterlyExport` (per the search aliases in `INDEX.md`). It wrote each order's raw float sum, so `[0.1, 0.2]` came out as `0.30000000000000004`. The fix formats the total with `.2f`, the same way `csv_export.py` already does.\n\n**Changes**\n- `src/orders-web/quarterly_export.py`: the total is now `{total:.2f}`.\n- `tests/test_orders_web.py`: added `test_totals_are_shown_to_two_decimal_places`, which expects `A1,2,0.30`.\n\n**Report**\n- verified: before the fix, the new test failed with `'A1,2,0.30000000000000004' != 'A1,2,0.30'`.\n- verified: after the fix, `python3 -m unittest` runs 9 tests, all pass.\n- verified: the commit contains only the two files above. `README.md` (modified) and `notes/` (untracked) were left out.\n- inferred: other callers of `QuarterlyExport` are unaffected. Its only caller in the repo is the test file, and the only other use of `to_csv` is in `csv_export.py`, which is separate code.\n\n**Not done**\n- `src/orders-api/sales_report.py:11` has the same problem: it sums prices without rounding and formats them as a plain string. I left it alone because it is a second bug, and the fix-a-bug playbook says to note those rather than fix them. It is a candidate for a follow-up.\n- No PR was opened. The repo has no remote.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-api/sales_report.py",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

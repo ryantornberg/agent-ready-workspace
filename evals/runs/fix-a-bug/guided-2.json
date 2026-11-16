@@ -1,0 +1,89 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && ls -la && grep -rni \"export\" --include=* -l . | grep -v \"^./.git/\" | head -50",
+    "ok": true,
+    "output": "  512 Nov 15 18:57 .git\n-rw-r--r--@  1 user  staff  3324 Nov 15 18:57 AGENTS.md\n-rw-r--r--@  1 user  staff    11 Nov 15 18:57 CLAUDE.md\ndrwxr-xr-x@  4 user  staff   128 Nov 15 18:57 docs\n-rw-r--r--@  1 user  staff  2129 Nov 15 18:57 INDEX.md\ndrwxr-xr-x@  3 user  staff    96 Nov 15 18:57 notes\n-rw-r--r--@  1 user  staff   145 Nov 15 18:57 README.md\ndrwxr-xr-x@  5 user  staff   160 Nov 15 18:42 src\ndrwxr-xr-x@  6 user  staff   192 Nov 15 18:42 tests\n./tests/test_orders_web.py\n./docs/playbooks/fix-a-bug.md\n./README.md\n./INDEX.md\n./src/orders-web/orders_page.py\n./src/orders-web/quarterly_export.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/orders_page.py && echo ---- && cat src/orders-web/quarterly_export.py && echo ---- && cat tests/test_orders_web.py && echo ---- && cat INDEX.md && echo ---- && cat docs/playbooks/fix-a-bug.md && echo ---- && git diff",
+    "ok": true,
+    "output": "is not where the report says.\n- The fix would undo a recorded decision.\n\n## Changing this page\n\nA small wording change here can change what an agent does. This page has an eval case, and a check fails any commit that changes the page without a new passing run. This page does not say what the case looks for, because an agent reads this page.\n----\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders."
+  },
+  {
+    "kind": "run",
+    "target": "find src tests -type f && echo ---- && cat src/README.md && echo ---- && cat src/orders-web/csv_export.py 2>/dev/null; echo ----; cat docs/definition-of-done.md | head -80; echo ----; cd src/orders-web 2>/dev/null; cd . && python3 -m unittest 2>&1 | tail -20",
+    "ok": true,
+    "output": " what you saw>\ninferred  <something you reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked.\n----\n........\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "run",
+    "target": "wc -c src/orders-web/csv_export.py && cat tests/__init__.py && echo ---- && grep -rn \"to_csv\\|OrdersPage\\|\\.click(\\|_on(\\|export\" src tests --include=*.py",
+    "ok": true,
+    "output": "ne_download(self):\ntests/test_orders_web.py:20:        page = OrdersPage(ORDERS)\ntests/test_orders_web.py:21:        page.export()\ntests/test_orders_web.py:25:        self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])\ntests/test_orders_web.py:30:        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\ntests/test_orders_web.py:31:        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\ntests/test_orders_web.py:32:        self.assertEqual(len(export.to_csv().splitlines()), 3)"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -15",
+    "ok": true,
+    "output": ".....F...\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -4; echo ----; grep -rn \"orders_page\\|OrdersPage\" --include=* -r . 2>/dev/null | grep -v \"^./.git/\"; echo ----; cat workspace.json 2>/dev/null; ls tools 2>/dev/null; cat docs/changing-the-machinery.md 2>/dev/null | head -5; git log --oneline -1 -- src/orders-web/orders_page.py",
+    "ok": true,
+    "output": "----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n----\n./tests/test_orders_web.py:4:from orders_page import OrdersPage\n./tests/test_orders_web.py:13:class OrdersPageTests(unittest.TestCase):\n./tests/test_orders_web.py:15:        page = OrdersPage(ORDERS)\n./tests/test_orders_web.py:20:        page = OrdersPage(ORDERS)\n./tests/test_orders_web.py:25:        page = OrdersPage(ORDERS)\nBinary file ./.git/index matches\n./src/orders-web/orders_page.py:5:class OrdersPage:\n----\n814b8c6 Orders"
+  },
+  {
+    "kind": "run",
+    "target": "git remote -v; git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nFix Export button doing nothing on the orders page\n\nOrdersPage registered only the refresh handler, so clicking \"export\"\nfound no handler and did nothing. Register export the same way.\n\nAdd a test that clicks the button; the existing test called export()\ndirectly and so never exercised the button.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
+    "ok": true,
+    "output": "da1c87e Fix Export button doing nothing on the orders page\n814b8c6 Orders\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `da1c87e`.\n\n**Fixed:** `OrdersPage` registered only the `refresh` handler. Clicking Export found no handler and did nothing. I registered `export` the same way in `src/orders-web/orders_page.py`.\n\n**Test:** the existing export test called `page.export()` directly, so it never exercised the button. I added `test_export_button_writes_one_download`, which calls `click(\"export\")`.\n\nverified: the new test failed before the fix with `AssertionError: 0 != 1`.\nverified: after the fix, `python3 -m unittest` runs 9 tests, all passing.\nverified: nothing else in the repo calls `OrdersPage` handlers, so the change has no other callers to check. Only the tests use the class.\ninferred: the real UI calls `click(\"export\")` with that name, following the `refresh` pattern. I did not run the app, because the repo has no running app to start.\n\nI staged only the two changed files by name. Your uncommitted `README.md` edit and the untracked `notes/` folder are untouched. The repo has no remote, so I did not open a pull request.\n\n**Not done:** your README note asks whether Export should include cancelled orders. The export currently includes every order, and I left that alone because it's a product decision.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

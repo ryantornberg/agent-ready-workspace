@@ -1,0 +1,100 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && cat INDEX.md | head -80 && ls -R src | head -50 && grep -rniE \"report|total\" --include=*.py --include=*.js --include=*.ts -l . | grep -v node_modules | head -30",
+    "ok": true,
+    "output": "iases` check fails when a name in the right-hand column is no longer defined under `src/`.\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |\norders-api\norders-service-v1\norders-web\n\nsrc/orders-api:\nreconciliation_worker.py\nsales_report.py\n\nsrc/orders-service-v1:\nnightly_job.py\n\nsrc/orders-web:\ncsv_export.py\norders_page.py\nquarterly_export.py\n./tests/test_orders_web.py\n./tests/test_orders_api.py\n./src/orders-web/quarterly_export.py\n./src/orders-web/csv_export.py\n./src/orders-api/sales_report.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/quarterly_export.py && echo ---- && cat src/orders-web/csv_export.py && echo ---- && grep -n -i \"quarter\\|float\\|round\\|total\" tests/test_orders_web.py | head -40 && echo ---- && cat docs/playbooks/fix-a-bug.md && echo ---- && cat docs/definition-of-done.md | head -60",
+    "ok": true,
+    "output": " was wrong, in one sentence>\n\nverified  <something you ran, and what you saw>\nverified  <something you ran, and what you saw>\ninferred  <something you reasoned out and did not check>\n\nNot done: <anything you left, and why>\n```\n\n**Verified** means you ran something and saw the result. **Inferred** means you reasoned your way there. Both are useful. A report that mixes them up is how a confident wrong answer gets merged.\n\n## What does not count\n\n- \"The tests pass\" with no test that covers the change.\n- A screenshot from before the fix.\n- \"Should work\" about anything a command could have checked."
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_web.py && echo ---- && cat workspace.json && ls tests && echo ---- && grep -n \"QuarterlyExport\\|quarterly\" -r . --include=*.py --include=*.md --include=*.json | grep -v \"^./.git/\"",
+    "ok": true,
+    "output": "_a_header_and_a_row_per_order(self):\n        self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])\n\n\nclass QuarterlyExportTests(unittest.TestCase):\n    def test_one_line_per_order_after_the_header(self):\n        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\n        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\n        self.assertEqual(len(export.to_csv().splitlines()), 3)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n----\ncat: workspace.json: No such file or directory"
+  },
+  {
+    "kind": "run",
+    "target": "git ls-files | head -80 && ls -la && ls src/orders-web && (cd src/orders-web && PYTHONPATH=. python3 -m unittest discover -s ../../tests -t ../../tests 2>&1 | tail -15); echo ----; PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -15",
+    "ok": true,
+    "output": "le = self._get_module_from_name(name)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 377, in _get_module_from_name\n    __import__(name)\n  File \"tests/test_orders_service_v1.py\", line 3, in <module>\n    from nightly_job import run_nightly_job\nModuleNotFoundError: No module named 'nightly_job'\n\n\n----------------------------------------------------------------------\nRan 6 tests in 0.000s\n\nFAILED (errors=2)\n----\n....\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -15",
+    "ok": true,
+    "output": "  File \"tests/test_orders_web.py\", line 36, in test_totals_are_two_decimal_places_without_float_noise\n    self.assertEqual(export.to_csv().splitlines()[1:], [\"A1,2,0.30\", \"A2,2,15.00\"])\nAssertionError: Lists differ: ['A1,2,0.30000000000000004', 'A2,2,15'] != ['A1,2,0.30', 'A2,2,15.00']\n\nFirst differing element 0:\n'A1,2,0.30000000000000004'\n'A1,2,0.30'\n\n- ['A1,2,0.30000000000000004', 'A2,2,15']\n+ ['A1,2,0.30', 'A2,2,15.00']\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/quarterly_export.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "P=src/orders-web:src/orders-api:src/orders-service-v1; echo \"== web after fix\"; PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -3; echo \"== full suite after fix\"; PYTHONPATH=$P python3 -m unittest discover -s tests -t . 2>&1 | tail -4; echo \"== full suite baseline (fix reverted in a temp copy)\"; D=$(mktemp -d) && cp -R src tests \"$D\"/ && git show HEAD:src/orders-web/quarterly_export.py > \"$D/src/orders-web/quarterly_export.py\" && (cd \"$D\" && PYTHONPATH=$P python3 -m unittest discover -s tests -t . 2>&1 | tail -4); rm -rf \"$D\"",
+    "ok": true,
+    "output": "== web after fix\nRan 5 tests in 0.000s\n\nOK\n== full suite after fix\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n== full suite baseline (fix reverted in a temp copy)\nmktemp: mkdtemp failed on /var/folders/kl/chr8rz8x5ln3vjgg8mrmb29r0000gn/T/tmp.GqBjCYGkpS: Operation not permitted"
+  },
+  {
+    "kind": "run",
+    "target": "P=src/orders-web:src/orders-api:src/orders-service-v1; D=$(mktemp -d \"$TMPDIR/base.XXXX\") && cp -R src tests \"$D\"/ && git show HEAD:src/orders-web/quarterly_export.py > \"$D/src/orders-web/quarterly_export.py\" && (cd \"$D\" && PYTHONPATH=$P python3 -m unittest discover -s tests -t . 2>&1 | grep -E \"^(FAIL|ERROR|Ran|OK|FAILED)\"); rm -rf \"$D\"; echo \"== callers\"; grep -rn \"QuarterlyExport\\|quarterly_export\" src tests; echo \"== diff\"; git diff -- src/orders-web/quarterly_export.py tests/test_orders_web.py",
+    "ok": true,
+    "output": "00644\n--- a/tests/test_orders_web.py\n+++ b/tests/test_orders_web.py\n@@ -31,6 +31,10 @@ class QuarterlyExportTests(unittest.TestCase):\n         self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\n         self.assertEqual(len(export.to_csv().splitlines()), 3)\n \n+    def test_totals_are_two_decimal_places_without_float_noise(self):\n+        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [0.1, 0.2]}, {\"id\": \"A2\", \"prices\": [10, 5]}])\n+        self.assertEqual(export.to_csv().splitlines()[1:], [\"A1,2,0.30\", \"A2,2,15.00\"])\n+\n \n if __name__ == \"__main__\":\n     unittest.main()"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/quarterly_export.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nFormat QuarterlyExport totals to two decimals\n\nThe big report wrote the raw float sum, so prices like 0.1 and 0.2\ncame out as 0.30000000000000004. Format the total with .2f, the same\nas csv_export.py. Whole-number totals now print as 15.00, not 15.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
+    "ok": true,
+    "output": "5b841b6 Format QuarterlyExport totals to two decimals\nd311edc Orders\n\n src/orders-web/quarterly_export.py | 2 +-\n tests/test_orders_web.py           | 4 ++++\n 2 files changed, 5 insertions(+), 1 deletion(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The big report now prints totals to two decimals, and the fix is committed as `5b841b6` on `main`.\n\n**Cause:** \"The big report\" maps to `QuarterlyExport` in `INDEX.md`. Its `to_csv` wrote the raw float sum, so 0.1 + 0.2 came out as `0.30000000000000004`.\n\n**Fix:** The total is now formatted with `:.2f`, the same as `csv_export.py`. I also added a regression test that prices `[0.1, 0.2]` must print `0.30`.\n\n**Verified:**\n- The new test fails on the old code with `0.30000000000000004`, and passes with the fix.\n- The full suite passes with the fix (9 tests). Run with all three `src` folders on the path, because the default run can't import them.\n\n**Behaviour change:** Whole-number totals now print with two decimals too, so `15` becomes `15.00`. That matches `csv_export.py`, but any consumer that expects `15` will see a difference.\n\n**Not touched:** `README.md` (modified) and `notes/` (untracked) were already in the working tree, and I left them unstaged. The commit contains only `src/orders-web/quarterly_export.py` and `tests/test_orders_web.py`.\n\nI did not run the repo's `docs/` checks or the eval. The change touches no playbook or `AGENTS.md` text, so I don't think either applies.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-api/sales_report.py",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]
