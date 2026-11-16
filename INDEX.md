@@ -21,6 +21,7 @@ Where each topic lives, and what the code calls the things people talk about. Ag
 | Changing scripts, parts, hooks or CI | [Changing the machinery](docs/changing-the-machinery.md) |
 | Why code repositories are pinned, not copied | [Decision 0001](docs/decisions/0001-pin-code-repositories.md) |
 | A commit refused because no edit tool wrote a file; why staging is checked at the commit | [Decision 0002](docs/decisions/0002-hooks-remind-the-commit-enforces.md), [the edit ledger](docs/parts.md#the-edit-ledger) |
+| A manifest refused for its version; where the engine's code lives | [Decision 0003](docs/decisions/0003-the-engine-in-one-folder.md), [the manifest](docs/parts.md#the-manifest) |
 | Questions someone had to ask a person | [Question log](docs/question-log.md) |
 | Testing a playbook | [Evals](evals/README.md) |
 | Adding a check or a hook | [Parts](docs/parts.md) |

@@ -1,4 +1,5 @@
 {
+  "version": "0.2.0",
   "tiers": {
     "driver": {
       "model": "opus",
@@ -16,12 +17,14 @@
   "parts": [
     {
       "use": "links",
+      "why": "A page that points at a moved or deleted page sends an agent to nothing.",
       "skip": [
         "evals/scaffold"
       ]
     },
     {
       "use": "freshness",
+      "why": "A page nobody has reviewed in months is trusted as if it were current.",
       "max_age_days": 180,
       "require": [
         "docs",
@@ -34,6 +37,7 @@
     },
     {
       "use": "aliases",
+      "why": "The index and the contract send agents to code names; a renamed class must not leave them pointing at nothing.",
       "index": "INDEX.md",
       "heading": "Search aliases",
       "code": "src",
@@ -46,25 +50,31 @@
     },
     {
       "use": "eval_record",
+      "why": "A playbook stays only while a recorded eval run shows it working, so it cannot change without one.",
       "playbooks": "docs/playbooks"
     },
     {
-      "use": "no_stage_all"
+      "use": "no_stage_all",
+      "why": "Staging everything sweeps another session's edits into a commit; the reminder comes before the commit refuses it."
     },
     {
-      "use": "edit_ledger"
+      "use": "edit_ledger",
+      "why": "A commit holds only the files the agent session wrote, so another session's edits stay out of it."
     },
     {
       "use": "shelved",
+      "why": "src/orders-service-v1 looks current and is kept read-only for audits; an edit there fixes nothing that runs.",
       "paths": [
         "src/orders-service-v1"
       ]
     },
     {
-      "use": "deny_list"
+      "use": "deny_list",
+      "why": "Nothing private reaches this public repository, in a file, a file name, a commit message or an identity."
     },
     {
-      "use": "handoff_tier"
+      "use": "handoff_tier",
+      "why": "Every delegated task names its tier and runs at that tier's model and effort, as the orchestration rules require."
     }
   ]
 }

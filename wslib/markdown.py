@@ -15,6 +15,8 @@ HTML_TARGET = re.compile(r"""<(?:a|img|source)\b[^>]*?\b(?:href|src|srcset)\s*=\
 QUOTE = re.compile(r"^(?: {0,3}> ?)+")
 HTML_ID = re.compile(r"""<[a-z][^>]*?\b(?:id|name)\s*=\s*["']([^"']+)["']""", re.I)
 EXTERNAL = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|//)")
+# A longer line is reported, not read: some patterns above slow down sharply on a very long line.
+LONGEST_LINE = 10_000
 
 
 def split_front_matter(text):
@@ -89,12 +91,17 @@ def inline_targets(line):
 
 
 def links(text):
-    """Yield (line number, target) for every link, image, reference definition and HTML href or src.
+    """Yield (line number, target, None) for every link, image, reference definition and HTML href or src.
 
-    Also yields (line number, None, label) for a [text][label] whose label is never defined.
+    Yields (line number, None, problem) for a [text][label] whose label is never defined, and for a line
+    over LONGEST_LINE characters, which is reported instead of read.
     """
     defined, used = set(), []
     for number, raw in prose_lines(text):
+        if len(raw) > LONGEST_LINE:
+            yield number, None, (f"line {number} is {len(raw):,} characters, over the {LONGEST_LINE:,} the link "
+                                 "reader reads, so its links were not checked; break it up")
+            continue
         definition = DEFINITION.match(raw)
         if definition and definition.group(1).startswith("^"):
             continue  # a footnote, not a link
@@ -110,7 +117,7 @@ def links(text):
         used.extend((number, label.strip().lower()) for label in REFERENCE.findall(line) if not label.startswith("^"))
     for number, label in used:
         if label not in defined:
-            yield number, None, label
+            yield number, None, f"reference [{label}] is never defined"
 
 
 def slug(heading):
@@ -140,6 +147,8 @@ def anchors(text):
 
     previous = ""
     for _, line in prose_lines(text):
+        if len(line) > LONGEST_LINE:
+            continue   # links() reports it
         line = QUOTE.sub("", line)  # a heading inside a blockquote still gets an anchor
         atx = ATX.match(line)
         if atx:

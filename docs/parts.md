@@ -13,7 +13,7 @@ How the checks and hooks plug in, and how to add one. It is for anyone extending
 | Piece | File | Job |
 |---|---|---|
 | Manifest | `workspace.json` | Lists the parts this workspace uses, each with its settings. |
-| Runner | `ws.py` | Loads the parts, gives each check a snapshot of the files, and gives each hook its event. |
+| Runner | `ws.py`, which starts `wslib/runner.py` | Loads the parts, gives each check a snapshot of the files, and gives each hook its event. |
 | Part | `parts/<name>.py` | One check or one hook. |
 | Cases | `parts/<name>.cases.json` | The part's own tests, as data. |
 
@@ -55,6 +55,16 @@ What a check can ask the snapshot:
 | `read_bytes(path)` | The bytes. A symbolic link reads as its target path, as git stores it. |
 
 A finding is an error unless it says `level="warning"`. An error fails the commit.
+
+A check runs in phases. By default it runs at the commit and in CI. A check that sets `PHASES` names its own, from `"commit"`, `"ci"` and `"nightly"`:
+
+| Command | Runs the checks whose phases hold |
+|---|---|
+| `python3 ws.py check`, `python3 ws.py check --staged` | `commit`. It is the default, so the two agree. |
+| `python3 ws.py check --phase ci` | `ci`. CI runs it. |
+| `python3 ws.py check --phase nightly` | `nightly`. CI's weekly run runs it, for checks too slow for every commit. |
+
+The phases are the part's, not the manifest's, so no manifest edit can move `deny_list` off the commit. `selftest` runs every part's cases, whatever its phases.
 
 A check that sets `COMMIT_MESSAGE = True` also runs from the commit-msg hook, `python3 ws.py check --message FILE`. Its snapshot then holds three files: `commit message`, `author` and `committer`, each identity as git will record it. `deny_list` is the one here.
 
@@ -156,21 +166,36 @@ A part the last commit's manifest uses must stay in the manifest, or be listed u
 
 Otherwise `check` fails. Locally, the last commit's manifest decides which parts are required. In CI, the manifest on the base branch decides. Only the `use` names are read from that older manifest, so keys added to the manifest later do not break the comparison. When CI has no base commit, as on a first push, no part is required, and it says so as a warning.
 
+## The manifest
+
+`workspace.json` holds four keys, and the runner refuses any other:
+
+| Key | Holds |
+|---|---|
+| `version` | The engine version it was written for. It must equal `python3 ws.py --version`. |
+| `tiers` | The [tier binding](orchestration.md): `driver`, `worker` and `mechanical`, each with a `model` and an `effort`. Optional; without it, `handoff_tier` refuses every task. |
+| `parts` | The parts in use, each with a `use`, a `why` and its settings. |
+| `retired` | Parts no longer used, each with a `use` and a `why`. |
+
+The `why` says in a sentence what the part guards against here, so a reader can tell whether it still earns its place. A part does not see it.
+
+A hook call checks only what its answer depends on: the version, the parts and the tier binding. A manifest it cannot read, or one written for another engine version, refuses every hook call. A missing `why` or an unknown key fails `list`, `selftest`, `check` and the commit, and does not refuse a hook call, so a half-finished entry cannot lock the session out. Upgrade the engine and the manifest's `version` in one step; [decision 0003](decisions/0003-the-engine-in-one-folder.md) says why.
+
 ## Adding a part
 
 1. Write `parts/<name>.py` and `parts/<name>.cases.json`.
-2. Add `{"use": "<name>"}` to `workspace.json`, with any settings the part reads from `config`.
+2. Add `{"use": "<name>", "why": "<what it guards against>"}` to `workspace.json`, with any settings the part reads from `config`.
 3. Run `python3 ws.py selftest`, then `python3 ws.py check`.
 
-A part's `config` is its manifest entry, plus the manifest's tier binding as `tiers`. The binding lives in one place, so an entry that sets `tiers` itself is refused.
+A part's `config` is its manifest entry without `use` and `why`, plus the manifest's tier binding as `tiers`. The binding lives in one place, so an entry that sets `tiers` itself is refused.
 
-To use a part kept somewhere else, give its path: `{"use": "shared/parts/licences.py"}`. Its cases file sits next to it.
+To use a part kept somewhere else, give its path: `{"use": "shared/parts/licences.py", "why": "..."}`. Its cases file sits next to it.
 
 ## The parts here
 
 | Part | Kind | Fails or refuses when |
 |---|---|---|
-| `links` | check | A link points at a missing file or heading. |
+| `links` | check | A link points at a missing file or heading, or a line is too long to read: over 10,000 characters. |
 | `freshness` | check | A commit edits a page that is past its review date, a required page has no date, or a date is more than a day ahead of today in UTC. |
 | `aliases` | check | The index maps a phrase to a name the code no longer defines, or a contract page names one in backticks. |
 | `eval_record` | check | A playbook, its guidance or its eval case changed since the last passing eval run, or a playbook has no case. |
