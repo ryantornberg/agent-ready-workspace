@@ -10,16 +10,26 @@ rm, git mv) does not pass through it; the README's Limits say so.
 Config: "paths": the shelved folders.
 """
 import posixpath
+import unicodedata
 
 KIND = "hook"
 EVENT = "before-edit"
 
 
+def _folded(path):
+    """A path as a case-insensitive file system sees it. On macOS and Windows a differently-cased name,
+    or one Unicode folds to the same letters (a long s for an s), is the same folder; Windows also
+    drops a trailing dot or space from each name."""
+    path = posixpath.normpath(path.replace("\\", "/"))
+    parts = [part.rstrip(". ") or part for part in path.split("/")]
+    return unicodedata.normalize("NFC", "/".join(parts)).casefold()
+
+
 def decide(event, config):
-    path = posixpath.normpath((event.get("path") or ".").replace("\\", "/")).lower()
+    path = _folded(event.get("path") or ".")
     for folder in config.get("paths", ()):
         folder = folder.strip("/")
-        # Compared without case: on macOS and Windows a differently-cased path is the same folder.
-        if path == folder.lower() or path.startswith(folder.lower() + "/"):
+        shelved = _folded(folder)
+        if path == shelved or path.startswith(shelved + "/"):
             return f"{folder} is shelved and read-only. If the change really belongs there, ask the person first."
     return None

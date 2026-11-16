@@ -2086,6 +2086,28 @@ class EvalThatCanLoseTests(Folder):
                                 (path.name, address.group(0)))
 
 
+class RedTeamTriageTests(Folder):
+    """M1 close-out: the fresh-session red team's findings that fit a fix-a-bug run."""
+
+    def test_the_shelved_folder_is_refused_under_every_name_the_file_system_folds_together(self):
+        self.workspace({"use": "shelved", "paths": ["src/orders-service-v1"]})
+        for path in ("src/orderſ-service-v1/OrderService.cs",      # a long s: APFS folds it to s
+                     "src/orders-service-v1./OrderService.cs",      # Windows drops a trailing dot
+                     "src/orders-service-v1 /OrderService.cs",      # and a trailing space
+                     "src/ORDERS-SERVICE-V1/OrderService.cs"):
+            with self.subTest(path=path):
+                code, output = self.ws("hook", "before-edit", stdin=json.dumps({"version": 1, "path": path}))
+                self.assertEqual(code, 2, output)
+        for path in ("src/orders-service-v10/x.cs", "src/orders-api/OrderService.cs"):
+            with self.subTest(path=path):
+                code, output = self.ws("hook", "before-edit", stdin=json.dumps({"version": 1, "path": path}))
+                self.assertEqual(code, 0, output)
+
+    def test_no_recorded_transcript_holds_the_machines_temporary_folder(self):
+        for path in (ROOT / "evals/runs").glob("*/*.json"):
+            self.assertIsNone(re.search(r"/var/folders/|/private/var/folders/|/tmp/claude-", path.read_text(encoding="utf-8")), path.name)
+
+
 class DenyListTests(Folder):
     """The deny list is read from a file the environment names, so these cases cannot be data in a cases file."""
 

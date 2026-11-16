@@ -43,7 +43,7 @@
     "kind": "run",
     "target": "git status --short && D=$(mktemp -d) && git show HEAD:src/orders-service-v1/nightly_job.py > $D/nightly_job.py && python3 -c \"\nimport sys; sys.path.insert(0, '$D')\nfrom nightly_job import run_nightly_job\nclass S:\n    def order_ids(self): return {'o1'}\n    def payments(self, day): return [{'id':'p2','order_id':'o9','day':day}]*2\nprint('original code, retried payment ->', run_nightly_job(S(), '2026-03-01'))\n\" -I; rm -rf $D",
     "ok": true,
-    "output": " M README.md\n M src/orders-service-v1/nightly_job.py\n M tests/test_orders_service_v1.py\n?? notes/\nmktemp: mkdtemp failed on /var/folders/kl/chr8rz8x5ln3vjgg8mrmb29r0000gn/T/tmp.glsmH6Xh81: Operation not permitted"
+    "output": " M README.md\n M src/orders-service-v1/nightly_job.py\n M tests/test_orders_service_v1.py\n?? notes/\nmktemp: mkdtemp failed on $TMPDIR/tmp.glsmH6Xh81: Operation not permitted"
   },
   {
     "kind": "run",
