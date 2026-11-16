@@ -134,19 +134,22 @@ def command_hook(root, args):
                                 "Repair it from your own terminal, where the agent's hooks do not run.")
     hooks = partlib.load_hooks(root, args.event, manifest)   # only this event's hooks: a broken check cannot lock it
     stream = getattr(sys.stdin, "buffer", sys.stdin)
-    event, tool, cwd = events.read_call(root, args.event, stream.read(), args.tool)
+    found, tool, cwd = events.read_call(root, args.event, stream.read(), args.tool)
     reminders = []
-    for part in hooks:
-        reason = part.decide(event)
-        if reason is None:
-            continue
-        if part.mode == "remind":
-            reminders.append(f"{part.name}: {reason}")
-            continue
-        print(f"Refused by {part.name}: {reason}", file=sys.stderr)
-        return 2
+    for event in found:   # one call can edit several files: all are decided before any is recorded
+        for part in hooks:
+            reason = part.decide(event)
+            if reason is None:
+                continue
+            if part.mode == "remind":
+                reminders.append(f"{part.name}: {reason}")
+                continue
+            print(f"Refused by {part.name}: {reason}", file=sys.stderr)
+            return 2
+    reminders = list(dict.fromkeys(reminders))
     if args.event == "before-edit":
-        ledgers.record(root, event["path"])   # cannot record: refused, so no edit escapes the commit check
+        for event in found:
+            ledgers.record(root, event["path"])   # cannot record: refused, so no edit escapes the commit check
     if reminders and args.event == "before-shell" and cwd:
         # The command may stage files this session did not write. The commit check compares only while a ledger is
         # open, so open it, even empty, when the working copy has uncommitted changes: an agent that wrote files only
