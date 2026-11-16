@@ -7,17 +7,17 @@ status: draft
 
 The plan for the second milestone: bring the features that proved themselves in the maintainer's private work workspace into this one, made generic. Building sessions work from it; the maintainer approves it. It follows the [hand-off plan template](../templates/hand-off-plan.md).
 
-**In short:** the maintainer's work workspace has grown features this one lacks, most of them for running several agent sessions at once. This plan ports six groups of them, in order of value. It also lists what waits for later and what stays behind, with the reason for each.
+**In short:** the maintainer's work workspace has grown features this one lacks, most of them for running several agent sessions at once. This plan first clears the eval harness so engine changes stop invalidating the eval, then ports six groups of features in order of value. It lists what waits for later and what stays behind, with the reason for each. This is the second draft; the first red team's 18 findings are triaged below.
 
 ## Key points
 
-- **Nothing private crosses over.** The source workspace's name, team, products and systems never appear here; the `deny_list` check refuses them. Each feature is rebuilt from its idea against this repository's invented example, never copied. A builder finds each feature's source files in a private map at `~/.config/agent-ready-workspace/port-sources.md`, next to the deny list.
-- **Slice 1 closes a gap this repository already admits.** [Changing the machinery](../changing-the-machinery.md) says a hook refusing a direct push of machinery to main "is planned". The work workspace has one.
-- **Slice 2 fixes a failure seen on 2026-11-16.** A second session's browser call failed with "Browser is already in use". The work workspace solved it by giving each session its own browser profile.
-- **Slice 4 needs a new decision record.** The writing-session lease refuses an edit before it happens. [Decision 0002](../decisions/0002-hooks-remind-the-commit-enforces.md) holds that hooks remind and the commit enforces. The record says why the lease is an exception, or the slice drops the refusal.
-- **Every slice runs at the driver tier.** Each one changes a gate, the engine or the hook wiring.
-- **Slice 6 is the costly one.** Two new playbooks each need a recorded eval run, at 40 or more trials per arm. It comes last so that one batched run covers both.
-- **Agents push branches and open draft pull requests here, and merge once CI passes on all three systems.** That is this repository's standing rule.
+- **Slice 0 pays for one eval re-recording up front.** The eval hash covers the engine's part loader, so any engine change makes every eval record stale. Slice 0 takes the loader out of the hash, fixes the Windows path leak, and re-records the three cases: about 360 agent runs. After it, slices 3–5 merge without new eval runs.
+- **A second recording comes in slice 6**, for the new playbooks and any contract edit. Until then, M2's new rules live in `docs/` pages and stay out of the five files the guided arm reads.
+- **GitHub now refuses a merge to main unless all five CI jobs pass.** The maintainer turned the branch rule on 2026-11-16. Slice 1 only covers what that rule cannot see: a machinery commit pushed straight to main.
+- **Slice 3 changes the hook contract.** Hooks today are pure functions of their event. The lease, the notices and the rule-page hook need read access to files, git and session identity. Decision record 0004 sets the new contract before any hook uses it.
+- **The lease must work for both tools, on all three systems, and inside worktrees.** Today an edit inside a linked worktree slips past `shelved`. Slice 3 fixes that first.
+- **Nothing private crosses over.** The source workspace's name, team, products and systems never appear here; the `deny_list` check refuses them. Each feature is rebuilt from its idea, never copied. Builders find each feature's source files in a private map at `~/.config/agent-ready-workspace/port-sources.md`.
+- **Every slice runs at the driver tier, in its own worktree.** Each one changes a gate, the engine, the eval or the hook wiring.
 
 ## Settled decisions
 
@@ -26,6 +26,8 @@ The maintainer, 2026-11-16:
 - "The workspace is supposed to have rules for using multiple playwright browsers. Check [the work workspace]. This is one of the many features I wanted moved to the workspace."
 - "First write the porting plan."
 - "You'll have to dig into the workspace for possible features. I'm constantly modifying it so I don't have a particular list."
+- Turned on GitHub's branch rule for main: all five CI jobs required, the branch must be current with main, direct pushes by the owner still allowed, force pushes and deletion blocked.
+- Asked how to pay for the eval re-recording ("We're fine in my claude subscription right now"); slice 0 is the answer this draft proposes.
 
 Carried from M1, 2026-11-15:
 
@@ -42,51 +44,65 @@ Each ported feature works on its own in this repository. It has cases that fail 
 
 - No feature that only makes sense for the source team's products, issue tracker, cloud or local test setup. See "Staying behind".
 - No change to the meaning of an existing part, except where a slice names it.
-- No third-party packages. The engine stays Python standard library only. A feature that cannot be built that way moves to "Later".
-- No re-sync with the source workspace after this milestone. It keeps changing; a later milestone takes a new survey.
+- No third-party packages in the engine, the parts or the tests that CI runs. The browser server in slice 2 is a tool the agent runs, not part of the engine, and its test is opt-in.
+- No edit to the five files the eval's guided arm reads (`AGENTS.md`, `CLAUDE.md`, `INDEX.md`, `docs/playbooks/fix-a-bug.md`, `docs/definition-of-done.md`) before slice 6. A slice that needs one records it under "Changes after approval" for slice 6's recording.
+- No re-sync with the source workspace after this milestone. A later milestone takes a new survey.
 
 ## Why this needs a plan
 
-It fails all four size-gate conditions: it spans more than a day, it changes several gates, it touches the engine and both tools' wiring, and a mistake in a hook can lock a session out.
+It fails two size-gate conditions: it is more than one screen of diff, and it is more than a day of work. It is in one repository, and most of it reverts cleanly, but a broken hook can lock a session out.
 
 ## Slices
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| 1 | Machinery push gate | A pre-push check that refuses a push to main carrying a machinery commit whose CI run did not pass on all three systems. It reads CI status through `gh` when installed, and otherwise refuses with a message. | driver | Criteria 1–2 |
-| 2 | One browser per session | Run the browser tool from the workspace's own config, pinned to an exact version with `--isolated`, for Claude Code and Codex CLI. Turn off the plugin that starts it without the flag. A check fails when the plugin is on or the flag is missing. Document that an isolated browser forgets logins when the session ends. | driver | Criteria 3–4 |
-| 3 | Session-start notices | A new `session-start` event in the engine and both adapters. Two hooks on it: list pages past their review date, and warn when a pinned code repository is behind its upstream. Add a check that a staged pin is on its upstream default branch ([decision 0001](../decisions/0001-pin-code-repositories.md)). | driver | Criteria 5–7 |
-| 4 | Writing-session lease | The first live session to edit the main working copy keeps it; any other live session is refused there and works in a worktree. At session start the main working copy fast-forwards to its upstream if it has no edits. Decision record 0004 first. | driver | Criteria 8–9 |
-| 5 | Doc checks | `line_cites`: a line a commit adds to a doc may not cite a file by line number. `in_short`: a plan, decision or milestone page opens with an **In short** line. A `before-edit` hook that shows the agent the path-scoped rule pages whose `applies-to` patterns match the file it is editing. | driver | Criteria 10–12 |
-| 6 | Playbooks | Port a red-team playbook and a diagnose playbook, with eval cases. One batched eval run. | driver | Criterion 13 |
+| 0 | Eval harness, re-recorded | `grade.py` loads the graded hook's file itself, so `wslib/parts.py` leaves the eval hash. `leaks()` catches the Windows temporary-folder path. Re-record the three cases at 40 or more runs per arm. | driver | Criteria 1–2 |
+| 1 | Direct-push hook | A pre-push hook that refuses a direct push to main whose new commits change a machinery path. Machinery reaches main only through a pull request, where GitHub's branch rule requires CI. Needs no network and no `gh`. | driver | Criteria 3–4 |
+| 2 | One browser per session | Run the browser server from the workspace's own config, pinned to an exact version with `--isolated`, for Claude Code (`.mcp.json`) and for Codex CLI where it reads project config. The project settings set the browser plugin to `false`. A `browser_isolation` check enforces both. Add the new config files to the machinery table. Document that an isolated browser forgets logins at session end. | driver | Criteria 5–7 |
+| 3 | Hook contract and session start | Decision record 0004: what a hook may read (files, git, session identity, tool name) and how cases supply it. Engine version bump, done in a separate working copy per the lockout trap. Paths inside a linked worktree are placed relative to that worktree, for every hook. A `session-start` event in both adapters, with a recorded Codex run and replay test. Hooks on it: pages past their review date, and a pinned repository behind its upstream. A check that a staged pin is on its upstream default branch. | driver | Criteria 8–13 |
+| 4 | Writing-session lease | Decision record 0005: concurrent sessions and the edit ledger. The first live session to edit the main working copy keeps it; any other live session is refused there and pointed at a worktree. Identity and liveness per tool and per system. Release at session end; takeover of a dead or idle lease. At session start, a clean main working copy fast-forwards, unless another live session holds the lease. | driver | Criteria 14–18 |
+| 5 | Doc checks | The snapshot gains the lines a commit adds per file. `line_cites`: an added doc line may not cite a file by line number. `in_short`: a plan, decision or milestone page has an **In short** line within 15 lines of its title. A `before-edit` hook returns the text of every rule page whose `applies-to` front matter matches the edited path. Add the missing **In short** line to `docs/milestones/m1.md`, and one real rule page. | driver | Criteria 19–22 |
+| 6 | Playbooks | 6a: write eval cases and graders for a red-team task and a diagnose task, define each one's two-line arm, and run the bare arm. 6b: write a playbook only for a task where the bare model failed. One batched recording covers the new cases and any queued contract edit. | driver | Criteria 23–24 |
 
-Order rationale: slice 1 first, because every later slice is machinery and should reach main through the gate. Slice 3 comes before slice 4, because the catch-up at session start uses the new event. Slice 6 is last for cost.
+Order rationale: slice 0 first, so engine changes after it don't stale the eval. Slice 1 next, so later machinery cannot reach main by a direct push. Slice 3 before 4 and 5, because both use its contract, its event and its worktree fix. Slice 6 last for cost.
 
 ## Success criteria
 
-1. A push to main with a machinery commit and no passing three-system CI run for it is refused. The refusal names the commit and the missing systems. (V1)
-2. The same push is allowed once the run has passed. Docs-only pushes are never checked. (V1)
-3. `ws.py check` fails when `.claude/settings.json` enables the browser plugin, or when the workspace's browser server lacks `--isolated` or an exact version, for either tool. (V2)
-4. Two copies of the configured browser server run at once, each navigates to `about:blank`, and both return the page. (V3)
-5. A `session-start` event lists every page past its review date, and prints nothing when none is. (V2)
-6. A `session-start` event warns when a pinned repository is behind its upstream, and stays quiet when it is current or offline. (V2)
-7. A commit that stages a pin not on its upstream default branch fails. (V2)
-8. With a live lease held by another session, an edit to a tracked file in the main working copy is refused, and the message names the worktree command. A stale lease, whose process has exited, is taken over. (V2)
-9. At session start, a main working copy with no edits fast-forwards; one with edits is left alone and the session is told. (V2)
-10. A commit adding a line-number citation to a doc fails; existing citations do not. (V2)
-11. A plan, decision or milestone page without an **In short** line near its top fails. (V2)
-12. Editing a file matched by a rule page's `applies-to` pattern returns that page's text to the agent; any other file returns nothing. (V2)
-13. Each new playbook's recorded eval run shows its guided arm beating the two-line arm, pooled, at 40 or more trials per arm. A losing playbook is cut, not tuned. (V4)
-14. No file in the repository holds a deny-listed term. (V2)
-15. CI passes on Linux, macOS and Windows for every slice's pull request. (V5)
+1. `python3 ws.py check --phase ci` passes after the re-recording, and every record has 40 or more runs per arm. (V4)
+2. In a scratch copy, adding an entry to the engine's event list leaves every eval record current. (V1)
+3. A direct push to main whose new commits change a machinery path is refused, and the refusal names the commit and the path. (V1)
+4. A direct push of doc-only commits, and a push of any branch other than main, is allowed. (V1)
+5. `ws.py check` fails when the project settings do not set the browser plugin to `false`, when the workspace's browser server lacks `--isolated`, or when its version is not exact. It fails for each tool's config the slice adds. (V2)
+6. With the opt-in browser test on, two copies of the configured server each navigate to `about:blank` and both return the page. (V3)
+7. With the opt-in browser test on, two copies without `--isolated` collide, and the second reports the profile lock. (V3)
+8. Decision record 0004 exists, and the parts and tests use only the access it allows. (V2)
+9. For a path inside a linked worktree, `shelved` gives the same answer as for the same path in the main working copy. (V2)
+10. A `session-start` event lists every page past its review date, and prints nothing when none is. (V2)
+11. A `session-start` event warns when a pinned fixture repository is behind its upstream, and stays quiet when it is current or unreachable. (V2)
+12. A commit that stages a pin not on its fixture upstream's default branch fails. Offline, the local commit check warns and passes; the CI check fails closed. (V2)
+13. A recorded Codex CLI run delivers `session-start`, and a replay test of it passes in CI. If Codex has no such event, the slice records that as a documented gap instead, and criterion 13 is met by the record. (V1)
+14. With a live lease held by another session, an edit to a tracked file in the main working copy is refused, and the message names the worktree command. (V2)
+15. A lease whose holder is dead, or idle past the limit decision 0005 sets, is taken over. Liveness is tested on all three systems. (V2, V5)
+16. Each tool's identity is covered: a Claude Code payload and a Codex CLI payload each take, keep and release a lease in the cases. (V2)
+17. At session start, a clean main working copy fast-forwards. One with edits, or one whose lease another live session holds, is left alone, and the session is told why. (V2)
+18. At session end, the holder's lease is released. (V2)
+19. A commit adding a line-number citation to a doc fails; a citation already present does not. (V2)
+20. A plan, decision or milestone page with no **In short** line within 15 lines of its title fails, and `docs/milestones/m1.md` passes. (V2)
+21. Editing a file matched by the real rule page's `applies-to` pattern returns that page's text, from the main working copy and from a linked worktree. Any other file returns nothing. (V2)
+22. Every new part's cases fail against a stub part that does nothing. (V6)
+23. Each new playbook's own cases show its guided arm beating its two-line arm, by `pool.py`'s one-sided Fisher test at p < 0.05, at 40 or more runs per arm. A losing playbook is cut, not tuned. (V4)
+24. A task where the bare arm already succeeds gets no playbook, and the record says so. (V4)
+25. No file in the repository holds a deny-listed term. (V2)
+26. CI passes on all five jobs for every slice's pull request. (V5)
 
 ## Verification
 
-- **V1:** `python3 -m unittest tests.test_push_gate -b` passes, with a fake CI status source covering pass, fail, missing and `gh` absent.
-- **V2:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` all exit 0, and each new part has cases that fail with its fix removed.
-- **V3:** a test that starts two copies of the configured server command and drives both through an MCP `initialize` and `browser_navigate`. It skips with a printed reason when no browser is installed, which CI records.
-- **V4:** `evals/run.py` records under `evals/runs/`, and `python3 ws.py check` passes `eval_record`.
-- **V5:** `gh pr checks` on each pull request shows the three systems green.
+- **V1:** `python3 -m unittest discover -b tests` passes, including the new tests named by each criterion: the scratch-copy event test, the push-hook tests against a temporary repository, and the Codex replay test.
+- **V2:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` all exit 0.
+- **V3:** `WS_BROWSER_TEST=1 python3 -m unittest tests.test_browser -b` passes on the maintainer's machine, with Node installed. Its output goes into the slice's report. CI does not run it.
+- **V4:** `evals/run.py` writes the records under `evals/runs/`; `python3 evals/pool.py` prints each comparison; `python3 ws.py check --phase ci` passes `eval_record`.
+- **V5:** `gh pr checks <number>` shows all five jobs passing.
+- **V6:** `python3 -m unittest tests.test_cases_bite -b` passes. It runs each new part's cases against a stub that allows everything and finds nothing, and expects at least one case to fail.
 
 ## Recovery
 
@@ -96,33 +112,40 @@ Halt and report. Do not work around a failing case or loosen a check to pass. If
 
 Stop the plan and report when any of these happens:
 
-- A slice needs a third-party package.
+- The engine, a part or a CI test needs a third-party package.
 - A feature cannot be made generic without a private fact.
 - A slice goes past two fix rounds on the same failure.
+- Slice 0's re-recording loses a comparison M1's recording won.
 
 ## Limits
 
-- Each slice runs on its own branch, `m2/slice-N`.
-- Agents push the branch, open a draft pull request, and merge once CI is green on all three systems.
-- No unattended runs.
+- Each slice is built in its own worktree under `.claude/worktrees/`, on its own branch, `m2/slice-N`. No builder checks out a branch in the main working copy.
+- Agents push the branch, open a draft pull request, and merge once GitHub shows all five CI jobs passing.
+- No unattended runs, except the eval recordings, which `run.py --resume` restarts after a usage limit.
+- Maintainer setup before slice 0: `gh auth status` passes, and the Claude Code CLI is signed in. Before slice 2: Node with `npx`. Before slice 3: Codex CLI signed in, for the recorded run.
 
 ## Records this plan must leave
 
-- Decision record 0004, the writing-session lease (slice 4). Another one if slice 3's new event changes how a hook may answer.
+- Decision records 0004 (hook contract) and 0005 (concurrent sessions and the edit ledger).
 - A report per slice under "Results", with each claim marked verified or inferred.
-- `docs/milestones/m2.md` at the close, and entries in `CHANGELOG.md` and `EVIDENCE.md`.
+- `docs/milestones/m2.md`, written as the slices finish and closed at sign-off, plus entries in `CHANGELOG.md` and `EVIDENCE.md`.
 - Question-log rows for anything a builder had to ask.
 
 ## Later
 
 Worth porting, but not in this milestone:
 
-- **Review mark before a pull request.** Refuse to open a pull request for a commit no recorded review covered. It needs a full-review playbook first, which is a third eval run.
+- **Review mark before a pull request.** Refuse to open a pull request for a commit no recorded review covered. Needs a full-review playbook first, which is another eval recording.
+- **Grill and spec playbooks.** The [size gate's ladder](../size-the-work.md#the-ladder) lists both as not written yet.
+- **Other playbooks:** test-first development, impact analysis, reuse check, instructions check, docs audit, prompt review, review feedback, estimation. Each needs a baseline run showing the model failing first.
+- **A per-session opt-in for shelved folders.** Lets one session edit a shelved folder on the person's say-so.
+- **Lease check at push.** Refuse a push from the main working copy by a session that does not hold the lease.
 - **Reverted-fix detector.** Flag a removed line whose history points at a fix commit.
 - **Navigation eval.** Ask a cold session routing questions and score whether it names the right page.
 - **Model-mix report.** How much work ran on each tier, from the agent's own logs.
 - **Fresh-clone check.** Clone into an empty folder, follow only the README, and check the result works.
 - **Backticked names resolve.** Extend `aliases` from the index to every doc.
+- **Doc coverage and diagram checks.** Every documentable unit has a page; every diagram's image matches its source.
 - **Linked-change reminder.** After an edit, name the other layers the index lists as changing with that path.
 - **Warning delta.** Compare build warnings between two commits, for touched files only.
 
@@ -130,19 +153,40 @@ Worth porting, but not in this milestone:
 
 | Feature | Why it stays |
 |---|---|
+| No agent edits in the main working copy at all | Slice 4 takes the other rule the source settled on: the first writing session keeps the main copy. |
 | Ask before the browser leaves the local test setup | Tied to the source team's local setup; on any public site it prompts every time. |
-| Gate on the legacy app | `shelved` already covers it. |
 | Refuse bulk staging | `no_stage_all` and `edit_ledger` already cover it. |
 | Require a tier on hand-offs | `handoff_tier` already covers it. |
 | Refuse edits to personal notes folders | `shelved` covers it with a folder list. |
-| Twin-file drift, closed-ticket defects, migration audit, side-by-side test setups, commit-link rewriting, architecture lookup, code maps, local CI mirror, issue-tracker and theme playbooks | Each depends on the source team's code, tracker or cloud. |
+| Status line | A personal display preference, not a rule. |
+| Twin-file drift, closed-ticket defects, migration audit, side-by-side test setups, commit-link rewriting, architecture lookup, code maps, local CI mirror, issue-tracker, regression, theme and scaffolding playbooks | Each depends on the source team's code, tracker or cloud. |
 
 ## Red team
 
-Not yet run. A fresh session gets this plan and the private source map, never the author's reasoning.
+Round 1, 2026-11-16: a fresh session given the first draft, both repositories, the private source map and the deny list.
 
 | # | Finding | Verdict | Action |
 |---|---|---|---|
+| 1 | The pre-push gate never fires: pull requests merge on GitHub, and main had no branch rule. | Accepted | The maintainer turned on GitHub's branch rule. Slice 1 narrowed to direct pushes. |
+| 2 | Slices 3–5 stale every eval record, because the hash covers the loader; only slice 6 paid for a recording. | Accepted | New slice 0 takes the loader out of the hash and re-records once. Contract files frozen until slice 6. |
+| 3 | Hooks are pure functions; the lease, notices and rule-page hook need files, git and session identity. | Accepted | Slice 3 delivers the contract with decision record 0004. |
+| 4 | The lease had no identity or liveness design for Codex, or for Windows. | Accepted | Criteria 15–16, and the recorded Codex run in criterion 13. |
+| 5 | Edits inside a linked worktree escape `shelved`; rule-page patterns would miss them too. | Accepted | Slice 3 fixes path placement; criteria 9 and 21. |
+| 6 | Decision 0002 covers staging only; the lease is no exception to it. | Accepted | Key point rewritten; decision record 0005 covers concurrent sessions and the ledger. |
+| 7 | The fast-forward can move files under a live lease holder; session-end release, idle takeover and the push-side check were unplaced. | Accepted | Criteria 15, 17, 18. Push-side check moved to Later. |
+| 8 | The plugin is enabled in user settings, so a project file that merely omits it passes the check. | Accepted | Criterion 5 requires an explicit `false`. |
+| 9 | The browser test passed on a skip, had no negative control, and ran `npx` inside the normal tests. | Accepted | Opt-in test, criteria 6–7, outside CI. |
+| 10 | The browser server is a third-party package, which the stop rule banned. | Accepted | Ban narrowed to the engine, parts and CI tests. |
+| 11 | The pooled gate lets strong old records carry a losing playbook. | Accepted | Criterion 23 requires a per-playbook Fisher test. |
+| 12 | No grader fits a red-team or diagnose task, the two-line arm is a bug-fix baseline, and the baseline run was skipped. | Accepted | Slice 6 split into 6a and 6b; criterion 24. |
+| 13 | `line_cites` needs added lines the snapshot lacks; `in_short` would fail `m1.md`; "near its top" was not checkable; no rule page exists. | Accepted | Slice 5 names each; criteria 19–21. |
+| 14 | This repository has no submodules; the offline behaviour of the pin checks was unspecified. | Accepted | Fixture repositories; criteria 11–12 state offline behaviour. |
+| 15 | Builders and other sessions would share one working copy. | Accepted | Limits: one worktree per slice, and the maintainer's setup steps. |
+| 16 | Several source features were unplaced; the legacy-app gate's per-session opt-in was missed. | Accepted | Later and Staying behind extended. |
+| 17 | Size-gate claim wrong; milestone record timing wrong; "fail with its fix removed" had no command. | Accepted | Corrected; V6 added. |
+| 18 | No deny-listed term in the plan. | Noted | None. |
+
+Round 2: not yet run.
 
 ## Approval
 

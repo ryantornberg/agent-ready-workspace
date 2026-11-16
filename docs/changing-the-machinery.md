@@ -38,7 +38,7 @@ Everything else is a doc.
 5. **Push the branch and open a draft pull request.** CI runs on three systems. In this repository an agent may push; in a team's workspace, a person does.
 6. **Merge once CI is green.** A red run on any one system blocks the merge.
 
-A hook that refuses a direct push of machinery to the main branch is planned. Until then this path is kept by hand.
+GitHub enforces step 6: a branch rule on main refuses a merge until all five CI jobs pass. It cannot see a direct push to main, which the owner may still make. A hook that refuses a direct push of machinery is planned in [M2](plans/m2-port-from-the-work-workspace.md); until it lands, that case is kept by hand.
 
 ## Traps
 
