@@ -1,0 +1,22 @@
+{
+  "guided": {
+    "why": "The workspace's own guidance: the real contract, the index, the playbook and the definition of done.",
+    "files": {
+      "AGENTS.md": "AGENTS.md",
+      "CLAUDE.md": "CLAUDE.md",
+      "INDEX.md": "INDEX.md",
+      "docs/playbooks/fix-a-bug.md": "docs/playbooks/fix-a-bug.md",
+      "docs/definition-of-done.md": "docs/definition-of-done.md"
+    }
+  },
+  "two-line": {
+    "why": "What a team could write instead in a minute: the two habits the playbook asks for, and nothing about this code.",
+    "files": {
+      "CLAUDE.md": "evals/two-line.md"
+    }
+  },
+  "bare": {
+    "why": "The model with the code alone.",
+    "files": {}
+  }
+}

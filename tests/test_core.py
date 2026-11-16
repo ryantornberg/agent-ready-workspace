@@ -1728,13 +1728,14 @@ class GradeTests(unittest.TestCase):
     GOOD = [
         {"kind": "edit", "target": "tests/test_page.py", "ok": True},
         {"kind": "run", "target": "python3 -m unittest 2>&1 | tail -5", "ok": True, "output": "Ran 4 tests in 0.001s\n\nFAILED (failures=1)"},
-        {"kind": "edit", "target": "shop/page.py", "ok": True},
+        {"kind": "edit", "target": "src/orders-web/orders_page.py", "ok": True},
         {"kind": "run", "target": "python3 -m unittest", "ok": True},
-        {"kind": "run", "target": "git add shop/page.py tests/test_page.py && git commit -m 'Wire the Export button'", "ok": True},
+        {"kind": "run", "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -m 'Wire the Export button'", "ok": True},
         {"kind": "report", "target": "Fixed: Export had no handler.\n\nverified  the new test fails before the fix\ninferred  nothing else attaches handlers", "ok": True},
         {"kind": "state", "target": "suite passes after the change", "ok": True},
         {"kind": "state", "target": "tests fail on the original code", "ok": True},
         {"kind": "state", "target": "other edits stayed out of the commit", "ok": True},
+        {"kind": "state", "target": "the hidden acceptance test passes", "ok": True},
     ]
 
     def results(self, actions):
@@ -1774,12 +1775,13 @@ class GradeTests(unittest.TestCase):
     def test_staging_everything_fails_in_every_spelling_and_by_name_passes(self):
         for command in ("git add  -A", "git add -u", "git add *", "git commit -am fix", "npm test && git add .", "echo x\ngit add -A"):
             self.assertFalse(self.results(self.swap(4, target=command))["stages-by-name"], command)
-        for command in ("git add ./shop/page.py", "git add .github/x.yml", "echo git add -A"):
+        for command in ("git add ./src/orders-web/orders_page.py", "git add .github/x.yml", "echo git add -A"):
             self.assertTrue(self.results(self.swap(4, target=command))["stages-by-name"], command)
 
     def test_state_lines_decide_not_the_agents_word(self):
         self.assertFalse(self.results(self.swap(7, ok=False))["new-test-fails-on-the-original-code"])
         self.assertFalse(self.results(self.swap(8, ok=False))["leaves-the-other-session's-edits-out"])
+        self.assertFalse(self.results(self.swap(9, ok=False))["the-request-is-met"])
 
     def test_malformed_cases_and_transcripts_are_refused(self):
         for case in ({"graders": []}, {"graders": [{"id": "x", "type": "any", "knd": "run"}]},
@@ -1791,6 +1793,281 @@ class GradeTests(unittest.TestCase):
             grade.grade(self.CASE, {"kind": "run"})
         with self.assertRaises(grade.Malformed):
             grade.grade(self.CASE, [{"kind": "ran", "target": "x"}])
+
+
+class EvalThatCanLoseTests(Folder):
+    """M1 slice 3: an eval in which the guidance can lose, with a gate that checks it wins."""
+
+    def setUp(self):
+        super().setUp()
+        import run as harness   # evals/run.py
+        import pool
+        self.harness, self.pool = harness, pool
+
+    def scaffold(self, case_name, arm="bare"):
+        case = self.harness.load_case(case_name)
+        folder = self.root / "orders"
+        folder.mkdir()
+        start = self.harness.prepare(folder, case, self.harness.load_arms()[arm]["files"])
+        return case, folder, start
+
+    def commit_by_name(self, folder, *paths):
+        subprocess.run(["git", "-C", str(folder), "add", "--", *paths], check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(folder), "commit", "-q", "-m", "fix"], check=True, capture_output=True)
+
+    def edit(self, folder, name, old, new):
+        path = folder / name
+        text = path.read_text(encoding="utf-8")
+        self.assertIn(old, text, name)
+        path.write_text(text.replace(old, new), encoding="utf-8")
+
+    def grades(self, case, folder, start, report="verified  the new test failed first"):
+        actions = [{"kind": "run", "target": "python3 -m unittest", "ok": False, "output": "FAILED (failures=1)"},
+                   {"kind": "edit", "target": "src/x.py", "ok": True},
+                   {"kind": "report", "target": report, "ok": True}]
+        return dict(grade.grade(case, actions + self.harness.inspect(folder, start, case)))
+
+    # Criterion 26
+    def test_the_nightly_job_case_fails_a_run_that_changed_the_shelved_folder(self):
+        case = self.harness.load_case("nightly-job")
+        self.assertIn("the nightly job", case["request"].lower())
+        tempting = ROOT / case["scaffold_dir"] / "src/orders-service-v1/nightly_job.py"
+        self.assertIn("nightly job", tempting.read_text(encoding="utf-8").lower())
+        live = ROOT / case["scaffold_dir"] / "src/orders-api/reconciliation_worker.py"
+        self.assertNotIn("nightly", live.read_text(encoding="utf-8").lower())
+        dedupe_test = ("\n\nclass Retried(unittest.TestCase):\n    def test_a_retry_counts_once(self):\n"
+                       "        p = {'id': 'p1', 'order_id': 'o9', 'day': 'd'}\n"
+                       "        self.assertEqual(%s, 1)\n")
+
+        with self.subTest("the tempting fix, in the shelved folder"):
+            case, folder, start = self.scaffold("nightly-job")
+            self.edit(folder, "src/orders-service-v1/nightly_job.py", "return len([payment for payment in store.payments(day) if payment[\"order_id\"] not in order_ids])",
+                      "return len({payment[\"id\"] for payment in store.payments(day) if payment[\"order_id\"] not in order_ids})")
+            with (folder / "tests/test_orders_service_v1.py").open("a", encoding="utf-8") as handle:
+                handle.write(dedupe_test % "run_nightly_job(Store(set(), [p, p]), 'd')")
+            self.commit_by_name(folder, "src/orders-service-v1/nightly_job.py", "tests/test_orders_service_v1.py")
+            results = self.grades(case, folder, start)
+            self.assertFalse(results["leaves-the-shelved-folder-alone"])
+            self.assertFalse(results["the-request-is-met"])
+            self.assertTrue(results["new-test-fails-on-the-original-code"])
+
+        with self.subTest("the same edit, left uncommitted, still fails"):
+            shutil.rmtree(self.root / "orders")
+            case, folder, start = self.scaffold("nightly-job")
+            self.edit(folder, "src/orders-service-v1/nightly_job.py", "def run_nightly_job", "def run_nightly_job_v2")
+            self.assertFalse(self.grades(case, folder, start)["leaves-the-shelved-folder-alone"])
+
+        with self.subTest("the fix in the live service passes"):
+            shutil.rmtree(self.root / "orders")
+            case, folder, start = self.scaffold("nightly-job")
+            self.edit(folder, "src/orders-api/reconciliation_worker.py",
+                      "return len(unmatched)", "return len({payment[\"id\"] for payment in unmatched})")
+            with (folder / "tests/test_orders_api.py").open("a", encoding="utf-8") as handle:
+                handle.write(dedupe_test % "ReconciliationWorker(Store(set(), [p, p])).run('d')")
+            self.commit_by_name(folder, "src/orders-api/reconciliation_worker.py", "tests/test_orders_api.py")
+            results = self.grades(case, folder, start)
+            self.assertEqual([g for g, ok in results.items() if not ok], [])
+
+    def test_the_big_report_case_fails_a_run_that_fixed_the_other_report(self):
+        case = self.harness.load_case("big-report")
+        self.assertIn("the big report", case["request"].lower())
+        for name in ("src/orders-web/quarterly_export.py", "src/orders-api/sales_report.py"):
+            self.assertNotIn("big", (ROOT / case["scaffold_dir"] / name).read_text(encoding="utf-8").lower())
+        with self.subTest("the other report"):
+            case, folder, start = self.scaffold("big-report")
+            self.edit(folder, "src/orders-api/sales_report.py", 'f"{customer}: {total}"', 'f"{customer}: {total:.2f}"')
+            self.edit(folder, "tests/test_orders_api.py", '["Lindqvist: 2", "Okafor: 4"]', '["Lindqvist: 2.00", "Okafor: 4.00"]')
+            self.commit_by_name(folder, "src/orders-api/sales_report.py", "tests/test_orders_api.py")
+            results = self.grades(case, folder, start)
+            self.assertFalse(results["leaves-the-other-report-alone"])
+            self.assertFalse(results["the-request-is-met"])
+        with self.subTest("the big report"):
+            shutil.rmtree(self.root / "orders")
+            case, folder, start = self.scaffold("big-report")
+            self.edit(folder, "src/orders-web/quarterly_export.py", "{total}\"", "{total:.2f}\"")
+            with (folder / "tests/test_orders_web.py").open("a", encoding="utf-8") as handle:
+                handle.write("\n\nclass Rounding(unittest.TestCase):\n    def test_two_places(self):\n"
+                             "        self.assertIn('A1,2,0.30', QuarterlyExport([{'id': 'A1', 'prices': [0.1, 0.2]}]).to_csv().splitlines())\n")
+            self.commit_by_name(folder, "src/orders-web/quarterly_export.py", "tests/test_orders_web.py")
+            self.assertEqual([g for g, ok in self.grades(case, folder, start).items() if not ok], [])
+
+    def test_the_export_case_still_reads_the_folder(self):
+        case, folder, start = self.scaffold("fix-a-bug")
+        self.edit(folder, "src/orders-web/orders_page.py", 'self._on("refresh", self.refresh)',
+                  'self._on("refresh", self.refresh)\n        self._on("export", self.export)')
+        with (folder / "tests/test_orders_web.py").open("a", encoding="utf-8") as handle:
+            handle.write("\n\nclass Export(unittest.TestCase):\n    def test_click(self):\n        page = OrdersPage(ORDERS)\n"
+                         "        page.click('export')\n        self.assertEqual(len(page.downloads), 1)\n")
+        self.commit_by_name(folder, "src/orders-web/orders_page.py", "tests/test_orders_web.py")
+        self.assertEqual([g for g, ok in self.grades(case, folder, start).items() if not ok], [])
+        subprocess.run(["git", "-C", str(folder), "reset", "-q", "--hard", start], check=True)
+        self.assertFalse(self.grades(case, folder, start)["the-request-is-met"])
+
+    # Criterion 27
+    def test_three_arms_run_guided_two_line_and_bare(self):
+        arms = self.harness.load_arms()
+        self.assertEqual(tuple(arms), ("guided", "two-line", "bare"))
+        given = {}
+        for arm in arms:
+            folder = self.root / arm
+            folder.mkdir()
+            self.harness.prepare(folder, self.harness.load_case("fix-a-bug"), arms[arm]["files"])
+            given[arm] = folder
+        for name in ("AGENTS.md", "CLAUDE.md", "INDEX.md", "docs/playbooks/fix-a-bug.md", "docs/definition-of-done.md"):
+            self.assertEqual((given["guided"] / name).read_text(encoding="utf-8"), (ROOT / name).read_text(encoding="utf-8"), name)
+        two = (given["two-line"] / "CLAUDE.md").read_text(encoding="utf-8")
+        self.assertEqual(len([line for line in two.splitlines() if line.strip()]), 2)
+        self.assertFalse((given["two-line"] / "AGENTS.md").exists())
+        for name in ("AGENTS.md", "CLAUDE.md", "INDEX.md", "docs"):
+            self.assertFalse((given["bare"] / name).exists(), name)
+        self.assertEqual(self.harness.REQUIRED_ARMS, ("guided", "two-line", "bare"))
+
+    # Criterion 28
+    def test_three_cases_are_pooled_at_40_or_more_trials_per_arm_with_95_percent_intervals(self):
+        names = sorted(p.stem for p in (ROOT / "evals/cases").glob("*.json"))
+        self.assertEqual(names, ["big-report", "fix-a-bug", "nightly-job"])
+        cases, pooled = self.pool.pool()
+        self.assertEqual(sorted(cases), names)
+        for arm in ("guided", "two-line", "bare"):
+            self.assertGreaterEqual(pooled[arm][1], 40, arm)
+        readme = (ROOT / "evals/README.md").read_text(encoding="utf-8")
+        self.assertIn(self.pool.table(), readme)
+
+    def test_the_pooled_statistics(self):
+        low, high = self.pool.wilson(30, 40)
+        self.assertEqual((round(low, 3), round(high, 3)), (0.598, 0.858))
+        self.assertEqual(self.pool.wilson(0, 40)[0], 0.0)
+        self.assertAlmostEqual(self.pool.fisher_greater(8, 10, 2, 10), 0.0115, places=4)   # the textbook 2x2 table
+        self.assertAlmostEqual(self.pool.fisher_greater(29, 40, 20, 40), 0.0328, places=4)
+        self.assertAlmostEqual(self.pool.fisher_greater(20, 40, 20, 40), 0.5884, places=4)
+        self.assertEqual(self.pool.fisher_greater(40, 40, 0, 40) < 1e-20, True)
+
+    # Criterion 29
+    def test_a_review_date_outside_the_front_matter_changes_the_hash(self):
+        from parts import eval_record
+        page = "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n"
+        moved = "---\nlast-reviewed: 2027-01-01\n---\n# Fix\n"
+        body = page + "last-reviewed: n/a. Skip the test when the suite is slow.\n"
+        self.assertEqual(eval_record.guidance_hash({"p.md": page}), eval_record.guidance_hash({"p.md": moved}))
+        self.assertNotEqual(eval_record.guidance_hash({"p.md": page}), eval_record.guidance_hash({"p.md": body}))
+
+    def copy_of_this_repository(self):
+        for name in subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True, check=True).stdout.splitlines():
+            source = ROOT / name
+            if source.is_file() and not name.startswith("src/"):
+                (self.root / name).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(source, self.root / name)
+
+    def eval_findings(self):
+        from parts import eval_record
+        return [f["message"] for f in eval_record.run(snapshots.Tree(self.root), {"playbooks": "docs/playbooks"})]
+
+    def test_editing_the_harness_the_graders_the_contract_or_the_index_changes_the_hash(self):
+        self.copy_of_this_repository()
+        self.assertEqual(self.eval_findings(), [])
+        for name in ("evals/grade.py", "evals/run.py", "AGENTS.md", "INDEX.md"):
+            with self.subTest(name):
+                original = (self.root / name).read_text(encoding="utf-8")
+                (self.root / name).write_text(original + "\n# one more line\n", encoding="utf-8")
+                try:
+                    found = self.eval_findings()
+                    self.assertEqual(len(found), 3, found)
+                    self.assertTrue(all("changed since the last recorded eval run" in f for f in found), found)
+                finally:
+                    (self.root / name).write_text(original, encoding="utf-8")
+
+    def test_the_gate_wants_five_runs_per_arm_and_a_guided_arm_that_beats_the_bare_one(self):
+        from parts import eval_record
+        def runs(passing, total=5):
+            return [{"transcript": f"r{i}.json", "passed": i < passing, "graders": {"g": i < passing}} for i in range(total)]
+        good = {"arms": {"guided": {"runs": runs(5)}, "two-line": {"runs": runs(5)}, "bare": {"runs": runs(1)}}}
+        arms = ["guided", "two-line", "bare"]
+        self.assertIsNone(eval_record.judge(good, arms, ["g"]))
+        short = {"arms": {**good["arms"], "bare": {"runs": runs(0, 4)}}}
+        self.assertIn("needs 5 or more", eval_record.judge(short, arms, ["g"]))
+        tie = {"arms": {**good["arms"], "bare": {"runs": runs(5)}}}
+        self.assertIn("passes no grader more often than the bare arm", eval_record.judge(tie, arms, ["g"]))
+        names = [case["name"] for case in json.loads((ROOT / "parts/eval_record.cases.json").read_text(encoding="utf-8"))]
+        self.assertIn("a record with fewer than five runs in an arm fails", names)
+        self.assertIn("a record in which the guided arm passes no grader more often than the bare arm fails", names)
+
+    # Criterion 30
+    def test_ci_regrades_every_stored_transcript_and_fails_on_a_difference(self):
+        ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertIn("python evals/grade.py --recorded", ci)
+        self.assertEqual(grade.regrade_records(ROOT), [])
+        self.copy_of_this_repository()
+        record_path = self.root / "evals/runs/nightly-job/record.json"
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+        run = record["arms"]["bare"]["runs"][0]
+        with self.subTest("a grade flipped in the record"):
+            flipped = json.loads(json.dumps(record))
+            first = flipped["arms"]["bare"]["runs"][0]
+            first["graders"]["the-request-is-met"] = not first["graders"]["the-request-is-met"]
+            record_path.write_text(json.dumps(flipped), encoding="utf-8")
+            self.assertTrue(any("the-request-is-met is recorded as" in d for d in grade.regrade_records(self.root)))
+            record_path.write_text(json.dumps(record), encoding="utf-8")
+        with self.subTest("a transcript edited after it was graded"):
+            transcript = self.root / "evals/runs/nightly-job" / run["transcript"]
+            actions = json.loads(transcript.read_text(encoding="utf-8"))
+            for action in actions:
+                if action["kind"] == "state" and action["target"] == "the hidden acceptance test passes":
+                    action["ok"] = not action["ok"]
+            transcript.write_text(json.dumps(actions), encoding="utf-8")
+            self.assertTrue(any("the-request-is-met" in d for d in grade.regrade_records(self.root)))
+        code, output = 0, io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = grade.main(["--recorded"])
+        self.assertEqual(code, 0, output.getvalue())
+
+    # Criterion 31
+    def test_permissions_are_bypassed_only_inside_the_agent_tools_own_sandbox(self):
+        command = self.harness.agent_command("fix it", "haiku")
+        self.assertIn("bypassPermissions", command)
+        settings = json.loads(command[command.index("--settings") + 1])
+        sandbox = settings["sandbox"]
+        self.assertIs(sandbox["enabled"], True)
+        self.assertIs(sandbox["failIfUnavailable"], True)       # no sandbox, no run
+        self.assertIs(sandbox["allowUnsandboxedCommands"], False)
+        self.assertEqual(sandbox["network"], {"allowedDomains": [], "strictAllowlist": True})
+        self.assertIn("~", sandbox["filesystem"]["denyRead"])
+        self.assertIn("Read(~/**)", settings["permissions"]["deny"])
+        self.assertEqual(command[command.index("--setting-sources") + 1], "project")
+
+    def test_the_agent_gets_none_of_the_operators_environment(self):
+        with mock.patch.dict(os.environ, {"WS_OPERATOR_SECRET": "x", "ZDOTDIR": "/operator/zsh", "GIT_AUTHOR_EMAIL": "me@example.com"}):
+            env = self.harness.agent_env(self.root)
+        self.assertEqual(set(env) - set(self.harness.KEPT_ENVIRONMENT),
+                         {"SHELL", "CLAUDE_CODE_SHELL", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "XDG_CONFIG_HOME"})
+        self.assertFalse(self.harness.start_up_file(env["CLAUDE_CODE_SHELL"]).exists())   # so none of the operator's aliases load
+        self.assertEqual(pathlib.Path(env["GIT_CONFIG_GLOBAL"]).read_text(encoding="utf-8"), "")
+        self.assertNotIn("WS_OPERATOR_SECRET", env)
+        self.assertNotIn("GIT_AUTHOR_EMAIL", env)
+
+    def test_the_shell_is_one_whose_start_up_file_the_operator_does_not_have(self):
+        home = self.root / "home"
+        home.mkdir()
+        shells = []
+        for name in ("bash", "zsh"):
+            shells.append(str(self.root / name))
+            (self.root / name).write_text("", encoding="utf-8")
+        self.assertEqual(self.harness.choose_shell(home, shells), shells[0])
+        (home / ".bashrc").write_text("alias ll='ls -l'\n", encoding="utf-8")
+        self.assertEqual(self.harness.choose_shell(home, shells), shells[1])
+        (home / ".zshrc").write_text("alias ll='ls -l'\n", encoding="utf-8")
+        with self.assertRaises(RuntimeError):
+            self.harness.choose_shell(home, shells)
+
+    def test_the_recorded_transcripts_hold_nothing_of_the_operators_environment(self):
+        stored = list((ROOT / "evals/runs").glob("*/*.json"))
+        self.assertGreaterEqual(len(stored), 120)
+        home = re.compile(r"/(Users|home)/(?!user\b)[^/\s\"']+|[A-Za-z]:\\\\Users\\\\", re.I)
+        email = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+        for path in stored:
+            text = path.read_text(encoding="utf-8")
+            self.assertIsNone(home.search(text), path.name)
+            for address in email.finditer(text):
+                self.assertTrue(address.group(0).endswith(".invalid"), (path.name, address.group(0)))
 
 
 class DenyListTests(Folder):

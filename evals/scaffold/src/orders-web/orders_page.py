@@ -1,5 +1,5 @@
 """The orders page: a table of orders and two buttons."""
-from shop.csv_export import to_csv
+from csv_export import to_csv
 
 
 class OrdersPage:

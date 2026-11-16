@@ -30,6 +30,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: python -m unittest discover -b tests
       - run: python ws.py selftest
+      # Re-grade every stored eval transcript; a grade that differs from its record fails. No agent runs here.
+      - run: python evals/grade.py --recorded
       # A teammate who never installed the commit hook is caught here: a page edited
       # in this push or pull request, and past its review date, fails.
       - if: github.event_name != 'schedule'
