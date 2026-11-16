@@ -26,6 +26,7 @@ The plan an agent works from when the work is too big for [fix a bug](../playboo
 4. Have a fresh session red-team the plan. It gets the plan and the sources, never your reasoning. Record every finding in the triage table.
 5. Ask the person to approve. On approval, set `status: approved` and fill the approval line.
 6. As slices finish, append each slice's report under "Results". Never edit the approved sections. A change of plan is a new dated entry under "Changes after approval", approved the same way.
+7. When a slice's work contradicts a criterion of a slice not yet built, such as a decision record that changes what a hook does, propose the revised criterion in that slice's report. Do not leave it for the later slice to find.
 
 ## Skeleton
 
