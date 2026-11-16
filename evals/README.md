@@ -128,6 +128,8 @@ Each `record.json` stores one hash over what a run depends on: the case, its acc
 
 A run counts when it passes every grader of its case. A record passes the gate when each arm has five or more runs, and the guided arm has more such runs than the bare arm. Then, pooled across the records that pass, the guided arm must beat the two-line arm by a one-sided Fisher exact test at p < 0.05. So a playbook the bare model follows just as well fails, and so does guidance that two lines would match. The two-line comparison is pooled, not per case, because a case that tests only the playbook's habits, like fix-a-bug, can tie with two lines that ask for the same habits; that tie is a finding, not a failure. The gate is criterion 29 of the [M1 plan](../docs/plans/m1-make-the-core-hold-weight.md#changes-after-approval), as revised on 2026-11-16.
 
+Because the hash covers the part loader, an edit to `wslib/parts.py` makes every record stale, even one that has nothing to do with the eval. The next recording removes that dependency: `grade.py` will load the hook's file itself, so only the hook and the harness count. Until then, batch loader changes into one recording.
+
 The gate trusts the record file. It shows that someone ran the cases on this wording; it cannot stop a person from editing the record by hand. CI's re-grade catches a grade that does not follow from its transcript, not a transcript that was written by hand.
 
 ## Rules that make this worth doing
