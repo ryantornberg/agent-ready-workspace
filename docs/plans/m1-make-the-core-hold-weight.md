@@ -208,6 +208,9 @@ Approved by: Ryan Tornberg, 2026-11-15.
 - 2026-11-15, the maintainer: agents may push slice branches to this repository. Merging into main still waits for CI to pass on all three systems. Agents push nothing to any other host.
 - 2026-11-15, the maintainer: agents open a draft pull request for each slice, which runs CI.
 - 2026-11-15, the maintainer: agents publish and merge a slice's pull request once CI passes on all three systems. The contract says so.
+- 2026-11-15, proposed, waiting on the maintainer's approval. Two revisions to slice 3. Slice 3 is not built until they are approved or struck.
+  - **Criterion 29 gains a sentence:** "The gate also refuses a record in which, for any affected case, the guided arm passes no grader more often than the bare arm." Why: today `eval_record` checks only that the guided arm passed. A playbook the bare model follows just as well still ships, which contradicts the eval page's rule that guidance stays only while it beats the bare model. The stop rule's Fisher test still decides the milestone's pooled result; this sentence is the cheap check on every change.
+  - **Criterion 31 becomes:** "The agent runs inside the agent tool's own operating-system sandbox where the tool has one, and inside a container where it does not. Its permissions are bypassed only inside one of the two. A recorded transcript holds none of the operator's environment: no home folder, user name, shell alias or git identity." Why: Claude Code's sandbox already confines writes to the run's folder, hides the home folder and limits the network. A container is then needed only for a tool without one. The Limits line "Before slice 3, the maintainer starts Docker" applies only if a container turns out to be needed.
 
 ## Results
 
