@@ -186,7 +186,34 @@ Round 1, 2026-11-16: a fresh session given the first draft, both repositories, t
 | 17 | Size-gate claim wrong; milestone record timing wrong; "fail with its fix removed" had no command. | Accepted | Corrected; V6 added. |
 | 18 | No deny-listed term in the plan. | Noted | None. |
 
-Round 2: not yet run.
+Round 2, 2026-11-16: a fresh session given the second draft and the same sources. The verdicts below are decided; the plan body above is still the second draft, and the third draft applies these actions.
+
+| # | Finding | Verdict | Action |
+|---|---|---|---|
+| 1 | Slice 6 cannot run on the current harness: arms are global, there is no bare-only mode, a case cannot exist before its playbook, and no grader fits red-team or diagnose output. Its real cost is far above the stated one. | Accepted | Slice 6 leaves M2. M3 generalizes the eval harness and ports playbooks. M2 ends instead with one closing slice: the queued contract edits and one re-recording. |
+| 2 | No command computes a per-playbook Fisher test. | Accepted | Moves to M3 with the playbooks. |
+| 3 | Slice 0 read "40 or more trials per arm" as per case (about 360 runs). M1 pooled it across cases and met it at 15 per case (135 runs). | Accepted | 135 runs per recording, pooled, as M1 did. Slice 0 makes `eval_record` check the pooled 40 per arm, so criterion 1 has a command. |
+| 4 | Placing worktree paths relative to the worktree breaks the edit ledger and blinds the lease. | Accepted | Decision 0004: the event carries the working copy and the path within it. New criterion: an edit in a worktree is recorded in that worktree's ledger. |
+| 5 | Criterion 14 passes for a lease that refuses everything. | Accepted | Negative control: a non-holder's edit inside a linked worktree is allowed. |
+| 6 | `.claude/worktrees/` is not git-ignored, so the main copy always looks dirty. | Accepted | Slice 0 ignores it. "Clean" means no tracked change. |
+| 7 | Session-end release has no event; the Codex escape clause lets a builder declare a gap. Codex appears to offer both events. | Accepted | Slice 3 adds `session-end` too, for both tools, with a recorded Codex run. Escape clause dropped. |
+| 8 | The Codex lease is tested only on hand-written payloads. | Accepted | The recorded Codex run must show the fields decision 0005 uses for identity and liveness. |
+| 9 | Time-based idle takeover can hand a live session's edits to another. | Accepted | Takeover only when the main copy has no tracked change and no unpushed commit, plus a minimum age, as the source does. |
+| 10 | The owner's sign-in merges past red CI with `gh pr merge --admin`; the texts overclaimed. | Accepted | `changing-the-machinery.md` reworded now. Slice 1 adds a shell-hook refusal of `--admin` merges. `enforce_admins` stays off, so direct doc pushes keep working. |
+| 11 | The Codex half of slice 2 was hedged to nothing, and Python 3.9 has no TOML parser. | Accepted | Hedge dropped. A line-based check of the Codex config, no parser. |
+| 12 | The browser criteria test the package, not the wiring; Windows and Chrome are unaddressed; separate worktrees already get separate profiles. | Accepted | Criterion: a recorded Claude Code session lists the project's browser tools. Windows config and Chrome named. The risk restated as sessions sharing one folder. |
+| 13 | `run.py` imports the snapshot, which slice 5 changes, so the eval can still go stale. | Accepted | Slice 0 removes that dependency as well; criterion 2 covers the snapshot. |
+| 14 | The pin check fails closed in CI on an upstream it cannot reach. | Accepted | Warn when unreachable; fail only on a reachable upstream whose default branch lacks the pin. |
+| 15 | Criteria 8, 13 and 24 need a person to judge. | Accepted | 8 becomes a test; 13 loses its escape clause; 24 leaves with slice 6. |
+| 16 | The milestone template has no In short line, so `m2.md` would fail `in_short`. | Accepted | Slice 5 adds it to the template. |
+| 17 | Freezing `INDEX.md` leaves it stale all milestone, with no page an agent finds for the browser rule. | Accepted | The closing slice updates the index and contract. Until then, each hook's refusal message links its doc page. |
+| 18 | The engine version bump has no reason and needs a third working copy. | Accepted | No bump unless a manifest key changes meaning. |
+| 19 | On Windows, `os.kill(pid, 0)` is not a liveness probe. | Accepted | Named in decision 0005. |
+| 20 | The machinery path list is prose, and slice 1's hook needs one it can read. | Accepted | One list in `workspace.json`; a test holds the doc table to it. |
+| 21 | The leak fix has no criterion. | Accepted | A test with a Windows path. |
+| 22 | `deny_list` blocks names, not domain facts. | Accepted | Key point reworded. |
+| 23 | Five generic source features were unplaced. | Accepted | Each placed in Later or Staying behind. |
+| 24 | A proposal sat under settled decisions; `--resume` restarts nothing by itself; one stop-rule condition was undefined. | Accepted | Each corrected. |
 
 ## Approval
 
