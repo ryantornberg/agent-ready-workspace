@@ -6,5 +6,7 @@
   {"name": "the same folder in another case", "event": {"path": "src/Orders-Service-V1/OrderService.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": false},
   {"name": "the live service next to it", "event": {"path": "src/orders-api/OrdersController.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": true},
   {"name": "a folder that only shares the prefix", "event": {"path": "src/orders-service-v10/x.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": true},
+  {"name": "a name Unicode folds to the same letters, a long s", "event": {"path": "src/orderſ-service-v1/OrderService.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": false},
+  {"name": "a trailing dot or space, which Windows drops", "event": {"path": "src/orders-service-v1. /OrderService.cs"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": false},
   {"name": "an event with no path", "event": {"command": "ls"}, "config": {"paths": ["src/orders-service-v1"]}, "allow": true}
 ]
