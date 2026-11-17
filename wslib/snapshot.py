@@ -28,6 +28,11 @@ or None when no ledger is open (wslib/ledger.py); `replaying` names a merge,
 cherry-pick, revert or rebase in progress, or is None. A Memory snapshot takes
 the same three from a case. A Tree has no staged paths and no ledger.
 
+For the pin check, `pin_facts()` lists each pinned repository whose pin the commit adds or moves, as
+{"path", "pin", "state", "branch", "head"}: state is "on" (the pin is on its upstream's default branch),
+"off", "unreachable", "absent" (not checked out) or "no-branch". The engine works them out with git
+(wslib/gitcall.py), fetching the default branch; a case gives them as "pins".
+
 For the pre-push check, `pushed` lists the commits a push adds to a branch, each as
 {"commit": full hash, "subject": first line, "paths": [paths it changes]}. Merge
 commits are left out; the commits they bring in are listed.
@@ -38,6 +43,7 @@ import pathlib
 import re
 import subprocess
 
+from . import gitcall
 from . import ledger as ledgers
 
 # Folders skipped when a folder is walked, and untracked files under them. A tracked or staged file is always listed.
@@ -81,9 +87,11 @@ class Snapshot:
     """repositories: folders that are code repositories of their own, such as a submodule; links: symbolic links."""
 
     def __init__(self, paths, changed=(), staged=None, ledger=None, replaying=None, ledger_problem=None,
-                 repositories=(), links=(), pushed=()):
+                 repositories=(), links=(), pushed=(), pins=None):
         self._paths = frozenset(paths)
         self.pushed = tuple(pushed)
+        self._pins = None if pins is None else [dict(p) for p in pins]
+        self._gitlinks = {}       # path -> staged commit, for a snapshot read from git
         self.changed = frozenset(changed)
         self.staged = frozenset(self.changed if staged is None else staged)
         self.ledger = None if ledger is None else frozenset(ledger)
@@ -115,6 +123,17 @@ class Snapshot:
 
     def is_file(self, path):
         return path in self._paths
+
+    def pin_facts(self):
+        """The pins this commit adds or moves, each with its state. Worked out with git the first time it is asked."""
+        if self._pins is None:
+            root = getattr(self, "root", None)
+            self._pins = []
+            for path, pin in sorted(self._gitlinks.items()):
+                if path in self.changed and root is not None:
+                    state, branch, head = gitcall.pin_state(root / path, pin)
+                    self._pins.append({"path": path, "pin": pin, "state": state, "branch": branch, "head": head})
+        return list(self._pins)
 
     def is_link(self, path):
         return path in self.links
@@ -160,9 +179,9 @@ class Snapshot:
 
 class Memory(Snapshot):
     def __init__(self, files, changed=(), staged=None, ledger=None, replaying=None, repositories=(), links=(),
-                 pushed=()):
+                 pushed=(), pins=()):
         super().__init__(files, changed, staged, ledger, replaying, repositories=repositories, links=links,
-                         pushed=pushed)
+                         pushed=pushed, pins=pins)
         self._files = files
 
     def _bytes(self, path):
@@ -259,9 +278,11 @@ class Tree(Snapshot):
             files, repositories, links = walk(self.root)
             super().__init__(files, changed, repositories=repositories, links=links)
             return
-        files, repositories, links = [], [], []
-        for mode, _, path in entries:
+        files, repositories, links, gitlinks = [], [], [], {}
+        for mode, oid, path in entries:
             disk = self.root / path
+            if mode == GITLINK:
+                gitlinks[path] = oid
             if mode == GITLINK or (mode is None and path.endswith("/") and (disk / ".git").exists()):
                 repositories.append(path.rstrip("/"))
                 if disk.is_dir():
@@ -285,6 +306,7 @@ class Tree(Snapshot):
             elif disk.is_file():
                 files.append(path)      # a tracked file deleted from disk is left out
         super().__init__(files, changed, repositories=repositories, links=links)
+        self._gitlinks = gitlinks
 
     def _bytes(self, path):
         disk = self.root / path
@@ -306,9 +328,10 @@ class Index(Snapshot):
 
     def __init__(self, root, extra=()):
         self.root = pathlib.Path(root).resolve()
-        paths, repositories, links, self._on_disk, self._oids = [], [], [], set(), {}
+        paths, repositories, links, self._on_disk, self._oids, gitlinks = [], [], [], set(), {}, {}
         for mode, oid, path in listing(self.root):
             if mode == GITLINK:
+                gitlinks[path] = oid
                 repositories.append(path)
                 folder = self.root / path
                 if folder.is_dir():
@@ -334,6 +357,7 @@ class Index(Snapshot):
             ledger, problem = None, str(error)
         super().__init__(paths, changed, staged, ledger, ledgers.replaying(folder), problem,
                          repositories=repositories, links=links)
+        self._gitlinks = gitlinks
 
     def _batch(self):
         """Every staged blob and every extra object, read in one git process the first time any is needed."""

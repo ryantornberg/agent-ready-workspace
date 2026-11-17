@@ -683,7 +683,13 @@ class FailClosedTests(Folder):
     def test_the_wiring_sends_every_tool_the_adapter_reads_and_every_event_has_wiring(self):
         from wslib import events
         wiring = self.wiring()
-        self.assertEqual(set(wiring), set(partlib.EVENTS))
+        self.assertEqual(set(wiring), set(partlib.TOOL_EVENTS))
+        settings = json.loads((ROOT / ".claude/settings.json").read_text(encoding="utf-8"))
+        for event, name in events.SESSION_NAMES.items():
+            with self.subTest(event=event):
+                command = settings["hooks"][name][0]["hooks"][0]["command"]
+                self.assertIn(f"hook {event} --tool claude-code", command)
+                self.assertTrue(command.rstrip().endswith("|| exit 0"), "a session start or end never fails")
         for event, tools in events.CLAUDE_CODE_TOOLS.items():
             matcher, command = wiring[event]
             for tool in tools:
@@ -1555,7 +1561,14 @@ class SecondToolTests(Folder):
     def test_the_wiring_sends_every_tool_the_adapter_reads_and_every_event_has_wiring(self):
         from wslib import events
         wiring = self.codex_wiring()
-        self.assertEqual(set(wiring), set(partlib.EVENTS))
+        self.assertEqual(set(wiring), set(partlib.TOOL_EVENTS))
+        settings = json.loads((ROOT / ".codex/hooks.json").read_text(encoding="utf-8"))
+        for event, name in events.SESSION_NAMES.items():
+            with self.subTest(event=event):
+                hook = settings["hooks"][name][0]["hooks"][0]
+                self.assertIn(f"hook {event} --tool codex", hook["command"])
+                self.assertTrue(hook["command"].rstrip().endswith("|| exit 0"), "a session start or end never fails")
+                self.assertLessEqual(hook.get("timeout", 600), 30)
         for event, tools in events.CODEX_TOOLS.items():
             matcher, hook = wiring[event]
             for tool in [*tools, *events.CODEX_REFUSED.get(event, ())]:
@@ -2617,6 +2630,279 @@ class BrowserIsolationTests(unittest.TestCase):
                          "the plugin's own browser server is off")
         args = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"]["playwright"]["args"]
         self.assertEqual(record["server_args"], args, "the record was made with the config as committed")
+
+
+def git_in(folder, *args):
+    return subprocess.run(["git", "-C", str(folder), "-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                           "-c", "commit.gpgsign=false", "-c", "protocol.file.allow=always", *args],
+                          check=True, capture_output=True, text=True)
+
+
+class WorktreePlacementTests(Folder):
+    """M2 slice 3: a path is placed relative to the working copy that holds it, never by the workspace folder
+    (criteria 9 and 30)."""
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "shelved", "paths": ["src/old"]})
+        self.write("src/old/a.cs", "class A { }\n")
+        self.write("src/new/b.cs", "class B { }\n")
+        self.git("init", "-q", "-b", "main")
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", "start")
+        outside = tempfile.TemporaryDirectory()
+        self.addCleanup(outside.cleanup)
+        self.linked = pathlib.Path(outside.name).resolve() / "linked"
+        self.git("worktree", "add", "-q", "-b", "linked", str(self.linked))
+        self.nested = self.root / ".claude/worktrees/nested"
+        self.git("worktree", "add", "-q", "-b", "nested", str(self.nested))
+
+    def edit(self, path, tool=None):
+        payload = claude("Edit", file_path=str(path)) if tool else json.dumps({"version": 1, "path": str(path)})
+        return self.ws("hook", "before-edit", *(["--tool", tool] if tool else []), stdin=payload)
+
+    def test_shelved_gives_the_same_answer_in_a_linked_worktree(self):
+        for top in (self.root, self.linked, self.nested):
+            for tool in (None, "claude-code"):
+                with self.subTest(top=top.name, tool=tool):
+                    self.assertEqual(self.edit(top / "src/old/a.cs", tool)[0], 2)
+                    self.assertEqual(self.edit(top / "src/new/b.cs", tool)[0], 0)
+
+    def test_the_event_carries_the_working_copy_and_the_path_within_it(self):
+        from wslib import events
+        for top in (self.linked, self.nested):
+            with self.subTest(top=top.name):
+                event = events.read(self.root, "before-edit", json.dumps({"version": 1, "path": str(top / "src/new/b.cs")}))[0]
+                self.assertEqual(event["path"], "src/new/b.cs")
+                self.assertTrue(os.path.samefile(event["working_copy"], top))
+                self.assertFalse(event["main"])
+        event = events.read(self.root, "before-edit", json.dumps({"version": 1, "path": "src/new/b.cs"}))[0]
+        self.assertEqual(event["path"], "src/new/b.cs")
+        self.assertTrue(event["main"])
+        elsewhere = pathlib.Path(tempfile.gettempdir()).resolve() / "not-a-working-copy" / "x.cs"
+        event = events.read(self.root, "before-edit", json.dumps({"version": 1, "path": str(elsewhere)}))[0]
+        self.assertIsNone(event["working_copy"])
+        self.assertTrue(pathlib.PurePath(event["path"]).is_absolute())
+
+    def test_relative_dot_dot_and_not_yet_existing_paths_place_correctly(self):
+        from wslib import events
+        cases = [(claude("Write", cwd=str(self.linked / "src"), file_path="new/c.cs"), "src/new/c.cs"),
+                 (claude("Write", file_path=str(self.linked / "docs/../src/new/d.cs")), "src/new/d.cs"),
+                 (claude("Write", file_path=str(self.linked / "brand/new/folder/e.cs")), "brand/new/folder/e.cs")]
+        for payload, want in cases:
+            with self.subTest(want):
+                event = events.read(self.root, "before-edit", payload, "claude-code")[0]
+                self.assertEqual(event["path"], want)
+                self.assertTrue(os.path.samefile(event["working_copy"], self.linked))
+
+    def test_an_edit_in_a_worktree_is_recorded_in_that_worktrees_ledger(self):
+        for top, name in ((self.linked, "linked"), (self.nested, "nested")):
+            with self.subTest(name):
+                self.assertEqual(self.edit(top / "src/new/b.cs", "claude-code")[0], 0)
+                ledger = self.root / ".git/worktrees" / name / "ws-ledger"
+                self.assertEqual(ledger.read_text(encoding="utf-8").splitlines(), ['"src/new/b.cs"'])
+        self.assertFalse((self.root / ".git/ws-ledger").exists())
+
+
+class SessionEventTests(Folder):
+    """M2 slice 3: session-start and session-end, in the workspace's shape and both agent tools' (criteria 10, 13, 36)."""
+
+    STALE = "---\nlast-reviewed: 2020-01-01\n---\n# Old\n"
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "freshness", "max_age_days": 180}, {"use": "stale_pages", "part": "freshness"})
+        self.git("init", "-q", "-b", "main")
+
+    def start(self, payload=None, tool=None, event="session-start"):
+        payload = payload if payload is not None else json.dumps({"version": 1, "session": "s1", "cwd": str(self.root)})
+        return self.ws("hook", event, *(["--tool", tool] if tool else []), stdin=payload)
+
+    def test_the_events_are_read_in_each_shape(self):
+        from wslib import events
+        shapes = [
+            (None, {"version": 1, "session": "s1", "cwd": str(self.root)}),
+            ("claude-code", {"hook_event_name": "SessionStart", "session_id": "s1", "cwd": str(self.root), "source": "startup"}),
+            ("codex", {"hook_event_name": "SessionStart", "session_id": "s1", "cwd": str(self.root)}),
+        ]
+        for tool, payload in shapes:
+            with self.subTest(tool=tool):
+                found = events.read(self.root, "session-start", json.dumps(payload), tool)[0]
+                self.assertEqual(found["session"], "s1")
+                self.assertTrue(os.path.samefile(found["cwd"], self.root))
+                self.assertEqual(found["tool"], tool)
+        ended = events.read(self.root, "session-end", json.dumps({"hook_event_name": "SessionEnd", "session_id": "s1",
+                                                                  "cwd": str(self.root), "reason": "exit"}), "claude-code")[0]
+        self.assertEqual(ended["session"], "s1")
+        with self.assertRaises(partlib.PartError):
+            events.read(self.root, "session-start", json.dumps({"hook_event_name": "SessionEnd", "session_id": "s1",
+                                                                "cwd": str(self.root)}), "claude-code")
+
+    def test_session_start_lists_every_page_past_its_review_date_and_is_quiet_when_none_is(self):
+        """Criterion 10."""
+        self.write("docs/fresh.md", f"---\nlast-reviewed: {datetime.date.today().isoformat()}\n---\n# Fresh\n")
+        code, output = self.start()
+        self.assertEqual((code, output.strip()), (0, ""))
+        self.write("docs/a.md", self.STALE)
+        self.write("docs/b.md", self.STALE)
+        code, output = self.start()
+        self.assertEqual(code, 0)
+        self.assertIn("docs/a.md", output)
+        self.assertIn("docs/b.md", output)
+        self.assertNotIn("docs/fresh.md", output)
+        self.assertIn("review the whole page", output)
+
+    def test_eleven_stale_pages_list_ten_and_a_count(self):
+        for number in range(11):
+            self.write(f"docs/p{number:02}.md", self.STALE)
+        code, output = self.start()
+        self.assertEqual(code, 0)
+        self.assertEqual(len(re.findall(r"docs/p\d\d\.md", output)), 10)
+        self.assertIn("and 1 more", output)
+
+    def test_the_notice_reaches_each_tool_as_context(self):
+        self.write("docs/a.md", self.STALE)
+        for tool in ("claude-code", "codex"):
+            with self.subTest(tool):
+                payload = json.dumps({"hook_event_name": "SessionStart", "session_id": "s1", "cwd": str(self.root)})
+                code, output = self.start(payload, tool)
+                self.assertEqual(code, 0)
+                reply = json.loads(output)
+                self.assertEqual(reply["hookSpecificOutput"]["hookEventName"], "SessionStart")
+                self.assertIn("docs/a.md", reply["hookSpecificOutput"]["additionalContext"])
+
+    def test_a_session_start_or_end_never_fails(self):
+        self.write("docs/a.md", self.STALE)
+        self.write("workspace.json", "{ not json")
+        for event in ("session-start", "session-end"):
+            for payload in (None, "not json", '{"version": 1}'):
+                with self.subTest(event=event, payload=payload):
+                    code, output = self.start(payload, event=event)
+                    self.assertEqual((code, output.strip()), (0, ""))
+
+    def test_a_session_start_hook_runs_on_the_sessions_own_working_copy(self):
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", "start")
+        outside = tempfile.TemporaryDirectory()
+        self.addCleanup(outside.cleanup)
+        linked = pathlib.Path(outside.name).resolve() / "linked"
+        self.git("worktree", "add", "-q", "-b", "linked", str(linked))
+        (linked / "docs").mkdir(exist_ok=True)
+        (linked / "docs/only-here.md").write_text(self.STALE, encoding="utf-8")
+        code, output = self.start(json.dumps({"version": 1, "session": "s1", "cwd": str(linked)}))
+        self.assertEqual(code, 0)
+        self.assertIn("docs/only-here.md", output)
+
+
+class PinTests(Folder):
+    """M2 slice 3: a pinned repository behind its upstream is noticed, and a staged pin must be on its upstream's
+    default branch (criteria 11 and 12). Local fixture repositories only, never the network."""
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "stale_pins"}, {"use": "pin_on_default"})
+        scratch = tempfile.TemporaryDirectory()
+        self.addCleanup(scratch.cleanup)
+        self.scratch = pathlib.Path(scratch.name).resolve()
+        self.upstream = self.scratch / "upstream.git"
+        git_in(self.scratch, "init", "-q", "--bare", "-b", "main", str(self.upstream))
+        seed = self.scratch / "seed"
+        git_in(self.scratch, "clone", "-q", str(self.upstream), str(seed))
+        (seed / "lib.txt").write_text("1\n", encoding="utf-8")
+        git_in(seed, "add", "lib.txt")
+        git_in(seed, "commit", "-q", "-m", "one")
+        git_in(seed, "push", "-q", "origin", "HEAD:main")
+        self.seed = seed
+        self.git("init", "-q", "-b", "main")
+        git_in(self.root, "submodule", "add", "-q", str(self.upstream), "src/lib")
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", "start")
+
+    def upstream_commit(self, text, branch="main"):
+        git_in(self.seed, "checkout", "-q", "-B", branch)
+        (self.seed / "lib.txt").write_text(text, encoding="utf-8")
+        git_in(self.seed, "commit", "-q", "-am", text.strip())
+        git_in(self.seed, "push", "-q", "-f", "origin", f"HEAD:{branch}")
+        return git_in(self.seed, "rev-parse", "HEAD").stdout.strip()
+
+    def start(self):
+        return self.ws("hook", "session-start", stdin=json.dumps({"version": 1, "session": "s1", "cwd": str(self.root)}))
+
+    def test_a_pin_behind_its_upstream_is_noticed_and_a_current_one_is_not(self):
+        """Criterion 11."""
+        self.assertEqual(self.start()[1].strip(), "")
+        for number in range(3):
+            self.upstream_commit(f"{number + 2}\n")
+        code, output = self.start()
+        self.assertEqual(code, 0)
+        self.assertIn("src/lib", output)
+        self.assertIn("3 commits behind", output)
+
+    def test_an_unreachable_upstream_or_a_missing_checkout_is_quiet(self):
+        self.upstream_commit("2\n")
+        shutil.rmtree(self.upstream)
+        self.assertEqual(self.start(), (0, ""))
+        shutil.rmtree(self.root / "src/lib")
+        (self.root / "src/lib").mkdir()
+        self.assertEqual(self.start(), (0, ""))
+
+    def stage_pin(self, sha):
+        git_in(self.root / "src/lib", "fetch", "-q", "origin")
+        git_in(self.root / "src/lib", "checkout", "-q", sha)
+        self.git("add", "src/lib")
+
+    def test_a_staged_pin_on_the_default_branch_passes_and_one_on_a_side_branch_fails(self):
+        """Criterion 12."""
+        on_main = self.upstream_commit("2\n")
+        self.stage_pin(on_main)
+        self.assertEqual(self.ws("check", "--staged")[0], 0)
+        side = self.upstream_commit("side\n", branch="side")
+        self.stage_pin(side)
+        code, output = self.ws("check", "--staged")
+        self.assertEqual(code, 1, output)
+        self.assertIn(side[:7], output)
+        self.assertIn("main", output)
+
+    def test_an_unreachable_upstream_warns_and_passes(self):
+        side = self.upstream_commit("side\n", branch="side")
+        self.stage_pin(side)
+        shutil.rmtree(self.upstream)
+        code, output = self.ws("check", "--staged")
+        self.assertEqual(code, 0, output)
+        self.assertIn("warning", output)
+        self.assertIn("cannot be reached", output)
+
+    def test_a_removed_pin_passes(self):
+        self.git("rm", "-q", "--cached", "src/lib")
+        self.assertEqual(self.ws("check", "--staged")[0], 0)
+
+
+class AccessContractTests(unittest.TestCase):
+    """M2 slice 3: a part reaches files, git, the environment and processes only as decision 0004 allows (criterion 8)."""
+
+    FORBIDDEN_MODULES = {"os", "subprocess", "socket", "shutil", "pathlib", "urllib", "http", "sys", "tempfile", "io"}
+    FORBIDDEN_CALLS = {"open", "exec", "eval", "compile", "__import__"}
+
+    def test_every_part_keeps_to_the_access_decision_0004_allows(self):
+        import ast
+        decision = (ROOT / "docs/decisions/0004-the-hook-contract.md").read_text(encoding="utf-8")
+        allowed = {}
+        for name, what in re.findall(r"^\| `(\w+)` \| ([^|]+) \|", decision, re.M):
+            allowed[name] = set(re.findall(r"`([\w.]+)`", what))
+        for path in sorted((ROOT / "parts").glob("*.py")):
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            used = set()
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    used |= {alias.name.split(".")[0] for alias in node.names} & self.FORBIDDEN_MODULES
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    used |= {node.module.split(".")[0]} & self.FORBIDDEN_MODULES
+                elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in self.FORBIDDEN_CALLS:
+                    used.add(node.func.id)
+            with self.subTest(path.stem):
+                self.assertEqual(used - allowed.get(path.stem, set()), set(),
+                                 f"{path.name} reaches outside its event, config and snapshot; decision 0004's table "
+                                 f"must name each exception")
 
 
 class DenyListTests(Folder):

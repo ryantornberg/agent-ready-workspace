@@ -14,6 +14,16 @@
         "matcher": "Agent|Task",
         "hooks": [{"type": "command", "command": "\"$CLAUDE_PROJECT_DIR/wslib/launch.sh\" hook before-handoff --tool claude-code || exit 2"}]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [{"type": "command", "command": "\"$CLAUDE_PROJECT_DIR/wslib/launch.sh\" hook session-start --tool claude-code || exit 0"}]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [{"type": "command", "command": "\"$CLAUDE_PROJECT_DIR/wslib/launch.sh\" hook session-end --tool claude-code || exit 0"}]
+      }
     ]
   }
 }

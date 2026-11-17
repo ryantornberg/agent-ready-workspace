@@ -1,0 +1,86 @@
+[
+  {
+    "name": "no stale page, nothing to say",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "findings": {
+        "freshness": []
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "two stale pages are listed",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "findings": {
+        "freshness": [
+          {
+            "path": "docs/a.md",
+            "line": 2,
+            "message": "last reviewed 2020-01-01, more than 180 days ago",
+            "level": "warning"
+          },
+          {
+            "path": "docs/b.md",
+            "line": 2,
+            "message": "last reviewed 2020-01-01, more than 180 days ago",
+            "level": "warning"
+          }
+        ]
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "an error that is not a stale page is not listed",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "findings": {
+        "freshness": [
+          {
+            "path": "docs/a.md",
+            "line": 2,
+            "message": "last-reviewed is not a date: x",
+            "level": "error"
+          }
+        ]
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "no findings given at all is quiet",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null
+    },
+    "remind": false
+  },
+  {
+    "name": "another check's findings are not read",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "findings": {
+        "links": [
+          {
+            "path": "docs/a.md",
+            "line": 2,
+            "message": "last reviewed 2020-01-01, more than 180 days ago",
+            "level": "warning"
+          }
+        ]
+      }
+    },
+    "remind": false
+  }
+]

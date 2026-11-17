@@ -1,0 +1,60 @@
+[
+  {
+    "name": "a pin three commits behind is named",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "pins": [
+        {
+          "path": "src/lib",
+          "branch": "main",
+          "behind": 3
+        }
+      ]
+    },
+    "remind": true
+  },
+  {
+    "name": "a current pin is quiet",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "pins": [
+        {
+          "path": "src/lib",
+          "branch": "main",
+          "behind": 0
+        }
+      ]
+    },
+    "remind": false
+  },
+  {
+    "name": "an unreachable upstream is quiet",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "pins": [
+        {
+          "path": "src/lib",
+          "branch": null,
+          "behind": null
+        }
+      ]
+    },
+    "remind": false
+  },
+  {
+    "name": "no pinned repository is quiet",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "pins": []
+    },
+    "remind": false
+  }
+]

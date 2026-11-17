@@ -112,6 +112,19 @@
         "claude-code": ".mcp.json",
         "codex": ".codex/config.toml"
       }
+    },
+    {
+      "use": "stale_pages",
+      "why": "The commit check fails only a stale page the commit edits; the rest stay out of sight until a session starts and is told.",
+      "part": "freshness"
+    },
+    {
+      "use": "stale_pins",
+      "why": "A session can start work on a pinned repository that is behind its upstream without knowing."
+    },
+    {
+      "use": "pin_on_default",
+      "why": "A pin on a commit the upstream never merged cannot be checked out by anyone else, and no other gate notices."
     }
   ]
 }
