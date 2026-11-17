@@ -338,7 +338,17 @@ Merged in [#18](https://github.com/ryantornberg/agent-ready-workspace/pull/18). 
 - verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26). Live after the merge, an edit to a file under `src/orders-api` returned the rule page.
 - verified: the commit check still starts three git processes; the lines a commit adds come from its own batch read.
 
+### Slice 6, 2026-11-16
+
+Merged in [#19](https://github.com/ryantornberg/agent-ready-workspace/pull/19). The report is in the [milestone record](../milestones/m2.md#slice-6-contract-index-and-the-closing-recording).
+
+- verified: criterion 37 holds. 40, 19 and 0 of 45 runs passed every grader; guided against two-line, one-sided Fisher exact p = 2.5e-06. Guided beats bare in each case and two-line in nightly-job, big-report and pooled, as slice 0's recording did.
+- verified: the guided arm fell from slice 0's 45 of 45 to 40 (p = 0.028 for the drop). Four of its five failures were habits; no run created a worktree.
+- verified: the instructions check ran on every changed contract and index line before the recording; four findings were fixed, two declined with reasons.
+- verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26). 140 of 150 agent runs used; the deny list and `leaks()` passed on every transcript.
+- inferred: the drop may come from the longer index drawing attention from the playbook's test-first step, or from chance. One recording cannot tell them apart.
+
 ### Where the plan stands, 2026-11-16
 
-Slices 0 to 5 and the walled reader are merged. Slice 6, the closing recording, is next: 135 agent runs, which did not fit in the session that built slices 0 to 5 (144 of its 150 used). The fresh-session red team, the attack scripts and sign-off follow slice 6.
+Slices 0 to 6 and the walled reader are merged. The fresh-session red team, the attack scripts and sign-off are next.
 
