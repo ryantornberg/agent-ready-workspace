@@ -3057,6 +3057,16 @@ class LeaseTests(Folder):
                 self.assertEqual(self.end(tool, f"{tool}-1")[0], 0)
                 self.assertIsNone(self.lease(), "session end releases the holder's lease")
 
+    def test_an_edit_another_hook_refuses_takes_no_lease(self):
+        self.workspace({"use": "shelved", "paths": ["src/old"]}, {"use": "lease"})
+        self.write("src/old/legacy.cs", "class L { }\n")
+        self.git("add", "src/old/legacy.cs", "workspace.json", "parts")
+        self.git("commit", "-q", "-m", "shelved")
+        code, output = self.edit(self.root / "src/old/legacy.cs", "claude-code", "me", {"CLAUDE_PID": str(os.getpid())})
+        self.assertEqual(code, 2, output)
+        self.assertIn("shelved", output)
+        self.assertIsNone(self.lease(), "a refused edit takes no lease")
+
     def test_an_edit_needing_no_lease_passes_and_takes_none(self):
         """Criterion 31, and the negative controls."""
         self.hold()
@@ -3256,18 +3266,25 @@ class RepositoryTests(unittest.TestCase):
                 self.assertEqual(errors, [], part.name)
 
 
-def _this_repositorys_ledger():
-    file = ROOT / ".git" / "ws-ledger"
+_COMMON = pathlib.Path(subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                                     capture_output=True, text=True).stdout.strip() or ROOT / ".git")
+
+
+def _this_repositorys(name):
+    file = (ROOT / ".git" if name == "ws-ledger" else _COMMON) / name     # the ledger is per working copy; the lease is shared
     return file.read_bytes() if file.is_file() else None
 
 
-_LEDGER_BEFORE = _this_repositorys_ledger()
+_LEDGER_BEFORE = _this_repositorys("ws-ledger")
+_LEASE_BEFORE = _this_repositorys("ws-lease.json")
 
 
 def tearDownModule():
-    # No test may open or change the edit ledger of the repository the tests run in.
-    if _this_repositorys_ledger() != _LEDGER_BEFORE:
+    # No test may open or change the edit ledger, or the writing-session lease, of the repository the tests run in.
+    if _this_repositorys("ws-ledger") != _LEDGER_BEFORE:
         raise AssertionError("a test changed this repository's edit ledger, .git/ws-ledger")
+    if _this_repositorys("ws-lease.json") != _LEASE_BEFORE:
+        raise AssertionError("a test changed this repository's writing-session lease, .git/ws-lease.json")
 
 
 if __name__ == "__main__":
