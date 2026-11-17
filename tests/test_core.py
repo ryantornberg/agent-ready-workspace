@@ -2840,7 +2840,7 @@ class PinTests(Folder):
 
     def test_an_unreachable_upstream_or_a_missing_checkout_is_quiet(self):
         self.upstream_commit("2\n")
-        shutil.rmtree(self.upstream)
+        self.upstream.rename(self.upstream.with_name("gone.git"))   # git's objects are read-only on Windows: move, not delete
         self.assertEqual(self.start(), (0, ""))
         shutil.rmtree(self.root / "src/lib")
         (self.root / "src/lib").mkdir()
@@ -2866,7 +2866,7 @@ class PinTests(Folder):
     def test_an_unreachable_upstream_warns_and_passes(self):
         side = self.upstream_commit("side\n", branch="side")
         self.stage_pin(side)
-        shutil.rmtree(self.upstream)
+        self.upstream.rename(self.upstream.with_name("gone.git"))
         code, output = self.ws("check", "--staged")
         self.assertEqual(code, 0, output)
         self.assertIn("warning", output)
