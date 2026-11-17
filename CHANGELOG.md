@@ -10,6 +10,8 @@ What changed in each version, for someone deciding whether to take it. The [mile
 - `eval_record` needs 40 or more runs in every arm, pooled across the cases, before it compares the guided arm with the two-line arm.
 - Git ignores `.claude/worktrees/`.
 - The eval was recorded again on 2026-11-16, 135 runs on `claude-haiku-5-5`: 45, 19 and 0 of 45 passed every grader (95% intervals 92% to 100%, 29% to 57%, 0% to 8%); guided against two-line, one-sided Fisher exact p = 8.4e-11.
+- `INDEX.md` routes what M2 added: the browser rule, decisions 0004 and 0005, the lease and worktrees, session-start notices, rule pages, the doc checks, and the push and admin-merge refusals. `AGENTS.md` gains one trap: a session refused because another holds the main working copy works in a worktree.
+- The eval was recorded again after those edits, on 2026-11-16, 135 runs on `claude-haiku-5-5`: 40, 19 and 0 of 45 passed every grader (95% intervals 77% to 95%, 29% to 57%, 0% to 8%); guided against two-line, one-sided Fisher exact p = 2.5e-06.
 
 **Added:**
 

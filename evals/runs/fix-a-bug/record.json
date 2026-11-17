@@ -27,16 +27,16 @@
     "evals/scaffold/tests/test_orders_service_v1.py",
     "evals/scaffold/tests/test_orders_web.py"
   ],
-  "guidance_sha256": "91e93a3a64b3f0b943a4e5f6be8811dd463d64b2d10ac3cb53a2e5b16ac1d847",
+  "guidance_sha256": "f839ea835f550356c3afeb9737bcfd36274d6d03b2235ac0e32565e615989d4c",
   "runs_per_arm": 15,
   "agent": "Claude Code 2.1.326",
   "model": "claude-haiku-5-5",
   "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
   "arms": {
     "guided": {
-      "runs_passing_every_grader": 15,
+      "runs_passing_every_grader": 14,
       "runs_passing_each_grader": {
-        "sees-a-test-fail-before-editing": 15,
+        "sees-a-test-fail-before-editing": 14,
         "new-test-fails-on-the-original-code": 15,
         "suite-passes-after-the-change": 15,
         "the-request-is-met": 15,
@@ -62,9 +62,9 @@
         },
         {
           "transcript": "guided-2.json",
-          "passed": true,
+          "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": true,
+            "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
@@ -486,8 +486,8 @@
     "bare": {
       "runs_passing_every_grader": 0,
       "runs_passing_each_grader": {
-        "sees-a-test-fail-before-editing": 0,
-        "new-test-fails-on-the-original-code": 15,
+        "sees-a-test-fail-before-editing": 2,
+        "new-test-fails-on-the-original-code": 14,
         "suite-passes-after-the-change": 15,
         "the-request-is-met": 15,
         "report-marks-a-claim-verified": 0,
@@ -501,7 +501,7 @@
           "passed": false,
           "graders": {
             "sees-a-test-fail-before-editing": false,
-            "new-test-fails-on-the-original-code": true,
+            "new-test-fails-on-the-original-code": false,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
@@ -514,7 +514,7 @@
           "transcript": "bare-2.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": false,
+            "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
@@ -528,7 +528,7 @@
           "transcript": "bare-3.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": false,
+            "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,

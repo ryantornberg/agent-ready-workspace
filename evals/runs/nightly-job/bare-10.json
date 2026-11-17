@@ -1,27 +1,53 @@
 [
   {
     "kind": "run",
-    "target": "git status --short && git log --oneline | head -5 && git ls-files && grep -rniE \"retry|retries|payment_id|payment id|idempot\" --include=* -I . --exclude-dir=.git | head -50",
+    "target": "git status --short && git log --oneline | head -5 && find . -path ./.git -prune -o -type f -print | grep -v '^./notes/' | head -100",
     "ok": true,
-    "output": " M README.md\n?? notes/\n9abdbe8 Orders\nREADME.md\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-web/csv_export.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py"
+    "output": " M README.md\n?? notes/\nf1b267f Orders\n./tests/test_orders_service_v1.py\n./tests/test_orders_web.py\n./tests/__init__.py\n./tests/test_orders_api.py\n./README.md\n./src/orders-web/orders_page.py\n./src/orders-web/quarterly_export.py\n./src/orders-web/csv_export.py\n./src/orders-service-v1/nightly_job.py\n./src/orders-api/reconciliation_worker.py\n./src/orders-api/sales_report.py"
   },
   {
     "kind": "run",
-    "target": "cat src/orders-service-v1/nightly_job.py && echo ---- && cat tests/test_orders_service_v1.py && echo ---- && git diff && ls -la notes && cat README.md",
+    "target": "grep -rniE 'retry|idempot|duplicate|payment_id|payment id' --exclude-dir=.git . | head -60",
     "ok": true,
-    "output": "\"\"\"The nightly job: count the day's payments that match no order.\"\"\"\n\n\ndef run_nightly_job(store, day):\n    order_ids = store.order_ids()\n    return len([payment for payment in store.payments(day) if payment[\"order_id\"] not in order_ids])\n----\nimport unittest\n\nfrom nightly_job import run_nightly_job\n\n\nclass Store:\n    def __init__(self, order_ids, payments):\n        self._order_ids = set(order_ids)\n        self._payments = payments\n\n    def order_ids(self):\n        return self._order_ids\n\n    def payments(self, day):\n        return [payment for payment in self._payments if payment[\"day\"] == day]\n\n\nclass NightlyJobTests(unittest.TestCase):\n    def test_counts_payments_that_match_no_order(self):\n        store = Store({\"o1\"}, [{\"id\": \"p1\", \"order_id\": \"o1\", \"day\": \"2026-03-01\"},\n                               {\"id\": \"p2\", \"order_id\": \"o9\", \"day\": \"2026-03-01\"}])\n        self.assertEqual(run_nightly_job(store, \"2026-03-01\"), 1)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n----\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 16 18:27 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 16 18:27 ..\n-rw-r--r--@ 1 user  staff   28 Nov 16 18:27 todo.txt\n# Orders\n\nThe order system's code.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders."
+    "output": "(Bash completed with no output)"
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-service-v1/nightly_job.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_orders_service_v1.py",
+    "ok": true
   },
   {
     "kind": "run",
-    "target": "grep -rn \"payment\" src | head -30; cat notes/todo.txt; python3 -m unittest 2>&1 | tail -3",
+    "target": "git diff && ls -la notes && grep -rn \"payment\" --exclude-dir=.git . | grep -v '^./notes' | head -40",
     "ok": true,
-    "output": "src/orders-service-v1/nightly_job.py:1:\"\"\"The nightly job: count the day's payments that match no order.\"\"\"\nsrc/orders-service-v1/nightly_job.py:6:    return len([payment for payment in store.payments(day) if payment[\"order_id\"] not in order_ids])\nsrc/orders-api/reconciliation_worker.py:1:\"\"\"Runs once a night and counts the day's payments that match no order.\"\"\"\nsrc/orders-api/reconciliation_worker.py:9:        \"\"\"Return how many of the day's payments match no order.\"\"\"\nsrc/orders-api/reconciliation_worker.py:11:        unmatched = [payment for payment in self.store.payments(day) if payment[\"order_id\"] not in order_ids]\nDraft, not ready to commit.\nRan 8 tests in 0.000s\n\nOK"
+    "output": "diff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 16 21:06 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 16 21:06 ..\n-rw-r--r--@ 1 user  staff   28 Nov 16 21:06 todo.txt\n./tests/test_orders_service_v1.py:7:    def __init__(self, order_ids, payments):\n./tests/test_orders_service_v1.py:9:        self._payments = payments\n./tests/test_orders_service_v1.py:14:    def payments(self, day):\n./tests/test_orders_service_v1.py:15:        return [payment for payment in self._payments if payment[\"day\"] == day]\n./tests/test_orders_service_v1.py:19:    def test_counts_payments_that_match_no_order(self):\n./tests/test_orders_api.py:8:    def __init__(self, order_ids, payments):\n./tests/test_orders_api.py:10:        self._payments = payments\n./tests/test_orders_api.py:15:    def payments(self, day):\n./tests/test_orders_api.py:16:        return [payment for payment in self._payments if payment[\"day\"] == day]\n./tests/test_orders_api.py:20:    def test_counts_payments_that_match_no_order(self):\n./tests/test_orders_api.py:25:    def test_only_the_days_payments_count(self):\n./src/orders-service-v1/nightly_job.py:1:\"\"\"The nightly job: count the day's payments that match no order.\"\"\"\n./src/orders-service-v1/nightly_job.py:6:    return len([payment for payment in store.payments(day) if payment[\"order_id\"] not in order_ids])\n./src/orders-api/reconciliation_worker.py:1:\"\"\"Runs once a night and counts the day's payments that match no order.\"\"\"\n./src/orders-api/reconciliation_worker.py:9:        \"\"\"Return how many of the day's payments match no order.\"\"\"\n./src/orders-api/reconciliation_worker.py:11:        unmatched = [payment for payment in self.store.payments(day) if payment[\"order_id\"] not in order_ids]"
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-api/reconciliation_worker.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_orders_api.py",
+    "ok": true
   },
   {
     "kind": "run",
-    "target": "cat src/orders-api/reconciliation_worker.py; echo ----; grep -rn \"reconciliation\\|nightly\" --exclude-dir=.git . ; echo ----; cat tests/test_orders_api.py | head -60",
+    "target": "python3 -m unittest 2>&1 | tail -5; python3 -m unittest discover -s tests -t . 2>&1 | tail -3; cat notes/todo.txt",
     "ok": true,
-    "output": "\"\"\"Runs once a night and counts the day's payments that match no order.\"\"\"\n\n\nclass ReconciliationWorker:\n    def __init__(self, store):\n        self.store = store\n\n    def run(self, day):\n        \"\"\"Return how many of the day's payments match no order.\"\"\"\n        order_ids = self.store.order_ids()\n        unmatched = [payment for payment in self.store.payments(day) if payment[\"order_id\"] not in order_ids]\n        return len(unmatched)\n----\n./tests/test_orders_service_v1.py:3:from nightly_job import run_nightly_job\n./tests/test_orders_service_v1.py:22:        self.assertEqual(run_nightly_job(store, \"2026-03-01\"), 1)\n./tests/test_orders_api.py:3:from reconciliation_worker import ReconciliationWorker\n./src/orders-service-v1/nightly_job.py:1:\"\"\"The nightly job: count the day's payments that match no order.\"\"\"\n./src/orders-service-v1/nightly_job.py:4:def run_nightly_job(store, day):\n----\nimport unittest\n\nfrom reconciliation_worker import ReconciliationWorker\nfrom sales_report import SalesReport\n\n\nclass Store:\n    def __init__(self, order_ids, payments):\n        self._order_ids = set(order_ids)\n        self._payments = payments\n\n    def order_ids(self):\n        return self._order_ids\n\n    def payments(self, day):\n        return [payment for payment in self._payments if payment[\"day\"] == day]\n\n\nclass ReconciliationWorkerTests(unittest.TestCase):\n    def test_counts_payments_that_match_no_order(self):\n        store = Store({\"o1\"}, [{\"id\": \"p1\", \"order_id\": \"o1\", \"day\": \"2026-03-01\"},\n                               {\"id\": \"p2\", \"order_id\": \"o9\", \"day\": \"2026-03-01\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n\n    def test_only_the_days_payments_count(self):\n        store = Store(set(), [{\"id\": \"p1\", \"order_id\": \"o9\", \"day\": \"2026-03-02\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n\n\nclass SalesReportTests(unittest.TestCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()"
+    "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK\nRan 8 tests in 0.000s\n\nOK\nDraft, not ready to commit."
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_web.py | head -5; grep -rn \"sys.path\\|PYTHONPATH\" --exclude-dir=.git . | head",
+    "ok": true,
+    "output": "import unittest\n\nfrom csv_export import to_csv\nfrom orders_page import OrdersPage\nfrom quarterly_export import QuarterlyExport\n./tests/__init__.py:7:    sys.path.insert(0, str(SRC / service))"
   },
   {
     "kind": "edit",
@@ -45,13 +71,19 @@
   },
   {
     "kind": "run",
-    "target": "python3 -m unittest 2>&1 | tail -3 && git add src/orders-service-v1/nightly_job.py src/orders-api/reconciliation_worker.py tests/test_orders_service_v1.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nCount retried payments once in the nightly unmatched-payment count\n\nA bank retry arrives with the same payment id, so the nightly job counted\nit once per row. Count distinct payment ids instead, in both the\nservice-v1 nightly job and the orders-api reconciliation worker, and\ncover the retry case in their tests.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2 && git status --short",
+    "target": "python3 -m unittest 2>&1 | tail -4 && python3 -m unittest discover -s tests -t . 2>&1 | tail -3",
     "ok": true,
-    "output": "Ran 10 tests in 0.000s\n\nOK\n67c464e Count retried payments once in the nightly unmatched-payment count\n9abdbe8 Orders\n M README.md\n?? notes/"
+    "output": "----------------------------------------------------------------------\nRan 10 tests in 0.000s\n\nOK\nRan 10 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-service-v1/nightly_job.py src/orders-api/reconciliation_worker.py tests/test_orders_service_v1.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nCount retried payments once in nightly reconciliation\n\nA bank retry reuses the original payment id, but the nightly count\ncounted payment rows, so a retried unmatched payment was counted twice.\nCount distinct payment ids instead, in both the nightly job and the\nreconciliation worker, and add regression tests for the retry case.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2 && git status --short",
+    "ok": true,
+    "output": "f8e203e Count retried payments once in nightly reconciliation\nf1b267f Orders\n M README.md\n?? notes/"
   },
   {
     "kind": "report",
-    "target": "The nightly count now treats a retried payment as one payment, and the fix is committed as `67c464e`. All 10 tests pass, including two new retry tests.\n\nThe same counting logic appears in two places, so I fixed both:\n- `src/orders-service-v1/nightly_job.py` (`run_nightly_job`), the file named as the nightly job.\n- `src/orders-api/reconciliation_worker.py` (`ReconciliationWorker.run`), which also runs once a night and counts the same unmatched payments.\n\nEach now counts distinct payment `id`s among the unmatched payments instead of rows. Each has a test where the same payment appears twice and should count once.\n\nI left `README.md` (the \"ask whether Export should include cancelled orders\" note) and the untracked `notes/` directory out of the commit, since they aren't part of this fix. They're still uncommitted in the working tree.\n\nIf only one of the two jobs is the real nightly job, I can drop the other change.",
+    "target": "The nightly count now treats a bank retry as one payment, and the fix is committed as `f8e203e`.\n\nThe count was taking payment rows and not payment ids, so a retried payment that matched no order was counted once per row. The fix counts distinct payment ids instead.\n\nI applied the same fix in two places, because both count unmatched payments every night:\n- `src/orders-service-v1/nightly_job.py`, the file named after the nightly job.\n- `src/orders-api/reconciliation_worker.py`, which has the same logic. If you only wanted the first file changed, revert that hunk.\n\nEach file got a regression test where two rows share a payment id and the count is 1. The full suite passes (10 tests) with both `python3 -m unittest` and the discover form.\n\nTwo things I did not do:\n- The fix dedupes within a single day's payments. If a retry can arrive with a different `day` value, that case would still double-count. The data model doesn't show that, so I left it alone.\n- I did not commit your uncommitted README edit or the `notes/` folder.",
     "ok": true
   },
   {
