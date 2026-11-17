@@ -6,7 +6,7 @@ The commit check reads the staged manifest, parts and cases. A part an older man
 used, or be listed under "retired" with a reason: the last commit's manifest decides locally, and the base
 commit's manifest in CI.
 
-The events are before-shell, before-edit and before-handoff. A hook reads the workspace's versioned event
+The events are before-shell, before-edit, before-handoff, session-start and session-end. A hook reads the workspace's versioned event
 shape, or one agent tool's payload through that tool's adapter (wslib/events.py), and refuses anything else.
 A hook with MODE = "remind" never refuses: the agent is shown its reason and the call goes ahead.
 
@@ -20,6 +20,12 @@ ref pushed, the parts and the manifest come from the remote's current tip, not f
 cannot weaken the check that judges it. A push whose range cannot be listed, or whose remote tip holds no
 readable manifest, is refused when it goes to main.
 
+A session hook only reminds, and a session start or end never fails: on any error the runner prints
+nothing and exits 0. Before the session hooks run, the runner adds the facts they declare in NEEDS:
+"findings", the findings of the check each names in its config "part", run on the session's own working
+copy; and "pins", for each pinned repository there, how far its checkout is behind its upstream's
+default branch. See docs/decisions/0004-the-hook-contract.md.
+
 Exit codes: 0 clean; 1 a check found an error or a case failed; 2 a hook refused, or the setup is
 wrong. A hook that cannot decide exits 2 as well: it fails closed.
 """
@@ -31,6 +37,7 @@ import sys
 
 from . import VERSION
 from . import events
+from . import gitcall
 from . import ledger as ledgers
 from . import parts as partlib
 from . import snapshot as snapshots
@@ -217,7 +224,55 @@ def command_check(root, args):
     return 1 if errors else 0
 
 
+def session_facts(root, hooks, event):
+    """The facts the session hooks declare in NEEDS, worked out on the working copy the session runs in."""
+    found = ledgers.working_copy(pathlib.Path(event["cwd"]).resolve() / "probe",
+                                 ledgers.common_dir(ledgers.git_dir(root) or root))
+    top = found[0] if found else root
+    needs = {need for part in hooks for need in getattr(part.module, "NEEDS", ())}
+    facts = {}
+    tree = snapshots.Tree(top) if needs else None
+    if "findings" in needs:
+        manifest = partlib.load_manifest(root)
+        facts["findings"] = {}
+        for name in {part.config.get("part") for part in hooks if part.config.get("part")}:
+            entry = next((e for e in manifest["parts"] if e.get("use") == name), None)
+            if entry is not None:
+                check = partlib.load(root, entry, tiers=manifest.get("tiers"))
+                facts["findings"][name] = check.run(tree) if check.kind == "check" else []
+    if "pins" in needs:
+        facts["pins"] = []
+        for path in sorted(tree.repositories):
+            behind = gitcall.behind(top / path)
+            facts["pins"].append({"path": path, "branch": behind[0] if behind else None,
+                                  "behind": behind[1] if behind else None})
+    return facts
+
+
+def command_session(root, args):
+    """session-start and session-end: run the session hooks, show their reminders, and never fail."""
+    try:
+        manifest = partlib.load_manifest(root, hook=True)
+        hooks = partlib.load_hooks(root, args.event, manifest)
+        stream = getattr(sys.stdin, "buffer", sys.stdin)
+        found, tool, _ = events.read_call(root, args.event, stream.read(), args.tool)
+        notes = []
+        for event in found:
+            event = {**event, **session_facts(root, hooks, event)}
+            for part in hooks:
+                reason = part.decide(event)
+                if reason:
+                    notes.append(reason)
+        if notes:
+            print(events.remind(tool, "\n\n".join(dict.fromkeys(notes)), args.event))
+    except Exception:      # a session start or end is never refused, and never shows a traceback
+        pass
+    return 0
+
+
 def command_hook(root, args):
+    if args.event in partlib.SESSION_EVENTS:
+        return command_session(root, args)
     if args.event not in partlib.EVENTS:
         raise partlib.PartError(f"unknown event {args.event!r}; the events are {partlib.EVENTS}")
     try:
@@ -242,7 +297,7 @@ def command_hook(root, args):
     reminders = list(dict.fromkeys(reminders))
     if args.event == "before-edit":
         for event in found:
-            ledgers.record(root, event["path"])   # cannot record: refused, so no edit escapes the commit check
+            ledgers.record(root, event["absolute"])   # in the ledger of the working copy that holds it
     if reminders and args.event == "before-shell" and cwd:
         # The command may stage files this session did not write. The commit check compares only while a ledger is
         # open, so open it, even empty, when the working copy has uncommitted changes: an agent that wrote files only
@@ -309,6 +364,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     root = pathlib.Path(args.root).resolve()
+    if args.command == "hook" and args.event in partlib.SESSION_EVENTS:
+        return command_session(root, args)      # never fails, so not under the error handling below
     try:
         return {"list": command_list, "selftest": command_selftest, "check": command_check,
                 "hook": command_hook, "ledger": command_ledger}[args.command](root, args)

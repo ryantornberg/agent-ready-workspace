@@ -1,0 +1,93 @@
+{
+  "what": "What Claude Code and Codex CLI send a hook at session start and session end, from one recorded run of each in a scratch clone of the m2/slice-3 branch, for criteria 13 and 36 of the M2 plan. A second hook, given on the command line, appended each payload and the hook's parent processes; the clone's own wiring ran as committed. Paths are redacted.",
+  "date": "2026-11-16",
+  "setup": [
+    "git clone --branch m2/slice-3 of this repository into /scratch/ws; git config core.hooksPath .githooks",
+    "docs/stale-for-the-record.md added, untracked, with last-reviewed 2020-01-01, so the stale-page notice has something to say"
+  ],
+  "runs": {
+    "claude-code": {
+      "tool": "Claude Code 2.1.326",
+      "command": "claude -p \"If your context names any page past its review date, reply with that page's path; otherwise reply: none\" --model haiku --max-turns 1 --settings capture.json --output-format stream-json --verbose",
+      "reply": "docs/stale-for-the-record.md",
+      "notice": {
+        "hook_event": "SessionStart",
+        "outcome": "success",
+        "exit_code": 0,
+        "output": {
+          "hookSpecificOutput": {
+            "hookEventName": "SessionStart",
+            "additionalContext": "These pages are past their review date. If you edit one, review the whole page first and move its last-reviewed date; the commit check refuses the edit otherwise:\n- docs/stale-for-the-record.md"
+          }
+        }
+      }
+    },
+    "codex": {
+      "tool": "codex-cli 0.169.0",
+      "command": "codex exec --ephemeral --json --dangerously-bypass-hook-trust -s read-only -m gpt-6-luna -c model_reasoning_effort=\"low\" -c 'hooks.SessionStart=[capture]' -c 'hooks.SessionEnd=[capture]' \"...\"",
+      "reply": "1. None.\n2. No.",
+      "note": "Codex reported the project's own configuration as untrusted and did not load it, so the clone's .codex/hooks.json did not run; only the capture hook given on the command line did. The payloads below are what Codex sends any SessionStart and SessionEnd hook."
+    }
+  },
+  "calls": [
+    {
+      "tool": "claude-code",
+      "payload": {
+        "session_id": "93364aaf-2096-47ee-aacd-1ecb0e51b095",
+        "transcript_path": "<the tool's transcript file>",
+        "cwd": "/scratch/ws",
+        "hook_event_name": "SessionStart",
+        "source": "startup"
+      },
+      "hook_parents": [
+        "sh",
+        "claude"
+      ]
+    },
+    {
+      "tool": "claude-code",
+      "payload": {
+        "session_id": "93364aaf-2096-47ee-aacd-1ecb0e51b095",
+        "transcript_path": "<the tool's transcript file>",
+        "cwd": "/scratch/ws",
+        "prompt_id": "201ea685-a3c2-4f45-8c62-0d16a599e5e8",
+        "hook_event_name": "SessionEnd",
+        "reason": "other"
+      },
+      "hook_parents": [
+        "sh",
+        "claude"
+      ]
+    },
+    {
+      "tool": "codex",
+      "payload": {
+        "session_id": "01a1e762-a597-7652-a33e-3f4ec4b95441",
+        "transcript_path": "<the tool's transcript file>",
+        "cwd": "/scratch/ws",
+        "hook_event_name": "SessionStart",
+        "model": "gpt-6-luna",
+        "permission_mode": "bypassPermissions",
+        "source": "startup"
+      },
+      "hook_parents": [
+        "sh",
+        "codex"
+      ]
+    },
+    {
+      "tool": "codex",
+      "payload": {
+        "session_id": "01a1e762-a597-7652-a33e-3f4ec4b95441",
+        "transcript_path": "<the tool's transcript file>",
+        "cwd": "/scratch/ws",
+        "hook_event_name": "SessionEnd",
+        "reason": "other"
+      },
+      "hook_parents": [
+        "sh",
+        "codex"
+      ]
+    }
+  ]
+}

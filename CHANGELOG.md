@@ -18,6 +18,14 @@ What changed in each version, for someone deciding whether to take it. The [mile
 - A `push` phase for checks, and `ws.py check --push REMOTE`.
 - One browser per session: `.mcp.json` and `.codex/config.toml` run the browser server pinned to `@playwright/mcp@0.0.84` with `--isolated`, the project settings turn the agent tool's browser plugin off, and the `browser_isolation` check holds all three. See `docs/browsers.md`.
 
+- Decision record 0004, the hook contract: a part reads its event, its config and a snapshot, and the engine hands in the rest; a test holds every part to it.
+- `session-start` and `session-end` events, in the workspace's shape and both tools' adapters and wiring. They never fail. Hooks on them: `stale_pages` and `stale_pins`.
+- `pin_on_default`, a check that a staged pin is on its reachable upstream's default branch.
+
+**Changed:**
+
+- A before-edit event's `path` is relative to the working copy that holds the file, a linked worktree included, and the event carries `working_copy`, `main` and `absolute`. `shelved` now refuses an edit to a shelved folder inside a worktree.
+
 **Fixed:**
 
 - `run.py` refuses a transcript holding the operator's identity written with backslashes, as a Windows path is.

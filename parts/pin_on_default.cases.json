@@ -1,0 +1,110 @@
+[
+  {
+    "name": "a pin on the default branch passes",
+    "files": {},
+    "pins": [
+      {
+        "path": "src/lib",
+        "pin": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "on",
+        "branch": "main",
+        "head": null
+      }
+    ],
+    "expect": []
+  },
+  {
+    "name": "a pin off the default branch fails, naming the pin and the branch",
+    "files": {},
+    "pins": [
+      {
+        "path": "src/lib",
+        "pin": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "off",
+        "branch": "main",
+        "head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "expect": [
+      "the pin aaaaaaa of src/lib is not on its upstream's default branch, main, so nobody else can check it out. Stage a commit that is on main. See docs/decisions/0001-pin-code-repositories.md"
+    ]
+  },
+  {
+    "name": "a pin that is the checkout's HEAD names the named-paths trap",
+    "files": {},
+    "pins": [
+      {
+        "path": "src/lib",
+        "pin": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "off",
+        "branch": "main",
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "expect": [
+      "a commit of named paths that includes the folder records the checkout"
+    ]
+  },
+  {
+    "name": "an unreachable upstream warns and passes",
+    "files": {},
+    "pins": [
+      {
+        "path": "src/lib",
+        "pin": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "unreachable",
+        "branch": "main",
+        "head": null
+      }
+    ],
+    "expect": [
+      {
+        "message": "the upstream of src/lib cannot be reached",
+        "level": "warning"
+      }
+    ]
+  },
+  {
+    "name": "a repository not checked out warns and passes",
+    "files": {},
+    "pins": [
+      {
+        "path": "src/lib",
+        "pin": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "absent",
+        "branch": null,
+        "head": null
+      }
+    ],
+    "expect": [
+      {
+        "message": "src/lib is not checked out",
+        "level": "warning"
+      }
+    ]
+  },
+  {
+    "name": "no known default branch warns and passes",
+    "files": {},
+    "pins": [
+      {
+        "path": "src/lib",
+        "pin": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "no-branch",
+        "branch": null,
+        "head": null
+      }
+    ],
+    "expect": [
+      {
+        "message": "no default branch is known",
+        "level": "warning"
+      }
+    ]
+  },
+  {
+    "name": "no pin moved, nothing to check",
+    "files": {},
+    "expect": []
+  }
+]

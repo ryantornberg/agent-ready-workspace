@@ -57,7 +57,10 @@ from . import VERSION
 from . import snapshot as snapshots
 
 KINDS = ("check", "hook")
-EVENTS = ("before-shell", "before-edit", "before-handoff")
+TOOL_EVENTS = ("before-shell", "before-edit", "before-handoff")
+SESSION_EVENTS = ("session-start", "session-end")
+EVENTS = TOOL_EVENTS + SESSION_EVENTS
+NEEDS = ("findings", "pins")   # facts a session hook may ask the runner for; see wslib/runner.py
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")
 PHASES = ("commit", "ci", "nightly", "push")
@@ -118,7 +121,7 @@ class Part:
                 if self.kind == "check":
                     memory = snapshots.Memory(case["files"], case.get("changed", ()), case.get("staged"),
                                               case.get("ledger"), case.get("replaying"), case.get("repositories", ()),
-                                              case.get("symlinks", ()), case.get("pushed", ()))
+                                              case.get("symlinks", ()), case.get("pushed", ()), case.get("pins", ()))
                     got = [(f["message"], f["level"]) for f in self.run(memory, config)]
                     want = [_expected(item) for item in case["expect"]]
                     missing = [f"{text} ({level})" for text, level in want
@@ -252,7 +255,7 @@ def _read_cases(name, kind, cases_file, text, mode="refuse"):
                                                   and isinstance(item["message"], str) and item["level"] in LEVELS)
                         for item in case["expect"])
             well_formed = well_formed and all(isinstance(case.get(key, []), list)
-                                              for key in ("staged", "ledger", "repositories", "symlinks", "pushed")) \
+                                              for key in ("staged", "ledger", "repositories", "symlinks", "pushed", "pins")) \
                 and isinstance(case.get("replaying", ""), str)
         else:
             answer, other = ("allow", "remind") if mode == "refuse" else ("remind", "allow")
@@ -302,6 +305,11 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None):
     mode = getattr(module, "MODE", "refuse")
     if kind == "hook" and mode not in MODES:
         raise PartError(f"part {name}: a hook's MODE must be one of {MODES}, not {mode!r}")
+    if kind == "hook" and event in SESSION_EVENTS and mode != "remind":
+        raise PartError(f'part {name}: a hook on {event} must set MODE = "remind": a session start or end is never refused')
+    needs = getattr(module, "NEEDS", ())
+    if not isinstance(needs, (tuple, list)) or not set(needs) <= set(NEEDS) or (needs and event not in SESSION_EVENTS):
+        raise PartError(f"part {name}: NEEDS is for session hooks, and lists some of {NEEDS}, not {needs!r}")
     phases = getattr(module, "PHASES", DEFAULT_PHASES)
     if kind == "check" and (not isinstance(phases, (tuple, list)) or not phases
                             or not all(isinstance(phase, str) and phase in PHASES for phase in phases)):

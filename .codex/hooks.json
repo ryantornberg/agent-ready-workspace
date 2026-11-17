@@ -13,6 +13,16 @@
         "matcher": "^spawn_agent$",
         "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook before-handoff --tool codex || exit 2"}]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook session-start --tool codex || exit 0"}]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook session-end --tool codex || exit 0"}]
+      }
     ]
   }
 }

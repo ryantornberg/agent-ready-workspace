@@ -11,12 +11,12 @@ sys.path.insert(0, str(ROOT))
 
 from wslib import parts as partlib  # noqa: E402
 
-NEW_PARTS = ("direct_push", "no_admin_merge", "browser_isolation")
+NEW_PARTS = ("direct_push", "no_admin_merge", "browser_isolation", "stale_pages", "stale_pins", "pin_on_default")
 
 
 def stub_of(part):
     module = types.ModuleType(f"stub_{part.name}")
-    for name in ("KIND", "EVENT", "MODE", "PHASES"):
+    for name in ("KIND", "EVENT", "MODE", "PHASES", "NEEDS"):
         if hasattr(part.module, name):
             setattr(module, name, getattr(part.module, name))
     module.run = lambda snapshot, config: []

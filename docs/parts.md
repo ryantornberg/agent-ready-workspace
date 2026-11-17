@@ -84,13 +84,17 @@ def decide(event, config):
     return None
 ```
 
-There are three events. The event a hook's `decide` gets:
+There are five events. The event a hook's `decide` gets:
 
 | Event | Fires | The event holds |
 |---|---|---|
 | `before-shell` | Before a shell command | `command`: the command line |
-| `before-edit` | Before an edit tool writes a file | `path`: relative to the workspace when the file is inside it, else absolute |
+| `before-edit` | Before an edit tool writes a file | `path`: relative to the working copy of this repository that holds the file, the main one or a linked worktree, else absolute; `working_copy`, `main` and `absolute`. See [decision 0004](decisions/0004-the-hook-contract.md). |
 | `before-handoff` | Before a task is handed to a helper session | `prompt`; and `model` and `effort` when the tool lets a task set them, `None` when left unset |
+| `session-start` | When an agent session opens | `session`, `cwd`, `tool`; and the facts the hook declares in `NEEDS` |
+| `session-end` | When an agent session closes | The same |
+
+A hook on a session event must set `MODE = "remind"`, and a session start or end never fails: on any error the runner prints nothing and exits 0. It may declare `NEEDS`, and the runner adds those facts to its event: `"findings"`, the findings of the check its config names in `"part"`, run on the session's own working copy; and `"pins"`, how far each pinned repository there is behind its upstream's default branch. A part reads nothing else from outside its event, config and snapshot; [decision 0004](decisions/0004-the-hook-contract.md) names the exceptions, and a test holds every part to it.
 
 `python3 ws.py hook <event>` reads the event as JSON on standard input and exits 2 when a hook refuses. It reads two shapes, and refuses everything else:
 
@@ -103,7 +107,7 @@ One call can carry several edits. Codex's patch tool can add, change, delete or 
 
 A hook that sets `MODE = "remind"` never refuses. When its `decide` returns a reason, the call goes ahead and the agent is shown the reason as a reminder: through the agent tool's `additionalContext`, next to the command's result, for Claude Code and Codex, or as plain text on standard output for the workspace's own shape. Use it where the real check comes later, as `no_stage_all` does before the commit. Before a part sees a path, the runner follows symbolic links, and on a case-insensitive file system it treats a differently cased path to the workspace as inside it.
 
-[.claude/settings.json](../.claude/settings.json) wires the three events into Claude Code, and [.codex/hooks.json](../.codex/hooks.json) into Codex CLI, which gives a hook no variable naming the project, so its lines find `wslib/launch.sh` from the top of the git repository. Each line calls `wslib/launch.sh`, which runs `ws.py` with the first Python 3.9 or later it finds and exits 2 when there is none, and ends in `|| exit 2`, so a missing launcher refuses too. An agent tool blocks a call only on exit 2; anything else lets it through. Codex also lets a call through when its hook times out, so its wiring sets a 30-second limit. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
+[.claude/settings.json](../.claude/settings.json) wires the five events into Claude Code, and [.codex/hooks.json](../.codex/hooks.json) into Codex CLI, which gives a hook no variable naming the project, so its lines find `wslib/launch.sh` from the top of the git repository. Each line calls `wslib/launch.sh`, which runs `ws.py` with the first Python 3.9 or later it finds and exits 2 when there is none, and ends in `|| exit 2`, so a missing launcher refuses too. An agent tool blocks a call only on exit 2; anything else lets it through. Codex also lets a call through when its hook times out, so its wiring sets a 30-second limit. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
 
 A hook call loads only the hooks for its event. It does not run any check, or any hook for the other event. So a check with a broken case cannot refuse a shell command or an edit, including the edit that repairs it. To know a part's kind without running it, the runner reads its `KIND` and `EVENT` lines. Write each as one plain line, such as `KIND = "hook"`. A part whose lines it cannot read refuses every hook call, because it might be a hook for that event. So does a missing part file, and a manifest it cannot read. Repair those from your own terminal, where the agent's hooks do not run. A hook call does not compare those lines with what the file sets when it runs; `check`, `selftest` and CI do, and refuse a part where they differ.
 
@@ -207,6 +211,9 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |
 | `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
 | `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
+| `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `freshness` run on the session's working copy. |
+| `stale_pins` | hook, session-start, reminds | Names each pinned repository whose checkout is behind its upstream's default branch. |
+| `pin_on_default` | check | A staged pin is not on its reachable upstream's default branch. An upstream it cannot reach warns. |
 | `browser_isolation` | check | The project settings do not turn the browser plugin off by name, or an agent tool's config runs the browser server without `--isolated` or at an inexact version. See [browsers](browsers.md). |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |
 | `handoff_tier` | hook, before-handoff | A delegated task names no tier on its first line, or sets a model or effort other than the manifest's binding for its tier, or leaves one unset that the tool lets it set. |

@@ -6,6 +6,8 @@ Two shapes are read, and nothing else:
       before-shell     {"version": 1, "command": "git add a.md"}
       before-edit      {"version": 1, "path": "docs/a.md"}      relative to the workspace, or absolute
       before-handoff   {"version": 1, "prompt": "Tier: worker ...", "model": "...", "effort": "..."}
+      session-start    {"version": 1, "session": "an id", "cwd": "/absolute/folder"}
+      session-end      the same
   A handoff gives "model" and "effort" only when its tool lets a task set them. No other key is allowed,
   so a misspelt field is refused instead of read as missing.
 - A known agent tool's own payload, read by that tool's adapter: `ws.py hook <event> --tool claude-code`,
@@ -24,19 +26,27 @@ destination both, and the runner refuses the whole call when any one of them is 
 
 The event a part sees:
     before-shell     {"command": text}
-    before-edit      {"path": text}   relative to the workspace when the file is inside it, else absolute.
-                                      Symbolic links are followed, and a differently cased path that names
-                                      the workspace on a case-insensitive file system counts as inside it.
+    before-edit      {"path": text, "working_copy": text or None, "main": bool, "absolute": text}
+                                      "path" is relative to the working copy of this repository that holds the
+                                      file: the main one or a linked worktree, wherever that sits. A file in no
+                                      working copy of it keeps its absolute path, and "working_copy" is None.
+                                      Symbolic links are followed, and a differently cased path that names a
+                                      working copy on a case-insensitive file system counts as inside it.
+                                      See docs/decisions/0004-the-hook-contract.md.
     before-handoff   {"prompt": text} plus "model" and "effort" when the tool exposes them; None when unset.
+    session-start    {"session": text, "cwd": absolute text, "tool": "claude-code", "codex" or None}
+    session-end      the same. The runner adds the facts a session hook declares it needs (wslib/runner.py).
 """
 import json
 import os
 import pathlib
 
-from .parts import EVENTS, PartError
+from . import ledger as ledgers
+from .parts import EVENTS, SESSION_EVENTS, PartError
 
 VERSION = 1
 FIELDS = {"before-shell": "command", "before-edit": "path", "before-handoff": "prompt"}
+SESSION_NAMES = {"session-start": "SessionStart", "session-end": "SessionEnd"}
 OPTIONAL = {"before-handoff": ("model", "effort")}
 
 # Claude Code: which tool reaches which event, and the field that holds what the hook decides on.
@@ -67,29 +77,49 @@ def _text(value, what):
 
 
 def place(root, path, base=None):
-    """A path as the parts compare it: relative to root when it is inside, else absolute. Follows symbolic links.
+    """A before-edit event's place fields for a path: see the module's docstring. Follows symbolic links.
 
     base: the folder a relative path starts from (default: root).
     """
+    absolute = _resolve(root, path, base)
+    own = ledgers.git_dir(pathlib.Path(root).resolve())
+    found = ledgers.working_copy(absolute, ledgers.common_dir(own)) if own is not None else None
+    if found is not None:
+        top, folder = found
+        within = _within(absolute, top)
+        if within is not None:
+            main = ledgers._same(folder, ledgers.common_dir(folder))
+            return {"path": within, "working_copy": str(top), "main": main, "absolute": absolute.as_posix()}
+    within = _within(absolute, pathlib.Path(root))
+    if within is not None:     # a workspace that is not a git working copy: the folder is the working copy
+        return {"path": within, "working_copy": str(root), "main": True, "absolute": absolute.as_posix()}
+    return {"path": absolute.as_posix(), "working_copy": None, "main": False, "absolute": absolute.as_posix()}
+
+
+def _within(absolute, top):
+    """absolute's path relative to top, or None. On a case-insensitive file system, asks the file system."""
+    try:
+        return absolute.relative_to(top).as_posix()
+    except ValueError:
+        pass
+    for ancestor in absolute.parents:
+        try:
+            if os.path.samefile(ancestor, top):
+                return absolute.relative_to(ancestor).as_posix()
+        except OSError:
+            continue
+    return None
+
+
+def _resolve(root, path, base=None):
+    """The absolute, link-free path, with .. removed. A file that does not exist yet resolves through its folders."""
     if "\0" in path:
         raise PartError(f"the path {path!r} holds a NUL character, which no file name can")
     try:
         candidate = pathlib.Path(path)
         if not candidate.is_absolute():
             candidate = pathlib.Path(base or root) / candidate
-        resolved = pathlib.Path(os.path.realpath(candidate))
-        try:
-            return resolved.relative_to(root).as_posix()
-        except ValueError:
-            pass
-        # On a case-insensitive file system /USERS/ME/ws is the workspace too: ask the file system, not the text.
-        for ancestor in resolved.parents:
-            try:
-                if os.path.samefile(ancestor, root):
-                    return resolved.relative_to(ancestor).as_posix()
-            except OSError:
-                continue
-        return resolved.as_posix()
+        return pathlib.Path(os.path.realpath(candidate))
     except (OSError, ValueError) as error:
         raise PartError(f"the path {path!r} cannot be placed: {error}")
 
@@ -101,19 +131,37 @@ def versioned(root, event, payload):
                         "an adapter for it")
     if type(payload["version"]) is not int or payload["version"] != VERSION:
         raise PartError(f"event version {payload['version']!r} is not one this runner reads; it reads {VERSION}")
-    field = FIELDS[event]
-    allowed = {"version", field, *OPTIONAL.get(event, ())}
+    field = FIELDS.get(event)
+    allowed = {"version", "session", "cwd"} if event in SESSION_EVENTS else {"version", field, *OPTIONAL.get(event, ())}
     unknown = sorted(set(payload) - allowed)
     if unknown:
         raise PartError(f"a {event} event has no field {unknown[0]!r}; it takes {sorted(allowed)}")
+    if event in SESSION_EVENTS:
+        return session_event(payload, "session", None)
     value = _text(payload.get(field), f'a {event} event\'s "{field}"')
     if event == "before-edit":
-        return {"path": place(root, value)}
+        return place(root, value)
     found = {field: value}
     for key in OPTIONAL.get(event, ()):
         if key in payload:
             found[key] = _text(payload[key], f'a {event} event\'s "{key}"')
     return found
+
+
+def session_event(payload, key, tool):
+    """{"session", "cwd", "tool"} from a session payload, whose session id is under key."""
+    cwd = _text(payload.get("cwd"), 'a session event\'s "cwd"')
+    if not pathlib.Path(cwd).is_absolute():
+        raise PartError(f'a session event\'s "cwd" must be an absolute folder, not {cwd!r}')
+    return {"session": _text(payload.get(key), f'a session event\'s "{key}"'), "cwd": cwd, "tool": tool}
+
+
+def tool_session(tool, event, payload):
+    """A Claude Code or Codex SessionStart or SessionEnd payload: {"hook_event_name", "session_id", "cwd", ...}."""
+    if not isinstance(payload, dict) or payload.get("hook_event_name") != SESSION_NAMES[event]:
+        raise PartError(f'this is not a {tool} {SESSION_NAMES[event]} payload: it needs '
+                        f'"hook_event_name": "{SESSION_NAMES[event]}", a "session_id" and a "cwd"')
+    return session_event(payload, "session_id", tool)
 
 
 def is_claude_code(payload):
@@ -122,6 +170,8 @@ def is_claude_code(payload):
 
 def claude_code(root, event, payload):
     """Claude Code's PreToolUse payload: {"hook_event_name": "PreToolUse", "tool_name", "tool_input", "cwd", ...}."""
+    if event in SESSION_EVENTS:
+        return tool_session("claude-code", event, payload)
     if not is_claude_code(payload):
         raise PartError('this is not a Claude Code PreToolUse payload: it needs "hook_event_name": "PreToolUse", '
                         'a "tool_name" and a "tool_input" object')
@@ -137,7 +187,7 @@ def claude_code(root, event, payload):
         base = payload.get("cwd")
         if not pathlib.Path(value).is_absolute() and not (isinstance(base, str) and pathlib.Path(base).is_absolute()):
             raise PartError(f"the {tool} tool gave a relative path and no absolute \"cwd\" to place it from")
-        return {"path": place(root, value, base)}
+        return place(root, value, base)
     found = {"prompt": value}
     for key in ("model", "effort"):   # the tool exposes both; an unset one is None, and inherits the caller's
         if given.get(key) is not None and not isinstance(given[key], str):
@@ -176,6 +226,8 @@ def codex(root, event, payload):
 
     Returns a list of events: one for a shell command, one per path for a patch.
     """
+    if event in SESSION_EVENTS:
+        return tool_session("codex", event, payload)
     if not is_tool_call(payload):
         raise PartError('this is not a Codex PreToolUse payload: it needs "hook_event_name": "PreToolUse", '
                         'a "tool_name" and a "tool_input" object')
@@ -196,7 +248,7 @@ def codex(root, event, payload):
         if not all(pathlib.PurePosixPath(p).is_absolute() or pathlib.Path(p).is_absolute() for p in paths):
             raise PartError(f"the {tool} tool gave a relative path and no absolute \"cwd\" to place it from")
         base = None
-    return [{"path": place(root, p, base)} for p in paths]
+    return [place(root, p, base) for p in paths]
 
 
 ADAPTERS = {"claude-code": claude_code, "codex": codex}
@@ -234,8 +286,9 @@ def read_call(root, event, data, tool=None):
     return found, tool, cwd if isinstance(cwd, str) and pathlib.Path(cwd).is_absolute() else None
 
 
-def remind(tool, text):
+def remind(tool, text, event="before-shell"):
     """What to print on standard output so the tool shows the agent a reminder and lets the call go ahead."""
     if tool in ("claude-code", "codex"):   # Codex reads the same reply; it ignores plain text from this hook
-        return json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": text}})
+        name = SESSION_NAMES.get(event, "PreToolUse")
+        return json.dumps({"hookSpecificOutput": {"hookEventName": name, "additionalContext": text}})
     return f"Reminder: {text}"
