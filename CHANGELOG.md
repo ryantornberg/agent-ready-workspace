@@ -2,7 +2,7 @@
 
 What changed in each version, for someone deciding whether to take it. The [milestone records](docs/milestones/m1.md) say how each change was made and checked.
 
-## Unreleased: M2, port what the work workspace learned
+## Unreleased: M2, port what the work workspace learned (signed off 2026-11-17)
 
 **Changed:**
 

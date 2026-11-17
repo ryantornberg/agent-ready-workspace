@@ -2,7 +2,7 @@
 
 What this workspace claims, what shows it, and how to check it yourself. A claim is listed only when a command, a test or a record backs it. The [milestone record](docs/milestones/m1.md) has how each was built and what went wrong on the way.
 
-Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`. CI runs the first three commands below on Linux, macOS and Windows on every pull request and every push to `main`. After the merge, [the run on `main`](https://github.com/ryantornberg/agent-ready-workspace/actions/runs/43996833124) passed on all three.
+Last run: 2026-11-17, at M2's sign-off, on `main` at `21ded4e`; the eval's fourth recording is from 2026-11-16. CI runs the first three commands below on Linux, macOS and Windows on every pull request and every push to `main`. [The run on `main`](https://github.com/ryantornberg/agent-ready-workspace/actions/runs/44147370428) passed on all three.
 
 ## The checks and hooks
 

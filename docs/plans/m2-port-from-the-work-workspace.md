@@ -348,7 +348,13 @@ Merged in [#19](https://github.com/ryantornberg/agent-ready-workspace/pull/19). 
 - verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26). 140 of 150 agent runs used; the deny list and `leaks()` passed on every transcript.
 - inferred: the drop may come from the longer index drawing attention from the playbook's test-first step, or from chance. One recording cannot tell them apart.
 
-### Where the plan stands, 2026-11-16
+### Outside checks and sign-off, 2026-11-17
 
-Slices 0 to 6 and the walled reader are merged. The fresh-session red team, the attack scripts and sign-off are next.
+The report and the triage table are in the [milestone record](../milestones/m2.md#outside-checks).
+
+- verified: a fresh red team found one blocker, a machinery file renamed away got past `direct_push`, so criterion 3 did not hold at `6d0644f`. Fixed in [#20](https://github.com/ryantornberg/agent-ready-workspace/pull/20) with seven other findings, each with a test or case that failed first; the rest are stated as limits.
+- verified: CI passed on all five jobs, on #20 and on `main` after the merge. The criteria's commands pass at `21ded4e`, and the red team's scripts, run again, show each fix holding.
+- verified: M1's attack scripts give M1's outcomes.
+- inferred: the guided arm's drop at slice 6 came from the longer index drawing it away from the playbook. M3 tests it when it gives the guided arm the pages the index routes to.
+- Signed off on 2026-11-17. The site update waits on the maintainer's read.
 
