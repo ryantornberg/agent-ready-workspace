@@ -126,6 +126,9 @@ def judge(record, arm_names, grader_ids):
         runs = given.get(arm, {}).get("runs") if isinstance(given.get(arm), dict) else None
         if not isinstance(runs, list) or len(runs) < MIN_RUNS:
             return f"the {arm} arm has {len(runs) if isinstance(runs, list) else 0} runs; it needs {MIN_RUNS} or more"
+        if isinstance(record.get("runs_per_arm"), int) and len(runs) != record["runs_per_arm"]:
+            return (f"the {arm} arm has {len(runs)} runs, but the record was made with {record['runs_per_arm']} per arm; "
+                    f"runs were added or dropped after the recording")
     if "guided" not in given or "bare" not in given:
         return "it needs a guided arm and a bare arm to compare"
     guided, bare = (passing(given[arm]["runs"], grader_ids) for arm in ("guided", "bare"))

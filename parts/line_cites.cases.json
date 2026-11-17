@@ -126,5 +126,25 @@
       ]
     },
     "expect": []
+  },
+  {
+    "name": "a link to a line with #L fails",
+    "files": {
+      "docs/a.md": "# A\n\nSee [the loop](parts/links.py#L7).\n"
+    },
+    "changed": [
+      "docs/a.md"
+    ],
+    "added": {
+      "docs/a.md": [
+        [
+          3,
+          "See [the loop](parts/links.py#L7)."
+        ]
+      ]
+    },
+    "expect": [
+      "cites parts/links.py#L7 by line number"
+    ]
   }
 ]

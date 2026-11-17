@@ -102,9 +102,12 @@ def _git_text(root, *args):
 
 
 def pushed_commits(root, local, remote):
-    """The commits a push adds, merges left out, each with its subject and paths. Raises PartError when it cannot list them."""
+    """The commits a push adds, each with its subject and paths. Raises PartError when it cannot list them.
+
+    A rename lists both its old and its new path, so a machinery file moved away is still machinery. A merge lists
+    only what it changes beyond its parents (its combined diff): what it brings in is judged by those commits."""
     span = [local] if remote == ZERO else [f"{remote}..{local}"]
-    text = _git_text(root, "log", "--no-merges", "--format=%x01%H%x02%s", "--name-only", *span, "--")
+    text = _git_text(root, "log", "--no-renames", "--cc", "--format=%x01%H%x02%s", "--name-only", *span, "--")
     if text is None:
         raise partlib.PartError(f"the commits between {remote[:7]} and {local[:7]} cannot be listed. "
                                 f"Fetch first (git fetch), then push again.")

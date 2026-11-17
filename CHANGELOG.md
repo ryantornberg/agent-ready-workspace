@@ -6,7 +6,7 @@ What changed in each version, for someone deciding whether to take it. The [mile
 
 **Changed:**
 
-- The eval harness no longer depends on the engine. `evals/grade.py` loads the graded hook's own file, and neither `grade.py` nor `run.py` imports anything from `wslib/`, so an engine change leaves the eval records current.
+- The eval harness no longer depends on the engine. `evals/grade.py` loads the graded hook's own file, and `grade.py` imports nothing from `wslib/`, so an engine change leaves the eval records current. `run.py` still reaches the engine through `parts/eval_record.py`.
 - `eval_record` needs 40 or more runs in every arm, pooled across the cases, before it compares the guided arm with the two-line arm.
 - Git ignores `.claude/worktrees/`.
 - The eval was recorded again on 2026-11-16, 135 runs on `claude-haiku-5-5`: 45, 19 and 0 of 45 passed every grader (95% intervals 92% to 100%, 29% to 57%, 0% to 8%); guided against two-line, one-sided Fisher exact p = 8.4e-11.
@@ -36,6 +36,12 @@ What changed in each version, for someone deciding whether to take it. The [mile
 **Fixed:**
 
 - `run.py` refuses a transcript holding the operator's identity written with backslashes, as a Windows path is.
+- Found by the M2 red team, each with a test that failed first:
+  - `direct_push` refused nothing when a machinery file was renamed away, or when a merge commit made a machinery change of its own. Both are now refused.
+  - The lease let a second session edit a tracked file by naming it in another case on a case-insensitive file system.
+  - Decision 0004's test blocked a list of modules and missed others that reach files or git. It now holds parts to a list of what is allowed.
+  - `browser_isolation` read `--isolated` from a TOML comment. `line_cites` missed `file#L12` links. `rule_pages` never matched a pattern on a dot folder such as `.github/**`.
+  - `eval_record` passed a record with runs dropped from an arm after the recording.
 
 ## 0.2.0, 2026-11-16: M1, make the core hold weight
 

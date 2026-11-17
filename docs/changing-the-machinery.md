@@ -1,5 +1,5 @@
 ---
-last-reviewed: 2026-11-15
+last-reviewed: 2026-11-17
 ---
 
 # Changing the machinery
@@ -41,7 +41,7 @@ Everything else is a doc. The table is the `machinery` list of the `direct_push`
 
 A branch rule on GitHub requires all five CI jobs to pass before a pull request merges to main. It does not bind the repository's owner: an owner's direct push, and `gh pr merge --admin`, both go past it, and an agent using the owner's sign-in has the same power. Two parts close those routes:
 
-- **`direct_push`, at the push.** The pre-push hook refuses a push to main that adds a commit changing a machinery path, and names each such commit with its path. A merge is judged by the commits it brings in. A doc-only push, and a push to any other branch, goes ahead. The hook reads the part and the machinery list from the remote's current tip, so a push that edits the list is judged by the list it would replace. It refuses when it cannot list the commits being pushed, so fetch first; and it refuses a push to main when the remote's tip holds no readable manifest.
+- **`direct_push`, at the push.** The pre-push hook refuses a push to main that adds a commit changing a machinery path, and names each such commit with its path. A merge is judged by the commits it brings in, and by any change the merge commit makes itself. A machinery file renamed or moved away counts as a change to its old path. A doc-only push, and a push to any other branch, goes ahead. The hook reads the part and the machinery list from the remote's current tip, so a push that edits the list is judged by the list it would replace. The engine that runs it is the working copy's own, so a commit that changes the engine is judged by the engine it brings. It refuses when it cannot list the commits being pushed, so fetch first; and it refuses a push to main when the remote's tip holds no readable manifest.
 - **`no_admin_merge`, before a shell command.** It refuses `gh pr merge` with `--admin`, in any form the command-line parser of `no_stage_all` follows. It cannot see a merge made through a raw API call, a `gh` alias or a script.
 
 A first push that creates main checks the whole history being pushed. To create main in a new repository, push once with `--no-verify`.

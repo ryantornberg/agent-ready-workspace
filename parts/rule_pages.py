@@ -82,7 +82,10 @@ def _regex(pattern):
 
 
 def matches(pattern, path):
-    return re.fullmatch(_regex(pattern.strip().lstrip("./")), path) is not None
+    pattern = pattern.strip()
+    if pattern.startswith("./"):   # only a leading "./": a dot folder such as .github keeps its dot
+        pattern = pattern[2:]
+    return re.fullmatch(_regex(pattern), path) is not None
 
 
 def decide(event, config):
