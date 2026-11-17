@@ -93,12 +93,25 @@
         ".github/",
         ".claude/settings.json",
         ".codex/hooks.json",
+        ".codex/config.toml",
+        ".mcp.json",
         "tests/"
       ]
     },
     {
       "use": "no_admin_merge",
       "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in."
+    },
+    {
+      "use": "browser_isolation",
+      "why": "Two sessions that share one browser profile collide, and the second cannot open a browser; each session gets its own, and the agent tool's own plugin stays off.",
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
     }
   ]
 }

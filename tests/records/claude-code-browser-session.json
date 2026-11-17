@@ -1,0 +1,44 @@
+{
+  "what": "The init event of one non-interactive Claude Code session started in this repository, with the committed .mcp.json and .claude/settings.json. Only the browser servers and tools are kept: every server and tool whose name holds 'playwright'.",
+  "recorded": "2026-11-16",
+  "command": "claude -p \"Reply with the single word: ready\" --model haiku --max-turns 1 --output-format stream-json --verbose",
+  "agent": "Claude Code 2.1.326",
+  "model": "claude-haiku-5-5",
+  "server_args": [
+    "@playwright/mcp@0.0.84",
+    "--isolated"
+  ],
+  "mcp_servers": [
+    {
+      "name": "playwright",
+      "status": "connected"
+    }
+  ],
+  "tools": [
+    "mcp__playwright__browser_click",
+    "mcp__playwright__browser_close",
+    "mcp__playwright__browser_console_messages",
+    "mcp__playwright__browser_drag",
+    "mcp__playwright__browser_drop",
+    "mcp__playwright__browser_emulate_media",
+    "mcp__playwright__browser_evaluate",
+    "mcp__playwright__browser_file_upload",
+    "mcp__playwright__browser_fill_form",
+    "mcp__playwright__browser_find",
+    "mcp__playwright__browser_handle_dialog",
+    "mcp__playwright__browser_hover",
+    "mcp__playwright__browser_navigate",
+    "mcp__playwright__browser_navigate_back",
+    "mcp__playwright__browser_network_request",
+    "mcp__playwright__browser_network_requests",
+    "mcp__playwright__browser_press_key",
+    "mcp__playwright__browser_resize",
+    "mcp__playwright__browser_run_code_unsafe",
+    "mcp__playwright__browser_select_option",
+    "mcp__playwright__browser_snapshot",
+    "mcp__playwright__browser_tabs",
+    "mcp__playwright__browser_take_screenshot",
+    "mcp__playwright__browser_type",
+    "mcp__playwright__browser_wait_for"
+  ]
+}

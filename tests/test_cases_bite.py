@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 from wslib import parts as partlib  # noqa: E402
 
-NEW_PARTS = ("direct_push", "no_admin_merge")
+NEW_PARTS = ("direct_push", "no_admin_merge", "browser_isolation")
 
 
 def stub_of(part):
