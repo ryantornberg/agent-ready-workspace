@@ -2,6 +2,19 @@
 
 What changed in each version, for someone deciding whether to take it. The [milestone records](docs/milestones/m1.md) say how each change was made and checked.
 
+## Unreleased: M2, port what the work workspace learned
+
+**Changed:**
+
+- The eval harness no longer depends on the engine. `evals/grade.py` loads the graded hook's own file, and neither `grade.py` nor `run.py` imports anything from `wslib/`, so an engine change leaves the eval records current.
+- `eval_record` needs 40 or more runs in every arm, pooled across the cases, before it compares the guided arm with the two-line arm.
+- Git ignores `.claude/worktrees/`.
+- The eval was recorded again on 2026-11-16, 135 runs on `claude-haiku-5-5`: 45, 19 and 0 of 45 passed every grader (95% intervals 92% to 100%, 29% to 57%, 0% to 8%); guided against two-line, one-sided Fisher exact p = 8.4e-11.
+
+**Fixed:**
+
+- `run.py` refuses a transcript holding the operator's identity written with backslashes, as a Windows path is.
+
 ## 0.2.0, 2026-11-16: M1, make the core hold weight
 
 A red team ran attacks against the first version, and several claims in the README did not survive them. Each failure became a test that failed before its fix and passes after it. [The M1 plan](docs/plans/m1-make-the-core-hold-weight.md) lists them; [EVIDENCE.md](EVIDENCE.md) says how to check each one.
