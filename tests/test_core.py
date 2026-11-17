@@ -2592,6 +2592,33 @@ class AdminMergeTests(Folder):
         return code, out.getvalue() + err.getvalue()
 
 
+class BrowserIsolationTests(unittest.TestCase):
+    """M2 slice 2: one isolated browser per session, for both agent tools (criteria 5 and 35)."""
+
+    def test_the_new_config_files_are_machinery(self):
+        manifest = json.loads((ROOT / "workspace.json").read_text(encoding="utf-8"))
+        machinery = next(p for p in manifest["parts"] if p.get("use") == "direct_push")["machinery"]
+        for name in (".mcp.json", ".codex/config.toml"):
+            self.assertIn(name, machinery)
+
+    def test_the_check_runs_on_this_repositorys_configs(self):
+        manifest = json.loads((ROOT / "workspace.json").read_text(encoding="utf-8"))
+        entry = next(p for p in manifest["parts"] if p.get("use") == "browser_isolation")
+        self.assertEqual(entry["configs"], {"claude-code": ".mcp.json", "codex": ".codex/config.toml"})
+        self.assertEqual(partlib.load(ROOT, entry).run(snapshots.Tree(ROOT)), [])
+
+    def test_a_recorded_claude_code_session_lists_the_projects_browser_tools(self):
+        """Criterion 35: replayed from tests/records/claude-code-browser-session.json."""
+        record = json.loads((ROOT / "tests/records/claude-code-browser-session.json").read_text(encoding="utf-8"))
+        servers = {s["name"]: s["status"] for s in record["mcp_servers"]}
+        self.assertEqual(servers.get("playwright"), "connected")
+        self.assertIn("mcp__playwright__browser_navigate", record["tools"])
+        self.assertFalse([t for t in record["tools"] if t.startswith("mcp__plugin_playwright")],
+                         "the plugin's own browser server is off")
+        args = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"]["playwright"]["args"]
+        self.assertEqual(record["server_args"], args, "the record was made with the config as committed")
+
+
 class DenyListTests(Folder):
     """The deny list is read from a file the environment names, so these cases cannot be data in a cases file."""
 

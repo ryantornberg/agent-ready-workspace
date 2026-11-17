@@ -1,0 +1,334 @@
+[
+  {
+    "name": "both tools' configs pinned and isolated, and the plugin off, pass",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": []
+  },
+  {
+    "name": "the plugin left out of the project settings fails, since user settings may turn it on",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      "must set enabledPlugins"
+    ]
+  },
+  {
+    "name": "the plugin turned on fails",
+    "files": {
+      ".claude/settings.json": "{\"enabledPlugins\": {\"playwright@claude-plugins-official\": true}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      "must set enabledPlugins"
+    ]
+  },
+  {
+    "name": "unreadable project settings fail, naming the file",
+    "files": {
+      ".claude/settings.json": "{not json",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".claude/settings.json is not readable JSON"
+    ]
+  },
+  {
+    "name": "a Claude Code server without --isolated fails",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".mcp.json: the server playwright runs @playwright/mcp without --isolated"
+    ]
+  },
+  {
+    "name": "latest is not an exact version",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@latest\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".mcp.json: the server playwright pins @playwright/mcp to \"latest\""
+    ]
+  },
+  {
+    "name": "a range is not an exact version",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@^0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      "pins @playwright/mcp to \"^0.0.84\""
+    ]
+  },
+  {
+    "name": "no version at all is not exact",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      "pins @playwright/mcp to no version"
+    ]
+  },
+  {
+    "name": "the Windows form, through cmd, passes",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"cmd\", \"args\": [\"/c\", \"npx\", \"-y\", \"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": []
+  },
+  {
+    "name": "a missing Claude Code config fails",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".mcp.json is missing"
+    ]
+  },
+  {
+    "name": "a Claude Code config with no browser server fails",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"other\": {\"command\": \"x\"}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".mcp.json runs no @playwright/mcp server"
+    ]
+  },
+  {
+    "name": "a malformed Claude Code config fails, naming the file",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "[",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".mcp.json is not readable JSON"
+    ]
+  },
+  {
+    "name": "a Codex server without --isolated fails",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".codex/config.toml: the server playwright runs @playwright/mcp without --isolated"
+    ]
+  },
+  {
+    "name": "a Codex server pinned to latest fails",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = 'npx'\nargs = ['@playwright/mcp@latest', '--isolated']\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".codex/config.toml: the server playwright pins @playwright/mcp to \"latest\""
+    ]
+  },
+  {
+    "name": "a Codex args array over several lines is read",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\n  \"@playwright/mcp@0.0.84\",\n  \"--isolated\",\n]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": []
+  },
+  {
+    "name": "a Codex config whose browser server sits in another table is not read as that server",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[profiles.x]\nargs = [\"@playwright/mcp@0.0.84\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".codex/config.toml runs no @playwright/mcp server"
+    ]
+  },
+  {
+    "name": "a missing Codex config fails",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      ".codex/config.toml is missing"
+    ]
+  }
+]

@@ -8,7 +8,7 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 
 | Claim | Evidence | Re-run |
 |---|---|---|
-| Every part passes its own cases, and the runner refuses one that does not. | 11 parts, 195 cases | `python3 ws.py selftest` |
+| Every part passes its own cases, and the runner refuses one that does not. | 12 parts, 212 cases | `python3 ws.py selftest` |
 | Each part added since M2 has a case that a do-nothing stub fails. | `test_cases_bite` | `python3 -m unittest tests.test_cases_bite` |
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | `FailClosedTests`: an empty event, a renamed field, a command given as a list, an upper-cased path, a symbolic link into the shelved folder, no Python on the path | `python3 -m unittest tests.test_core.FailClosedTests` |
 | A broken check cannot lock out the session that repairs it, and a manifest edit cannot switch the checks off. | `NoSelfLockTests` | `python3 -m unittest tests.test_core.NoSelfLockTests` |
@@ -16,6 +16,7 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 | The page checks cover the workspace's own pages, report a file they cannot decode, and agree between the folder and the commit. | `AdoptionPathTests` | `python3 -m unittest tests.test_core.AdoptionPathTests` |
 | The manifest names the engine's version, a reason for every part and a full tier binding. | `ShapeForGrowthTests` | `python3 -m unittest tests.test_core.ShapeForGrowthTests` |
 | A direct push to main that adds a machinery commit is refused, and so is `gh pr merge --admin`; the machinery page and the manifest hold one list. | `DirectPushTests`, against a temporary bare remote and through `git push` itself; `AdminMergeTests`; the cases of `direct_push` and `no_admin_merge` | `python3 -m unittest tests.test_core.DirectPushTests tests.test_core.AdminMergeTests` |
+| Each session gets its own browser. | Two isolated browser servers both opened a page, and two sharing a profile folder collided, the second reporting the lock (opt-in test, run 2026-11-16 on macOS with `@playwright/mcp@0.0.84`). A recorded Claude Code 2.1.326 session listed the project's server as connected, with 25 browser tools and none of the plugin's: [tests/records/claude-code-browser-session.json](tests/records/claude-code-browser-session.json). `browser_isolation`'s cases. | `WS_BROWSER_TEST=1 python3 -m unittest tests.test_browser` (needs Node and Chrome); `python3 -m unittest tests.test_core.BrowserIsolationTests` |
 | The same hooks run under Codex CLI. | One recorded run of codex-cli 0.169.0, [tests/records/codex-cli-run.json](tests/records/codex-cli-run.json), replayed by `SecondToolTests` | `python3 -m unittest tests.test_core.SecondToolTests` |
 
 ## The eval

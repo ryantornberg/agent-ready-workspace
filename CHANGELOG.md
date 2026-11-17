@@ -16,6 +16,7 @@ What changed in each version, for someone deciding whether to take it. The [mile
 - `direct_push`, a check the new pre-push hook runs: a push to main that adds a commit changing machinery is refused, and names each such commit with its path. It reads the machinery list from the remote's current tip. The machinery page's table and the manifest's list are one list, held together by a test.
 - `no_admin_merge`, a shell hook that refuses `gh pr merge --admin`.
 - A `push` phase for checks, and `ws.py check --push REMOTE`.
+- One browser per session: `.mcp.json` and `.codex/config.toml` run the browser server pinned to `@playwright/mcp@0.0.84` with `--isolated`, the project settings turn the agent tool's browser plugin off, and the `browser_isolation` check holds all three. See `docs/browsers.md`.
 
 **Fixed:**
 

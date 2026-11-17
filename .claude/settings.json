@@ -1,4 +1,5 @@
 {
+  "enabledPlugins": {"playwright@claude-plugins-official": false},
   "hooks": {
     "PreToolUse": [
       {

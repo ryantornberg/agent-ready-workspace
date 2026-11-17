@@ -1,0 +1,4 @@
+# Codex CLI's project config. The browser server runs isolated, pinned to an exact version: see docs/browsers.md.
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@0.0.84", "--isolated"]

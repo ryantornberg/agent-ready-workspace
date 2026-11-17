@@ -207,5 +207,6 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |
 | `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
 | `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
+| `browser_isolation` | check | The project settings do not turn the browser plugin off by name, or an agent tool's config runs the browser server without `--isolated` or at an inexact version. See [browsers](browsers.md). |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |
 | `handoff_tier` | hook, before-handoff | A delegated task names no tier on its first line, or sets a model or effort other than the manifest's binding for its tier, or leaves one unset that the tool lets it set. |
