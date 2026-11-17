@@ -94,7 +94,16 @@ There are five events. The event a hook's `decide` gets:
 | `session-start` | When an agent session opens | `session`, `cwd`, `tool`; and the facts the hook declares in `NEEDS` |
 | `session-end` | When an agent session closes | The same |
 
-A hook on a session event must set `MODE = "remind"`, and a session start or end never fails: on any error the runner prints nothing and exits 0. It may declare `NEEDS`, and the runner adds those facts to its event: `"findings"`, the findings of the check its config names in `"part"`, run on the session's own working copy; and `"pins"`, how far each pinned repository there is behind its upstream's default branch. A part reads nothing else from outside its event, config and snapshot; [decision 0004](decisions/0004-the-hook-contract.md) names the exceptions, and a test holds every part to it.
+A hook on a session event must set `MODE = "remind"`, and a session start or end never fails: on any error the runner prints nothing and exits 0. A hook may declare `NEEDS`, and the runner adds those facts to its event:
+
+| Event | Fact | What the runner does |
+|---|---|---|
+| `session-start` | `"findings"` | Runs the check the hook's config names in `"part"` on the session's own working copy |
+| `session-start` | `"pins"` | Fetches each pinned repository's upstream default branch and counts the commits its checkout lacks |
+| `session-start` | `"fast_forward"` | Brings the main working copy up to `origin/main` when that is safe, and gives the reason when it held back |
+| `before-edit` | `"lease"` | Takes or keeps the writing-session lease for an edit to a tracked file in the main working copy; see [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md) |
+
+While the manifest uses `lease`, the runner also releases the session's own lease at `session-end`. A part reads nothing else from outside its event, config and snapshot; [decision 0004](decisions/0004-the-hook-contract.md) names the exceptions, and a test holds every part to it.
 
 `python3 ws.py hook <event>` reads the event as JSON on standard input and exits 2 when a hook refuses. It reads two shapes, and refuses everything else:
 
@@ -214,6 +223,8 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `freshness` run on the session's working copy. |
 | `stale_pins` | hook, session-start, reminds | Names each pinned repository whose checkout is behind its upstream's default branch. |
 | `pin_on_default` | check | A staged pin is not on its reachable upstream's default branch. An upstream it cannot reach warns. |
+| `lease` | hook, before-edit | Another live agent session holds the main working copy, or the lease cannot be checked. The edit goes to a worktree instead. |
+| `fast_forward` | hook, session-start, reminds | Says why the main working copy was not brought up to `origin/main`, when it held back. |
 | `browser_isolation` | check | The project settings do not turn the browser plugin off by name, or an agent tool's config runs the browser server without `--isolated` or at an inexact version. See [browsers](browsers.md). |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |
 | `handoff_tier` | hook, before-handoff | A delegated task names no tier on its first line, or sets a model or effort other than the manifest's binding for its tier, or leaves one unset that the tool lets it set. |

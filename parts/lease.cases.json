@@ -1,0 +1,77 @@
+[
+  {
+    "name": "a lease this session took allows the edit",
+    "event": {
+      "path": "src/a.cs",
+      "main": true,
+      "working_copy": "/w",
+      "lease": {
+        "state": "taken",
+        "file": "/w/.git/ws-lease.json"
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a lease this session holds allows the edit",
+    "event": {
+      "path": "src/a.cs",
+      "main": true,
+      "working_copy": "/w",
+      "lease": {
+        "state": "mine"
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "an edit that needs no lease is allowed",
+    "event": {
+      "path": "src/a.cs",
+      "main": true,
+      "working_copy": "/w",
+      "lease": {
+        "state": "not-needed"
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "another live holder refuses, naming the worktree command",
+    "event": {
+      "path": "src/a.cs",
+      "main": true,
+      "working_copy": "/w",
+      "lease": {
+        "state": "refused",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/w/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a lease that cannot be checked refuses",
+    "event": {
+      "path": "src/a.cs",
+      "main": true,
+      "working_copy": "/w",
+      "lease": {
+        "state": "error",
+        "error": "the session has no id"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "no lease facts at all refuses",
+    "event": {
+      "path": "src/a.cs"
+    },
+    "allow": false
+  }
+]

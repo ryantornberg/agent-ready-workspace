@@ -125,6 +125,14 @@
     {
       "use": "pin_on_default",
       "why": "A pin on a commit the upstream never merged cannot be checked out by anyone else, and no other gate notices."
+    },
+    {
+      "use": "lease",
+      "why": "Two sessions in one working copy commit, reset or switch away each other's work; the first writer keeps the main copy and any other goes to a worktree."
+    },
+    {
+      "use": "fast_forward",
+      "why": "Hooks and pages run from the main working copy's files, so a fix merged by another session does nothing until the main copy is brought up to date."
     }
   ]
 }
