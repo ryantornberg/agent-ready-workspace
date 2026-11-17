@@ -269,6 +269,7 @@ The agent, 2026-11-16, at approval, on the same footing:
 6. **Round two's decided actions are part of the approved plan.** Finding 1 takes the playbooks out of M2, so "slice 6" now names the closing slice: the queued edits to `AGENTS.md` and `INDEX.md`, and one re-recording. A third draft applies round two to slices 1–6 before slice 1 starts. Slice 0 applies only the actions that are its own, listed in item 2.
 7. **Slice 0 edits neither `AGENTS.md` nor `INDEX.md`.** Nothing slice 0 changes is named there; what slices 1–5 add waits for slice 6's recording.
 8. **The descriptions stay private.** The walled reader writes them beside the private source map, not in this repository. `deny_list` blocks names, not facts about how a team or its systems work, so a public page would need the maintainer to read it first. What the builders publish still passes `deny_list`, and is generic code and pages rather than a description of the source.
+9. **Slice 1, decided while building.** The agent settings file counts as machinery as a whole, not only its hook entries. `no_admin_merge` loads the command-line parser from `no_stage_all`'s file instead of moving it, because `no_stage_all.py` is in the eval hash; slice 6, which records anyway, may move the parser to one shared place.
 
 ## Results
 
@@ -281,3 +282,18 @@ Merged in [#12](https://github.com/ryantornberg/agent-ready-workspace/pull/12). 
 - verified: CI passed on all five jobs, on the pull request and on `main` after the merge (criterion 26 for this slice).
 - verified: 139 agent runs used of the 150 allowed; the deny list and `leaks()` passed on every transcript.
 - inferred: slices 3 to 5 can now change the engine without staling the eval, since the records hash only the hook's file and the harness. Slice 3 will be the first real test of that.
+
+### Walled reader, 2026-11-16
+
+- verified: the private descriptions file holds 13 entries, one per feature slices 1 to 5 port, and no code block; its scan found no deny-listed term (criterion 29).
+- verified: the seventeen unplaced features it found are listed under "Later" and "Staying behind".
+- verified: slice 1's builder read the descriptions and opened no file of the work workspace.
+
+### Slice 1, 2026-11-16
+
+Merged in [#13](https://github.com/ryantornberg/agent-ready-workspace/pull/13). The report is in the [milestone record](../milestones/m2.md#slice-1-direct-push-and-admin-merge-refusals).
+
+- verified: criteria 3, 4, 22 (for this slice's parts), 32, 33 and 34 hold. Fourteen new tests failed at `eb567e5` and pass at the tip.
+- verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26).
+- verified: after the merge, the live shell hook refused an admin merge, and a dry-run push of a machinery commit to the real main was refused while a doc-only one went ahead.
+- inferred: the pre-push hook guards only clones whose hooks path is set; `--no-verify` skips it. The README's limits say so.
