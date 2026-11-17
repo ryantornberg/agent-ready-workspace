@@ -38,6 +38,7 @@ import sys
 from . import VERSION
 from . import events
 from . import gitcall
+from . import lease as leases
 from . import ledger as ledgers
 from . import parts as partlib
 from . import snapshot as snapshots
@@ -240,6 +241,8 @@ def session_facts(root, hooks, event):
             if entry is not None:
                 check = partlib.load(root, entry, tiers=manifest.get("tiers"))
                 facts["findings"][name] = check.run(tree) if check.kind == "check" else []
+    if "fast_forward" in needs:
+        facts["fast_forward"] = leases.fast_forward(root, event["cwd"], event.get("session"))
     if "pins" in needs:
         facts["pins"] = []
         for path in sorted(tree.repositories):
@@ -257,6 +260,9 @@ def command_session(root, args):
         stream = getattr(sys.stdin, "buffer", sys.stdin)
         found, tool, _ = events.read_call(root, args.event, stream.read(), args.tool)
         notes = []
+        if args.event == "session-end" and any(e.get("use") == "lease" for e in manifest["parts"]):
+            for event in found:
+                leases.release(root, event.get("session"))     # only this session's own lease; never raises
         for event in found:
             event = {**event, **session_facts(root, hooks, event)}
             for part in hooks:
@@ -268,6 +274,28 @@ def command_session(root, args):
     except Exception:      # a session start or end is never refused, and never shows a traceback
         pass
     return 0
+
+
+def lease_fact(root, event, tool):
+    """Take or keep the writing-session lease for an edit to a tracked file in the main working copy.
+    Any other edit needs none. See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md."""
+    if not event.get("main") or not event.get("working_copy"):
+        return {"state": "not-needed"}
+    found = leases.main_copy(root)
+    if found is None:
+        return {"state": "not-needed"}
+    is_tracked = leases.tracked(found[0], event["path"])
+    if is_tracked is False:
+        return {"state": "not-needed"}
+    pid = event.get("pid") if event.get("pid") else leases.tool_pid(tool)
+    file = str(found[1] / leases.NAME)
+    if is_tracked is None:
+        return {"state": "error", "error": "git cannot say whether the file is tracked", "file": file}
+    try:
+        state, holder = leases.acquire(root, event.get("session"), pid)
+    except (leases.LeaseError, OSError) as error:
+        return {"state": "error", "error": str(error), "file": file}
+    return {"state": state, "holder": holder, "file": file}
 
 
 def command_hook(root, args):
@@ -283,6 +311,8 @@ def command_hook(root, args):
     hooks = partlib.load_hooks(root, args.event, manifest)   # only this event's hooks: a broken check cannot lock it
     stream = getattr(sys.stdin, "buffer", sys.stdin)
     found, tool, cwd = events.read_call(root, args.event, stream.read(), args.tool)
+    if any("lease" in getattr(part.module, "NEEDS", ()) for part in hooks):
+        found = [dict(event, lease=lease_fact(root, event, tool)) for event in found]
     reminders = []
     for event in found:   # one call can edit several files: all are decided before any is recorded
         for part in hooks:

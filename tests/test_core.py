@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from unittest import mock
 
@@ -2910,6 +2911,220 @@ class SessionReplayTests(Folder):
         self.assertEqual(run["notice"]["outcome"], "success")
         self.assertIn("docs/stale-for-the-record.md", run["notice"]["output"]["hookSpecificOutput"]["additionalContext"])
         self.assertIn("docs/stale-for-the-record.md", run["reply"])
+
+
+class LeaseTests(Folder):
+    """M2 slice 4: the writing-session lease and the start-of-session fast-forward (criteria 14 to 18, and 31).
+    See decision 0005."""
+
+    def setUp(self):
+        super().setUp()
+        from wslib import lease as leases
+        self.leases = leases
+        self.workspace({"use": "lease"}, {"use": "fast_forward"})
+        self.write("src/a.cs", "class A { }\n")
+        self.git("init", "-q", "-b", "main")
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", "start")
+        scratch = tempfile.TemporaryDirectory()
+        self.addCleanup(scratch.cleanup)
+        self.scratch = pathlib.Path(scratch.name).resolve()
+        self.origin = self.scratch / "origin.git"
+        git_in(self.scratch, "init", "-q", "--bare", "-b", "main", str(self.origin))
+        self.git("remote", "add", "origin", str(self.origin))
+        self.git("push", "-q", "-u", "origin", "main")
+        self.common = self.root / ".git"
+        self.other = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"])
+        self.addCleanup(self.other.wait)
+        self.addCleanup(self.other.kill)
+        done = subprocess.Popen([sys.executable, "-c", "pass"])
+        done.wait()
+        self.dead = done.pid
+
+    def hold(self, session="other", pid=None, age=10.0):
+        lease = {"session": session, "pid": self.other.pid if pid is None else pid, "taken": time.time() - age}
+        (self.common / "ws-lease.json").write_text(json.dumps(lease), encoding="utf-8")
+        os.utime(self.common / "ws-lease.json", (time.time() - age, time.time() - age))
+
+    def lease(self):
+        return self.leases.read(self.common)[0]
+
+    def acquire(self, session="me", pid=None):
+        return self.leases.acquire(self.root, session, os.getpid() if pid is None else pid)[0]
+
+    def test_a_free_lease_is_taken_kept_and_refreshed(self):
+        self.assertEqual(self.acquire(), "taken")
+        self.assertEqual(self.acquire(), "mine")
+        self.assertEqual(self.acquire(pid=self.other.pid), "mine")
+        self.assertEqual(self.lease()["pid"], self.other.pid, "the same session under a new process refreshes it")
+
+    def test_a_live_holder_keeps_the_lease_while_the_main_copy_has_something_to_protect(self):
+        """Criterion 15: each condition refuses the takeover on its own."""
+        situations = {
+            "a tracked change": lambda: self.write("src/a.cs", "class A { int x; }\n"),
+            "an unpushed commit": lambda: (self.write("docs/b.md", "# B\n"), self.git("add", "docs/b.md"),
+                                           self.git("commit", "-q", "-m", "local")),
+            "another branch": lambda: self.git("checkout", "-q", "-b", "elsewhere"),
+            "a detached head": lambda: self.git("checkout", "-q", "--detach"),
+        }
+        for name, make in situations.items():
+            with self.subTest(name):
+                self.git("checkout", "-q", "main")
+                self.git("reset", "-q", "--hard", "origin/main")
+                make()
+                self.hold()
+                self.assertEqual(self.acquire(), "refused")
+                self.assertEqual(self.lease()["session"], "other")
+        self.git("checkout", "-q", "main")
+        self.git("reset", "-q", "--hard", "origin/main")
+        self.hold(age=1.0)
+        self.assertEqual(self.acquire(), "refused", "a lease younger than the minimum age is never taken over")
+        self.hold(age=10.0)
+        self.assertEqual(self.acquire(), "taken", "an idle main copy and an old lease: taken over")
+
+    def test_a_dead_holder_and_a_stale_corrupt_lease_are_replaced(self):
+        self.hold(pid=self.dead)
+        self.assertEqual(self.acquire(), "taken")
+        (self.common / "ws-lease.json").write_text("{half a lease", encoding="utf-8")
+        self.assertEqual(self.acquire("me2"), "refused", "a young corrupt lease may be mid-write")
+        self.assertEqual((self.common / "ws-lease.json").read_text(encoding="utf-8"), "{half a lease")
+        old = time.time() - 10
+        os.utime(self.common / "ws-lease.json", (old, old))
+        self.assertEqual(self.acquire("me2"), "taken")
+
+    def test_liveness_never_raises(self):
+        """Runs on Linux, macOS and Windows in CI."""
+        self.assertTrue(self.leases.alive(os.getpid()))
+        self.assertTrue(self.leases.alive(self.other.pid))
+        self.assertFalse(self.leases.alive(self.dead))
+        for odd in (0, -1, 2 ** 40, "x", None, 1.5):
+            self.assertFalse(self.leases.alive(odd), odd)
+
+    def test_no_identity_no_lease(self):
+        for session, pid in ((None, os.getpid()), ("", os.getpid()), ("me", None), ("me", 0)):
+            with self.subTest(session=session, pid=pid):
+                with self.assertRaises(self.leases.LeaseError):
+                    self.leases.acquire(self.root, session, pid)
+        self.assertIsNone(self.lease())
+
+    def test_release_and_query_touch_only_what_they_should(self):
+        self.hold()
+        self.assertEqual(self.leases.query(self.root)[0]["session"], "other")
+        self.assertFalse(self.leases.release(self.root, "me"))
+        self.assertEqual(self.lease()["session"], "other")
+        self.assertTrue(self.leases.release(self.root, "other"))
+        self.assertIsNone(self.lease())
+        self.assertEqual(self.leases.query(self.root), (None, False))
+        self.assertIsNone(self.lease(), "a query never takes the lease")
+
+    def test_a_race_has_exactly_one_winner(self):
+        import threading
+        results = []
+        threads = [threading.Thread(target=lambda n=n: results.append(self.acquire(f"s{n}"))) for n in range(40)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        self.assertEqual(results.count("taken"), 1, results)
+        self.assertEqual(results.count("refused"), 39)
+
+    def edit(self, path, tool, session, environ=None):
+        payload = {"claude-code": claude, "codex": codex}[tool]("Edit" if tool == "claude-code" else "apply_patch",
+                                                              **({"file_path": str(path)} if tool == "claude-code" else
+                                                                 {"cwd": str(self.root),
+                                                                  "command": f"*** Begin Patch\n*** Update File: {path}\n*** End Patch"}))
+        payload = json.dumps(dict(json.loads(payload), session_id=session))
+        with mock.patch.dict(os.environ, environ or {}):
+            return self.ws("hook", "before-edit", "--tool", tool, stdin=payload)
+
+    def end(self, tool, session):
+        payload = json.dumps({"hook_event_name": "SessionEnd", "session_id": session, "cwd": str(self.root), "reason": "exit"})
+        return self.ws("hook", "session-end", "--tool", tool, stdin=payload)
+
+    def test_each_tool_takes_keeps_and_releases_a_lease(self):
+        """Criteria 14, 16 and 18."""
+        tools = ["claude-code"] + ([] if os.name == "nt" else ["codex"])    # Codex's process id is read on POSIX only
+        for tool in tools:
+            with self.subTest(tool):
+                env = {"CLAUDE_PID": str(os.getpid())} if tool == "claude-code" else {}
+                self.assertEqual(self.edit(self.root / "src/a.cs", tool, f"{tool}-1", env)[0], 0)
+                self.assertEqual(self.lease()["session"], f"{tool}-1")
+                self.assertEqual(self.edit(self.root / "src/a.cs", tool, f"{tool}-1", env)[0], 0)
+                code, output = self.edit(self.root / "src/a.cs", "claude-code", "intruder", {"CLAUDE_PID": str(self.other.pid)})
+                self.assertEqual(code, 2, output)
+                self.assertIn("git worktree add", output)
+                self.assertIn("docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md", output)
+                self.assertEqual(self.end(tool, f"{tool}-1")[0], 0)
+                self.assertIsNone(self.lease(), "session end releases the holder's lease")
+
+    def test_an_edit_needing_no_lease_passes_and_takes_none(self):
+        """Criterion 31, and the negative controls."""
+        self.hold()
+        env = {"CLAUDE_PID": str(os.getpid())}
+        self.assertEqual(self.edit(self.root / "src/new.cs", "claude-code", "me", env)[0], 0, "an untracked file")
+        linked = self.scratch / "linked"
+        self.git("worktree", "add", "-q", "-b", "linked", str(linked))
+        self.assertEqual(self.edit(linked / "src/a.cs", "claude-code", "me", env)[0], 0, "a linked worktree")
+        self.assertEqual(self.lease()["session"], "other")
+        code, output = self.edit(self.root / "src/a.cs", "claude-code", "me", {"CLAUDE_PID": ""})
+        self.assertEqual(code, 2, "no process id: refused, and no lease taken")
+        self.assertEqual(self.lease()["session"], "other")
+
+    def start(self, cwd=None, session="me"):
+        return self.ws("hook", "session-start", stdin=json.dumps({"version": 1, "session": session, "cwd": str(cwd or self.root)}))
+
+    def upstream_ahead(self):
+        other = self.scratch / "other-clone"
+        git_in(self.scratch, "clone", "-q", str(self.origin), str(other))
+        (other / "docs").mkdir(exist_ok=True)
+        (other / "docs/c.md").write_text("# C\n", encoding="utf-8")
+        git_in(other, "add", "docs/c.md")
+        git_in(other, "commit", "-q", "-m", "docs: c")
+        git_in(other, "push", "-q", "origin", "main")
+        return git_in(other, "rev-parse", "HEAD").stdout.strip()
+
+    def head(self):
+        return self.git("rev-parse", "HEAD").stdout.strip()
+
+    def test_session_start_fast_forwards_a_main_copy_with_nothing_to_protect(self):
+        """Criterion 17."""
+        tip = self.upstream_ahead()
+        self.assertEqual(self.start(), (0, ""))
+        self.assertEqual(self.head(), tip)
+
+    def test_session_start_leaves_the_main_copy_alone_and_says_why(self):
+        """Criterion 17: a tracked change, or another live session's lease, holds it back with a reason."""
+        start = self.head()
+        self.upstream_ahead()
+        self.write("src/a.cs", "class A { int y; }\n")
+        code, output = self.start()
+        self.assertEqual((code, self.head()), (0, start))
+        self.assertIn("uncommitted changes to tracked files", output)
+        self.git("checkout", "-q", "--", "src/a.cs")
+        self.hold()
+        code, output = self.start()
+        self.assertEqual((code, self.head()), (0, start))
+        self.assertIn("holds the main working copy", output)
+
+    def test_session_start_names_local_commits_and_stays_quiet_elsewhere(self):
+        self.upstream_ahead()
+        self.write("docs/mine.md", "# Mine\n")
+        self.git("add", "docs/mine.md")
+        self.git("commit", "-q", "-m", "docs: my unpushed page")
+        local = self.head()
+        code, output = self.start()
+        self.assertEqual(self.head(), local)
+        self.assertIn("docs: my unpushed page", output)
+        self.assertIn("do not move them", output)
+        self.git("checkout", "-q", "-b", "elsewhere")
+        self.assertEqual(self.start(), (0, ""))
+        self.git("checkout", "-q", "main")
+        linked = self.scratch / "linked"
+        self.git("worktree", "add", "-q", "-b", "linked", str(linked))
+        self.assertEqual(self.start(cwd=linked), (0, ""))
+        self.origin.rename(self.origin.with_name("gone.git"))
+        self.git("reset", "-q", "--hard", "origin/main")
+        self.assertEqual(self.start(), (0, ""))
 
 
 class AccessContractTests(unittest.TestCase):

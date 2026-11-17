@@ -133,6 +133,8 @@ def versioned(root, event, payload):
         raise PartError(f"event version {payload['version']!r} is not one this runner reads; it reads {VERSION}")
     field = FIELDS.get(event)
     allowed = {"version", "session", "cwd"} if event in SESSION_EVENTS else {"version", field, *OPTIONAL.get(event, ())}
+    if event == "before-edit":
+        allowed |= {"session", "pid"}      # the writing-session lease's identity, for a tool with no adapter
     unknown = sorted(set(payload) - allowed)
     if unknown:
         raise PartError(f"a {event} event has no field {unknown[0]!r}; it takes {sorted(allowed)}")
@@ -140,7 +142,10 @@ def versioned(root, event, payload):
         return session_event(payload, "session", None)
     value = _text(payload.get(field), f'a {event} event\'s "{field}"')
     if event == "before-edit":
-        return place(root, value)
+        found = place(root, value)
+        found["session"] = payload.get("session") if isinstance(payload.get("session"), str) else None
+        found["pid"] = payload.get("pid") if type(payload.get("pid")) is int else None
+        return found
     found = {field: value}
     for key in OPTIONAL.get(event, ()):
         if key in payload:
@@ -162,6 +167,11 @@ def tool_session(tool, event, payload):
         raise PartError(f'this is not a {tool} {SESSION_NAMES[event]} payload: it needs '
                         f'"hook_event_name": "{SESSION_NAMES[event]}", a "session_id" and a "cwd"')
     return session_event(payload, "session_id", tool)
+
+
+def _session(payload):
+    value = payload.get("session_id")
+    return value if isinstance(value, str) and value else None
 
 
 def is_claude_code(payload):
@@ -187,7 +197,7 @@ def claude_code(root, event, payload):
         base = payload.get("cwd")
         if not pathlib.Path(value).is_absolute() and not (isinstance(base, str) and pathlib.Path(base).is_absolute()):
             raise PartError(f"the {tool} tool gave a relative path and no absolute \"cwd\" to place it from")
-        return place(root, value, base)
+        return dict(place(root, value, base), session=_session(payload), pid=None)
     found = {"prompt": value}
     for key in ("model", "effort"):   # the tool exposes both; an unset one is None, and inherits the caller's
         if given.get(key) is not None and not isinstance(given[key], str):
@@ -248,7 +258,7 @@ def codex(root, event, payload):
         if not all(pathlib.PurePosixPath(p).is_absolute() or pathlib.Path(p).is_absolute() for p in paths):
             raise PartError(f"the {tool} tool gave a relative path and no absolute \"cwd\" to place it from")
         base = None
-    return [place(root, p, base) for p in paths]
+    return [dict(place(root, p, base), session=_session(payload), pid=None) for p in paths]
 
 
 ADAPTERS = {"claude-code": claude_code, "codex": codex}

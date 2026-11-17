@@ -1,0 +1,31 @@
+[
+  {
+    "name": "a fast-forward that went through says nothing",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "fast_forward": null
+    },
+    "remind": false
+  },
+  {
+    "name": "a reason it held back is shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "fast_forward": "The main working copy has uncommitted changes to tracked files"
+    },
+    "remind": true
+  },
+  {
+    "name": "no fact at all is quiet",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null
+    },
+    "remind": false
+  }
+]

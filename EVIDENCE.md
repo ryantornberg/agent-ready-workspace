@@ -8,7 +8,7 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 
 | Claim | Evidence | Re-run |
 |---|---|---|
-| Every part passes its own cases, and the runner refuses one that does not. | 15 parts, 228 cases | `python3 ws.py selftest` |
+| Every part passes its own cases, and the runner refuses one that does not. | 17 parts, 237 cases | `python3 ws.py selftest` |
 | Each part added since M2 has a case that a do-nothing stub fails. | `test_cases_bite` | `python3 -m unittest tests.test_cases_bite` |
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | `FailClosedTests`: an empty event, a renamed field, a command given as a list, an upper-cased path, a symbolic link into the shelved folder, no Python on the path | `python3 -m unittest tests.test_core.FailClosedTests` |
 | A broken check cannot lock out the session that repairs it, and a manifest edit cannot switch the checks off. | `NoSelfLockTests` | `python3 -m unittest tests.test_core.NoSelfLockTests` |
@@ -21,6 +21,7 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 | A part reaches files, git, the environment and processes only as [decision 0004](docs/decisions/0004-the-hook-contract.md) allows. | `AccessContractTests` reads the decision's table and every part's code | `python3 -m unittest tests.test_core.AccessContractTests` |
 | A session start lists the stale pages and the pins behind their upstream, and never fails. Both tools deliver session start and end. | `SessionEventTests`, `PinTests`; one recorded run of each tool, [tests/records/session-events.json](tests/records/session-events.json), replayed by `SessionReplayTests`. In the Claude Code run the notice reached the agent, which named the stale page. | `python3 -m unittest tests.test_core.SessionEventTests tests.test_core.PinTests tests.test_core.SessionReplayTests` |
 | A staged pin must be on its reachable upstream's default branch. | `PinTests`, against local fixture repositories; `pin_on_default`'s cases | `python3 -m unittest tests.test_core.PinTests` |
+| Two live agent sessions cannot both write in the main working copy: the second is refused and sent to a worktree; a takeover needs a dead holder, or an idle main copy and a lease at least five seconds old; session end releases it. A race of 40 threads has one winner. | `LeaseTests`: every takeover condition refuses on its own; liveness on Linux, macOS and Windows in CI; a Claude Code payload and a Codex payload each take, keep and release a lease | `python3 -m unittest tests.test_core.LeaseTests` |
 | The same hooks run under Codex CLI. | One recorded run of codex-cli 0.169.0, [tests/records/codex-cli-run.json](tests/records/codex-cli-run.json), replayed by `SecondToolTests` | `python3 -m unittest tests.test_core.SecondToolTests` |
 
 ## The eval

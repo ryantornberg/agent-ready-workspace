@@ -22,6 +22,9 @@ What changed in each version, for someone deciding whether to take it. The [mile
 - `session-start` and `session-end` events, in the workspace's shape and both tools' adapters and wiring. They never fail. Hooks on them: `stale_pages` and `stale_pins`.
 - `pin_on_default`, a check that a staged pin is on its reachable upstream's default branch.
 
+- The writing-session lease (decision record 0005): the first live agent session that edits a tracked file in the main working copy keeps it, any other is refused and sent to a worktree, and session end releases it. The `lease` hook and `wslib/lease.py`.
+- `fast_forward`: at session start, the main working copy is brought up to `origin/main` when nothing would be moved under someone.
+
 **Changed:**
 
 - A before-edit event's `path` is relative to the working copy that holds the file, a linked worktree included, and the event carries `working_copy`, `main` and `absolute`. `shelved` now refuses an edit to a shelved folder inside a worktree.

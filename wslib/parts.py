@@ -60,7 +60,8 @@ KINDS = ("check", "hook")
 TOOL_EVENTS = ("before-shell", "before-edit", "before-handoff")
 SESSION_EVENTS = ("session-start", "session-end")
 EVENTS = TOOL_EVENTS + SESSION_EVENTS
-NEEDS = ("findings", "pins")   # facts a session hook may ask the runner for; see wslib/runner.py
+# Facts a hook may ask the runner for, by event; see wslib/runner.py and decisions 0004 and 0005.
+NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease",)}
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")
 PHASES = ("commit", "ci", "nightly", "push")
@@ -308,8 +309,8 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None):
     if kind == "hook" and event in SESSION_EVENTS and mode != "remind":
         raise PartError(f'part {name}: a hook on {event} must set MODE = "remind": a session start or end is never refused')
     needs = getattr(module, "NEEDS", ())
-    if not isinstance(needs, (tuple, list)) or not set(needs) <= set(NEEDS) or (needs and event not in SESSION_EVENTS):
-        raise PartError(f"part {name}: NEEDS is for session hooks, and lists some of {NEEDS}, not {needs!r}")
+    if not isinstance(needs, (tuple, list)) or not set(needs) <= set(NEEDS.get(event, ())):
+        raise PartError(f"part {name}: on {event}, NEEDS lists some of {NEEDS.get(event, ())}, not {needs!r}")
     phases = getattr(module, "PHASES", DEFAULT_PHASES)
     if kind == "check" and (not isinstance(phases, (tuple, list)) or not phases
                             or not all(isinstance(phase, str) and phase in PHASES for phase in phases)):
