@@ -305,3 +305,14 @@ Merged in [#14](https://github.com/ryantornberg/agent-ready-workspace/pull/14). 
 - verified: criteria 5, 6, 7, 22 (for this slice's part) and 35 hold. Four new tests failed at `009f26b` and pass at the tip; the opt-in browser test passed on macOS before and after the merge.
 - verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26).
 - inferred: Codex CLI loads the project's browser server. One Codex run neither showed nor ruled it out; the check holds Codex's config to the same rule.
+
+### Slice 3, 2026-11-16
+
+Merged in [#15](https://github.com/ryantornberg/agent-ready-workspace/pull/15). The report is in the [milestone record](../milestones/m2.md#slice-3-the-hook-contract-session-events-and-pins).
+
+- verified: criteria 8 to 13, 22 (for this slice's parts), 30 and 36 hold. The new tests failed at `c9d9145` and pass at the tip, except the worktree-ledger half of criterion 30, which already held there.
+- verified: CI passed on all five jobs after one fix round for the Windows fixture cleanup (criterion 26).
+- verified: live after the merge, the main checkout's `shelved` hook refused an edit to the shelved folder in a real linked worktree outside the folder.
+- verified: the engine changed in this slice and the eval records stayed current, as slice 0 meant.
+- inferred: Codex runs the project's own session hooks once the project is trusted. The recorded Codex run delivered both events to a hook given on the command line; Codex treated the clone's own configuration as untrusted.
+
