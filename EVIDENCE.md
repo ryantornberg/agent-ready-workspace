@@ -8,7 +8,7 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 
 | Claim | Evidence | Re-run |
 |---|---|---|
-| Every part passes its own cases, and the runner refuses one that does not. | 20 parts, 259 cases | `python3 ws.py selftest` |
+| Every part passes its own cases, and the runner refuses one that does not. | 20 parts, 264 cases | `python3 ws.py selftest` |
 | Each part added since M2 has a case that a do-nothing stub fails. | `test_cases_bite` | `python3 -m unittest tests.test_cases_bite` |
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | `FailClosedTests`: an empty event, a renamed field, a command given as a list, an upper-cased path, a symbolic link into the shelved folder, no Python on the path | `python3 -m unittest tests.test_core.FailClosedTests` |
 | A broken check cannot lock out the session that repairs it, and a manifest edit cannot switch the checks off. | `NoSelfLockTests` | `python3 -m unittest tests.test_core.NoSelfLockTests` |
@@ -33,7 +33,7 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 | The lead comes from the contract's and the index's facts, not the playbook's two habits. | Two-line arm: test first in 45 of 45 runs and 15 of 15 passing on the Export bug, against 14 for the guided arm; shelved folder left alone in 0 of 15; other report left alone in 4 of 15. Leaving out the two habit graders, bare passes 18 of 45, two-line 19 and guided 43 | The per-grader counts in each `evals/runs/*/record.json` |
 | Every stored grade follows from its transcript. | CI re-grades all 135 transcripts on every push | `python3 evals/grade.py --recorded` |
 | A change to a playbook, the contract, the index, the harness or a hook a grader runs fails the commit until the eval runs again. A record fails too when, counting runs that pass every grader, the guidance does not beat the bare model in each case, or does not beat a two-line instruction across the cases by a one-sided Fisher exact test at p < 0.05, with 40 or more runs in every arm. | `eval_record`'s cases; `EvalThatCanLoseTests`; `EvalRerecordTests`; `EvalHarnessApartTests` | `python3 -m unittest tests.test_core.EvalThatCanLoseTests tests.test_core.EvalRerecordTests tests.test_core.EvalHarnessApartTests` |
-| An engine change leaves the eval records current: the harness loads the graded hook's own file and imports nothing from `wslib/`. | `EvalHarnessApartTests`: an added hook event and an edited snapshot module leave every record as it was | `python3 -m unittest tests.test_core.EvalHarnessApartTests` |
+| An engine change leaves the eval records current: `grade.py` loads the graded hook's own file and imports nothing from `wslib/`; `run.py` reaches the engine only through `parts/eval_record.py`'s hash and gate. | `EvalHarnessApartTests`: an added hook event and an edited snapshot module leave every record as it was | `python3 -m unittest tests.test_core.EvalHarnessApartTests` |
 | The agent runs inside Claude Code's own sandbox, and none of the operator's environment reaches it. | A probe run held on nine points: no write outside the run's folder, no home folder, no network, no global git identity, none of the operator's aliases, no Read of a home-folder file; Python and a commit still worked. The transcripts are scanned by a test, for forward-slash and backslash paths alike. | `python3 evals/run.py --probe` (one agent run) |
 
 ## Outside checks

@@ -18,7 +18,7 @@ from wslib.parts import finding
 
 KIND = "check"
 EXTENSIONS = "py|md|cs|ts|tsx|js|jsx|json|yml|yaml|toml|sh|ps1|txt|go|java|rb|rs|sql|css|html|xml"
-CITE = re.compile(rf"(?<![\w/.-])([\w./-]+\.(?:{EXTENSIONS})):(\d+)(?!\w)")
+CITE = re.compile(rf"(?<![\w/.-])([\w./-]+\.(?:{EXTENSIONS}))(?::|#L)(\d+)(?!\w)")
 PINNED = re.compile(r"(?<![0-9A-Za-z])(?=[0-9a-f]*\d)[0-9a-f]{7,40}(?![0-9A-Za-z])")
 
 

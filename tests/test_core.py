@@ -2001,6 +2001,12 @@ class EvalThatCanLoseTests(Folder):
         self.assertIn("needs 5 or more", eval_record.judge(short, arms, ["g"]))
         tie = {"arms": {**good["arms"], "bare": {"runs": runs(5)}}}
         self.assertIn("in no more runs than the bare arm", eval_record.judge(tie, arms, ["g"]))
+        # M2 red team, finding 15: runs dropped from one arm after the recording
+        six = {"runs_per_arm": 6, "arms": {"guided": {"runs": runs(6, 6)}, "two-line": {"runs": runs(6, 6)},
+                                           "bare": {"runs": runs(1, 6)}}}
+        self.assertIsNone(eval_record.judge(six, arms, ["g"]))
+        trimmed = {**six, "arms": {**six["arms"], "guided": {"runs": runs(5, 5)}}}
+        self.assertIn("5 runs, but the record was made with 6 per arm", eval_record.judge(trimmed, arms, ["g"]) or "")
         names = [case["name"] for case in json.loads((ROOT / "parts/eval_record.cases.json").read_text(encoding="utf-8"))]
         self.assertIn("a record with fewer than five runs in an arm fails", names)
         self.assertIn("a record in which the guided arm passes every grader in no more runs than the bare arm fails", names)
@@ -2506,6 +2512,32 @@ class DirectPushTests(Folder):
         self.assertEqual(code, 1, output)
         self.assertIn(sha[:7], output)
         self.assertNotIn("Merge branch", output)
+
+    def test_a_machinery_file_renamed_away_is_refused(self):
+        """M2 red team, finding 1: git log shows only where a renamed file went."""
+        self.commit("parts/new.py", "x = 1\n", "feat: a part")
+        self.git("push", "-q", "--no-verify", "origin", "main")
+        self.git("mv", "parts/new.py", "docs/new.py")
+        self.git("commit", "-q", "-m", "docs: move")
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertIn("parts/new.py", output)
+
+    def test_a_machinery_change_made_inside_a_merge_commit_is_refused(self):
+        """M2 red team, finding 2: a merge that changes a file neither parent had."""
+        self.git("checkout", "-q", "-b", "topic")
+        self.commit("docs/c.md", "# C\n", "docs: c")
+        self.git("checkout", "-q", "main")
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        self.git("merge", "-q", "--no-ff", "--no-commit", "topic")
+        self.write("wslib/evil.py", "x = 1\n")
+        self.git("add", "wslib/evil.py")
+        self.git("commit", "-q", "--no-edit")
+        merge = self.git("rev-parse", "HEAD").stdout.strip()
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertIn(merge[:7], output)
+        self.assertIn("wslib/evil.py", output)
 
     def test_the_machinery_list_comes_from_the_remote_tip_not_the_push(self):
         text = (self.root / "workspace.json").read_text(encoding="utf-8")
@@ -3057,6 +3089,17 @@ class LeaseTests(Folder):
                 self.assertEqual(self.end(tool, f"{tool}-1")[0], 0)
                 self.assertIsNone(self.lease(), "session end releases the holder's lease")
 
+    def test_a_tracked_file_named_in_another_case_still_needs_the_lease(self):
+        """M2 red team, finding 4: on a case-insensitive file system, SRC/A.CS is src/a.cs."""
+        probe = self.root / "SRC" / "A.CS"
+        if not probe.exists():
+            self.skipTest("the file system here tells cases apart")
+        self.write("src/a.cs", "class A { int held; }\n")   # the holder's work, so no takeover
+        self.hold()
+        code, output = self.edit(probe, "claude-code", "intruder", {"CLAUDE_PID": str(os.getpid())})
+        self.assertEqual(code, 2, output)
+        self.assertIn("git worktree add", output)
+
     def test_an_edit_another_hook_refuses_takes_no_lease(self):
         self.workspace({"use": "shelved", "paths": ["src/old"]}, {"use": "lease"})
         self.write("src/old/legacy.cs", "class L { }\n")
@@ -3238,27 +3281,54 @@ class DocCheckTests(Folder):
 class AccessContractTests(unittest.TestCase):
     """M2 slice 3: a part reaches files, git, the environment and processes only as decision 0004 allows (criterion 8)."""
 
-    FORBIDDEN_MODULES = {"os", "subprocess", "socket", "shutil", "pathlib", "urllib", "http", "sys", "tempfile", "io"}
-    FORBIDDEN_CALLS = {"open", "exec", "eval", "compile", "__import__"}
+    FORBIDDEN_NAMES = {"open", "exec", "eval", "compile", "__import__", "__builtins__", "globals", "vars",
+                       "getattr", "setattr", "breakpoint", "input"}
+
+    @staticmethod
+    def allowed_modules():
+        """The modules decision 0004 lets every part import, read from the decision itself."""
+        decision = (ROOT / "docs/decisions/0004-the-hook-contract.md").read_text(encoding="utf-8")
+        line = next(line for line in decision.splitlines() if line.startswith("- Parts may import only"))
+        return set(re.findall(r"`([\w.]+)`", line))
+
+    @classmethod
+    def reaches(cls, source, allowed):
+        """What a part's source uses beyond the allowed modules and names. M2 red team, finding 6: an allow list,
+        since a block list missed codecs, builtins, importlib, ctypes, linecache and the engine's git module."""
+        import ast
+        used = set()
+        for node in ast.walk(ast.parse(source)):
+            if isinstance(node, ast.Import):
+                used |= {alias.name for alias in node.names if alias.name not in allowed}
+            elif isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+                names = {f"{module}.{alias.name}" for alias in node.names} if module in ("wslib", "") else {module}
+                used |= {name for name in names if name not in allowed}
+            elif isinstance(node, ast.Name) and node.id in cls.FORBIDDEN_NAMES:
+                used.add(node.id)
+            elif isinstance(node, ast.Attribute) and node.attr.startswith("__") and node.attr != "__name__":
+                used.add(node.attr)
+        return used
+
+    def test_the_check_catches_each_way_past_the_old_block_list(self):
+        allowed = self.allowed_modules()
+        for source in ["import codecs\ncodecs.open('x')", "import builtins\nbuiltins.open('x')", "import importlib",
+                       "import ctypes", "import linecache", "from wslib import gitcall", "import wslib.gitcall",
+                       "getattr(__builtins__, 'open')('x')", "().__class__.__base__.__subclasses__()",
+                       "import os.path", "from os import path", "import subprocess"]:
+            with self.subTest(source):
+                self.assertTrue(self.reaches(source, allowed), source)
+        self.assertEqual(self.reaches("import re\nfrom wslib.parts import finding\nfrom wslib import markdown", allowed), set())
 
     def test_every_part_keeps_to_the_access_decision_0004_allows(self):
-        import ast
         decision = (ROOT / "docs/decisions/0004-the-hook-contract.md").read_text(encoding="utf-8")
-        allowed = {}
+        allowed, exceptions = self.allowed_modules(), {}
         for name, what in re.findall(r"^\| `(\w+)` \| ([^|]+) \|", decision, re.M):
-            allowed[name] = set(re.findall(r"`([\w.]+)`", what))
+            exceptions[name] = set(re.findall(r"`([\w.]+)`", what))
         for path in sorted((ROOT / "parts").glob("*.py")):
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-            used = set()
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    used |= {alias.name.split(".")[0] for alias in node.names} & self.FORBIDDEN_MODULES
-                elif isinstance(node, ast.ImportFrom) and node.module:
-                    used |= {node.module.split(".")[0]} & self.FORBIDDEN_MODULES
-                elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in self.FORBIDDEN_CALLS:
-                    used.add(node.func.id)
+            used = self.reaches(path.read_text(encoding="utf-8"), allowed)
             with self.subTest(path.stem):
-                self.assertEqual(used - allowed.get(path.stem, set()), set(),
+                self.assertEqual(used - exceptions.get(path.stem, set()), set(),
                                  f"{path.name} reaches outside its event, config and snapshot; decision 0004's table "
                                  f"must name each exception")
 

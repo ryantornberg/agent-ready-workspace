@@ -1,6 +1,6 @@
 ---
 status: accepted
-last-reviewed: 2026-11-16
+last-reviewed: 2026-11-17
 ---
 
 # 0004: The hook contract
@@ -27,7 +27,8 @@ A hook that reaches for these itself is hard to test and easy to get wrong. The 
   - `"findings"`: the findings of the check the hook's config names in `"part"`, run on the session's own working copy.
   - `"pins"`: for each pinned repository in that working copy, its upstream's default branch and how many commits the checkout is behind.
 - Both read their config.
-- Parts may import the engine, `wslib/`, and the standard library's pure modules. They may not import `os`, `subprocess`, `socket`, `shutil`, `pathlib`, `urllib`, `http`, `sys`, `tempfile` or `io`. They may not call `open`, `exec`, `eval`, `compile` or `__import__`.
+- Parts may import only these modules: `re`, `json`, `datetime`, `hashlib`, `math`, `posixpath`, `shlex`, `unicodedata`, and from the engine `wslib.parts`, `wslib.markdown` and `wslib.symbols`.
+- They may not use `open`, `exec`, `eval`, `compile`, `__import__`, `__builtins__`, `globals`, `vars`, `getattr`, `setattr`, `breakpoint` or `input`, or reach a double-underscore attribute other than `__name__`. Amended 2026-11-17, after the M2 red team: a list of what is banned missed `codecs`, `builtins`, `importlib`, `ctypes`, `linecache` and the engine's own git module, so the test now holds parts to a list of what is allowed.
 
 **Where the engine does the rest.**
 
@@ -53,8 +54,8 @@ The path is resolved first: a relative path from the tool's folder, `..` removed
 
 | Part | May use, and why |
 |---|---|
-| `deny_list` | `os`, `open`: it reads the private list from the file `WS_DENY_LIST` names, outside the repository, which no snapshot holds. |
-| `no_admin_merge` | `pathlib`, `exec`, `compile`: it loads `no_stage_all`'s command-line parser from that part's file, beside its own, instead of copying it. `no_stage_all.py` is in the eval hash, so moving the parser waits for a recording. |
+| `deny_list` | `os`, `open`, `codecs`, `wslib.snapshot`: it reads the private list from the file `WS_DENY_LIST` names, outside the repository, which no snapshot holds, decodes it, and checks a commit message as a one-file snapshot. |
+| `no_admin_merge` | `pathlib`, `types`, `exec`, `compile`, `__file__`, `__dict__`: it loads `no_stage_all`'s command-line parser from that part's file, beside its own, instead of copying it. `no_stage_all.py` is in the eval hash, so moving the parser waits for a recording. |
 
 ## What it gave up
 

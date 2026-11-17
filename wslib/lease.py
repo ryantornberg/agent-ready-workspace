@@ -257,8 +257,11 @@ def release(root, session):
 
 
 def tracked(top, path):
-    """True when path is tracked in the working copy at top. None when git cannot say."""
-    out = gitcall.run(top, "ls-files", "-z", "--", path, timeout=5)
+    """True when path is tracked in the working copy at top. None when git cannot say.
+
+    Matched without regard to case, so SRC/A.CS needs the lease that src/a.cs does where the file system folds case.
+    On a file system that does not, a new file that differs from a tracked one only in case needs it too: the safe side."""
+    out = gitcall.run(top, "ls-files", "-z", "--", f":(icase){path}", timeout=5)
     return None if out is None else bool(out.strip("\0"))
 
 

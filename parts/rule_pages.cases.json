@@ -89,5 +89,31 @@
       "path": "src/orders-api/x.cs"
     },
     "remind": false
+  },
+  {
+    "name": "a pattern on a dot folder matches it",
+    "event": {
+      "path": ".github/workflows/ci.yml",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/.github/workflows/ci.yml",
+      "rule_pages": {
+        "docs/rules/ci.md": "---\napplies-to: \".github/**\"\n---\n# CI\n\nCI text.\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a pattern that starts with ./ matches from the top",
+    "event": {
+      "path": "tools/symbols.py",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/tools/symbols.py",
+      "rule_pages": {
+        "docs/rules/t.md": "---\napplies-to: \"./tools/*.py\"\n---\n# T\n\nT text.\n"
+      }
+    },
+    "remind": true
   }
 ]

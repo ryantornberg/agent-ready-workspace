@@ -330,5 +330,43 @@
     "expect": [
       ".codex/config.toml is missing"
     ]
+  },
+  {
+    "name": "an --isolated that only a TOML comment holds fails",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\"] # \"--isolated\"\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": [
+      "without --isolated"
+    ]
+  },
+  {
+    "name": "a quoted # inside an argument is not a comment",
+    "files": {
+      ".claude/settings.json": "{\"hooks\": {}, \"enabledPlugins\": {\"playwright@claude-plugins-official\": false}}",
+      ".mcp.json": "{\"mcpServers\": {\"playwright\": {\"command\": \"npx\", \"args\": [\"@playwright/mcp@0.0.84\", \"--isolated\"]}}}",
+      ".codex/config.toml": "[mcp_servers.playwright]\ncommand = \"npx\"\nargs = [\"@playwright/mcp@0.0.84\", \"--user-data-dir=#x\", \"--isolated\"]\n"
+    },
+    "config": {
+      "settings": ".claude/settings.json",
+      "plugin": "playwright@claude-plugins-official",
+      "package": "@playwright/mcp",
+      "configs": {
+        "claude-code": ".mcp.json",
+        "codex": ".codex/config.toml"
+      }
+    },
+    "expect": []
   }
 ]

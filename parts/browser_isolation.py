@@ -37,10 +37,28 @@ def _json_servers(text):
             for name, spec in servers.items() if isinstance(spec, dict)}
 
 
+def _uncomment(line):
+    """The line up to a # that sits outside a quoted string, so a comment cannot supply --isolated."""
+    quote, index = None, 0
+    while index < len(line):
+        char = line[index]
+        if quote == '"' and char == "\\":
+            index += 2
+            continue
+        if quote and char == quote:
+            quote = None
+        elif not quote and char in "\"'":
+            quote = char
+        elif not quote and char == "#":
+            return line[:index]
+        index += 1
+    return line
+
+
 def _toml_servers(text):
     """{server: its args} from [mcp_servers.NAME] tables, read line by line. An args array may span lines."""
     servers, current, collecting, gathered = {}, None, False, ""
-    for line in text.splitlines():
+    for line in map(_uncomment, text.splitlines()):
         if collecting:
             gathered += " " + line
             if "]" in line.split("#")[0]:
