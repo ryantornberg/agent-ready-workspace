@@ -311,19 +311,24 @@ def command_hook(root, args):
     hooks = partlib.load_hooks(root, args.event, manifest)   # only this event's hooks: a broken check cannot lock it
     stream = getattr(sys.stdin, "buffer", sys.stdin)
     found, tool, cwd = events.read_call(root, args.event, stream.read(), args.tool)
-    if any("lease" in getattr(part.module, "NEEDS", ()) for part in hooks):
-        found = [dict(event, lease=lease_fact(root, event, tool)) for event in found]
+    # The lease is taken only for an edit every other hook allows, so a refused edit takes no lease.
+    leasing = [part for part in hooks if "lease" in getattr(part.module, "NEEDS", ())]
+    ordered = [part for part in hooks if part not in leasing] + leasing
     reminders = []
-    for event in found:   # one call can edit several files: all are decided before any is recorded
-        for part in hooks:
-            reason = part.decide(event)
-            if reason is None:
-                continue
-            if part.mode == "remind":
-                reminders.append(f"{part.name}: {reason}")
-                continue
-            print(f"Refused by {part.name}: {reason}", file=sys.stderr)
-            return 2
+    # One call can edit several files: all are decided before any is recorded. Every other hook decides every
+    # file first; only then is the lease taken, so a call refused for any one file takes no lease.
+    rounds = [(part, index) for part in ordered for index in range(len(found))]
+    for part, index in rounds:
+        if part in leasing and "lease" not in found[index]:
+            found[index] = dict(found[index], lease=lease_fact(root, found[index], tool))
+        reason = part.decide(found[index])
+        if reason is None:
+            continue
+        if part.mode == "remind":
+            reminders.append(f"{part.name}: {reason}")
+            continue
+        print(f"Refused by {part.name}: {reason}", file=sys.stderr)
+        return 2
     reminders = list(dict.fromkeys(reminders))
     if args.event == "before-edit":
         for event in found:
