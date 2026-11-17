@@ -70,6 +70,9 @@ git config core.hooksPath .githooks
 | A pin moved by a commit is on its upstream's default branch. | `pin_on_default` check | Commit, CI |
 | The first live agent session to edit the main working copy keeps it; any other works in a worktree of its own. The lease ends with its session. | `lease` hook | Before an edit; session end |
 | A session starts on an up-to-date main working copy, unless that would move someone's work. | `fast_forward` hook | Session start |
+| A doc line a commit adds cites a method, class or heading, not a line number. | `line_cites` check | Commit, CI |
+| A plan, decision record or milestone page states its verdict in an **In short** line near its title. | `in_short` check | Commit, CI |
+| An agent editing a file sees the rule pages that apply to it, whichever agent tool it runs in. | `rule_pages` hook | Before an edit |
 | Each agent session gets its own browser: the server runs pinned and with `--isolated`, for Claude Code and Codex CLI, and the agent tool's own browser plugin is off. | `browser_isolation` check | Commit, CI |
 | A shelved folder is not edited. | `shelved` hook | Before an edit |
 | A task handed to a helper names its tier, and runs at the model and effort the manifest binds to it. | `handoff_tier` hook | Before a helper starts |

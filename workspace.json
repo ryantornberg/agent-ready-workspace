@@ -133,6 +133,19 @@
     {
       "use": "fast_forward",
       "why": "Hooks and pages run from the main working copy's files, so a fix merged by another session does nothing until the main copy is brought up to date."
+    },
+    {
+      "use": "line_cites",
+      "why": "A line number in a durable page goes stale with the next edit to the file it cites; a method, class or heading survives."
+    },
+    {
+      "use": "in_short",
+      "why": "A reporting page that opens with background makes its reader read all of it for the verdict."
+    },
+    {
+      "use": "rule_pages",
+      "why": "Some agent tools load path-scoped rules on their own and others do not; every session sees the rules for the file it edits.",
+      "folder": "docs/rules"
     }
   ]
 }

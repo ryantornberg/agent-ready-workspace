@@ -1,0 +1,65 @@
+[
+  {
+    "name": "a page with the line under its title passes",
+    "files": {
+      "docs/plans/p.md": "---\nlast-reviewed: 2026-11-16\n---\n\n# P\n\n**In short:** the verdict.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a page without it fails, named",
+    "files": {
+      "docs/decisions/0009-x.md": "# X\n\nBackground only.\n"
+    },
+    "expect": [
+      "has no **In short:** line within 15 lines of its title"
+    ]
+  },
+  {
+    "name": "the line at the sixteenth line after the title fails",
+    "files": {
+      "docs/milestones/m9.md": "# M9\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n**In short:** late.\n"
+    },
+    "expect": [
+      "has no **In short:** line"
+    ]
+  },
+  {
+    "name": "the line at the fifteenth line passes",
+    "files": {
+      "docs/milestones/m9.md": "# M9\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n**In short:** in time.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a block quote, and a colon outside the bold, pass",
+    "files": {
+      "docs/plans/q.md": "# Q\n\n> **In short**: quoted.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a README and a template are skipped",
+    "files": {
+      "docs/plans/README.md": "# Plans\n",
+      "docs/plans/plan-template.md": "# T\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a page with no title fails",
+    "files": {
+      "docs/plans/r.md": "no title here\n"
+    },
+    "expect": [
+      "has no title"
+    ]
+  },
+  {
+    "name": "pages outside the folders are not read",
+    "files": {
+      "docs/guide.md": "# Guide\n\nNo verdict.\n"
+    },
+    "expect": []
+  }
+]

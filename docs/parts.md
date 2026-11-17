@@ -101,6 +101,7 @@ A hook on a session event must set `MODE = "remind"`, and a session start or end
 | `session-start` | `"findings"` | Runs the check the hook's config names in `"part"` on the session's own working copy |
 | `session-start` | `"pins"` | Fetches each pinned repository's upstream default branch and counts the commits its checkout lacks |
 | `session-start` | `"fast_forward"` | Brings the main working copy up to `origin/main` when that is safe, and gives the reason when it held back |
+| `before-edit` | `"rule_pages"` | Reads every page in the rules folder the hook's config names, fresh, from the working copy that holds the edited file |
 | `before-edit` | `"lease"` | Takes or keeps the writing-session lease for an edit to a tracked file in the main working copy; see [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md) |
 
 While the manifest uses `lease`, the runner also releases the session's own lease at `session-end`. A part reads nothing else from outside its event, config and snapshot; [decision 0004](decisions/0004-the-hook-contract.md) names the exceptions, and a test holds every part to it.
@@ -223,6 +224,9 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `freshness` run on the session's working copy. |
 | `stale_pins` | hook, session-start, reminds | Names each pinned repository whose checkout is behind its upstream's default branch. |
 | `pin_on_default` | check | A staged pin is not on its reachable upstream's default branch. An upstream it cannot reach warns. |
+| `line_cites` | check | A line the commit adds to a doc page cites a file by line number, outside a fenced block and with no commit hash beside it. |
+| `in_short` | check | A plan, decision record or milestone page has no **In short:** line within 15 lines of its title. |
+| `rule_pages` | hook, before-edit, reminds | Shows the agent each page in `docs/rules/` whose `applies-to` patterns match the edited file. |
 | `lease` | hook, before-edit | Another live agent session holds the main working copy, or the lease cannot be checked. The edit goes to a worktree instead. |
 | `fast_forward` | hook, session-start, reminds | Says why the main working copy was not brought up to `origin/main`, when it held back. |
 | `browser_isolation` | check | The project settings do not turn the browser plugin off by name, or an agent tool's config runs the browser server without `--isolated` or at an inexact version. See [browsers](browsers.md). |

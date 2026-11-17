@@ -61,7 +61,7 @@ TOOL_EVENTS = ("before-shell", "before-edit", "before-handoff")
 SESSION_EVENTS = ("session-start", "session-end")
 EVENTS = TOOL_EVENTS + SESSION_EVENTS
 # Facts a hook may ask the runner for, by event; see wslib/runner.py and decisions 0004 and 0005.
-NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease",)}
+NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease", "rule_pages")}
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")
 PHASES = ("commit", "ci", "nightly", "push")
@@ -122,7 +122,8 @@ class Part:
                 if self.kind == "check":
                     memory = snapshots.Memory(case["files"], case.get("changed", ()), case.get("staged"),
                                               case.get("ledger"), case.get("replaying"), case.get("repositories", ()),
-                                              case.get("symlinks", ()), case.get("pushed", ()), case.get("pins", ()))
+                                              case.get("symlinks", ()), case.get("pushed", ()), case.get("pins", ()),
+                                              case.get("added"))
                     got = [(f["message"], f["level"]) for f in self.run(memory, config)]
                     want = [_expected(item) for item in case["expect"]]
                     missing = [f"{text} ({level})" for text, level in want
@@ -257,7 +258,7 @@ def _read_cases(name, kind, cases_file, text, mode="refuse"):
                         for item in case["expect"])
             well_formed = well_formed and all(isinstance(case.get(key, []), list)
                                               for key in ("staged", "ledger", "repositories", "symlinks", "pushed", "pins")) \
-                and isinstance(case.get("replaying", ""), str)
+                and isinstance(case.get("replaying", ""), str) and isinstance(case.get("added", {}), dict)
         else:
             answer, other = ("allow", "remind") if mode == "refuse" else ("remind", "allow")
             well_formed = isinstance(case, dict) and isinstance(case.get("name"), str) \

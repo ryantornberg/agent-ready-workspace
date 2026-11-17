@@ -1,0 +1,130 @@
+[
+  {
+    "name": "an added line that cites a file by line number fails",
+    "files": {
+      "docs/a.md": "# A\n\nSee parts/links.py:7.\n"
+    },
+    "changed": [
+      "docs/a.md"
+    ],
+    "added": {
+      "docs/a.md": [
+        [
+          3,
+          "See parts/links.py:7."
+        ]
+      ]
+    },
+    "expect": [
+      "cites parts/links.py:7 by line number"
+    ]
+  },
+  {
+    "name": "a citation already on the page is not read",
+    "files": {
+      "docs/a.md": "# A\n\nSee parts/links.py:7.\n\nNew.\n"
+    },
+    "changed": [
+      "docs/a.md"
+    ],
+    "added": {
+      "docs/a.md": [
+        [
+          5,
+          "New."
+        ]
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "a citation inside a fenced block passes",
+    "files": {
+      "docs/a.md": "# A\n\n````\nparts/links.py:7\n````\n"
+    },
+    "changed": [
+      "docs/a.md"
+    ],
+    "added": {
+      "docs/a.md": [
+        [
+          4,
+          "parts/links.py:7"
+        ]
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "a citation pinned to a commit passes",
+    "files": {
+      "docs/a.md": "# A\n\nAt 1a2b3c4, parts/links.py:7 held it.\n"
+    },
+    "changed": [
+      "docs/a.md"
+    ],
+    "added": {
+      "docs/a.md": [
+        [
+          3,
+          "At 1a2b3c4, parts/links.py:7 held it."
+        ]
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "a page in a skipped folder is not read",
+    "files": {
+      "evals/runs/x/a.md": "parts/links.py:7\n"
+    },
+    "changed": [
+      "evals/runs/x/a.md"
+    ],
+    "added": {
+      "evals/runs/x/a.md": [
+        [
+          1,
+          "parts/links.py:7"
+        ]
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "a file that is not a page is not read",
+    "files": {
+      "docs/a.txt": "parts/links.py:7\n"
+    },
+    "changed": [
+      "docs/a.txt"
+    ],
+    "added": {
+      "docs/a.txt": [
+        [
+          1,
+          "parts/links.py:7"
+        ]
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "a time of day or a ratio is not a citation",
+    "files": {
+      "docs/a.md": "# A\n\nAt 10:30, 3:1.\n"
+    },
+    "changed": [
+      "docs/a.md"
+    ],
+    "added": {
+      "docs/a.md": [
+        [
+          3,
+          "At 10:30, 3:1."
+        ]
+      ]
+    },
+    "expect": []
+  }
+]
