@@ -266,10 +266,15 @@ The maintainer, 2026-11-16, at approval:
 
 The agent, 2026-11-16, at approval, on the same footing:
 
-6. **Round two's decided actions are part of the approved plan.** Finding 1 takes the playbooks out of M2, so "slice 6" now names the closing slice: the queued edits to `AGENTS.md` and `INDEX.md`, and one re-recording. A third draft applies round two to slices 1–6 before slice 1 starts. Slice 0 applies only the actions that are its own, listed in item 2.
+6. **Round two's decided actions are part of the approved plan.** Finding 1 takes the playbooks out of M2, so "slice 6" now names the closing slice: the queued edits to `AGENTS.md` and `INDEX.md`, and one re-recording. A third draft applies round two to slices 1–6 before slice 1 starts. Slice 0 applies only the actions that are its own, listed in item 2. The maintainer confirmed this item on 2026-11-16, before slice 6.
 7. **Slice 0 edits neither `AGENTS.md` nor `INDEX.md`.** Nothing slice 0 changes is named there; what slices 1–5 add waits for slice 6's recording.
 8. **The descriptions stay private.** The walled reader writes them beside the private source map, not in this repository. `deny_list` blocks names, not facts about how a team or its systems work, so a public page would need the maintainer to read it first. What the builders publish still passes `deny_list`, and is generic code and pages rather than a description of the source.
 9. **Slice 1, decided while building.** The agent settings file counts as machinery as a whole, not only its hook entries. `no_admin_merge` loads the command-line parser from `no_stage_all`'s file instead of moving it, because `no_stage_all.py` is in the eval hash; slice 6, which records anyway, may move the parser to one shared place.
+
+The maintainer, 2026-11-16, before slice 6:
+
+10. **The parser stays in `no_stage_all.py`.** Moving it into `wslib/` would make `grade.py` depend on the engine again, which slice 0 ended.
+11. **Slice 6's recording keeps slice 0's design and stop rule:** 15 runs per arm in each case, 135 runs, on the small model. If the guided arm does not beat the two-line arm across the cases (one-sided Fisher exact, p < 0.05), or loses any comparison slice 0's recording won, the result is published and the plan stops. The session is capped at 150 agent runs, probes and retries included.
 
 ## Results
 
