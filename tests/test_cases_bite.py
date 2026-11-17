@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 from wslib import parts as partlib  # noqa: E402
 
-NEW_PARTS = ("direct_push", "no_admin_merge", "browser_isolation", "stale_pages", "stale_pins", "pin_on_default", "lease", "fast_forward")
+NEW_PARTS = ("direct_push", "no_admin_merge", "browser_isolation", "stale_pages", "stale_pins", "pin_on_default", "lease", "fast_forward", "line_cites", "in_short", "rule_pages")
 
 
 def stub_of(part):

@@ -33,11 +33,17 @@ For the pin check, `pin_facts()` lists each pinned repository whose pin the comm
 "off", "unreachable", "absent" (not checked out) or "no-branch". The engine works them out with git
 (wslib/gitcall.py), fetching the default branch; a case gives them as "pins".
 
+`added_lines(path)` gives the lines a commit adds to a file, as [(line number, text)], or None when the
+snapshot cannot say: an Index compares the staged file with the last commit's, inside the one batch read;
+a Tree compares the file with the base it was given (`check --changed-from`); a case gives them as "added".
+A file the last commit did not have is all added lines.
+
 For the pre-push check, `pushed` lists the commits a push adds to a branch, each as
 {"commit": full hash, "subject": first line, "paths": [paths it changes]}. Merge
 commits are left out; the commits they bring in are listed.
 """
 import codecs
+import difflib
 import os
 import pathlib
 import re
@@ -87,8 +93,9 @@ class Snapshot:
     """repositories: folders that are code repositories of their own, such as a submodule; links: symbolic links."""
 
     def __init__(self, paths, changed=(), staged=None, ledger=None, replaying=None, ledger_problem=None,
-                 repositories=(), links=(), pushed=(), pins=None):
+                 repositories=(), links=(), pushed=(), pins=None, added=None):
         self._paths = frozenset(paths)
+        self._added = None if added is None else {path: [tuple(line) for line in lines] for path, lines in added.items()}
         self.pushed = tuple(pushed)
         self._pins = None if pins is None else [dict(p) for p in pins]
         self._gitlinks = {}       # path -> staged commit, for a snapshot read from git
@@ -123,6 +130,21 @@ class Snapshot:
 
     def is_file(self, path):
         return path in self._paths
+
+    def added_lines(self, path):
+        """[(line number, text)] that this change adds to path, or None when the snapshot cannot say."""
+        if self._added is not None:
+            return self._added.get(path, [])
+        old = self._old_text(path)
+        if old is None:
+            return None
+        new = self.read(path)
+        if new is None:
+            return None
+        return added_between(old, new)
+
+    def _old_text(self, path):
+        return None
 
     def pin_facts(self):
         """The pins this commit adds or moves, each with its state. Worked out with git the first time it is asked."""
@@ -179,14 +201,24 @@ class Snapshot:
 
 class Memory(Snapshot):
     def __init__(self, files, changed=(), staged=None, ledger=None, replaying=None, repositories=(), links=(),
-                 pushed=(), pins=()):
+                 pushed=(), pins=(), added=None):
         super().__init__(files, changed, staged, ledger, replaying, repositories=repositories, links=links,
-                         pushed=pushed, pins=pins)
+                         pushed=pushed, pins=pins, added=added if added is not None else {})
         self._files = files
 
     def _bytes(self, path):
         text = self._files[path]
         return text if isinstance(text, bytes) else text.encode("utf-8")
+
+
+def added_between(old, new):
+    """The lines new adds to old, numbered as in new."""
+    old_lines, new_lines = old.replace("\r\n", "\n").split("\n"), new.replace("\r\n", "\n").split("\n")
+    found = []
+    for tag, _, _, start, end in difflib.SequenceMatcher(None, old_lines, new_lines, autojunk=False).get_opcodes():
+        if tag in ("insert", "replace"):
+            found += [(number + 1, new_lines[number]) for number in range(start, end)]
+    return found
 
 
 def _git(root, *args, data=None):
@@ -264,8 +296,9 @@ class Tree(Snapshot):
     """The files in a folder. At the top of a git working copy, git's own listing decides which: every tracked
     or staged file, and every untracked file git does not ignore. Any other folder is walked."""
 
-    def __init__(self, root, changed=()):
+    def __init__(self, root, changed=(), base=None):
         self.root = pathlib.Path(root).resolve()
+        self._base, self._base_commit = base, None
         if not self.root.is_dir():
             raise NotADirectoryError(f"not a folder: {root}")
         entries = None
@@ -308,6 +341,23 @@ class Tree(Snapshot):
         super().__init__(files, changed, repositories=repositories, links=links)
         self._gitlinks = gitlinks
 
+    def _old_text(self, path):
+        """The file at the merge base of HEAD and the base it was given, "" when it was not there, None with no base."""
+        if not self._base or set(self._base) == {"0"}:
+            return None
+        if self._base_commit is None:
+            try:
+                self._base_commit = _git(self.root, "merge-base", self._base, "HEAD").decode().strip()
+            except RuntimeError:
+                self._base_commit = ""
+        if not self._base_commit:
+            return None
+        try:
+            data = _git(self.root, "show", f"{self._base_commit}:./{path}")
+        except RuntimeError:
+            return ""
+        return data.decode("utf-8-sig", "replace")
+
     def _bytes(self, path):
         disk = self.root / path
         if path in self.links and disk.is_symlink():
@@ -349,7 +399,9 @@ class Index(Snapshot):
         status = _names(_git(self.root, "diff", "--cached", "--name-status", "--no-renames", "-z"))
         staged = dict(zip(status[1::2], status[0::2]))
         changed = [path for path, letter in staged.items() if letter[:1] in "ACMR"]
-        self._extra, self._objects, self._failed = tuple(extra), None, None
+        # The last commit's copy of each changed page comes in the same batch read, for added_lines().
+        self._previous = {path: f"HEAD:./{path}" for path in changed if path.lower().endswith(".md")}
+        self._extra, self._objects, self._failed = tuple(extra) + tuple(self._previous.values()), None, None
         folder = ledgers.git_dir(self.root)
         try:
             ledger, problem = ledgers.read(folder), None
@@ -383,6 +435,16 @@ class Index(Snapshot):
                 self._objects[name] = output[at:at + size]
                 at += size + 1
         return self._objects
+
+    def _old_text(self, path):
+        name = self._previous.get(path)
+        if name is None:
+            return None
+        try:
+            data = self._batch().get(name)
+        except RuntimeError:
+            return None
+        return "" if data is None else data.decode("utf-8-sig", "replace")
 
     def _bytes(self, path):
         if path in self._on_disk:

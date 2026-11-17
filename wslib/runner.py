@@ -197,7 +197,7 @@ def command_check(root, args):
                 # Fail closed: with nothing to compare against, every file counts as changed.
                 print(f"warning: {changed_problem}; every file is treated as changed")
                 since = list(snapshot.paths())
-            snapshot = snapshots.Tree(root, list(args.changed) + since)
+            snapshot = snapshots.Tree(root, list(args.changed) + since, base=args.changed_from)
             if not args.changed_from or set(args.changed_from) == {"0"}:
                 required, problem = set(), None
                 print("warning: no base commit, so no part is required to stay in the manifest")
@@ -276,6 +276,25 @@ def command_session(root, args):
     return 0
 
 
+def rule_pages(root, event, hooks):
+    """{page: text} of every rule page in the folder each rule hook names, read fresh from the working copy that
+    holds the edited file. Nothing for a file in no working copy of this repository. An unreadable page is skipped."""
+    top = event.get("working_copy")
+    if not top:
+        return {}
+    pages = {}
+    for part in hooks:
+        if "rule_pages" not in getattr(part.module, "NEEDS", ()):
+            continue
+        folder = pathlib.Path(top) / part.config.get("folder", "docs/rules")
+        for page in sorted(folder.glob("*.md")) if folder.is_dir() else ():
+            try:
+                pages[page.relative_to(top).as_posix()] = page.read_text(encoding="utf-8-sig")
+            except (OSError, UnicodeDecodeError, ValueError):
+                continue
+    return pages
+
+
 def lease_fact(root, event, tool):
     """Take or keep the writing-session lease for an edit to a tracked file in the main working copy.
     Any other edit needs none. See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md."""
@@ -311,6 +330,8 @@ def command_hook(root, args):
     hooks = partlib.load_hooks(root, args.event, manifest)   # only this event's hooks: a broken check cannot lock it
     stream = getattr(sys.stdin, "buffer", sys.stdin)
     found, tool, cwd = events.read_call(root, args.event, stream.read(), args.tool)
+    if any("rule_pages" in getattr(part.module, "NEEDS", ()) for part in hooks):
+        found = [dict(event, rule_pages=rule_pages(root, event, hooks)) for event in found]
     # The lease is taken only for an edit every other hook allows, so a refused edit takes no lease.
     leasing = [part for part in hooks if "lease" in getattr(part.module, "NEEDS", ())]
     ordered = [part for part in hooks if part not in leasing] + leasing

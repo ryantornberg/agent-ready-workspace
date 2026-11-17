@@ -30,6 +30,8 @@ status: in progress
 
 <One sentence: what the milestone delivered.> The plan is <link to the hand-off plan>.
 
+**In short:** <the verdict: what holds now, the key number, and what is left>.
+
 ## Slices
 
 | Slice | Tier | Questions asked | Fix rounds | What the checks caught | Commits |

@@ -1,0 +1,93 @@
+[
+  {
+    "name": "a file one page applies to gets that page",
+    "event": {
+      "path": "tools/symbols.py",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/tools/symbols.py",
+      "rule_pages": {
+        "docs/rules/api.md": "---\napplies-to: \"src/orders-api/**, tools/*.py\"\n---\n# API\n\nAPI text.\n",
+        "docs/rules/code.md": "---\napplies-to:\n  - \"**/*.{cs,ts}\"\n---\n# Code\n\nCode text.\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a file two pages apply to gets both",
+    "event": {
+      "path": "src/orders-api/Worker.cs",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/src/orders-api/Worker.cs",
+      "rule_pages": {
+        "docs/rules/api.md": "---\napplies-to: \"src/orders-api/**, tools/*.py\"\n---\n# API\n\nAPI text.\n",
+        "docs/rules/code.md": "---\napplies-to:\n  - \"**/*.{cs,ts}\"\n---\n# Code\n\nCode text.\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a top-level file matches a pattern that starts with **/",
+    "event": {
+      "path": "Top.ts",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/Top.ts",
+      "rule_pages": {
+        "docs/rules/api.md": "---\napplies-to: \"src/orders-api/**, tools/*.py\"\n---\n# API\n\nAPI text.\n",
+        "docs/rules/code.md": "---\napplies-to:\n  - \"**/*.{cs,ts}\"\n---\n# Code\n\nCode text.\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a single star stays within one folder",
+    "event": {
+      "path": "tools/sub/deep.py",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/tools/sub/deep.py",
+      "rule_pages": {
+        "docs/rules/api.md": "---\napplies-to: \"src/orders-api/**, tools/*.py\"\n---\n# API\n\nAPI text.\n",
+        "docs/rules/code.md": "---\napplies-to:\n  - \"**/*.{cs,ts}\"\n---\n# Code\n\nCode text.\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "a file no page applies to gets nothing",
+    "event": {
+      "path": "docs/guide.md",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/docs/guide.md",
+      "rule_pages": {
+        "docs/rules/api.md": "---\napplies-to: \"src/orders-api/**, tools/*.py\"\n---\n# API\n\nAPI text.\n",
+        "docs/rules/code.md": "---\napplies-to:\n  - \"**/*.{cs,ts}\"\n---\n# Code\n\nCode text.\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "a file outside every working copy gets nothing",
+    "event": {
+      "path": "/elsewhere/src/orders-api/x.cs",
+      "working_copy": null,
+      "main": true,
+      "absolute": "/w//elsewhere/src/orders-api/x.cs",
+      "rule_pages": {
+        "docs/rules/api.md": "---\napplies-to: \"src/orders-api/**, tools/*.py\"\n---\n# API\n\nAPI text.\n",
+        "docs/rules/code.md": "---\napplies-to:\n  - \"**/*.{cs,ts}\"\n---\n# Code\n\nCode text.\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "no rule pages at all is quiet",
+    "event": {
+      "path": "src/orders-api/x.cs"
+    },
+    "remind": false
+  }
+]

@@ -3137,6 +3137,104 @@ class LeaseTests(Folder):
         self.assertEqual(self.start(), (0, ""))
 
 
+class DocCheckTests(Folder):
+    """M2 slice 5: line-number citations, the In short line, and rule pages surfaced on edit (criteria 19 to 21)."""
+
+    def commit_all(self, message="start"):
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", message)
+
+    def test_a_commit_that_adds_a_line_number_citation_fails_and_one_already_there_passes(self):
+        """Criterion 19."""
+        self.workspace({"use": "line_cites"})
+        self.write("docs/a.md", "# A\n\nSee `wslib/runner.py:42` for the old way.\n")
+        self.git("init", "-q", "-b", "main")
+        self.commit_all()
+        self.write("docs/a.md", "# A\n\nSee `wslib/runner.py:42` for the old way.\n\nA new line, with no citation.\n")
+        self.git("add", "docs/a.md")
+        self.assertEqual(self.ws("check", "--staged")[0], 0, "the citation already present is not touched")
+        self.write("docs/a.md", "# A\n\nSee `wslib/runner.py:42` for the old way.\n\nAnd `parts/links.py:7` too.\n")
+        self.git("add", "docs/a.md")
+        code, output = self.ws("check", "--staged")
+        self.assertEqual(code, 1, output)
+        self.assertIn("docs/a.md:5", output)
+        self.assertIn("parts/links.py:7", output)
+        exempt = ["```\nparts/links.py:7\n```", "At 1a2b3c4, `parts/links.py:7` held it.", "notes.txt", "x"]
+        for added in exempt[:2]:
+            with self.subTest(added):
+                self.write("docs/a.md", f"# A\n\nSee `wslib/runner.py:42` for the old way.\n\n{added}\n")
+                self.git("add", "docs/a.md")
+                self.assertEqual(self.ws("check", "--staged")[0], 0)
+        self.write("docs/a.md", "# A\n\nSee `wslib/runner.py:42` for the old way.\n")
+        self.write("src/notes.txt", "parts/links.py:7\n")
+        self.git("add", "docs/a.md", "src/notes.txt")
+        self.assertEqual(self.ws("check", "--staged")[0], 0, "a file that is not a doc page is not read")
+
+    def test_a_plan_decision_or_milestone_page_needs_an_in_short_line_near_its_title(self):
+        """Criterion 20."""
+        self.workspace({"use": "in_short"})
+        page = "---\nlast-reviewed: 2026-11-16\n---\n\n# A plan\n\n" + "Background.\n\n" * 3 + "**In short:** the verdict.\n"
+        for folder in ("docs/plans", "docs/decisions", "docs/milestones"):
+            with self.subTest(folder):
+                self.write(f"{folder}/p.md", page)
+                self.assertEqual(self.ws("check")[0], 0)
+                self.write(f"{folder}/p.md", "# A plan\n\n" + "Background.\n\n" * 9 + "**In short:** too late.\n")
+                code, output = self.ws("check")
+                self.assertEqual(code, 1, output)
+                self.assertIn(f"{folder}/p.md", output)
+                self.write(f"{folder}/p.md", "# A plan\n\n> **In short**: in a quote, colon outside.\n")
+                self.assertEqual(self.ws("check")[0], 0)
+                (self.root / folder / "p.md").unlink()
+        self.write("docs/plans/README.md", "# Plans\n\nNo verdict here.\n")
+        self.assertEqual(self.ws("check")[0], 0, "a README is skipped")
+
+    def test_this_repositorys_milestone_pages_and_template_carry_the_line(self):
+        manifest = json.loads((ROOT / "workspace.json").read_text(encoding="utf-8"))
+        entry = next(p for p in manifest["parts"] if p.get("use") == "in_short")
+        self.assertEqual(partlib.load(ROOT, entry).run(snapshots.Tree(ROOT)), [])
+        template = (ROOT / "docs/templates/milestone-record.md").read_text(encoding="utf-8")
+        skeleton = template[template.index("```markdown"):]
+        self.assertRegex(skeleton, r"\n\*\*In short:\*\*")
+
+    def rules(self):
+        self.workspace({"use": "rule_pages"})
+        self.write("docs/rules/api.md", "---\napplies-to: \"src/orders-api/**\"\n---\n# API rule\n\nThe API rule text.\n")
+        self.write("docs/rules/code.md", "---\napplies-to:\n  - \"**/*.{cs,ts}\"\n  - \"tools/*.py\"\n---\n# Code rule\n\nThe code rule text.\n")
+        self.write("src/orders-api/Worker.cs", "class W { }\n")
+        self.git("init", "-q", "-b", "main")
+        self.commit_all()
+
+    def edit(self, path):
+        return self.ws("hook", "before-edit", "--tool", "claude-code", stdin=claude("Edit", file_path=str(path)))
+
+    def test_editing_a_file_returns_the_rule_pages_that_apply_to_it(self):
+        """Criterion 21."""
+        self.rules()
+        code, output = self.edit(self.root / "src/orders-api/Worker.cs")
+        self.assertEqual(code, 0)
+        self.assertIn("The API rule text.", output)
+        self.assertIn("The code rule text.", output)
+        code, output = self.edit(self.root / "Top.ts")
+        self.assertIn("The code rule text.", output, "**/ matches a file at the top level too")
+        self.assertNotIn("The API rule text.", output)
+        code, output = self.edit(self.root / "tools/sub/deep.py")
+        self.assertEqual((code, output.strip()), (0, ""), "a single star stays within one folder")
+        self.assertEqual(self.edit(self.root / "docs/readme.md")[1].strip(), "")
+        outside = tempfile.TemporaryDirectory()
+        self.addCleanup(outside.cleanup)
+        linked = pathlib.Path(outside.name).resolve() / "linked"
+        self.git("worktree", "add", "-q", "-b", "linked", str(linked))
+        code, output = self.edit(linked / "src/orders-api/Worker.cs")
+        self.assertIn("The API rule text.", output, "the same page from a linked worktree")
+
+    def test_this_repositorys_rule_page_reaches_an_edit_in_its_folder(self):
+        from wslib import events
+        manifest = json.loads((ROOT / "workspace.json").read_text(encoding="utf-8"))
+        self.assertIn("rule_pages", [p.get("use") for p in manifest["parts"]])
+        pages = sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "docs/rules").glob("*.md"))
+        self.assertTrue(pages, "docs/rules holds at least one real rule page")
+
+
 class AccessContractTests(unittest.TestCase):
     """M2 slice 3: a part reaches files, git, the environment and processes only as decision 0004 allows (criterion 8)."""
 
