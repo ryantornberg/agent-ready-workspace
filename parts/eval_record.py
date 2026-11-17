@@ -7,7 +7,8 @@ the real contract, the index, the playbook and the definition of done. evals/run
 stores a record of the last run of each case, with one hash over everything an
 agent or a grade depends on: the case, the arms file and every file it names,
 the scaffold, the acceptance test, the harness itself (run.py and grade.py), and
-the code of every workspace hook a grader runs, with the loader that runs it.
+the code of every workspace hook a grader runs. grade.py loads that hook's file
+itself, not through the engine, so an engine change leaves the records current.
 Edit any of them and the hash stops matching, so this check fails until the
 case is run again. A page's review date is left out of the hash, but only in its
 front matter: a line that starts "last-reviewed:" in a page's body is text an agent reads.
@@ -17,7 +18,8 @@ arm has five or more runs, and the guided arm has more such runs than the bare
 arm. A playbook the bare model follows just as well fails here, because it no
 longer earns its place. Pooled across the records that pass, the guided arm must
 also beat the two-line arm, by a one-sided Fisher exact test at p < 0.05: guidance
-that two lines would match fails too.
+that two lines would match fails too. That comparison needs 40 or more runs in
+every arm, pooled across the records, as the plans count trials.
 
 It trusts the record file: it shows that someone ran the case on this wording.
 It cannot stop a person from editing the record by hand. CI re-grades every
@@ -40,8 +42,8 @@ KIND = "check"
 HARNESS = ("run.py", "grade.py")
 ARMS = "arms.json"
 MIN_RUNS = 5
-LOADER = "wslib/parts.py"   # what a hook_allows grader loads a hook through
 POOLED_P = 0.05
+POOLED_MIN_RUNS = 40
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
 
 
@@ -92,7 +94,7 @@ def covered_files(case_path, case, paths=(), arms=None, folder="evals"):
         files.append(case["acceptance"])
     hooks = sorted({g.get("hook") for g in case.get("graders", []) if isinstance(g, dict) and g.get("type") == "hook_allows"})
     for hook in hooks:
-        files += [f"parts/{hook}.py", LOADER]
+        files.append(f"parts/{hook}.py")
     scaffold = case.get("scaffold_dir")
     if scaffold:
         files += sorted(p for p in paths if p.startswith(scaffold.strip("/") + "/"))
@@ -133,13 +135,21 @@ def judge(record, arm_names, grader_ids):
     return None
 
 
-def pooled(records):
+def pooled(records, min_runs=POOLED_MIN_RUNS):
     """Why the records, pooled, do not show the guided arm beating the two-line arm, or None.
-    records: [(record, grader ids)], each a record that passes judge()."""
+    records: [(record, grader ids)], each a record that passes judge(). min_runs: runs each arm needs, pooled."""
     if not records:
         return None
     if not all("two-line" in record["arms"] for record, _ in records):
         return "the pooled comparison needs a two-line arm in every record"
+    totals = {}
+    for record, _ in records:
+        for arm, given in record["arms"].items():
+            totals[arm] = totals.get(arm, 0) + len(given["runs"])
+    for arm, total in totals.items():
+        if total < min_runs:
+            return (f"pooled across {len(records)} case(s), the {arm} arm has {total} runs; the comparison "
+                    f"needs {min_runs} or more in every arm")
     counts = {arm: [0, 0] for arm in ("guided", "two-line")}
     for record, grader_ids in records:
         for arm in counts:

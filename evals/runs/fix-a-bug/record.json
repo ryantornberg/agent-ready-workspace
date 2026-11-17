@@ -15,7 +15,6 @@
     "evals/two-line.md",
     "evals/acceptance/fix-a-bug.py",
     "parts/no_stage_all.py",
-    "wslib/parts.py",
     "evals/scaffold/README.md",
     "evals/scaffold/src/orders-api/reconciliation_worker.py",
     "evals/scaffold/src/orders-api/sales_report.py",
@@ -28,9 +27,9 @@
     "evals/scaffold/tests/test_orders_service_v1.py",
     "evals/scaffold/tests/test_orders_web.py"
   ],
-  "guidance_sha256": "f666ef0e3c260756913c151c4adedbf8259b2b1f4b1ae680b608f5d5a0df162a",
+  "guidance_sha256": "91e93a3a64b3f0b943a4e5f6be8811dd463d64b2d10ac3cb53a2e5b16ac1d847",
   "runs_per_arm": 15,
-  "agent": "Claude Code 2.1.325",
+  "agent": "Claude Code 2.1.326",
   "model": "claude-haiku-5-5",
   "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
   "arms": {
@@ -487,7 +486,7 @@
     "bare": {
       "runs_passing_every_grader": 0,
       "runs_passing_each_grader": {
-        "sees-a-test-fail-before-editing": 1,
+        "sees-a-test-fail-before-editing": 0,
         "new-test-fails-on-the-original-code": 15,
         "suite-passes-after-the-change": 15,
         "the-request-is-met": 15,
@@ -529,7 +528,7 @@
           "transcript": "bare-3.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": true,
+            "sees-a-test-fail-before-editing": false,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
