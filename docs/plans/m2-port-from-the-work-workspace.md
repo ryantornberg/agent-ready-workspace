@@ -244,3 +244,13 @@ The agent, 2026-11-16, at approval, on the same footing:
 8. **The descriptions stay private.** The walled reader writes them beside the private source map, not in this repository. `deny_list` blocks names, not facts about how a team or its systems work, so a public page would need the maintainer to read it first. What the builders publish still passes `deny_list`, and is generic code and pages rather than a description of the source.
 
 ## Results
+
+### Slice 0, 2026-11-16
+
+Merged in [#12](https://github.com/ryantornberg/agent-ready-workspace/pull/12). The full report is in the [milestone record](../milestones/m2.md#slice-0-the-eval-harness-re-recorded).
+
+- verified: criteria 1, 2, 27 and 28 hold. `EvalHarnessApartTests` passes; seven of its eight tests failed at `397e972`.
+- verified: the recording passes the gate and loses no comparison M1's recording won. 45, 19 and 0 of 45 runs passed every grader; guided against two-line, one-sided Fisher exact p = 8.4e-11.
+- verified: CI passed on all five jobs, on the pull request and on `main` after the merge (criterion 26 for this slice).
+- verified: 139 agent runs used of the 150 allowed; the deny list and `leaks()` passed on every transcript.
+- inferred: slices 3 to 5 can now change the engine without staling the eval, since the records hash only the hook's file and the harness. Slice 3 will be the first real test of that.
