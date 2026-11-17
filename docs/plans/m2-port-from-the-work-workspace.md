@@ -167,6 +167,20 @@ Worth porting, but not in this milestone:
 - **Linked-change reminder.** After an edit, name the other layers the index lists as changing with that path.
 - **Warning delta.** Compare build warnings between two commits, for touched files only.
 
+Placed by the walled reader on 2026-11-16 (criterion 29). Round two's five come first:
+
+- **Partial-access checkout of pinned repositories.** This repository has no real pinned repositories yet.
+- **Playbooks to import a pinned repository, review architecture, build a prototype, and review an escaped defect.** Playbooks wait for M3's eval harness.
+- **Refuse commands that discard uncommitted work.** A reset or checkout that throws away another session's edits. Needs slice 4's lease.
+- **Lease check at commit.** Pairs with the lease check at push, above.
+- **Draft-only pull requests.** Refuse opening a pull request that is not a draft; same hook as the review mark.
+- **Commit subject format.** A check on the first line of a commit message.
+- **Instructions-check reminder.** Ask that a commit changing guidance record its instructions check; comes with that playbook.
+- **Secret scan.** Needs a third-party scanner, which the engine may not use.
+- **Worktrees read pinned repositories from the main copy.** Matters once pinned repositories exist.
+- **Session hand-off note.** Needs its own eval case.
+- **Remove a session's worktree after its work lands.** A `session-end` reminder can do it after slice 4.
+
 ## Staying behind
 
 | Feature | Why it stays |
@@ -177,6 +191,9 @@ Worth porting, but not in this milestone:
 | Require a tier on hand-offs | `handoff_tier` already covers it. |
 | Refuse edits to personal notes folders | `shelved` covers it with a folder list. |
 | Status line | A personal display preference, not a rule. |
+| No-regression eval mark at push | `eval_record` already refuses a stale or losing record at the commit and in CI. |
+| Per-clone switches that turn checks off | A check here binds every clone of the repository. |
+| Publishing docs to a team wiki | Depends on the source team's wiki. |
 | Twin-file drift, closed-ticket defects, migration audit, side-by-side test setups, commit-link rewriting, architecture lookup, code maps, local CI mirror, issue-tracker, regression, theme and scaffolding playbooks | Each depends on the source team's code, tracker or cloud. |
 
 ## Red team
