@@ -8,7 +8,7 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 
 | Claim | Evidence | Re-run |
 |---|---|---|
-| Every part passes its own cases, and the runner refuses one that does not. | 12 parts, 212 cases | `python3 ws.py selftest` |
+| Every part passes its own cases, and the runner refuses one that does not. | 15 parts, 228 cases | `python3 ws.py selftest` |
 | Each part added since M2 has a case that a do-nothing stub fails. | `test_cases_bite` | `python3 -m unittest tests.test_cases_bite` |
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | `FailClosedTests`: an empty event, a renamed field, a command given as a list, an upper-cased path, a symbolic link into the shelved folder, no Python on the path | `python3 -m unittest tests.test_core.FailClosedTests` |
 | A broken check cannot lock out the session that repairs it, and a manifest edit cannot switch the checks off. | `NoSelfLockTests` | `python3 -m unittest tests.test_core.NoSelfLockTests` |
@@ -17,6 +17,10 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 | The manifest names the engine's version, a reason for every part and a full tier binding. | `ShapeForGrowthTests` | `python3 -m unittest tests.test_core.ShapeForGrowthTests` |
 | A direct push to main that adds a machinery commit is refused, and so is `gh pr merge --admin`; the machinery page and the manifest hold one list. | `DirectPushTests`, against a temporary bare remote and through `git push` itself; `AdminMergeTests`; the cases of `direct_push` and `no_admin_merge` | `python3 -m unittest tests.test_core.DirectPushTests tests.test_core.AdminMergeTests` |
 | Each session gets its own browser. | Two isolated browser servers both opened a page, and two sharing a profile folder collided, the second reporting the lock (opt-in test, run 2026-11-16 on macOS with `@playwright/mcp@0.0.84`). A recorded Claude Code 2.1.326 session listed the project's server as connected, with 25 browser tools and none of the plugin's: [tests/records/claude-code-browser-session.json](tests/records/claude-code-browser-session.json). `browser_isolation`'s cases. | `WS_BROWSER_TEST=1 python3 -m unittest tests.test_browser` (needs Node and Chrome); `python3 -m unittest tests.test_core.BrowserIsolationTests` |
+| A path is placed by the working copy that holds it, so `shelved` answers the same in a linked worktree, and the edit is recorded in that worktree's ledger. | `WorktreePlacementTests` | `python3 -m unittest tests.test_core.WorktreePlacementTests` |
+| A part reaches files, git, the environment and processes only as [decision 0004](docs/decisions/0004-the-hook-contract.md) allows. | `AccessContractTests` reads the decision's table and every part's code | `python3 -m unittest tests.test_core.AccessContractTests` |
+| A session start lists the stale pages and the pins behind their upstream, and never fails. Both tools deliver session start and end. | `SessionEventTests`, `PinTests`; one recorded run of each tool, [tests/records/session-events.json](tests/records/session-events.json), replayed by `SessionReplayTests`. In the Claude Code run the notice reached the agent, which named the stale page. | `python3 -m unittest tests.test_core.SessionEventTests tests.test_core.PinTests tests.test_core.SessionReplayTests` |
+| A staged pin must be on its reachable upstream's default branch. | `PinTests`, against local fixture repositories; `pin_on_default`'s cases | `python3 -m unittest tests.test_core.PinTests` |
 | The same hooks run under Codex CLI. | One recorded run of codex-cli 0.169.0, [tests/records/codex-cli-run.json](tests/records/codex-cli-run.json), replayed by `SecondToolTests` | `python3 -m unittest tests.test_core.SecondToolTests` |
 
 ## The eval

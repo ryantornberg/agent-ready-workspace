@@ -2877,6 +2877,41 @@ class PinTests(Folder):
         self.assertEqual(self.ws("check", "--staged")[0], 0)
 
 
+class SessionReplayTests(Folder):
+    """M2 slice 3: the session events that Claude Code and Codex CLI sent in recorded runs, replayed through the
+    adapters (criteria 13 and 36). tests/records/session-events.json holds them."""
+
+    def setUp(self):
+        super().setUp()
+        self.record = json.loads((ROOT / "tests/records/session-events.json").read_text(encoding="utf-8"))
+
+    def test_each_tool_delivered_both_events_with_identity_and_a_live_parent(self):
+        from wslib import events
+        seen = set()
+        for call in self.record["calls"]:
+            payload = dict(call["payload"], cwd=str(self.root))     # the recorded folder, as this machine spells one
+            name = payload["hook_event_name"]
+            event = {"SessionStart": "session-start", "SessionEnd": "session-end"}[name]
+            with self.subTest(tool=call["tool"], event=event):
+                found = events.read(self.root, event, json.dumps(payload), call["tool"])[0]
+                self.assertEqual(found["session"], call["payload"]["session_id"])
+                self.assertEqual(found["tool"], call["tool"])
+                # Liveness, for decision 0005: the hook's parent is a shell, and its parent is the agent tool.
+                self.assertEqual(call["hook_parents"][1], {"claude-code": "claude", "codex": "codex"}[call["tool"]])
+                seen.add((call["tool"], event))
+        self.assertEqual(seen, {(tool, event) for tool in ("claude-code", "codex") for event in ("session-start", "session-end")})
+        ids = {call["tool"]: {c["payload"]["session_id"] for c in self.record["calls"] if c["tool"] == call["tool"]}
+               for call in self.record["calls"]}
+        self.assertEqual({tool: len(found) for tool, found in ids.items()}, {"claude-code": 1, "codex": 1},
+                         "a session's start and end carry the same id")
+
+    def test_the_recorded_claude_code_session_was_told_about_the_stale_page(self):
+        run = self.record["runs"]["claude-code"]
+        self.assertEqual(run["notice"]["outcome"], "success")
+        self.assertIn("docs/stale-for-the-record.md", run["notice"]["output"]["hookSpecificOutput"]["additionalContext"])
+        self.assertIn("docs/stale-for-the-record.md", run["reply"])
+
+
 class AccessContractTests(unittest.TestCase):
     """M2 slice 3: a part reaches files, git, the environment and processes only as decision 0004 allows (criterion 8)."""
 
