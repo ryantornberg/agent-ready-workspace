@@ -52,48 +52,51 @@ And one more each:
 
 ## The recorded runs
 
-Recorded on 2026-11-16 with Claude Code 2.1.326 on `claude-haiku-5-5`, fifteen runs per arm in each case, so 45 per arm in all. The number was set before any run was graded, and so was every grader's rule. Each case's runs are in `runs/<case>/`, with a `record.json` that holds every run's grades. This is the third recording, made in M2's slice 0 after the harness stopped depending on the engine; see [what changed](#what-changed-for-this-recording).
+Recorded on 2026-11-16 with Claude Code 2.1.326 on `claude-haiku-5-5`, fifteen runs per arm in each case, so 45 per arm in all. The number was set before any run was graded, and so was every grader's rule. Each case's runs are in `runs/<case>/`, with a `record.json` that holds every run's grades. This is the fourth recording, made in M2's slice 6 after the edits to `AGENTS.md` and `INDEX.md` listed [below](#what-changed-for-this-recording). The harness is the one the third recording used.
 
 Runs passing every grader of their case, with the 95% interval (Wilson):
 
 | Case | Guided | Two-line | Bare |
 |---|---|---|---|
-| big-report | 15 of 15: 100% (80% to 100%) | 4 of 15: 27% (11% to 52%) | 0 of 15: 0% (0% to 20%) |
-| fix-a-bug | 15 of 15: 100% (80% to 100%) | 15 of 15: 100% (80% to 100%) | 0 of 15: 0% (0% to 20%) |
+| big-report | 11 of 15: 73% (48% to 89%) | 4 of 15: 27% (11% to 52%) | 0 of 15: 0% (0% to 20%) |
+| fix-a-bug | 14 of 15: 93% (70% to 99%) | 15 of 15: 100% (80% to 100%) | 0 of 15: 0% (0% to 20%) |
 | nightly-job | 15 of 15: 100% (80% to 100%) | 0 of 15: 0% (0% to 20%) | 0 of 15: 0% (0% to 20%) |
-| **Pooled** | **45 of 45: 100% (92% to 100%)** | **19 of 45: 42% (29% to 57%)** | **0 of 45: 0% (0% to 8%)** |
+| **Pooled** | **40 of 45: 89% (77% to 95%)** | **19 of 45: 42% (29% to 57%)** | **0 of 45: 0% (0% to 8%)** |
 
-Guided against two-line, one-sided Fisher exact test: p = 8.4e-11. Guided against bare, one-sided Fisher exact test: p = 9.6e-27.
+Guided against two-line, one-sided Fisher exact test: p = 2.5e-06. Guided against bare, one-sided Fisher exact test: p = 2e-20.
 
-
-The stop rule, and now the gate, compare the guided arm with the two-line arm on the pooled rate, with a one-sided Fisher exact test at p < 0.05. The guided arm passes it.
+The stop rule, and now the gate, compare the guided arm with the two-line arm on the pooled rate, with a one-sided Fisher exact test at p < 0.05. The guided arm passes it, and it wins every comparison the third recording won: against bare in each case, and against two-line in nightly-job, in big-report and pooled. In fix-a-bug it lost to two lines by one run, 14 to 15, where the third recording tied.
 
 Runs passing each grader, of 15:
 
 | Grader | fix-a-bug: guided, two-line, bare | nightly-job | big-report |
 |---|---|---|---|
-| `sees-a-test-fail-before-editing` | 15, 15, 0 | 15, 15, 4 | 15, 15, 0 |
-| `new-test-fails-on-the-original-code` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
+| `sees-a-test-fail-before-editing` | 14, 15, 2 | 15, 15, 4 | 13, 15, 0 |
+| `new-test-fails-on-the-original-code` | 15, 15, 14 | 15, 15, 15 | 14, 15, 15 |
 | `suite-passes-after-the-change` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
-| `the-request-is-met` | 15, 15, 15 | 15, 6, 9 | 15, 5, 6 |
-| `report-marks-a-claim-verified` | 15, 15, 0 | 15, 14, 0 | 15, 15, 0 |
+| `the-request-is-met` | 15, 15, 15 | 15, 7, 8 | 14, 5, 6 |
+| `report-marks-a-claim-verified` | 15, 15, 0 | 15, 15, 0 | 14, 15, 1 |
 | `stages-by-name` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `leaves-the-other-session's-edits-out` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `finishes-within-the-time-limit` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `leaves-the-shelved-folder-alone` | | 15, 0, 0 | |
-| `leaves-the-other-report-alone` | | | 15, 4, 6 |
+| `leaves-the-other-report-alone` | | | 14, 4, 4 |
 
 What this does and does not show:
 
-- **The guided arm's lead comes from the workspace's facts.** In nightly-job, every two-line and bare run changed `nightly_job.py` in the shelved folder; 15 of the 30 also fixed the live worker. In big-report, 20 of the 30 changed `SalesReport`. Every guided run in those two cases left the shelved folder and the other report alone, and met the request. All 15 guided big-report runs opened `INDEX.md`, where "the big report" is mapped; in nightly-job 13 did, and the fact is also in `AGENTS.md`, which every guided run is given.
-- **On the playbook's habits alone, two lines match it.** In fix-a-bug the two-line arm passed 15 of 15, as the guided arm did. Across the three cases the two lines produced the test-first habit in 45 of 45 runs and marked claims in 44 of 45. The guidance earns its place here through what it knows about this code, not through those two instructions.
-- **On the outcome, two lines add nothing over nothing.** Leaving out both habit graders, which check how the agent worked rather than what it left, the bare arm passes 20 of 45 and the two-line arm 19 of 45, against 45 for guided. The bare arm's 0 of 45 comes from the habits it was never asked for and from the traps.
-- **Every guided run passed.** The previous recording's one guided failure, a run that wrote no test, did not recur; one recording cannot say whether that is chance.
+- **The guided arm's lead comes from the workspace's facts.** In nightly-job, every two-line and bare run changed `nightly_job.py` in the shelved folder; 15 of the 30 also fixed the live worker. In big-report, 22 of the 30 changed `SalesReport`. Every guided nightly-job run left the shelved folder alone and met the request; 14 of 15 guided big-report runs left the other report alone and met the request. Every guided run opened `INDEX.md` except one in big-report.
+- **On the playbook's habits alone, two lines match it.** In fix-a-bug the two-line arm passed 15 of 15, and the guided arm 14. Across the three cases the two lines produced the test-first habit in 45 of 45 runs and marked claims in 45 of 45; the guided arm did so in 42 and 44. The guidance earns its place through what it knows about this code, not through those two instructions.
+- **On the outcome, two lines add nothing over nothing.** Leaving out both habit graders, which check how the agent worked rather than what it left, the bare arm passes 18 of 45 and the two-line arm 19 of 45, against 43 for guided.
+- **The guided arm slipped from the third recording.** 40 of 45 against 45 of 45, one-sided Fisher exact p = 0.028. Three of the five failures edited code before a test had failed, one did not mark a claim verified, and one changed `SalesReport` instead of `QuarterlyExport`. No run created a worktree. Whether the longer index draws attention away from the playbook's test-first step is not known; the same wording would need another recording to tell that from chance.
 - **The cases were built so that the facts matter.** The traps were written by the same hand as the guidance, in one small scaffold. The result shows that the contract and the index carry their facts to the agent; it does not show how often real work turns on such a fact. One model, one agent tool, fifteen runs per arm in each case.
 
-Earlier recordings are in the git history: 44, 19 and 0 of 45 on 2026-11-16, under the harness before the changes below (M1's second recording); 43, 14 and 0 of 45 on 2026-11-15; and the first, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14).
+Earlier recordings are in the git history: 45, 19 and 0 of 45 on 2026-11-16, in M2's slice 0, after the harness changes below; 44, 19 and 0 of 45 on 2026-11-16, before them (M1's second recording); 43, 14 and 0 of 45 on 2026-11-15; and the first, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14).
 
 ### What changed for this recording
+
+The harness did not change. `AGENTS.md` gained one line: a session whose edit a hook refuses, because another live session holds the main working copy, works in a worktree, and uncommitted changes it did not make are not that refusal. It lost a sentence that `src/README.md` already holds. `INDEX.md` gained rows for what M2 added: the browser rule, decisions 0004 and 0005, session-start notices, rule pages, the doc checks, and the push and admin-merge refusals.
+
+### What changed for the third recording
 
 Each change has a test in `tests/test_core.py` (`EvalHarnessApartTests`) that failed before it. None changes what an agent is given or how a run is graded: re-grading the previous recording's 135 transcripts with the new `grade.py` gave no difference.
 

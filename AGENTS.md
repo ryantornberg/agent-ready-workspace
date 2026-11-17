@@ -10,7 +10,7 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 
 ## What lives where
 
-- [src/](src/README.md) holds the code. In a real workspace each folder is a repository pinned at an exact commit; here it is a few sample files.
+- [src/](src/README.md) holds the code, one repository per folder.
 - `docs/` holds what the code cannot tell you: decisions, procedures and how the parts fit together.
 - [INDEX.md](INDEX.md) lists every topic and maps everyday words to the names the code uses. Look there before you search.
 - [workspace.json](workspace.json) lists the checks and hooks this workspace runs. [docs/parts.md](docs/parts.md) says how to add one.
@@ -19,6 +19,7 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 
 - `src/orders-api` is the live order service. `src/orders-service-v1` looks current and is not: it is kept read-only for audits. A hook refuses edits to it.
 - "The nightly job" means `ReconciliationWorker`. "A hold" means `AccountFreeze`. More in [INDEX.md](INDEX.md#search-aliases). A check fails when one of those names leaves the code.
+- A hook refuses an edit in the main working copy while another live agent session holds it. Only then work in a worktree of your own under `.claude/worktrees/`, as the refusal says. Uncommitted changes you did not make are not that refusal: leave them and work where you are. See [decision 0005](docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md).
 
 ## Finding things
 
