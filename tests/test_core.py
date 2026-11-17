@@ -2408,6 +2408,190 @@ class EvalHarnessApartTests(Folder):
                                             ".claude/settings.json"]).returncode, 0)
 
 
+MACHINERY = ["ws.py", "wslib/", "parts/", "tools/", "evals/*.py", "evals/cases/", "evals/acceptance/", "evals/arms.json",
+             "workspace.json", ".githooks/", ".github/", ".claude/settings.json", ".codex/hooks.json", "tests/"]
+ZERO = "0" * 40
+
+
+class DirectPushTests(Folder):
+    """M2 slice 1: a direct push to main that changes machinery is refused; the pull request is the only route.
+    Each case pushes to a temporary bare remote, with no network."""
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "direct_push", "machinery": MACHINERY})
+        self.write("docs/a.md", "# A\n")
+        self.git("init", "-q", "-b", "main")
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", "start")
+        remote = tempfile.TemporaryDirectory()
+        self.addCleanup(remote.cleanup)
+        self.remote = pathlib.Path(remote.name) / "origin.git"
+        subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(self.remote)], check=True, capture_output=True)
+        self.git("remote", "add", "origin", str(self.remote))
+        self.git("push", "-q", "--no-verify", "origin", "main")
+
+    def commit(self, path, text, message):
+        self.write(path, text)
+        self.git("add", "--", path)
+        self.git("commit", "-q", "-m", message)
+        return self.git("rev-parse", "HEAD").stdout.strip()
+
+    def tip(self, ref="refs/heads/main"):
+        done = subprocess.run(["git", "--git-dir", str(self.remote), "rev-parse", "--verify", "-q", ref],
+                              capture_output=True, text=True)
+        return done.stdout.strip() or ZERO
+
+    def push(self, local="HEAD", remote_ref="refs/heads/main", local_ref="refs/heads/main"):
+        sha = ZERO if local == ZERO else self.git("rev-parse", local).stdout.strip()
+        line = f"{local_ref} {sha} {remote_ref} {self.tip(remote_ref)}\n"
+        return self.ws("check", "--push", "origin", stdin=line)
+
+    def test_a_doc_only_push_to_main_passes(self):
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        code, output = self.push()
+        self.assertEqual(code, 0, output)
+
+    def test_a_machinery_commit_pushed_to_main_is_refused_naming_the_commit_and_the_path(self):
+        sha = self.commit("parts/new.py", "x = 1\n", "feat: a new part")
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertIn(sha[:7], output)
+        self.assertIn("feat: a new part", output)
+        self.assertIn("parts/new.py", output)
+        self.assertIn("docs/changing-the-machinery.md", output)   # criterion 32: the message names its page
+
+    def test_a_mixed_push_names_only_the_machinery_commit(self):
+        doc = self.commit("docs/b.md", "# B\n", "docs: b")
+        machinery = self.commit("evals/run.py", "# harness\n", "fix: harness")
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertIn(machinery[:7], output)
+        self.assertNotIn(doc[:7], output)
+
+    def test_the_machinery_list_matches_globs_one_folder_deep_and_folders_by_prefix(self):
+        self.commit("evals/scaffold/app.py", "x = 1\n", "test: scaffold")
+        self.assertEqual(self.push()[0], 0)
+        self.commit(".github/workflows/ci.yml", "on: push\n", "ci: workflow")
+        self.assertEqual(self.push()[0], 1)
+
+    def test_a_push_to_another_branch_and_a_deletion_pass(self):
+        self.commit("parts/new.py", "x = 1\n", "feat: a new part")
+        self.assertEqual(self.push(remote_ref="refs/heads/m2/slice-1", local_ref="refs/heads/m2/slice-1")[0], 0)
+        self.git("push", "-q", "--no-verify", "origin", "HEAD:refs/heads/old")
+        line = f"(delete) {ZERO} refs/heads/old {self.tip('refs/heads/old')}\n"
+        self.assertEqual(self.ws("check", "--push", "origin", stdin=line)[0], 0)
+
+    def test_a_merge_is_judged_by_the_commits_it_brings_in(self):
+        self.git("checkout", "-q", "-b", "topic")
+        sha = self.commit("wslib/x.py", "x = 1\n", "feat: engine")
+        self.git("checkout", "-q", "main")
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        self.git("merge", "-q", "--no-ff", "--no-edit", "topic")
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertIn(sha[:7], output)
+        self.assertNotIn("Merge branch", output)
+
+    def test_the_machinery_list_comes_from_the_remote_tip_not_the_push(self):
+        text = (self.root / "workspace.json").read_text(encoding="utf-8")
+        weaker = text.replace('"parts/", ', "").replace('"workspace.json", ', "")
+        self.assertNotEqual(weaker, text)
+        self.write("workspace.json", weaker)
+        self.write("parts/new.py", "x = 1\n")
+        self.git("add", "--", "workspace.json", "parts/new.py")
+        self.git("commit", "-q", "-m", "chore: quietly drop parts from the list")
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertIn("parts/new.py", output)
+
+    def test_a_range_that_cannot_be_listed_is_refused(self):
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        sha = self.git("rev-parse", "HEAD").stdout.strip()
+        line = f"refs/heads/main {sha} refs/heads/main {'1' * 40}\n"       # a remote tip this clone has never seen
+        code, output = self.ws("check", "--push", "origin", stdin=line)
+        self.assertEqual(code, 2, output)
+        self.assertIn("fetch", output)
+
+    def test_a_new_main_is_checked_over_its_whole_history(self):
+        self.commit("parts/new.py", "x = 1\n", "feat: a new part")
+        sha = self.git("rev-parse", "HEAD").stdout.strip()
+        code, output = self.ws("check", "--push", "origin", stdin=f"refs/heads/main {sha} refs/heads/main {ZERO}\n")
+        self.assertEqual(code, 1, output)
+        self.assertIn("parts/new.py", output)
+
+    def test_a_remote_tip_without_a_readable_manifest_refuses_a_push_to_main(self):
+        self.git("rm", "-q", "workspace.json")
+        self.git("commit", "-q", "-m", "chore: no manifest")
+        self.git("push", "-q", "--no-verify", "origin", "main")
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        code, output = self.push()
+        self.assertEqual(code, 2, output)
+        self.assertIn("workspace.json", output)
+
+    def test_through_git_each_refspec_form_for_main_is_checked(self):
+        for name in ("ws.py",):
+            shutil.copy(ROOT / name, self.root / name)
+        shutil.copytree(ROOT / "wslib", self.root / "wslib", ignore=shutil.ignore_patterns("__pycache__"))
+        shutil.copytree(ROOT / ".githooks", self.root / ".githooks")
+        self.git("add", "--", "ws.py", "wslib", ".githooks")
+        self.git("commit", "-q", "-m", "chore: the engine")
+        self.git("push", "-q", "--no-verify", "origin", "main")
+        self.git("checkout", "-q", "-b", "topic")
+        self.commit("parts/new.py", "x = 1\n", "feat: a new part")
+        for refspec in ("HEAD:main", "topic:refs/heads/main"):
+            with self.subTest(refspec):
+                done = subprocess.run(["git", "-C", str(self.root), "-c", "core.hooksPath=.githooks", "push", "-q",
+                                       "origin", refspec], capture_output=True, text=True)
+                self.assertNotEqual(done.returncode, 0, done.stderr)
+                self.assertIn("parts/new.py", done.stderr)
+        self.git("checkout", "-q", "main")
+        self.git("merge", "-q", "--ff-only", "topic")
+        done = subprocess.run(["git", "-C", str(self.root), "-c", "core.hooksPath=.githooks", "push", "-q", "origin", "main"],
+                              capture_output=True, text=True)
+        self.assertNotEqual(done.returncode, 0, done.stderr)
+        done = subprocess.run(["git", "-C", str(self.root), "-c", "core.hooksPath=.githooks", "push", "-q", "origin",
+                               "main:refs/heads/topic"], capture_output=True, text=True)
+        self.assertEqual(done.returncode, 0, done.stderr)
+
+    def test_the_machinery_page_and_the_manifest_hold_one_list(self):
+        """Criterion 34."""
+        manifest = json.loads((ROOT / "workspace.json").read_text(encoding="utf-8"))
+        entries = [p for p in manifest["parts"] if p.get("use") == "direct_push"]
+        self.assertEqual(len(entries), 1, "workspace.json lists the direct_push part once")
+        page = (ROOT / "docs/changing-the-machinery.md").read_text(encoding="utf-8")
+        table = page[page.index("## What counts as machinery"):page.index("## The path for a machinery change")]
+        listed = []
+        for row in table.splitlines():
+            if row.startswith("| `"):
+                listed += re.findall(r"`([^`]+)`", row.split("|")[1])
+        self.assertEqual(sorted(listed), sorted(entries[0]["machinery"]))
+
+
+class AdminMergeTests(Folder):
+    """M2 slice 1: a merge past CI with the owner's administrator flag is refused (criterion 33)."""
+
+    def test_the_hook_is_wired_on_the_shell_event(self):
+        names = [p.get("use") for p in json.loads((ROOT / "workspace.json").read_text(encoding="utf-8"))["parts"]]
+        self.assertIn("no_admin_merge", names)
+        code, output = self.ws_root("hook", "before-shell", stdin='{"version": 1, "command": "gh pr merge 12 --admin"}')
+        self.assertEqual(code, 2, output)
+        self.assertIn("docs/changing-the-machinery.md", output)
+        code, output = self.ws_root("hook", "before-shell", stdin='{"version": 1, "command": "gh pr merge 12 --merge"}')
+        self.assertEqual(code, 0, output)
+
+    def ws_root(self, *args, stdin=""):
+        out, err = io.StringIO(), io.StringIO()
+        old = sys.stdin
+        sys.stdin = io.StringIO(stdin)
+        try:
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                code = ws.main(["--root", str(ROOT), *args])
+        finally:
+            sys.stdin = old
+        return code, out.getvalue() + err.getvalue()
+
+
 class DenyListTests(Folder):
     """The deny list is read from a file the environment names, so these cases cannot be data in a cases file."""
 

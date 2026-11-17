@@ -11,6 +11,12 @@ What changed in each version, for someone deciding whether to take it. The [mile
 - Git ignores `.claude/worktrees/`.
 - The eval was recorded again on 2026-11-16, 135 runs on `claude-haiku-5-5`: 45, 19 and 0 of 45 passed every grader (95% intervals 92% to 100%, 29% to 57%, 0% to 8%); guided against two-line, one-sided Fisher exact p = 8.4e-11.
 
+**Added:**
+
+- `direct_push`, a check the new pre-push hook runs: a push to main that adds a commit changing machinery is refused, and names each such commit with its path. It reads the machinery list from the remote's current tip. The machinery page's table and the manifest's list are one list, held together by a test.
+- `no_admin_merge`, a shell hook that refuses `gh pr merge --admin`.
+- A `push` phase for checks, and `ws.py check --push REMOTE`.
+
 **Fixed:**
 
 - `run.py` refuses a transcript holding the operator's identity written with backslashes, as a Windows path is.

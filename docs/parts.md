@@ -56,13 +56,14 @@ What a check can ask the snapshot:
 
 A finding is an error unless it says `level="warning"`. An error fails the commit.
 
-A check runs in phases. By default it runs at the commit and in CI. A check that sets `PHASES` names its own, from `"commit"`, `"ci"` and `"nightly"`:
+A check runs in phases. By default it runs at the commit and in CI. A check that sets `PHASES` names its own, from `"commit"`, `"ci"`, `"nightly"` and `"push"`:
 
 | Command | Runs the checks whose phases hold |
 |---|---|
 | `python3 ws.py check`, `python3 ws.py check --staged` | `commit`. It is the default, so the two agree. |
 | `python3 ws.py check --phase ci` | `ci`. CI runs it. |
 | `python3 ws.py check --phase nightly` | `nightly`. CI's weekly run runs it, for checks too slow for every commit. |
+| `python3 ws.py check --push REMOTE` | `push`. The pre-push hook runs it, with git's list of pushed refs on standard input. The parts and the manifest come from the remote's current tip, and the snapshot's `pushed` lists the commits the push adds, merges left out: each as `{"commit", "subject", "paths"}`. |
 
 The phases are the part's, not the manifest's, so no manifest edit can move `deny_list` off the commit. `selftest` runs every part's cases, whatever its phases.
 
@@ -131,7 +132,7 @@ A check case gives files and the findings to expect. Every finding the check ret
 
 An expectation written as text is an error. A warning is expected by saying so, as `{"message": "...", "level": "warning"}`. So a check whose errors are demoted to warnings fails its own cases, and cannot quietly stop failing commits.
 
-A check that reads the commit's state takes it from the case: `"staged"` lists every staged path, deletions included (default: `"changed"`); `"ledger"` lists the edit ledger's paths, and leaving it out means no ledger is open; `"replaying"` names a merge or rebase in progress. `"repositories"` names folders that are code repositories, and `"symlinks"` names files that are symbolic links.
+A check that reads the commit's state takes it from the case: `"staged"` lists every staged path, deletions included (default: `"changed"`); `"ledger"` lists the edit ledger's paths, and leaving it out means no ledger is open; `"replaying"` names a merge or rebase in progress. `"repositories"` names folders that are code repositories, and `"symlinks"` names files that are symbolic links. `"pushed"` lists the commits of a push, for a push check.
 
 A case runs with the settings in its own `config`, never with the manifest's. Changing a setting in the manifest therefore cannot fail a part's cases.
 
@@ -204,5 +205,7 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `deny_list` | check | A file or file name holds a term from a private list kept outside the repository, and so, from the commit-msg hook, does the commit message, the author or the committer. With no list it warns and checks nothing, so CI cannot run it. |
 | `edit_ledger` | check | While the edit ledger is open, a commit stages a path that no edit tool of the agent session wrote. |
 | `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |
+| `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
+| `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |
 | `handoff_tier` | hook, before-handoff | A delegated task names no tier on its first line, or sets a model or effort other than the manifest's binding for its tier, or leaves one unset that the tool lets it set. |

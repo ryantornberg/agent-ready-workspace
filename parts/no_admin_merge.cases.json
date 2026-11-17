@@ -1,0 +1,135 @@
+[
+  {
+    "name": "a merge with the flag after the number",
+    "event": {
+      "command": "gh pr merge 12 --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "the flag before the number, with other flags",
+    "event": {
+      "command": "gh pr merge --squash --admin --delete-branch 12"
+    },
+    "allow": false
+  },
+  {
+    "name": "the flag set to true",
+    "event": {
+      "command": "gh pr merge 12 --admin=true"
+    },
+    "allow": false
+  },
+  {
+    "name": "with a repository named first",
+    "event": {
+      "command": "gh -R owner/repo pr merge 12 --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "after a separator",
+    "event": {
+      "command": "git push && gh pr merge 12 --merge --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "on a new line",
+    "event": {
+      "command": "echo merging\ngh pr merge 12 --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "inside sh -c",
+    "event": {
+      "command": "sh -c 'gh pr merge 12 --admin'"
+    },
+    "allow": false
+  },
+  {
+    "name": "behind a wrapper",
+    "event": {
+      "command": "env GH_PROMPT_DISABLED=1 gh pr merge 12 --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "through eval",
+    "event": {
+      "command": "eval gh pr merge 12 --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "by a full path",
+    "event": {
+      "command": "/usr/local/bin/gh pr merge 12 --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "in a subshell",
+    "event": {
+      "command": "(gh pr merge 12 --admin)"
+    },
+    "allow": false
+  },
+  {
+    "name": "a merge without the flag",
+    "event": {
+      "command": "gh pr merge 12 --merge"
+    },
+    "allow": true
+  },
+  {
+    "name": "the flag set to false",
+    "event": {
+      "command": "gh pr merge 12 --admin=false"
+    },
+    "allow": true
+  },
+  {
+    "name": "a quoted mention in a commit message",
+    "event": {
+      "command": "git commit -m 'never run gh pr merge --admin'"
+    },
+    "allow": true
+  },
+  {
+    "name": "a mention in a heredoc body",
+    "event": {
+      "command": "cat > note.txt <<'EOF'\ngh pr merge 12 --admin\nEOF"
+    },
+    "allow": true
+  },
+  {
+    "name": "an echo of the command",
+    "event": {
+      "command": "echo gh pr merge 12 --admin"
+    },
+    "allow": true
+  },
+  {
+    "name": "another gh command with the flag",
+    "event": {
+      "command": "gh repo edit --admin"
+    },
+    "allow": true
+  },
+  {
+    "name": "the flag after the end of options",
+    "event": {
+      "command": "gh pr merge 12 -- --admin"
+    },
+    "allow": true
+  },
+  {
+    "name": "no command at all",
+    "event": {
+      "command": ""
+    },
+    "allow": true
+  }
+]

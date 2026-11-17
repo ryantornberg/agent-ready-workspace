@@ -1,0 +1,12 @@
+#!/bin/sh
+# Refuse a direct push to main whose new commits change machinery: scripts, hooks or CI.
+# Machinery reaches main through a pull request. git gives the refs on standard input; they pass straight through.
+# Install once, with the other hooks: git config core.hooksPath .githooks
+cd "$(git rev-parse --show-toplevel)" || exit 1
+for candidate in python3 python py; do
+  if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c "import sys; sys.exit(sys.version_info < (3, 9))" 2>/dev/null; then
+    exec "$candidate" ws.py check --push "$1"
+  fi
+done
+echo "pre-push: no working Python 3.9 or later found; the push is refused" >&2
+exit 1

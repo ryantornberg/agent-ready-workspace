@@ -27,6 +27,10 @@ edited what: `staged` is every path the commit adds, changes or deletes;
 or None when no ledger is open (wslib/ledger.py); `replaying` names a merge,
 cherry-pick, revert or rebase in progress, or is None. A Memory snapshot takes
 the same three from a case. A Tree has no staged paths and no ledger.
+
+For the pre-push check, `pushed` lists the commits a push adds to a branch, each as
+{"commit": full hash, "subject": first line, "paths": [paths it changes]}. Merge
+commits are left out; the commits they bring in are listed.
 """
 import codecs
 import os
@@ -77,8 +81,9 @@ class Snapshot:
     """repositories: folders that are code repositories of their own, such as a submodule; links: symbolic links."""
 
     def __init__(self, paths, changed=(), staged=None, ledger=None, replaying=None, ledger_problem=None,
-                 repositories=(), links=()):
+                 repositories=(), links=(), pushed=()):
         self._paths = frozenset(paths)
+        self.pushed = tuple(pushed)
         self.changed = frozenset(changed)
         self.staged = frozenset(self.changed if staged is None else staged)
         self.ledger = None if ledger is None else frozenset(ledger)
@@ -154,8 +159,10 @@ class Snapshot:
 
 
 class Memory(Snapshot):
-    def __init__(self, files, changed=(), staged=None, ledger=None, replaying=None, repositories=(), links=()):
-        super().__init__(files, changed, staged, ledger, replaying, repositories=repositories, links=links)
+    def __init__(self, files, changed=(), staged=None, ledger=None, replaying=None, repositories=(), links=(),
+                 pushed=()):
+        super().__init__(files, changed, staged, ledger, replaying, repositories=repositories, links=links,
+                         pushed=pushed)
         self._files = files
 
     def _bytes(self, path):
