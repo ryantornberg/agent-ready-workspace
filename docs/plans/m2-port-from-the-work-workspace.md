@@ -297,3 +297,11 @@ Merged in [#13](https://github.com/ryantornberg/agent-ready-workspace/pull/13). 
 - verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26).
 - verified: after the merge, the live shell hook refused an admin merge, and a dry-run push of a machinery commit to the real main was refused while a doc-only one went ahead.
 - inferred: the pre-push hook guards only clones whose hooks path is set; `--no-verify` skips it. The README's limits say so.
+
+### Slice 2, 2026-11-16
+
+Merged in [#14](https://github.com/ryantornberg/agent-ready-workspace/pull/14). The report is in the [milestone record](../milestones/m2.md#slice-2-one-browser-per-session).
+
+- verified: criteria 5, 6, 7, 22 (for this slice's part) and 35 hold. Four new tests failed at `009f26b` and pass at the tip; the opt-in browser test passed on macOS before and after the merge.
+- verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26).
+- inferred: Codex CLI loads the project's browser server. One Codex run neither showed nor ruled it out; the check holds Codex's config to the same rule.
