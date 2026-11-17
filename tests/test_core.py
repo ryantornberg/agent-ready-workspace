@@ -2196,8 +2196,7 @@ class EvalRerecordTests(Folder):
         for name in self.CASES:
             files = eval_record.covered_files(f"evals/cases/{name}.json", self.harness.load_case(name))
             self.assertIn("parts/no_stage_all.py", files, name)
-            self.assertIn("wslib/parts.py", files, name)
-        for name in ("parts/no_stage_all.py", "wslib/parts.py"):
+        for name in ("parts/no_stage_all.py",):
             with self.subTest(name):
                 copy = self.root / name.replace("/", "-")
                 for path in subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True,
@@ -2250,10 +2249,7 @@ class EvalRerecordTests(Folder):
             self.assertNotRegex(text, re.escape(temp) + r"(?![\w.-])")
         self.assertIn("$TMPDIR/pytest-of-someone/x.txt", text)
         self.assertTrue(temps <= set(self.harness.operator_identity()))
-        # On Windows, leaks() would miss a path with backslashes, because it searches the JSON text, where each
-        # backslash is doubled. run.py does not run there (it finds no POSIX shell), so no transcript is affected;
-        # evals/README.md lists it under the harness's limits.
-        for temp in (temps if os.name != "nt" else set()) | {"/private/var/folders/ab/cd/T", "/tmp/claude-501"}:
+        for temp in temps | {"/private/var/folders/ab/cd/T", "/tmp/claude-501"}:
             self.assertTrue(self.harness.leaks([{"kind": "run", "target": f"cat {temp}/x", "ok": True}]), temp)
         self.assertFalse(self.harness.leaks([{"kind": "run", "target": "cat $TMPDIR/x", "ok": True}]))
 
@@ -2282,15 +2278,134 @@ class EvalRerecordTests(Folder):
             return {"arms": {"guided": {"runs": self.runs(*["11"] * 5)}, "two-line": {"runs": self.runs(*two_line)},
                              "bare": {"runs": self.runs(*["00"] * 5)}}}
         close = [(record(["11", "11", "11", "11", "00"]), ["a", "b"])] * 3     # 15 of 15 against 12 of 15: p = 0.11
-        problem = eval_record.pooled(close)
+        problem = eval_record.pooled(close, min_runs=15)
         self.assertIn("Fisher", problem)
         self.assertIn("15 of 15", problem)
         self.assertIn("12 of 15", problem)
-        self.assertIsNone(eval_record.pooled([(record(["11", "00", "00", "01", "10"]), ["a", "b"])] * 3))
+        self.assertIsNone(eval_record.pooled([(record(["11", "00", "00", "01", "10"]), ["a", "b"])] * 3, min_runs=15))
         self.assertIsNone(eval_record.pooled([]))
         names = [case["name"] for case in json.loads((ROOT / "parts/eval_record.cases.json").read_text(encoding="utf-8"))]
         self.assertIn("pooled, a guided arm that does not beat the two-line arm by the Fisher test fails", names)
         self.assertIn("winning one grader is not enough when no guided run passes every grader", names)
+
+
+class EvalHarnessApartTests(Folder):
+    """M2 slice 0: the eval harness stops depending on the engine, so an engine change leaves the eval records current.
+    Each test failed at the slice's base commit."""
+
+    CASES = ("big-report", "fix-a-bug", "nightly-job")
+
+    def setUp(self):
+        super().setUp()
+        import run as harness   # evals/run.py
+        self.harness = harness
+
+    def copy_of_this_repository(self, *, with_runs):
+        copy = self.root / "workspace"
+        for path in subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True,
+                                   check=True).stdout.splitlines():
+            if (ROOT / path).is_file() and not path.startswith("src/") and (with_runs or not path.startswith("evals/runs/")):
+                (copy / path).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(ROOT / path, copy / path)
+        return copy
+
+    @staticmethod
+    def engine_edits(copy):
+        """An entry added to the engine's event list, and a change to the snapshot module."""
+        loader = copy / "wslib/parts.py"
+        text = loader.read_text(encoding="utf-8")
+        old = 'EVENTS = ("before-shell", "before-edit", "before-handoff")'
+        assert old in text, "the engine's event list moved; update this test"
+        loader.write_text(text.replace(old, 'EVENTS = ("before-shell", "before-edit", "before-handoff", "session-start")'),
+                          encoding="utf-8")
+        with (copy / "wslib/snapshot.py").open("a", encoding="utf-8") as handle:
+            handle.write("\n\ndef added_lines(path):\n    return []\n")
+
+    def test_the_hash_leaves_the_engines_loader_out(self):
+        from parts import eval_record
+        for name in self.CASES:
+            files = eval_record.covered_files(f"evals/cases/{name}.json", self.harness.load_case(name))
+            self.assertIn("parts/no_stage_all.py", files, name)
+            self.assertFalse([f for f in files if f.startswith("wslib/")], name)
+
+    def test_an_engine_change_leaves_every_eval_record_as_it_was(self):
+        """Criterion 2. Compared before and after the edit, so it holds whether or not the records are current."""
+        copy = self.copy_of_this_repository(with_runs=True)
+        entry = {"use": "eval_record", "playbooks": "docs/playbooks"}
+        before = [f["message"] for f in partlib.load(copy, entry).run(snapshots.Tree(copy))]
+        hashes = {name: self.harness.covered(name, copy)[1] for name in self.CASES}
+        self.engine_edits(copy)
+        after = [f["message"] for f in partlib.load(copy, entry).run(snapshots.Tree(copy))]
+        self.assertEqual(after, before)
+        self.assertEqual({name: self.harness.covered(name, copy)[1] for name in self.CASES}, hashes)
+
+    def test_the_harness_imports_nothing_from_the_engine(self):
+        import ast
+        for script in ("evals/run.py", "evals/grade.py"):
+            tree = ast.parse((ROOT / script).read_text(encoding="utf-8"))
+            imported = [node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
+            imported += [alias.name for node in ast.walk(tree) if isinstance(node, ast.Import) for alias in node.names]
+            self.assertFalse([name for name in imported if name and name.split(".")[0] == "wslib"], script)
+        done = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, 'evals'); import grade; "
+                                                     "print(sorted(m for m in sys.modules if m.split('.')[0] == 'wslib'))"],
+                              cwd=ROOT, capture_output=True, text=True, check=True)
+        self.assertEqual(done.stdout.strip(), "[]", "grade.py loads none of the engine")
+
+    def test_the_grader_loads_the_hooks_own_file_from_the_workspace_it_grades(self):
+        hook = (ROOT / "parts/no_stage_all.py").read_text(encoding="utf-8")
+        self.write("parts/no_stage_all.py", hook)            # the hook alone: no cases file, no engine beside it
+        grader = {"id": "stages-by-name", "type": "hook_allows", "hook": "no_stage_all"}
+        case = {"graders": [grader]}
+        by_name = [{"kind": "run", "target": "git add src/app.py", "ok": True}]
+        sweep = [{"kind": "run", "target": "git add -A", "ok": True}]
+        self.assertEqual(grade.grade(case, by_name, self.root), [("stages-by-name", True)])
+        self.assertEqual(grade.grade(case, sweep, self.root), [("stages-by-name", False)])
+        self.write("parts/no_stage_all.py", hook + "\n\ndef decide(event, config):\n    return None\n")
+        self.assertEqual(grade.grade(case, sweep, self.root), [("stages-by-name", True)], "the workspace's own file decides")
+        with self.assertRaises(grade.Malformed):
+            grade.grade({"graders": [dict(grader, hook="../no_stage_all")]}, sweep, self.root)
+
+    def test_the_harness_lists_the_same_files_and_hash_as_the_check(self):
+        from parts import eval_record
+        tree = snapshots.Tree(ROOT)
+        arms = json.loads((ROOT / "evals/arms.json").read_text(encoding="utf-8"))
+        for name in self.CASES:
+            with self.subTest(name):
+                case_path = f"evals/cases/{name}.json"
+                files = eval_record.covered_files(case_path, self.harness.load_case(name), list(tree.paths()), arms)
+                self.assertEqual(self.harness.covered(name), (files, eval_record.guidance_hash({f: tree.read(f) for f in files})))
+
+    def test_a_windows_path_written_with_backslashes_is_found(self):
+        """Criterion 27. Runs on every system: the identity is given, not read from this machine."""
+        for secret in (r"C:\Users\someone", r"C:\Users\someone\AppData\Local\Temp"):
+            with self.subTest(secret), mock.patch.object(self.harness, "operator_identity", return_value=[secret]):
+                for target in (rf"type {secret}\notes.txt", rf"type {secret.lower()}\notes.txt"):
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]), target)
+                self.assertTrue(self.harness.leaks([{"kind": "run", "target": "dir", "ok": True,
+                                                     "output": rf"Directory of {secret}"}]))
+                self.assertFalse(self.harness.leaks([{"kind": "run", "target": r"type .\notes.txt", "ok": True}]))
+
+    def test_the_gate_wants_40_or_more_runs_in_every_arm_pooled(self):
+        """Criterion 1: the plan's 40 runs per arm, pooled across the cases, as M1 counted them."""
+        from parts import eval_record
+
+        def record(n):
+            return {"arms": {arm: {"runs": [{"transcript": f"r{i}.json", "graders": {"a": arm == "guided"}}
+                                            for i in range(n)]} for arm in ("guided", "two-line", "bare")}}
+        problem = eval_record.pooled([(record(5), ["a"])] * 3)
+        self.assertIsNotNone(problem, "15 runs per arm pooled is too few")
+        self.assertIn("40 or more", problem)
+        self.assertIsNone(eval_record.pooled([(record(14), ["a"])] * 3))
+        short = [(record(14), ["a"]) for _ in range(3)]
+        short[0][0]["arms"]["bare"]["runs"] = short[0][0]["arms"]["bare"]["runs"][:11]
+        self.assertIn("the bare arm has 39 runs", eval_record.pooled(short))
+
+    def test_git_ignores_worktrees_under_the_claude_folder(self):
+        """Criterion 28."""
+        done = subprocess.run(["git", "-C", str(ROOT), "check-ignore", "-q", "--no-index", ".claude/worktrees/m2-slice-4/x"])
+        self.assertEqual(done.returncode, 0)
+        self.assertNotEqual(subprocess.run(["git", "-C", str(ROOT), "check-ignore", "-q", "--no-index",
+                                            ".claude/settings.json"]).returncode, 0)
 
 
 class DenyListTests(Folder):

@@ -20,8 +20,11 @@ Grader types:
   none         no action matches
   before       an action matching "first" comes before the first action matching "then".
                Fails if "then" comes first, or never comes.
-  hook_allows  a workspace hook allows every "run" action. The grader calls the
-               hook's own decide function, so the test and the rule cannot drift apart.
+  hook_allows  a workspace hook allows every "run" action. The grader loads the hook's
+               own file, parts/<hook>.py, and calls its decide function, so the test and
+               the rule cannot drift apart. It loads nothing from the engine (wslib/),
+               so the eval hash covers that one file, and an engine change leaves the
+               eval records current.
 
 A matcher is {"kind": ..., "match": regex, "output": regex, "ok": bool}; each part
 is optional. "match" is searched in the target and "output" in the output,
@@ -34,11 +37,10 @@ import json
 import pathlib
 import re
 import sys
+import types
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-
-from wslib import parts as partlib  # noqa: E402
+HOOK_NAME = re.compile(r"[A-Za-z0-9_]+")
 
 MATCHER_KEYS = {"kind", "match", "output", "ok"}
 GRADER_KEYS = {
@@ -82,6 +84,22 @@ def matches(action, matcher):
     return re.search(matcher.get("match", ""), str(action.get("target", "")), re.I | re.M) is not None
 
 
+def load_hook(root, name):
+    """The hook's own module, from parts/<name>.py under root. Raises Malformed when it cannot be loaded."""
+    if not isinstance(name, str) or not HOOK_NAME.fullmatch(name):
+        raise Malformed(f"a hook_allows grader names a hook under parts/ by its plain name, not {name!r}")
+    path = pathlib.Path(root) / "parts" / f"{name}.py"
+    module = types.ModuleType(f"graded_hook_{name}")
+    module.__file__ = str(path)
+    try:
+        exec(compile(path.read_text(encoding="utf-8-sig"), str(path), "exec"), module.__dict__)
+    except Exception as error:
+        raise Malformed(f"hook {name} cannot be loaded from {path.name}: {type(error).__name__}: {error}")
+    if not callable(getattr(module, "decide", None)):
+        raise Malformed(f"hook {name} has no decide function")
+    return module
+
+
 def grade_one(grader, actions, root=ROOT):
     kind = grader["type"]
     if kind == "any":
@@ -96,8 +114,8 @@ def grade_one(grader, actions, root=ROOT):
             if matches(action, grader["first"]):
                 seen_first = True
         return False
-    hook = partlib.load(root, {"use": grader["hook"]})
-    return all(hook.decide({"command": a.get("target")}) is None for a in actions if a.get("kind") == "run")
+    hook = load_hook(root, grader["hook"])
+    return all(hook.decide({"command": a.get("target")}, {}) is None for a in actions if a.get("kind") == "run")
 
 
 def grade(case, actions, root=ROOT):
@@ -126,7 +144,7 @@ def regrade_records(root=ROOT):
                 try:
                     actions = json.loads((record_path.parent / run["transcript"]).read_text(encoding="utf-8"))
                     fresh = dict(grade(case, actions, root))
-                except (OSError, ValueError, KeyError, TypeError, Malformed, partlib.PartError) as error:
+                except (OSError, ValueError, KeyError, TypeError, Malformed) as error:
                     differences.append(f"{where}: {arm} {run.get('transcript')}: cannot be graded: {error}")
                     continue
                 fresh_runs.append(fresh)
@@ -165,7 +183,7 @@ def main(argv=None):
         case = json.loads(pathlib.Path(argv[0]).read_text(encoding="utf-8"))
         actions = json.loads(pathlib.Path(argv[1]).read_text(encoding="utf-8"))
         results = grade(case, actions)
-    except (OSError, ValueError, Malformed, partlib.PartError) as error:
+    except (OSError, ValueError, Malformed) as error:
         print(f"grade: {error}", file=sys.stderr)
         return 2
     for grader_id, passed in results:

@@ -66,7 +66,6 @@ sys.path.insert(0, str(ROOT / "evals"))
 
 import grade as grading  # noqa: E402
 from parts import eval_record  # noqa: E402
-from wslib import snapshot as snapshots  # noqa: E402
 
 OTHER_SESSION = {
     "README.md": "\nNote to self: ask whether Export should include cancelled orders.\n",   # appended to a tracked file
@@ -95,6 +94,49 @@ REQUIRED_ARMS = ("guided", "two-line", "bare")
 # Paths that name this machine without naming its user: its temporary folders, and the agent tool's own.
 MACHINE_PATHS = re.compile(r"/(?:private/)?var/folders/|/(?:private/)?tmp/claude-\d")
 _CLEAN_GIT = []
+
+
+# Untracked files under these folders are not listed, as the eval_record check's snapshot does not list them.
+SKIPPED_FOLDERS = {".git", "node_modules", ".venv", "__pycache__"}
+
+
+def workspace_files(root=ROOT):
+    """Every file the eval_record check sees in root: tracked files on disk, and untracked files git does not ignore.
+
+    run.py lists files itself, not through the engine's snapshot, so the harness depends only on files the eval
+    hash covers. A test holds this listing, and the hash built from it, to the check's."""
+    root = pathlib.Path(root)
+
+    def names(*args):
+        done = subprocess.run(["git", "-C", str(root), "ls-files", "-z", *args], capture_output=True)
+        if done.returncode != 0:
+            raise RuntimeError(done.stderr.decode("utf-8", "replace").strip() or "git failed")
+        return [name for name in done.stdout.decode("utf-8", "surrogateescape").split("\0") if name]
+    try:
+        if not (root / ".git").exists():
+            raise RuntimeError("not the top of a git working copy")
+        tracked = names("-c")
+        untracked = [n for n in names("-o", "--exclude-standard") if not SKIPPED_FOLDERS.intersection(n.split("/"))]
+    except (OSError, RuntimeError):     # as the check does: no git, or no working copy, so walk the folder
+        found = []
+        for folder, dirs, files in os.walk(root):
+            dirs[:] = sorted(d for d in dirs if d not in SKIPPED_FOLDERS)
+            here = pathlib.Path(folder).relative_to(root).as_posix()
+            found += [name if here == "." else f"{here}/{name}" for name in sorted(files) if name != ".git"]
+        return [n for n in found if (root / n).is_file()]
+    return [n for n in dict.fromkeys(tracked + untracked) if (root / n).is_symlink() or (root / n).is_file()]
+
+
+def read_text(root, path):
+    """A file's text as the eval_record check reads it: UTF-8, with a byte-order mark dropped; "" when it is not."""
+    disk = pathlib.Path(root) / path
+    data = os.fsencode(os.readlink(disk)) if disk.is_symlink() else disk.read_bytes()
+    if b"\0" in data:
+        return ""
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return ""
 
 
 def clean_git_env():
@@ -140,7 +182,7 @@ def prepare(folder, case, files, root=ROOT):
     The scaffold's files are the ones the eval hash covers, no more: a file git ignores, such as a .DS_Store,
     is neither hashed nor given to the agent."""
     scaffold = case["scaffold_dir"].strip("/") + "/"
-    for path in snapshots.Tree(root).paths():
+    for path in workspace_files(root):
         if path.startswith(scaffold):
             (folder / path[len(scaffold):]).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(root / path, folder / path[len(scaffold):])
@@ -289,9 +331,21 @@ def operator_identity():
     return [value for value in found if len(value) > 2]
 
 
+def _strings(value):
+    """Every string in a transcript, as written: JSON text would double each backslash and hide a Windows path."""
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for item in value.values():
+            yield from _strings(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _strings(item)
+
+
 def leaks(actions):
     """What in a transcript would identify the operator or this machine. Empty when it is safe to write."""
-    text = json.dumps(actions).lower()
+    text = "\n".join(_strings(actions)).lower()
     return [secret for secret in operator_identity() if secret.lower() in text] + MACHINE_PATHS.findall(text)
 
 
@@ -380,10 +434,9 @@ def run_once(case, model, files, timeout):
 def covered(case_name, root=ROOT):
     case_path = f"evals/cases/{case_name}.json"
     case = json.loads((root / case_path).read_text(encoding="utf-8"))
-    tree = snapshots.Tree(root)
     arms = json.loads((root / "evals" / eval_record.ARMS).read_text(encoding="utf-8"))
-    files = eval_record.covered_files(case_path, case, list(tree.paths()), arms, "evals")
-    return files, eval_record.guidance_hash({f: tree.read(f) or "" for f in files})
+    files = eval_record.covered_files(case_path, case, workspace_files(root), arms, "evals")
+    return files, eval_record.guidance_hash({f: read_text(root, f) for f in files})
 
 
 def build_record(case, out, runs, files, digest, meta):
