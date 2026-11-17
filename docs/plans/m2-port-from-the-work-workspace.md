@@ -325,3 +325,15 @@ Merged in [#16](https://github.com/ryantornberg/agent-ready-workspace/pull/16), 
 - verified: CI passed on all five jobs on both pull requests and on `main` (criterion 26). Live, in a fresh clone of `main`, a second session was refused while the first held the lease, and allowed once the first ended.
 - inferred: Codex's process id is its hook's grandparent, as slice 3's recorded run showed. Decision 0005 names this as the first thing to recheck when Codex changes.
 
+### Slice 5, 2026-11-16
+
+Merged in [#18](https://github.com/ryantornberg/agent-ready-workspace/pull/18). The report is in the [milestone record](../milestones/m2.md#slice-5-the-doc-checks).
+
+- verified: criteria 19 to 22 hold. The new tests failed at `9669d8b` and pass at the tip.
+- verified: CI passed on all five jobs, on the pull request and on `main` (criterion 26). Live after the merge, an edit to a file under `src/orders-api` returned the rule page.
+- verified: the commit check still starts three git processes; the lines a commit adds come from its own batch read.
+
+### Where the plan stands, 2026-11-16
+
+Slices 0 to 5 and the walled reader are merged. Slice 6, the closing recording, is next: 135 agent runs, which did not fit in the session that built slices 0 to 5 (144 of its 150 used). The fresh-session red team, the attack scripts and sign-off follow slice 6.
+
