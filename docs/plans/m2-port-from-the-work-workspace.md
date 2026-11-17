@@ -316,3 +316,12 @@ Merged in [#15](https://github.com/ryantornberg/agent-ready-workspace/pull/15). 
 - verified: the engine changed in this slice and the eval records stayed current, as slice 0 meant.
 - inferred: Codex runs the project's own session hooks once the project is trusted. The recorded Codex run delivered both events to a hook given on the command line; Codex treated the clone's own configuration as untrusted.
 
+### Slice 4, 2026-11-16
+
+Merged in [#16](https://github.com/ryantornberg/agent-ready-workspace/pull/16), with one fix in [#17](https://github.com/ryantornberg/agent-ready-workspace/pull/17). The report is in the [milestone record](../milestones/m2.md#slice-4-the-writing-session-lease).
+
+- verified: criteria 14 to 18, 22 (for this slice's parts) and 31 hold. The new tests failed at `8a7ccca` and pass at the tip.
+- verified: one fix round. The lease was taken before the other edit hooks decided, which the suite showed by leaving a lease in this repository; fixed, with a test that failed at `114f302`.
+- verified: CI passed on all five jobs on both pull requests and on `main` (criterion 26). Live, in a fresh clone of `main`, a second session was refused while the first held the lease, and allowed once the first ended.
+- inferred: Codex's process id is its hook's grandparent, as slice 3's recorded run showed. Decision 0005 names this as the first thing to recheck when Codex changes.
+
