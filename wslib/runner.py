@@ -15,11 +15,18 @@ before-shell reminder opens the ledger of the folder the agent tool says its ses
 working copy has uncommitted changes. While a ledger is open, the commit check fails a staged path no edit
 tool wrote (parts/edit_ledger.py).
 
+The pre-push hook runs `check --push REMOTE`, with git's list of updated refs on standard input. For each
+ref pushed, the parts and the manifest come from the remote's current tip, not from the push, so a push
+cannot weaken the check that judges it. A push whose range cannot be listed, or whose remote tip holds no
+readable manifest, is refused when it goes to main.
+
 Exit codes: 0 clean; 1 a check found an error or a case failed; 2 a hook refused, or the setup is
 wrong. A hook that cannot decide exits 2 as well: it fails closed.
 """
 import argparse
+import os
 import pathlib
+import subprocess
 import sys
 
 from . import VERSION
@@ -71,7 +78,93 @@ def command_message(root, args):
     return 1 if errors else 0
 
 
+ZERO = "0" * 40
+# Variables git sets for a hook; a git call on another repository must not inherit them.
+GIT_VARIABLES = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_PREFIX",
+                 "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_QUARANTINE_PATH")
+
+
+def _git_text(root, *args):
+    """A git call's output as text, or None when it fails. Carriage returns are dropped, for Git Bash on Windows."""
+    env = {key: value for key, value in os.environ.items() if key not in GIT_VARIABLES}
+    done = subprocess.run(["git", "-C", str(root), "-c", "core.quotePath=false", *args], capture_output=True, env=env)
+    if done.returncode != 0:
+        return None
+    return done.stdout.decode("utf-8", "surrogateescape").replace("\r\n", "\n")
+
+
+def pushed_commits(root, local, remote):
+    """The commits a push adds, merges left out, each with its subject and paths. Raises PartError when it cannot list them."""
+    span = [local] if remote == ZERO else [f"{remote}..{local}"]
+    text = _git_text(root, "log", "--no-merges", "--format=%x01%H%x02%s", "--name-only", *span, "--")
+    if text is None:
+        raise partlib.PartError(f"the commits between {remote[:7]} and {local[:7]} cannot be listed. "
+                                f"Fetch first (git fetch), then push again.")
+    commits = []
+    for block in text.split("\x01")[1:]:
+        head, _, names = block.partition("\n")
+        sha, _, subject = head.partition("\x02")
+        commits.append({"commit": sha.strip(), "subject": subject.strip(),
+                        "paths": [line for line in names.split("\n") if line.strip()]})
+    return commits
+
+
+def push_parts(root, base):
+    """The manifest and the push checks, as the commit `base` holds them. None when it holds no readable manifest."""
+    text = _git_text(root, "show", f"{base}:{partlib.MANIFEST}")
+    if text is None:
+        return None
+    manifest = partlib.parse_manifest(text, f"{partlib.MANIFEST} at {base[:7]}")
+    files = {partlib.MANIFEST: text}
+    for entry in manifest["parts"]:
+        relative = partlib.source_of(root, entry)[1]
+        for name in (relative, relative[:-len(".py")] + ".cases.json"):
+            found = _git_text(root, "show", f"{base}:{name}")
+            if found is not None:
+                files[name] = found
+    loaded = partlib.load_all(root, manifest, snapshot=snapshots.Memory(files))
+    return [part for part in loaded if part.kind == "check" and "push" in part.phases]
+
+
+def command_push(root, args):
+    """The pre-push hook. Standard input holds one line per ref: local ref, local hash, remote ref, remote hash."""
+    errors = 0
+    for line in sys.stdin.read().splitlines():
+        if not line.strip():
+            continue
+        fields = line.split()
+        if len(fields) != 4:
+            raise partlib.PartError(f"pre-push: cannot read the line {line!r}")
+        _, local, remote_ref, remote = fields
+        if set(local) == {"0"}:
+            continue                    # a deletion adds no commit
+        remote = ZERO if set(remote) == {"0"} else remote
+        if remote != ZERO and _git_text(root, "cat-file", "-e", f"{remote}^{{commit}}") is None:
+            raise partlib.PartError(f"the remote's tip {remote[:7]} is not in this clone, so the push cannot be "
+                                    f"checked. Fetch first (git fetch), then push again.")
+        base = local if remote == ZERO else remote
+        parts = push_parts(root, base)
+        if parts is None:
+            if remote_ref == "refs/heads/main":
+                raise partlib.PartError(f"{partlib.MANIFEST} cannot be read at {base[:7]}, the tip this push builds on, "
+                                        f"so a push to main cannot be checked; see docs/changing-the-machinery.md")
+            continue
+        for part in parts:
+            if remote_ref != f"refs/heads/{part.config.get('branch', 'main')}":
+                continue
+            snapshot = snapshots.Memory({}, pushed=pushed_commits(root, local, remote))
+            for found in part.run(snapshot):
+                errors += found["level"] == "error"
+                print(f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{part.name}]",
+                      file=sys.stderr)
+    if errors:
+        print(f"\n{errors} error(s). The push was refused.", file=sys.stderr)
+    return 1 if errors else 0
+
+
 def command_check(root, args):
+    if args.push is not None:
+        return command_push(root, args)
     if args.message is not None:
         return command_message(root, args)
     if args.staged:
@@ -203,6 +296,7 @@ def main(argv=None):
     check.add_argument("--changed", nargs="*", default=[])
     check.add_argument("--changed-from", metavar="REF")
     check.add_argument("--message", metavar="FILE", help="check a commit message file, and the commit's identities")
+    check.add_argument("--push", metavar="REMOTE", help="the pre-push hook: check the refs git lists on standard input")
     check.add_argument("--phase", choices=partlib.PHASES, default="commit",
                        help="run only the checks for this phase (default: commit)")
     hook = commands.add_parser("hook")

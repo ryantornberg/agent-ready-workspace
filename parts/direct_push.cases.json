@@ -1,0 +1,220 @@
+[
+  {
+    "name": "a doc-only push passes",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ]
+    },
+    "pushed": [
+      {
+        "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "subject": "docs: a page",
+        "paths": [
+          "docs/a.md",
+          "README.md"
+        ]
+      }
+    ],
+    "expect": []
+  },
+  {
+    "name": "a commit that changes a part fails, naming the commit and the path",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ]
+    },
+    "pushed": [
+      {
+        "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "subject": "feat: a part",
+        "paths": [
+          "parts/x.py"
+        ]
+      }
+    ],
+    "expect": [
+      "commit bbbbbbb \"feat: a part\" changes machinery (parts/x.py)"
+    ]
+  },
+  {
+    "name": "of a mixed push, only the machinery commit is named",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ]
+    },
+    "pushed": [
+      {
+        "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "subject": "docs: a page",
+        "paths": [
+          "docs/a.md"
+        ]
+      },
+      {
+        "commit": "cccccccccccccccccccccccccccccccccccccccc",
+        "subject": "fix: engine",
+        "paths": [
+          "docs/b.md",
+          "wslib/x.py",
+          "ws.py"
+        ]
+      }
+    ],
+    "expect": [
+      "commit ccccccc \"fix: engine\" changes machinery (wslib/x.py and 1 more)"
+    ]
+  },
+  {
+    "name": "a star matches within one folder only",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ]
+    },
+    "pushed": [
+      {
+        "commit": "dddddddddddddddddddddddddddddddddddddddd",
+        "subject": "test: scaffold",
+        "paths": [
+          "evals/scaffold/app.py"
+        ]
+      },
+      {
+        "commit": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "subject": "fix: harness",
+        "paths": [
+          "evals/run.py"
+        ]
+      }
+    ],
+    "expect": [
+      "commit eeeeeee"
+    ]
+  },
+  {
+    "name": "a folder entry covers everything under it, and a file entry only that file",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ]
+    },
+    "pushed": [
+      {
+        "commit": "ffffffffffffffffffffffffffffffffffffffff",
+        "subject": "ci: a workflow",
+        "paths": [
+          ".github/workflows/ci.yml"
+        ]
+      },
+      {
+        "commit": "1111111111111111111111111111111111111111",
+        "subject": "docs: not the manifest",
+        "paths": [
+          "workspace.json.md"
+        ]
+      }
+    ],
+    "expect": [
+      "commit fffffff"
+    ]
+  },
+  {
+    "name": "a commit with no paths passes",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ]
+    },
+    "pushed": [
+      {
+        "commit": "2222222222222222222222222222222222222222",
+        "subject": "chore: empty",
+        "paths": []
+      }
+    ],
+    "expect": []
+  },
+  {
+    "name": "no machinery list fails closed",
+    "files": {},
+    "config": {},
+    "pushed": [
+      {
+        "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "subject": "docs: a page",
+        "paths": [
+          "docs/a.md"
+        ]
+      }
+    ],
+    "expect": [
+      "direct_push needs \"machinery\""
+    ]
+  },
+  {
+    "name": "the message names the branch it guards and the page",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ],
+      "branch": "trunk"
+    },
+    "pushed": [
+      {
+        "commit": "3333333333333333333333333333333333333333",
+        "subject": "feat: x",
+        "paths": [
+          "ws.py"
+        ]
+      }
+    ],
+    "expect": [
+      "pushed straight to trunk. Push it to its own branch and open a draft pull request, where CI runs on three systems; see docs/changing-the-machinery.md"
+    ]
+  }
+]

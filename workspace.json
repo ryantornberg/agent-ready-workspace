@@ -75,6 +75,30 @@
     {
       "use": "handoff_tier",
       "why": "Every delegated task names its tier and runs at that tier's model and effort, as the orchestration rules require."
+    },
+    {
+      "use": "direct_push",
+      "why": "A broken hook on main locks out every session that pulls it, so machinery reaches main only through a pull request, where CI runs on three systems; the branch rule does not bind the owner's direct push.",
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "tools/",
+        "evals/*.py",
+        "evals/cases/",
+        "evals/acceptance/",
+        "evals/arms.json",
+        "workspace.json",
+        ".githooks/",
+        ".github/",
+        ".claude/settings.json",
+        ".codex/hooks.json",
+        "tests/"
+      ]
+    },
+    {
+      "use": "no_admin_merge",
+      "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in."
     }
   ]
 }

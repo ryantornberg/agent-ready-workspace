@@ -20,7 +20,7 @@ Docs change freely. The scripts, hooks and CI that check them take a stricter pa
 | `.githooks/`, `.github/`, `.claude/settings.json`, `.codex/hooks.json` | The commit hook, CI and the agent tools' wiring |
 | `tests/` | The tests of all of the above |
 
-Everything else is a doc.
+Everything else is a doc. The table is the `machinery` list of the `direct_push` part in [workspace.json](../workspace.json), and a test fails when the two differ.
 
 ## The path for a machinery change
 
@@ -38,7 +38,12 @@ Everything else is a doc.
 5. **Push the branch and open a draft pull request.** CI runs on three systems. In this repository an agent may push; in a team's workspace, a person does.
 6. **Merge once CI is green.** A red run on any one system blocks the merge.
 
-A branch rule on GitHub requires all five CI jobs to pass before a pull request merges to main. It does not bind the repository's owner: an owner's direct push, and `gh pr merge --admin`, both go past it, and an agent using the owner's sign-in has the same power. Hooks that refuse both are planned in [M2](plans/m2-port-from-the-work-workspace.md); until they land, this path is kept by hand.
+A branch rule on GitHub requires all five CI jobs to pass before a pull request merges to main. It does not bind the repository's owner: an owner's direct push, and `gh pr merge --admin`, both go past it, and an agent using the owner's sign-in has the same power. Two parts close those routes:
+
+- **`direct_push`, at the push.** The pre-push hook refuses a push to main that adds a commit changing a machinery path, and names each such commit with its path. A merge is judged by the commits it brings in. A doc-only push, and a push to any other branch, goes ahead. The hook reads the part and the machinery list from the remote's current tip, so a push that edits the list is judged by the list it would replace. It refuses when it cannot list the commits being pushed, so fetch first; and it refuses a push to main when the remote's tip holds no readable manifest.
+- **`no_admin_merge`, before a shell command.** It refuses `gh pr merge` with `--admin`, in any form the command-line parser of `no_stage_all` follows. It cannot see a merge made through a raw API call, a `gh` alias or a script.
+
+A first push that creates main checks the whole history being pushed. To create main in a new repository, push once with `--no-verify`.
 
 ## Traps
 

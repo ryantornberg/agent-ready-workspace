@@ -7,8 +7,9 @@ A part is one Python file. It declares what it is and exposes one function:
                        def decide(event, config) -> None to allow, or the reason to refuse
                        MODE = "remind" (optional): the hook never refuses. Its reason is shown
                        to the agent as a reminder and the call goes ahead. The default is "refuse".
-    A check may set PHASES, the phases it runs in: "commit", "ci" and "nightly". The default is
+    A check may set PHASES, the phases it runs in: "commit", "ci", "nightly" and "push". The default is
     ("commit", "ci"). `ws.py check --phase nightly` runs only the checks whose PHASES hold "nightly".
+    A "push" check runs from the pre-push hook, `ws.py check --push REMOTE`, on the commits being pushed.
 
 KIND and EVENT are each one plain line of their own, such as KIND = "hook".
 The runner reads those lines without running the file, so a hook call loads
@@ -59,7 +60,7 @@ KINDS = ("check", "hook")
 EVENTS = ("before-shell", "before-edit", "before-handoff")
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")
-PHASES = ("commit", "ci", "nightly")
+PHASES = ("commit", "ci", "nightly", "push")
 DEFAULT_PHASES = ("commit", "ci")
 TIERS = ("driver", "worker", "mechanical")
 TOP_LEVEL = ("version", "tiers", "parts", "retired")
@@ -117,7 +118,7 @@ class Part:
                 if self.kind == "check":
                     memory = snapshots.Memory(case["files"], case.get("changed", ()), case.get("staged"),
                                               case.get("ledger"), case.get("replaying"), case.get("repositories", ()),
-                                              case.get("symlinks", ()))
+                                              case.get("symlinks", ()), case.get("pushed", ()))
                     got = [(f["message"], f["level"]) for f in self.run(memory, config)]
                     want = [_expected(item) for item in case["expect"]]
                     missing = [f"{text} ({level})" for text, level in want
@@ -251,7 +252,7 @@ def _read_cases(name, kind, cases_file, text, mode="refuse"):
                                                   and isinstance(item["message"], str) and item["level"] in LEVELS)
                         for item in case["expect"])
             well_formed = well_formed and all(isinstance(case.get(key, []), list)
-                                              for key in ("staged", "ledger", "repositories", "symlinks")) \
+                                              for key in ("staged", "ledger", "repositories", "symlinks", "pushed")) \
                 and isinstance(case.get("replaying", ""), str)
         else:
             answer, other = ("allow", "remind") if mode == "refuse" else ("remind", "allow")

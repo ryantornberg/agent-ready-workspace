@@ -8,12 +8,14 @@ Last run: 2026-11-16, at the eval's third recording, on the branch `m2/slice-0`.
 
 | Claim | Evidence | Re-run |
 |---|---|---|
-| Every part passes its own cases, and the runner refuses one that does not. | 9 parts, 167 cases | `python3 ws.py selftest` |
+| Every part passes its own cases, and the runner refuses one that does not. | 11 parts, 195 cases | `python3 ws.py selftest` |
+| Each part added since M2 has a case that a do-nothing stub fails. | `test_cases_bite` | `python3 -m unittest tests.test_cases_bite` |
 | A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | `FailClosedTests`: an empty event, a renamed field, a command given as a list, an upper-cased path, a symbolic link into the shelved folder, no Python on the path | `python3 -m unittest tests.test_core.FailClosedTests` |
 | A broken check cannot lock out the session that repairs it, and a manifest edit cannot switch the checks off. | `NoSelfLockTests` | `python3 -m unittest tests.test_core.NoSelfLockTests` |
 | A commit holds only the files the agent session wrote, whatever command staged them. | `StagingAtTheCommitTests`; [decision 0002](docs/decisions/0002-hooks-remind-the-commit-enforces.md) | `python3 -m unittest tests.test_core.StagingAtTheCommitTests` |
 | The page checks cover the workspace's own pages, report a file they cannot decode, and agree between the folder and the commit. | `AdoptionPathTests` | `python3 -m unittest tests.test_core.AdoptionPathTests` |
 | The manifest names the engine's version, a reason for every part and a full tier binding. | `ShapeForGrowthTests` | `python3 -m unittest tests.test_core.ShapeForGrowthTests` |
+| A direct push to main that adds a machinery commit is refused, and so is `gh pr merge --admin`; the machinery page and the manifest hold one list. | `DirectPushTests`, against a temporary bare remote and through `git push` itself; `AdminMergeTests`; the cases of `direct_push` and `no_admin_merge` | `python3 -m unittest tests.test_core.DirectPushTests tests.test_core.AdminMergeTests` |
 | The same hooks run under Codex CLI. | One recorded run of codex-cli 0.169.0, [tests/records/codex-cli-run.json](tests/records/codex-cli-run.json), replayed by `SecondToolTests` | `python3 -m unittest tests.test_core.SecondToolTests` |
 
 ## The eval
