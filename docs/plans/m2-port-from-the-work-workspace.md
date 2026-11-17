@@ -60,7 +60,7 @@ It fails two size-gate conditions: it is more than one screen of diff, and it is
 |---|---|---|---|---|
 | 0 | Eval harness, re-recorded | `grade.py` loads the graded hook's file itself, so `wslib/parts.py` leaves the eval hash: only the hook's own file and the harness count. `run.py` and `grade.py` import nothing from `wslib/`. `leaks()` catches a Windows path written with backslashes. `eval_record` refuses a pooled comparison with fewer than 40 runs in an arm. Git ignores `.claude/worktrees/`. Re-record the three cases at 15 runs per arm in each, 135 runs on the small model, as M1 did. | driver | Criteria 1–2, 27–28 |
 | 1 | Direct-push hook | A pre-push hook that refuses a direct push to main whose new commits change a machinery path. Machinery reaches main only through a pull request, where GitHub's branch rule requires CI. Needs no network and no `gh`. | driver | Criteria 3–4 |
-| — | Walled reader | A session that builds nothing opens the work workspace's files, using the private source map, which only it reads. It writes a generic description of each feature slices 2–5 port, with no code, no private names and nothing copied, to `docs/plans/m2-feature-descriptions.md`, where `deny_list` scans it. Builders work only from that page. | driver | Criterion 29 |
+| — | Walled reader | A session that builds nothing opens the work workspace's files, using the private source map, which only it reads. It writes a generic description of each feature slices 2–5 port, with no code, no private names and nothing copied, to a private file beside the source map, outside every repository. Builders work only from that file. | driver | Criterion 29 |
 | 2 | One browser per session | Run the browser server from the workspace's own config, pinned to an exact version with `--isolated`, for Claude Code (`.mcp.json`) and for Codex CLI where it reads project config. The project settings set the browser plugin to `false`. A `browser_isolation` check enforces both. Add the new config files to the machinery table. Document that an isolated browser forgets logins at session end. | driver | Criteria 5–7 |
 | 3 | Hook contract and session start | Decision record 0004: what a hook may read (files, git, session identity, tool name) and how cases supply it. Engine version bump, done in a separate working copy per the lockout trap. Paths inside a linked worktree are placed relative to that worktree, for every hook. A `session-start` event in both adapters, with a recorded Codex run and replay test. Hooks on it: pages past their review date, and a pinned repository behind its upstream. A check that a staged pin is on its upstream default branch. | driver | Criteria 8–13 |
 | 4 | Writing-session lease | Decision record 0005: concurrent sessions and the edit ledger. The first live session to edit the main working copy keeps it; any other live session is refused there and pointed at a worktree. Identity and liveness per tool and per system. Release at session end; takeover of a dead or idle lease. At session start, a clean main working copy fast-forwards, unless another live session holds the lease. | driver | Criteria 14–18 |
@@ -99,7 +99,7 @@ Order rationale: slice 0 first, so engine changes after it don't stale the eval.
 26. CI passes on all five jobs for every slice's pull request. (V5)
 27. `leaks()` finds a Windows path written with backslashes, in a test that runs on all three systems. (V1, V5)
 28. Git ignores `.claude/worktrees/`. (V1)
-29. Before slice 2 starts, `docs/plans/m2-feature-descriptions.md` holds one entry per feature slices 2–5 port, holds no code block, and passes `deny_list`. (V2)
+29. Before slice 2 starts, the private descriptions file holds one entry per feature slices 2–5 port, and holds no code block. Each builder's report says it read no file of the work workspace. (V1)
 
 ## Verification
 
@@ -241,5 +241,6 @@ The agent, 2026-11-16, at approval, on the same footing:
 
 6. **Round two's decided actions are part of the approved plan.** Finding 1 takes the playbooks out of M2, so "slice 6" now names the closing slice: the queued edits to `AGENTS.md` and `INDEX.md`, and one re-recording. A third draft applies round two to slices 1–6 before slice 1 starts. Slice 0 applies only the actions that are its own, listed in item 2.
 7. **Slice 0 edits neither `AGENTS.md` nor `INDEX.md`.** Nothing slice 0 changes is named there; what slices 1–5 add waits for slice 6's recording.
+8. **The descriptions stay private.** The walled reader writes them beside the private source map, not in this repository. `deny_list` blocks names, not facts about how a team or its systems work, so a public page would need the maintainer to read it first. What the builders publish still passes `deny_list`, and is generic code and pages rather than a description of the source.
 
 ## Results
