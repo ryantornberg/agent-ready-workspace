@@ -555,10 +555,21 @@ None yet.
 
 ## Results
 
-None yet.
+### C2, the case runner
+
+Pull request #22, at the driver tier. Criteria 28 and 42 are met.
+
+- **Verified:** `tests/hook_cases.py` runs 27 cases from `tests/hooks/` across all five events the engine knows, for Claude Code and Codex. Each case builds a scratch repository and runs the wiring command from `.claude/settings.json` or `.codex/hooks.json` through `wslib/launch.sh`. Seeded leases use a live process and a dead one. Every `session-start` case runs against a local bare remote. All 27 pass on all five CI jobs of the pull request's run.
+- **Verified:** CI prints every row's median on all three systems. On Linux, before-tool calls take 48 to 56 milliseconds and `session-start` 71. On macOS they take 78 to 120, and `session-start` 162 to 168. Windows takes 197 to 254 for a before-tool call, over the 200-millisecond budget, and 468 to 509 for `session-start`; Windows only reports, as criterion 28 allows.
+- **Verified:** `tests/test_hook_cases.py` shows the budgets fail on Linux and macOS and only report on Windows. It also shows a case with a wrong exit code, lease holder or output text is reported as failing, and a missing event or timing row fails the run.
+- **Verified:** `test_cases_bite` reads the 20 parts from the manifest. Every part's cases fail against both stubs. It passed on its first run, so no part's cases were missing teeth. A test of the test shows that a part whose cases only allow, or only find, is caught.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` (228 tests) pass locally.
+- **Inferred:** the session-start fast-forward already fetches under a timeout (`FETCH_BUDGET`, 15 seconds, in `wslib/lease.py`), so this slice left it unchanged. Against a slow real remote, a session start can still take up to 15 seconds. The 2-second budget holds only against the local remote the cases use, as criterion 28 says.
+- **Proposed revision (template rule 7):** `session-end` has no budget in criterion 28, so the runner prints its time and holds it to nothing. It measures 48 to 254 milliseconds. A later plan could give it the 2-second session-start budget.
+- No file the eval hashes was edited, and `workspace.json` was not touched. No question had to be asked.
 
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
 
-None yet.
+- C2, `INDEX.md`: a row for the hook case runner, `tests/hook_cases.py` and `tests/hooks/`, with the aliases "hook timing" and "hook budget", linking `docs/parts.md#the-hook-case-runner`.
