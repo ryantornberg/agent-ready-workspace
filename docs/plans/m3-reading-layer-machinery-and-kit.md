@@ -560,8 +560,25 @@ A demotion needs an approved change too. A side review during slice A0 found tha
 
 ## Results
 
-None yet.
+### Sub-batch A, 2026-11-18
 
+Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
+
+**A0, the harness.** Verified: the `eval_record` cases (46) cover a case's own arms, additions to a shared arm, baseline and one-time records, a proof-key flip leaving a record current, link text staling it, re-records and the scale rule; `tests/test_m3_a.py` covers criteria 1, 2, 4, 5, 56, 61 and 67; `tests/test_shell.py` (157 tests) covers the parser side of criteria 55 and 58; `python3 evals/grade.py --recorded` gave no difference on M2's 135 transcripts after the harness changes, and on R1's 135 after recording. Inferred: criterion 55's guard refusals (a redirect into `.git/config`, a stored alias that force-pushes, and the rest) are the guards' to make; A0 gives them the facts, and C3 and C5 hold the refusals with cases.
+
+**A1, structure.** Verified: `page_kinds` replaces `freshness`, which is retired, with its 12 cases kept and 24 more; `chains` and `pointers` each have cases; a page under `archive/` is not found by `rg` (test, skipped where ripgrep is missing); every page under `docs/` names its kind. `AGENTS.md` no longer says `src/` holds one repository per folder, and the index's row for the plan being built now reads the manifest's `building` list instead.
+
+**A2, the rules register.** Verified: `python3 ws.py rules` prints 36 rules: part 30, prose 10, eval 3 tags. `loaded_size` holds the contract and pointers to 6,000 bytes (4,462 now) and the wrappers' descriptions to 9,000.
+
+**A3, the proof field.** Verified: decision record 0006; `proof` with 29 cases; `fix-a-bug.md` marked proven with M1's record and M2's closing recordings pinned at `b754e39`, an ancestor of `main`; the README's table, held by the check; `building: ["M3"]` in the manifest; `direct_push` refuses an anchor change pushed straight to main. The sentence about playbooks now reads "a playbook marked proven stays only while it beats the bare model" in `workspace.json`, the `eval_record` docstring and the README.
+
+**A4, R1.** Verified: 135 runs on `claude-haiku-5-5`, Claude Code 2.1.327, 15 per arm per case. Every grader passed in 41, 18 and 0 of 45 runs (fix-a-bug 14, 15, 0; nightly-job 15, 0, 0; big-report 12, 3, 0). Guided against two-line p = 2.1e-07. Criterion 15 holds without a re-record: 41 is not more than 3 below M2's 40. `check --staged` and `check --phase ci --changed-from origin/main` pass with both comparisons. Inferred: M2's open question stays confounded; 28 of 45 guided runs opened `docs/rules/`, and the contract and index changed in the same recording. Eval runs used: 136 of 1,000, the probe included.
+
+**Proposed revisions (template rule 7).**
+
+- Criterion 55 lists guard refusals that only C3 and C5 can show. A0 meets its parser side; the refusal cases belong to criteria 38, 39, 58 and 65 when those slices land.
+- The README promised the commit check starts three git processes. The history the proof checks read adds at most two more, one batch and one ancestry test per anchor commit, whatever the number of files. The README, `docs/parts.md` and the test now say so.
+- A plain `check`, with no base, warns that the guided arm was not compared with its past, as A0's row says it should. The warning shows on every plain `check` of a workspace with a proven playbook.
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
