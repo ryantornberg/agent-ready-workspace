@@ -421,6 +421,7 @@ def _held_to_its_past(snapshot, page, runs, current, anchors, graders):
                                  "scheduled run); the commit check and CI on a pull request compare them",
                         level="warning")]
     found = []
+    snapshot.prefetch_history([f"{runs}/{name}/record.json" for name in current], anchors)
     previous = {}
     for name in current:
         record = _record(snapshot.base_text(f"{runs}/{name}/record.json"))

@@ -127,10 +127,18 @@ def run(snapshot, config):
     runs = config.get("runs", "evals/runs")
     found, all_marks = [], {}
     approved, attempts = None, None
+    pages = [page for page in snapshot.pages(skip=config.get("skip", ("evals/scaffold", "archive")))
+             if any(page.startswith(f.rstrip("/") + "/") for f in folders)]
+    anchors = []
+    for page in pages:
+        for _, _, items in marks(keys, snapshot.read(page)).values():
+            anchors += [(sha, path) for sha, path in items if sha]
+    if snapshot.has_base():
+        snapshot.prefetch_history([snapshot.base_path(page) for page in pages], anchors)
+    else:
+        snapshot.prefetch_history((), anchors)
 
-    for page in snapshot.pages(skip=config.get("skip", ("evals/scaffold", "archive"))):
-        if not any(page.startswith(f.rstrip("/") + "/") for f in folders):
-            continue
+    for page in pages:
         current = marks(keys, snapshot.read(page))
         for key, (state, prove_by, items) in current.items():
             name = page + key

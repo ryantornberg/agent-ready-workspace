@@ -245,7 +245,7 @@ def prepare(folder, case, files, root=ROOT, stripped=True):
         (folder / destination).parent.mkdir(parents=True, exist_ok=True)
         if stripped and source.lower().endswith(".md"):
             text = (root / source).read_text(encoding="utf-8-sig")
-            (folder / destination).write_text(proofkeys.strip(text), encoding="utf-8", newline="\n")
+            (folder / destination).write_bytes(proofkeys.strip(text).encode("utf-8"))
         else:
             shutil.copy(root / source, folder / destination)
     git(folder, "init", "-q", "-b", "main")

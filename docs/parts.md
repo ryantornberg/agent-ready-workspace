@@ -44,7 +44,7 @@ The snapshot is the only way a check reads files. That is what lets one check ru
 | `python3 ws.py check --staged` | Exactly what is staged. This is the commit hook. |
 | A case | The files written in the case. |
 
-Both commands start from one git listing, so they see the same files. A tracked or staged file is always in it, wherever it sits, and the `.git` entry never is. `check` adds the untracked files that git does not ignore. A folder that is not the top of a git working copy is walked instead. `check --staged` reads every staged file in one batch: three git processes in all, however many files there are.
+Both commands start from one git listing, so they see the same files. A tracked or staged file is always in it, wherever it sits, and the `.git` entry never is. `check` adds the untracked files that git does not ignore. A folder that is not the top of a git working copy is walked instead. `check --staged` reads every staged file in one batch: three git processes, however many files there are, plus at most two for the history the proof checks read (decision record 0006).
 
 What a check can ask the snapshot:
 

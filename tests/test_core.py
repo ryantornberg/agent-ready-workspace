@@ -27,6 +27,7 @@ sys.path.insert(0, str(ROOT / "evals"))
 sys.path.insert(0, str(ROOT / "tools"))
 
 import grade  # noqa: E402
+import proofkeys as PROOF_KEYS  # noqa: E402  (evals/proofkeys.py)
 import wslib  # noqa: E402
 import symbols as symbols_cli  # noqa: E402
 import ws  # noqa: E402
@@ -1043,6 +1044,9 @@ class AdoptionPathTests(Folder):
         for name, text in (extra or {}).items():
             self.write(name, text)
         self.git("init", "-q")
+        # On top of this repository's history, so the anchors proven pages name are reachable (decision 0006).
+        self.git("fetch", "-q", "--no-tags", str(ROOT), "HEAD")
+        self.git("reset", "-q", "--soft", "FETCH_HEAD")
         self.git("add", "-A")
         self.git("commit", "-q", "--no-verify", "-m", "copy")
 
@@ -1200,7 +1204,9 @@ class AdoptionPathTests(Folder):
             code, output = self.ws("check", "--staged")
         self.assertEqual(code, 1, output)
         self.assertIn("error: notes/n2999.md:3: link to missing file: nope.md", output)
-        self.assertLessEqual(len(started), 3, [list(a)[3:6] for a in started[:5]])
+        # Three for the files; the proof checks add one batch of older files and one ancestry test per anchor commit
+        # (decision record 0006). The number does not grow with the files.
+        self.assertLessEqual(len(started), 5, [list(a)[3:6] for a in started[:8]])
 
     # Criterion 19
     def test_the_contract_and_the_index_need_a_review_date(self):
@@ -1962,8 +1968,9 @@ class EvalThatCanLoseTests(Folder):
         page = "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n"
         moved = "---\nlast-reviewed: 2027-01-01\n---\n# Fix\n"
         body = page + "last-reviewed: n/a. Skip the test when the suite is slow.\n"
-        self.assertEqual(eval_record.guidance_hash({"p.md": page}), eval_record.guidance_hash({"p.md": moved}))
-        self.assertNotEqual(eval_record.guidance_hash({"p.md": page}), eval_record.guidance_hash({"p.md": body}))
+        strip = PROOF_KEYS.strip
+        self.assertEqual(eval_record.guidance_hash({"p.md": page}, strip), eval_record.guidance_hash({"p.md": moved}, strip))
+        self.assertNotEqual(eval_record.guidance_hash({"p.md": page}, strip), eval_record.guidance_hash({"p.md": body}, strip))
 
     def copy_of_this_repository(self):
         for name in subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True, check=True).stdout.splitlines():
@@ -2000,7 +2007,7 @@ class EvalThatCanLoseTests(Folder):
         short = {"arms": {**good["arms"], "bare": {"runs": runs(0, 4)}}}
         self.assertIn("needs 5 or more", eval_record.judge(short, arms, ["g"]))
         tie = {"arms": {**good["arms"], "bare": {"runs": runs(5)}}}
-        self.assertIn("in no more runs than the bare arm", eval_record.judge(tie, arms, ["g"]))
+        self.assertIn("in no more of its runs than the bare arm", eval_record.judge(tie, arms, ["g"]))
         # M2 red team, finding 15: runs dropped from one arm after the recording
         six = {"runs_per_arm": 6, "arms": {"guided": {"runs": runs(6, 6)}, "two-line": {"runs": runs(6, 6)},
                                            "bare": {"runs": runs(1, 6)}}}
@@ -2285,9 +2292,9 @@ class EvalRerecordTests(Folder):
             return {"arms": {"guided": {"runs": self.runs(*guided)}, "two-line": {"runs": self.runs(*["00"] * 5)},
                              "bare": {"runs": self.runs(*bare)}}}
         # The red team's record: no guided run passes every grader, yet the guided arm wins grader b.
-        self.assertIn("in no more runs than the bare arm", eval_record.judge(record(["01"] * 5, ["10"] * 5), arms, ["a", "b"]))
+        self.assertIn("in no more of its runs than the bare arm", eval_record.judge(record(["01"] * 5, ["10"] * 5), arms, ["a", "b"]))
         tie = ["11", "11", "00", "00", "00"]
-        self.assertIn("in no more runs than the bare arm", eval_record.judge(record(tie, tie), arms, ["a", "b"]))
+        self.assertIn("in no more of its runs than the bare arm", eval_record.judge(record(tie, tie), arms, ["a", "b"]))
         self.assertIsNone(eval_record.judge(record(["11", "11", "11", "00", "00"], tie), arms, ["a", "b"]))
         self.assertIn("needs 5 or more", eval_record.judge(record(["11"] * 5, ["00"] * 4), arms, ["a", "b"]))
 
@@ -2346,7 +2353,7 @@ class EvalHarnessApartTests(Folder):
         for name in self.CASES:
             files = eval_record.covered_files(f"evals/cases/{name}.json", self.harness.load_case(name))
             self.assertIn("parts/no_stage_all.py", files, name)
-            self.assertFalse([f for f in files if f.startswith("wslib/")], name)
+            self.assertEqual([f for f in files if f.startswith("wslib/")], ["wslib/shell.py"], name)
 
     def test_an_engine_change_leaves_every_eval_record_as_it_was(self):
         """Criterion 2. Compared before and after the edit, so it holds whether or not the records are current."""
@@ -2393,7 +2400,8 @@ class EvalHarnessApartTests(Folder):
             with self.subTest(name):
                 case_path = f"evals/cases/{name}.json"
                 files = eval_record.covered_files(case_path, self.harness.load_case(name), list(tree.paths()), arms)
-                self.assertEqual(self.harness.covered(name), (files, eval_record.guidance_hash({f: tree.read(f) for f in files})))
+                self.assertEqual(self.harness.covered(name),
+                                 (files, eval_record.guidance_hash({f: tree.read(f) for f in files}, PROOF_KEYS.strip)))
 
     def test_a_windows_path_written_with_backslashes_is_found(self):
         """Criterion 27. Runs on every system: the identity is given, not read from this machine."""

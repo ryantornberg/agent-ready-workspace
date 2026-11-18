@@ -158,18 +158,52 @@ class Snapshot:
     def _old_text(self, path):
         return None
 
-    # History. A snapshot read from git answers these with git; a Memory snapshot from its case.
+    # History. A snapshot read from git answers these with git; a Memory snapshot from its case. Reads are
+    # cached, and prefetch_history() reads many files in one git process, so the commit check stays at a fixed
+    # number of git processes however many pages it holds.
 
     _history = None
 
     def _base_commit_id(self):
-        """The full hash of the base commit, or None when the snapshot has none."""
+        """A name git resolves to the base commit ("HEAD", or a hash), or None when the snapshot has none."""
         return None
 
     def has_base(self):
         if self._history is not None:
             return "base" in self._history
         return self._base_commit_id() is not None
+
+    def _cache(self):
+        if getattr(self, "_read_cache", None) is None:
+            self._read_cache, self._ancestors = {}, {}
+        return self._read_cache
+
+    def prefetch_history(self, base_paths=(), commits=()):
+        """Read files at the base, and (sha, path) at other commits, in one git process; later reads come from it."""
+        if self._history is not None or getattr(self, "root", None) is None:
+            return
+        base = self._base_commit_id()
+        names = [f"{base}:./{path}" for path in base_paths] if base else []
+        names += [f"{sha}:./{path}" for sha, path in commits if re.fullmatch(r"[0-9a-f]{40}", sha or "")]
+        cache = self._cache()
+        names = [name for name in dict.fromkeys(names) if name not in cache]
+        if not names:
+            return
+        try:
+            output = _git(self.root, "cat-file", "--batch", data="".join(n + "\n" for n in names).encode("utf-8"))
+        except RuntimeError:
+            return
+        at = 0
+        for name in names:
+            end = output.index(b"\n", at)
+            header = output[at:end].decode("utf-8", "replace")
+            at = end + 1
+            if header.endswith((" missing", " ambiguous")) or len(header.split()) != 3:
+                cache[name] = None
+                continue
+            size = int(header.rsplit(" ", 1)[1])
+            cache[name] = output[at:at + size].decode("utf-8-sig", "replace")
+            at += size + 1
 
     def base_text(self, path):
         """The file's text at the base, or None when it was not there or there is no base."""
@@ -182,17 +216,18 @@ class Snapshot:
         """The path this file had at the base, when the change renamed it there; else the path itself."""
         if self._history is not None:
             return (self._history.get("renamed") or {}).get(path, path)
-        base, root = self._base_commit_id(), getattr(self, "root", None)
-        if base is None or root is None:
+        if self._base_commit_id() is None or getattr(self, "root", None) is None:
             return path
-        found = self._renames().get(path)
-        return found or path
+        return self._renames().get(path) or path
 
     def _renames(self):
         if getattr(self, "_rename_map", None) is None:
             self._rename_map = {}
-            base = self._base_commit_id()
-            args = ["diff", "--name-status", "-M", "-z", base] + (["--cached"] if isinstance(self, Index) else [])
+            if isinstance(self, Index) and not self._deleted:
+                return self._rename_map          # a rename needs a deletion, and the commit makes none
+            args = ["diff", "--name-status", "-M", "-z", self._base_commit_id()]
+            if isinstance(self, Index):
+                args.insert(1, "--cached")
             try:
                 fields = _names(_git(self.root, *args))
             except RuntimeError:
@@ -222,11 +257,14 @@ class Snapshot:
             return sha in (self._history.get("ancestors") or ())
         if not re.fullmatch(r"[0-9a-f]{40}", sha or "") or getattr(self, "root", None) is None:
             return False
-        try:
-            _git(self.root, "merge-base", "--is-ancestor", sha, "HEAD")
-            return True
-        except RuntimeError:
-            return False
+        self._cache()
+        if sha not in self._ancestors:
+            try:
+                _git(self.root, "merge-base", "--is-ancestor", sha, "HEAD")
+                self._ancestors[sha] = True
+            except RuntimeError:
+                self._ancestors[sha] = False
+        return self._ancestors[sha]
 
     def building_when_added(self, path):
         """The manifest's "building" list at the commit that added the file. A file no commit has added yet is
@@ -244,13 +282,14 @@ class Snapshot:
         return _building(text)
 
     def _git_text(self, name):
-        root = getattr(self, "root", None)
-        if root is None:
-            return None
-        try:
-            return _git(root, "show", name).decode("utf-8-sig", "replace")
-        except RuntimeError:
-            return None
+        cache = self._cache()
+        if name not in cache:
+            root = getattr(self, "root", None)
+            try:
+                cache[name] = None if root is None else _git(root, "show", name).decode("utf-8-sig", "replace")
+            except RuntimeError:
+                cache[name] = None
+        return cache[name]
 
     def pin_facts(self):
         """The pins this commit adds or moves, each with its state. Worked out with git the first time it is asked."""
@@ -527,9 +566,10 @@ class Index(Snapshot):
         status = _names(_git(self.root, "diff", "--cached", "--name-status", "--no-renames", "-z"))
         staged = dict(zip(status[1::2], status[0::2]))
         changed = [path for path, letter in staged.items() if letter[:1] in "ACMR"]
+        self._deleted = [path for path, letter in staged.items() if letter[:1] == "D"]
         # The last commit's copy of each changed page comes in the same batch read, for added_lines().
         self._previous = {path: f"HEAD:./{path}" for path in changed if path.lower().endswith(".md")}
-        self._extra, self._objects, self._failed = tuple(extra) + tuple(self._previous.values()), None, None
+        self._extra, self._objects, self._failed = ("HEAD",) + tuple(extra) + tuple(self._previous.values()), None, None
         folder = ledgers.git_dir(self.root)
         try:
             ledger, problem = ledgers.read(folder), None
@@ -565,13 +605,12 @@ class Index(Snapshot):
         return self._objects
 
     def _base_commit_id(self):
-        """The last commit, which the staged commit is judged against; None in a repository with no commit yet."""
-        if getattr(self, "_head", None) is None:
-            try:
-                self._head = _git(self.root, "rev-parse", "-q", "--verify", "HEAD^{commit}").decode().strip()
-            except RuntimeError:
-                self._head = ""
-        return self._head or None
+        """"HEAD", the last commit, which the staged commit is judged against; None in a repository with no commit
+        yet. Asked in the one batch read the snapshot makes anyway, so it starts no git process of its own."""
+        try:
+            return "HEAD" if self._batch().get("HEAD") is not None else None
+        except RuntimeError:
+            return None
 
     def _old_text(self, path):
         name = self._previous.get(path)
