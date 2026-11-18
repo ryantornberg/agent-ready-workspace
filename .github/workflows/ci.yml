@@ -36,6 +36,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: bash wslib/launch.sh -m unittest discover -b tests
       - run: bash wslib/launch.sh ws.py selftest
+      # Every hook event, called through the launcher as the agent tools call it, and timed against its budget.
+      - run: bash wslib/launch.sh tests/hook_cases.py
       # Re-grade every stored eval transcript; a grade that differs from its record fails. No agent runs here.
       - run: bash wslib/launch.sh evals/grade.py --recorded
       # A teammate who never installed the commit hook is caught here: a page edited

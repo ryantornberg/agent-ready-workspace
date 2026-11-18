@@ -1,0 +1,6 @@
+[
+  {"name": "the main copy is brought up to date with a local remote that is ahead", "tool": "claude-code", "setup": {"remote": true, "remote_ahead": true}, "payload": {"hook_event_name": "SessionStart", "session_id": "me", "cwd": "{root}"}, "exit": 0, "repeat": 1},
+  {"name": "start when nothing has changed upstream", "tool": "claude-code", "setup": {"remote": true}, "payload": {"hook_event_name": "SessionStart", "session_id": "me", "cwd": "{root}"}, "exit": 0},
+  {"name": "lease: another live session holds the main copy, and the session is told", "tool": "claude-code", "setup": {"remote": true, "remote_ahead": true, "lease": {"session": "other-session", "pid": "live"}}, "payload": {"hook_event_name": "SessionStart", "session_id": "me", "cwd": "{root}"}, "exit": 0, "output": ["Another live agent session (other-se)"], "lease_after": "other-session"},
+  {"name": "codex: start against a local remote", "tool": "codex", "setup": {"remote": true}, "payload": {"hook_event_name": "SessionStart", "session_id": "codex-me", "cwd": "{root}"}, "exit": 0}
+]
