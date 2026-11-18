@@ -603,7 +603,7 @@ Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `-
 **Proposed revisions (template rule 7).**
 
 - Criterion 55 lists guard refusals that only C3 and C5 can show. A0 meets its parser side; the refusal cases belong to criteria 38, 39, 58 and 65 when those slices land.
-- The README promised the commit check starts three git processes. The history the proof checks read adds at most two more, one batch and one ancestry test per anchor commit, whatever the number of files. The README, `docs/parts.md` and the test now say so.
+- The README promised the commit check starts three git processes. The history the proof and eval checks read adds at most three more, one batch of older files for each check and one ancestry test per anchor commit, whatever the number of files. The README, `docs/parts.md` and the test now say so.
 - A plain `check`, with no base, warns that the guided arm was not compared with its past, as A0's row says it should. The warning shows on every plain `check` of a workspace with a proven playbook.
 
 ### Queued for slice Z

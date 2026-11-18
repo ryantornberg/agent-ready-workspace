@@ -1204,9 +1204,9 @@ class AdoptionPathTests(Folder):
             code, output = self.ws("check", "--staged")
         self.assertEqual(code, 1, output)
         self.assertIn("error: notes/n2999.md:3: link to missing file: nope.md", output)
-        # Three for the files; the proof checks add one batch of older files and one ancestry test per anchor commit
-        # (decision record 0006). The number does not grow with the files.
-        self.assertLessEqual(len(started), 5, [list(a)[3:6] for a in started[:8]])
+        # Three for the files; the proof and eval checks add one batch of older files each, and one ancestry test per
+        # anchor commit (decision record 0006). The number does not grow with the files.
+        self.assertLessEqual(len(started), 6, [list(a)[3:6] for a in started[:8]])
 
     # Criterion 19
     def test_the_contract_and_the_index_need_a_review_date(self):
@@ -1983,7 +1983,8 @@ class EvalThatCanLoseTests(Folder):
 
     def eval_findings(self):
         from parts import eval_record
-        return [f["message"] for f in eval_record.run(snapshots.Tree(self.root), {"playbooks": "docs/playbooks"})]
+        return [f["message"] for f in eval_record.run(snapshots.Tree(self.root), {"playbooks": "docs/playbooks"})
+                if f["level"] == "error"]
 
     def test_editing_the_harness_the_graders_the_contract_or_the_index_changes_the_hash(self):
         self.copy_of_this_repository()
