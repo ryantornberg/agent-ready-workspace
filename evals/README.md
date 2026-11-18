@@ -22,7 +22,9 @@ The scaffold's suite passes at the start, because no test covers any of the thre
 | Two-line | The scaffold, plus a `CLAUDE.md` of [two lines](two-line.md): reproduce a bug with a failing test before editing, and mark each claim verified or inferred. |
 | Bare | The scaffold only. |
 
-[arms.json](arms.json) lists each arm's files. The two-line arm asks for the two habits the playbook asks for, word for word what its graders check, and says nothing about this code. It is what a team could write in a minute instead of the workspace. So the guided arm can beat it only through what the two lines leave out: the facts in the contract and the index, and the rest of the playbook. None of the files says what the graders look for.
+[arms.json](arms.json) lists each arm's files. A case may add files to a shared arm for itself alone (`add_files`): since M3, the nightly-job and big-report cases' guided arm also gets [the live order service's rule page](../docs/rules/orders-api.md), because their code paths fall under it, as an agent tool that loads rule pages would show it. A case may instead name its own arm files (`arms`), which replace the shared ones for that case; M3's proof attempts use that, so they depend on no shared file. Before a gated arm reads a page, the runner takes out its proof keys (`proof`, `prove-by`, `proven-by` and a section's proof line, in their exact forms only), and the hash ignores the same text; see [decision 0006](../docs/decisions/0006-what-proven-means.md).
+
+A one-time arm, defined in [one-time.json](one-time.json), sits outside every case's hash, so adding one stales no record, and its runs go to `runs/<case>/one-time/<arm>/`, which the gate never reads. The routed arm is one: the guided arm's files, every page under `docs/` the index links to, read as they ship, and the wrappers' plugin enabled. It is to be measured once, at M3's close. The two-line arm asks for the two habits the playbook asks for, word for word what its graders check, and says nothing about this code. It is what a team could write in a minute instead of the workspace. So the guided arm can beat it only through what the two lines leave out: the facts in the contract and the index, and the rest of the playbook. None of the files says what the graders look for.
 
 The guided arm gets the pages, not the engine: no hooks run, so nothing refuses an edit to the shelved folder. The eval tests what the guidance makes the agent do, not what the hooks stop.
 
@@ -118,6 +120,9 @@ A container is the fallback for an agent tool that has no sandbox of its own. No
 ```
 python3 evals/run.py --probe
 python3 evals/run.py nightly-job --model haiku --runs 15
+python3 evals/run.py nightly-job --rerecord guided          # after a margin miss: once more, then pooled
+python3 evals/run.py nightly-job --baseline --runs 10       # the bare arm alone; never counts as passing
+python3 evals/run.py nightly-job --one-time routed          # a one-time arm; never gated
 python3 evals/pool.py
 python3 evals/grade.py --recorded
 ```
@@ -128,11 +133,15 @@ python3 evals/grade.py --recorded
 
 ## The gate
 
-Each `record.json` stores one hash over what a run depends on: the case, its acceptance test, the scaffold, `arms.json` and every file it gives an agent, among them `AGENTS.md` and `INDEX.md`, the harness, `run.py` and `grade.py`, and the code of every workspace hook a grader runs, `parts/no_stage_all.py`. `grade.py` loads that hook's file itself, and `grade.py` imports nothing from the engine, `wslib/`, so an engine change leaves every record current. A page's review date is left out of the hash, but only in its front matter. The [`eval_record` check](../docs/parts.md#the-parts-here) compares the hash on every commit and in CI. Edit any of those files and the commit fails until every case has been run again.
+Each `record.json` stores one hash over what a run depends on: the case, its acceptance test, the scaffold, the arm files (`arms.json` and every file it gives an agent, among them `AGENTS.md` and `INDEX.md`, plus the case's own additions), the harness (`run.py`, `grade.py` and `proofkeys.py`), the code of every workspace hook a grader runs, `parts/no_stage_all.py`, and the shell parser it shares, `wslib/shell.py`. A page's review date and its exact proof keys are left out of the hash, but only in those forms. The [`eval_record` check](../docs/parts.md#the-parts-here) compares the hash on every commit and in CI. Edit any of those files and the commit fails until every case has been run again.
 
-A run counts when it passes every grader of its case. A record passes the gate when each arm has five or more runs, and the guided arm has more such runs than the bare arm. Then, pooled across the records that pass, each arm needs 40 or more runs, and the guided arm must beat the two-line arm by a one-sided Fisher exact test at p < 0.05. So a playbook the bare model follows just as well fails, and so does guidance that two lines would match. The two-line comparison is pooled, not per case, because a case that tests only the playbook's habits, like fix-a-bug, can tie with two lines that ask for the same habits; that tie is a finding, not a failure. The gate is criterion 29 of the [M1 plan](../docs/plans/m1-make-the-core-hold-weight.md#changes-after-approval), as revised on 2026-11-16.
+Since M3, a playbook marked proven stays only while it beats the bare model, and only proven pages are gated ([decision 0006](../docs/decisions/0006-what-proven-means.md)). A run counts when it passes every grader of its case. A record passes when each arm has five or more runs, and the guided arm passes more often than the bare arm. Then, pooled across the playbook's own cases, each arm needs 40 or more runs, and the guided arm must beat the two-line arm by a one-sided Fisher exact test at p < 0.05. So a playbook the bare model follows just as well fails, and so does guidance that two lines would match. The two-line comparison is pooled, not per case, because a case that tests only the playbook's habits, like fix-a-bug, can tie with two lines that ask for the same habits; that tie is a finding, not a failure.
+
+The guided arm is also held to its own past. Pooled over the cases present in both, a new record's guided arm may pass no more than 3 runs fewer than the previous record's (at the base commit), nor than the anchor's: the record its `proven-by` pins to a commit, `<sha>:evals/runs/<case>/record.json`. An arm that misses that margin may be recorded once more (`--rerecord`); the record then holds twice the runs for that arm, and both sides are put on the larger scale, at a margin of 6. With no base commit, as in a plain `check` or a scheduled CI run, these two comparisons are skipped, and a warning says so. A baseline (`--baseline`) and a one-time arm's record never count as passing.
 
 The gate trusts the record file. It shows that someone ran the cases on this wording; it cannot stop a person from editing the record by hand. CI's re-grade catches a grade that does not follow from its transcript, not a transcript that was written by hand.
+
+The graders for M3's proof attempts read more of the folder: `run.py` writes a state line for each of a case's `checks`, a file that must exist, a file that must hold a table, or a pattern no added line may match (debug output left behind), and the transcript records a task handed to a fresh session as a `dispatch`. A `report_brief` grader passes a final reply that gives only a path and a verdict.
 
 ## Rules that make this worth doing
 

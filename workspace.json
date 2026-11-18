@@ -103,7 +103,9 @@
         ".codex/hooks.json",
         ".codex/config.toml",
         ".mcp.json",
-        "tests/"
+        "tests/",
+        "evals/one-time.json",
+        "opencode.json"
       ]
     },
     {

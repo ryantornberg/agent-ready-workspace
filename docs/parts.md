@@ -2,7 +2,7 @@
 kind: how-to
 proof: unproven
 prove-by: M4
-last-reviewed: 2026-11-16
+last-reviewed: 2026-11-18
 ---
 
 # Parts
@@ -217,15 +217,20 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | Part | Kind | Fails or refuses when |
 |---|---|---|
 | `links` | check | A link points at a missing file or heading, or a line is too long to read: over 10,000 characters. |
-| `freshness` | check | A commit edits a page that is past its review date, a required page has no date, or a date is more than a day ahead of today in UTC. |
+| `page_kinds` | check | A page under `docs/` names no kind or a kind outside the nine, lacks the front matter its kind needs, or opens out of order: title, a purpose sentence of 25 words or fewer, the **In short** line, and `## Key points` on a plan (see [layout](layout.md)). A proof key in any form but its exact one. And the review-date rule `freshness` held: a commit edits a page past its review date, a required page has no date, or a date is more than a day ahead of today in UTC. It fails when it checks no pages. |
+| `chains` | check | A path in the index's cross-cutting chains does not exist, or the index has no chain table. |
+| `pointers` | check | The GitHub Copilot or opencode pointer file is missing, or no longer names `AGENTS.md` and the rule pages. |
+| `rules` | check | A rule in a rules table has no tag, or a tag names a part the manifest does not use, a case that part does not have, or an eval case that does not exist. `python3 ws.py rules` prints the register. |
+| `loaded_size` | check | The contract and the pointer files pass 6,000 bytes, or the wrappers' descriptions 9,000, as the manifest sets. |
+| `proof` | check | A proof mark does not hold, or moves without its record: see [decision 0006](decisions/0006-what-proven-means.md). |
 | `aliases` | check | The index maps a phrase to a name the code no longer defines, or a contract page names one in backticks. |
-| `eval_record` | check | Anything an eval case depends on changed since its last recorded run: the case, its scaffold and acceptance test, the files each arm is given (`AGENTS.md` and `INDEX.md` among them), or the harness and graders. It also fails when a record has fewer than five runs in an arm; when, counting runs that pass every grader, the guided arm has no more of them than the bare arm; when, pooled across the records, the guided arm does not beat the two-line arm by a one-sided Fisher exact test at p < 0.05; or when a playbook has no case. The hash also covers the code of a hook a grader runs. |
+| `eval_record` | check | For each playbook marked proven: anything its eval cases depend on changed since their last recorded run (the case, its scaffold and acceptance test, the files each arm is given, `AGENTS.md` and `INDEX.md` among them, the harness, the graders, the code of a hook a grader runs and the shell parser it shares). It also fails when a record has fewer than five runs in an arm; when, counting runs that pass every grader, the guided arm passes no more often than the bare arm; when, pooled across the playbook's cases, the guided arm does not beat the two-line arm by a one-sided Fisher exact test at p < 0.05; when its guided arm passes more than 3 runs fewer than the previous record's or its anchor's; or when a proven playbook has no case. A page's review date and its exact proof keys are not in the hash. |
 | `deny_list` | check | A file or file name holds a term from a private list kept outside the repository, and so, from the commit-msg hook, does the commit message, the author or the committer. With no list it warns and checks nothing, so CI cannot run it. |
 | `edit_ledger` | check | While the edit ledger is open, a commit stages a path that no edit tool of the agent session wrote. |
 | `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |
 | `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
 | `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
-| `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `freshness` run on the session's working copy. |
+| `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `page_kinds` run on the session's working copy. |
 | `stale_pins` | hook, session-start, reminds | Names each pinned repository whose checkout is behind its upstream's default branch. |
 | `pin_on_default` | check | A staged pin is not on its reachable upstream's default branch. An upstream it cannot reach warns. |
 | `line_cites` | check | A line the commit adds to a doc page cites a file by line number, outside a fenced block and with no commit hash beside it. |

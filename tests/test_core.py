@@ -1934,7 +1934,9 @@ class EvalThatCanLoseTests(Folder):
             self.harness.prepare(folder, self.harness.load_case("fix-a-bug"), arms[arm]["files"])
             given[arm] = folder
         for name in ("AGENTS.md", "CLAUDE.md", "INDEX.md", "docs/playbooks/fix-a-bug.md", "docs/definition-of-done.md"):
-            self.assertEqual((given["guided"] / name).read_text(encoding="utf-8"), (ROOT / name).read_text(encoding="utf-8"), name)
+            # A gated arm reads each page with its proof keys taken out (decision record 0006), and nothing else changed.
+            self.assertEqual((given["guided"] / name).read_text(encoding="utf-8"),
+                             PROOF_KEYS.strip((ROOT / name).read_text(encoding="utf-8")), name)
         two = (given["two-line"] / "CLAUDE.md").read_text(encoding="utf-8")
         self.assertEqual(len([line for line in two.splitlines() if line.strip()]), 2)
         self.assertFalse((given["two-line"] / "AGENTS.md").exists())

@@ -187,9 +187,10 @@ class BaselineAndRerecordTests(unittest.TestCase):
         self.assertIsNone(eval_record.slipped(records(74, 90, True), records(40, 45), "old", graders))
         self.assertIn("more than 6 fewer", eval_record.slipped(records(73, 90, True), records(40, 45), "old", graders))
         self.assertIn("more than 6 fewer", eval_record.slipped(records(73, 90, True), records(80, 90, True), "old", graders))
-        self.assertIsNone(eval_record.slipped(records(36, 45), records(80, 90, True), "old", graders))
+        self.assertIsNone(eval_record.slipped(records(37, 45), records(80, 90, True), "old", graders))
+        self.assertIn("more than 6 fewer", eval_record.slipped(records(36, 45), records(80, 90, True), "old", graders))
         # Only the cases both records hold count.
-        both = {**records(36, 45), "d": records(0, 45)["c"]}
+        both = {**records(37, 45), "d": records(0, 45)["c"]}
         self.assertIsNone(eval_record.slipped(both, records(40, 45), "old", {"c": ["g"], "d": ["g"]}))
         # A pooled arm that passes on count but fails on rate does not beat the bare arm.
         rec = {"runs_per_arm": 15, "rerecorded": ["guided"],
@@ -322,11 +323,12 @@ class StructureTests(unittest.TestCase):
     def test_criterion_8_the_archive_is_hidden_from_search(self):
         if shutil.which("rg") is None:
             self.skipTest("ripgrep is not installed here")
-        marker = "archived-page-marker-7f3a"
+        marker = "-".join(["archived", "page", "marker", "7f3a"])   # not written whole here, or rg finds this file
         page = ROOT / "archive" / "test-marker.md"
         page.write_text(f"# Gone\n\n{marker}\n", encoding="utf-8")
         try:
-            found = subprocess.run(["rg", "-l", marker], cwd=ROOT, capture_output=True, text=True).stdout
+            found = subprocess.run(["rg", "-l", marker, "."], cwd=ROOT, capture_output=True, text=True,
+                                   stdin=subprocess.DEVNULL, timeout=60).stdout
         finally:
             page.unlink()
         self.assertEqual(found.strip(), "")

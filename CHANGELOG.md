@@ -2,6 +2,24 @@
 
 What changed in each version, for someone deciding whether to take it. The [milestone records](docs/milestones/m1.md) say how each change was made and checked.
 
+## Unreleased: M3, sub-batch A
+
+**Changed:**
+
+- `freshness` is retired. `page_kinds` holds its review-date rule, with the same cases, beside the new kind and opening rules. `stale_pages` reads `page_kinds`.
+- `eval_record` gates only the playbooks marked proven (decision record 0006). For each, pooled across its own cases, the guided arm must beat two lines, and pass no more than 3 runs fewer than the previous record's guided arm and the anchor its `proven-by` names.
+- The eval hash leaves out a page's exact proof keys, and the runner takes them out of every page a gated arm reads, through one file, `evals/proofkeys.py`. It now also covers `wslib/shell.py`, the shell parser the graded hook uses.
+- The shell parser moved from `parts/no_stage_all.py` into `wslib/shell.py`, and learned the commands M3's guards will judge. `no_admin_merge` imports it instead of loading another part's file.
+- The manifest gains `building`, the milestones being built now.
+- `check --staged` starts a fixed number of git processes: three for the files, and at most two more for the history the proof checks read.
+- `AGENTS.md` keeps its rules in a table tagged with how each is enforced. `INDEX.md` gains rows for the layout, the glossary and decision 0006, and a table of cross-cutting chains.
+
+**Added:**
+
+- Per-case arm files (`arms`), additions to a shared arm (`add_files`), one-time arms outside every hash (`evals/one-time.json`, with the routed arm), the wrappers' plugin inside the sandbox, `run.py --baseline`, `--attempt`, `--rerecord`, and graders for a review protocol and a diagnosis.
+- Checks: `page_kinds`, `chains`, `pointers`, `rules` (and `ws.py rules`), `loaded_size`, `proof`. `direct_push` also refuses a commit that changes a proof anchor pushed straight to main.
+- Pages: the layout, the glossary, decision record 0006, the records folder, an archive hidden from search, and pointer files for GitHub Copilot and opencode.
+
 ## 0.3.0, 2026-11-17: M2, port what the work workspace learned
 
 **Changed:**
