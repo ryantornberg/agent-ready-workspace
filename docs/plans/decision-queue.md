@@ -19,7 +19,7 @@ Eighth draft. It applies rounds 1 to 7 of the red team (26, 16, 20, 14, 17, 16 a
 - **The maintainer's private pass must stay out of this repository while this is built and measured.** It pushes answers to sessions, and its trigger overlaps this wrapper's. Builders must not call it, since it loads the original. The maintainer turns it off here before slice 0 (see "Preconditions").
 - **A pass is a real thing the tool issues.** `queue pass start` returns an id tied to the session that started it, and `pass end` closes it. Only the person starts a pass, and a new pass ends any pass left open. Answers from a pass or from evidence must name that open pass. Only the session holding an item may mark it done. Every answer not given by the person in a pass is labelled at pickup: "from evidence", or "not from a pass".
 - **The park rule is narrow.** An agent files a question only when the person tells it to park one, or when it runs with no person present. A question the person can answer now is asked in the session as usual. Round 2 showed a broad rule would file every clarifying question, including the pass's own.
-- **Two tests, in order.** The trial of the private version is measured by use, with its one deadline at M3's sign-off (the maintainer's word, 2026-11-18); it gates the build. Then slice 6 tests this plan's own design over a window of use during M4, and decides keep or cut before M4's closing recording. The bars, C2 and C3, need the maintainer's yes.
+- **Two tests, in order.** The trial of the private version is measured by use, with its one deadline at M3's sign-off (the maintainer's word, 2026-11-18); it gates the build. Then slice 6 tests this plan's own design over a window of use during M4, and decides keep or cut before M4's closing recording. The maintainer set both bars, C2 and C3, as recommended on 2026-11-18.
 - **Fewer items will come in than in the private version.** It gathers unanswered questions from live sessions; this version does not, and parks questions only on the person's word or when no person is present. So C3 has a floor: with too few items filed, the verdict is "not tested", not "cut".
 - **Smaller than the private version.** Out of scope now: waking sessions, a prompt-time notice, gathering unfiled questions from transcripts, question-log rows, archive and restore, messages for people, tracker lookups, and sync across machines. Each is under "Later".
 - **Fresh source.** Builders never open the private version's files. This planning session read them and acts as the walled reader. The section "What the private version does" is the only description builders get. Details the slices take from the original are marked (*o*), and a builder may change any of them.
@@ -34,6 +34,9 @@ The maintainer, 2026-11-18:
 - They flagged a risk: sending each answer to an idle session could start many sessions at once.
 - Build it right after M3 closes, not in M10.
 - The trial is measured by use rather than by time. It keeps one deadline: the sign-off of M3's milestone record.
+- The two bars, C2 and C3, are set as recommended (see "The two bars").
+- The plan is approved if round 8 of the red team only finishes earlier work. Round 7 raised new findings, so the program's stop rule calls for round 8. If round 8 raises anything new, the plan goes back to the maintainer.
+- The private decision skill stays on in this repository until right before slice 0, so passes run here still count toward the trial.
 
 Carried from the program, 2026-11-15 and 2026-11-16:
 
@@ -41,9 +44,11 @@ Carried from the program, 2026-11-15 and 2026-11-16:
 - Every port is rebuilt from scratch from a generic description. Nobody who builds it opens the original. Only a walled reader does, and a walled reader builds nothing.
 - Public pages make no comparative claims.
 
-## Choices for the maintainer
+## The two bars
 
-| # | Choice | Recommended | Why |
+Both set by the maintainer on 2026-11-18, as recommended.
+
+| # | Choice | Bar | Why |
 |---|---|---|---|
 | C2 | The trial's bar, checked at M3's sign-off | At least 4 passes on at least 3 different days. At least 1 item closed from evidence without asking. At least 3 answers that reached the asking session and were acted on. | On 2026-11-18 the private queue had 2 passes on 2 days and 29 items done or answered (verified from its history), so an item count tests nothing. The private version pushes answers, so this bar tests use, not this plan's pull design; C3 tests that. |
 | C3 | Slice 6's bar | Over one week of M4's build: at least 3 answers from a pass, or from evidence, picked up and acted on by the session holding them, where another session ran that pass; and no message sent to a session by a pass. If fewer than 8 items were filed that week, the verdict is "not tested": the window runs one more week, once, and then the maintainer decides. Otherwise a miss cuts the queue. | It is the only test of the design this plan changes. Answers given in the session (`direct`) do not count toward it. The floor stops a quiet week from cutting an untested design. |
@@ -347,7 +352,7 @@ Round 7, 2026-11-18. A fresh session read the seventh draft and the sources. All
 
 ## Approval
 
-Not yet approved.
+Approved by the maintainer on 2026-11-18, on one condition: round 8 of the red team only finishes earlier work. If round 8 raises anything new, the plan goes back to the maintainer before any slice starts. The status stays `draft` until round 8 is on record.
 
 ## Changes after approval
 
