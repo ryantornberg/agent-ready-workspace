@@ -23,9 +23,9 @@ The plan for the first milestone of the workspace's expansion. Building sessions
 
 The maintainer, 2026-11-15:
 
-- "make sure the plan is written such that I can use the workspace itself to implement the plan. Testing the workspace could be an exercise of the workspace itself."
-- "The workspace should already contain orchestration rules."
-- "Do not write on any system other people can see, and put nothing private in the public repository."
+- The plan is written so the workspace itself builds it, which makes building it a test of the workspace.
+- The workspace holds its own orchestration rules.
+- Agents write on no system other people can see, and nothing private goes into this repository.
 - An eval result counts at 40 or more trials per arm, with graders that read the folder and the commit.
 - The second agent tool is Codex CLI.
 - Slice 2 comes before any hook is made stricter.
@@ -212,6 +212,7 @@ Approved by: Ryan Tornberg, 2026-11-15.
   - **Criterion 29 gains a sentence:** "The gate also refuses a record in which, for any affected case, the guided arm passes no grader more often than the bare arm." Why: today `eval_record` checks only that the guided arm passed. A playbook the bare model follows just as well still ships, which contradicts the eval page's rule that guidance stays only while it beats the bare model. The stop rule's Fisher test still decides the milestone's pooled result; this sentence is the cheap check on every change.
   - **Criterion 31 becomes:** "The agent runs inside the agent tool's own operating-system sandbox where the tool has one, and inside a container where it does not. Its permissions are bypassed only inside one of the two. A recorded transcript holds none of the operator's environment: no home folder, user name, shell alias or git identity." Why: Claude Code's sandbox already confines writes to the run's folder, hides the home folder and limits the network. A container is then needed only for a tool without one. The Limits line "Before slice 3, the maintainer starts Docker" applies only if a container turns out to be needed.
 - 2026-11-15, the maintainer approved a revision to criterion 25, which now carries it.
+- 2026-11-18, the maintainer: the settled decisions are paraphrased instead of quoting the maintainer's words. No decision changed.
   - **Criterion 25 becomes:** "A recorded Codex CLI run, in a scratch clone of the workspace, shows the reminder on `git add -A` next to the command's result, the sweep refused at the commit, and an edit to the shelved folder refused. The files Codex wrote with its patch tool reach the slice-5 ledger, and their commit passes. A test replays every hook payload the run recorded and gets the same answers. A patch that touches several files is refused when any one of them is in the shelved folder, a move into it included, and then records none of them."
   - **Why the reminder, not a refusal:** since slice 5 the shell hook never refuses `git add -A`; the commit check does. [Decision 0002](../decisions/0002-hooks-remind-the-commit-enforces.md) gives the reasons. The criterion as approved predates it.
   - **Why a replay test:** every other criterion is a named test that can fail later. A recording alone cannot. The replay runs in CI on three systems, so a change to the adapter that would misread Codex fails there.

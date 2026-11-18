@@ -1,6 +1,6 @@
 ---
 last-reviewed: 2026-11-18
-status: draft
+status: approved
 milestone: M3
 ---
 
@@ -12,7 +12,7 @@ The plan for the third milestone: write fresh, in this repository, everything a 
 
 ## Key points
 
-Eighth draft, after rounds 1 to 7 of the red team. Every accepted action of the seven rounds is applied to the body. The seven choices that needed the maintainer's yes are settled (see "Settled decisions"). Round 7 only finished earlier work, so under the program's stop rule the review loop ends there, and the plan goes to approval.
+Eighth draft, after rounds 1 to 7 of the red team. Every accepted action of the seven rounds is applied to the body. The seven choices that needed the maintainer's yes are settled (see "Settled decisions"). Round 7 only finished earlier work, so under the program's stop rule the review loop ends there. The maintainer approved the plan on 2026-11-18.
 
 - **A playbook can now ship unproven, but says so.** Today every page in `docs/playbooks/` must have an eval case that beats the bare model. Of the about 60 pages this plan ports, about half are templates, record formats and tutorials, which checks and CI hold instead. About 29 are procedures an agent follows. Proving those now is not honest: cases must come from real tasks, this workspace has two milestones of them, and many procedures need machinery from M4 or M8 before they can run. Instead every procedure carries a `proof` field. A `proven` page needs a real-run record and a passing eval record. An `unproven` page says so in its front matter, which agents and people read. The eval runner strips the proof keys, in their exact forms only, before a gated arm reads a page, and the hash ignores the same text, so marking a page proven does not stale its own record. The gate for proven pages gets stricter, not looser: each must beat the two-line arm on its own. Decision record 0006 sets this.
 - **Unproven is temporary.** Each unproven page names the milestone that is to prove it, in a `prove-by` field. A check fails an unproven page once that milestone's record is signed off. Moving `prove-by` later is refused unless a failed proof attempt is on record: a record under `evals/runs/` that names the page and the milestone it moves away from, with the verdict "not proven", made while that milestone was being built. B2 sets each page's `prove-by` in a table: the milestone whose program section runs that procedure on real work, with M6 as the default for development procedures. The six procedures that may be model coaching get `prove-by: M4`, and the program's M4 carries their proof attempts. Each later milestone a page names carries that page's proof attempts and their run budget in the program.
@@ -35,17 +35,17 @@ Eighth draft, after rounds 1 to 7 of the red team. Every accepted action of the 
 
 The maintainer, 2026-11-15:
 
-- "Make sure the plan is written such that I can use the workspace itself to implement the plan. Testing the workspace could be an exercise of the workspace itself."
-- "I think there might be many areas to expand in the workspace before we begin the testing." And: "the import from [the work workspace] is more narrow than I had intended."
-- "Expand the scope of the workspace to officially include and guide for automations, devops, product, etc."
-- "I do not have a goal to compete with anybody or even consider myself a competition." Other setups are cited only as credit for an idea taken from them.
+- The plan is written so the workspace itself builds it, which makes building it a test of the workspace.
+- The workspace has many areas to expand before testing begins, and the import from the work workspace was narrower than intended.
+- The workspace officially covers and guides automation, DevOps and product work, not only development.
+- The workspace does not compete with anyone. Other setups are cited only as credit for an idea taken from them.
 
 The maintainer, 2026-11-16, approving M2's plan, carried here:
 
 - Builders never open the work workspace's files. A walled reader session, which builds nothing, reads them and writes generic descriptions.
 - Eval-harness work is committed with `--no-verify` before the paid runs; this is a standing rule.
 - From M2's slice 4 on, slices are built in worktrees under `.claude/worktrees/`.
-- On paying for eval runs: "We're fine in my claude subscription right now."
+- Eval runs are paid from the maintainer's existing subscription.
 
 The maintainer, 2026-11-17:
 
@@ -54,8 +54,8 @@ The maintainer, 2026-11-17:
 - One tag per milestone: M3's is `v0.4.0`.
 - Yes to red-team finding 18: the request door and the release-and-rollback drafts leave M3. M9 and M11 build them from real work, and the guide names them as planned.
 - Yes to red-team finding 37: the discard guard refuses only while another live session is on record, which keeps decision record 0005's promise to a person working with one session.
-- Yes to round-2 finding R2-22, "defer both items": verifying a change on the local environment waits for M5, and machine-state records wait for M4 or M5.
-- Yes to round-2 finding R2-23: "M4 carries the proof attempts" for the six procedures that may be model coaching. The program's M4 section now says so.
+- Yes to round-2 finding R2-22, deferring both items: verifying a change on the local environment waits for M5, and machine-state records wait for M4 or M5.
+- Yes to round-2 finding R2-23: M4 carries the proof attempts for the six procedures that may be model coaching. The program's M4 section now says so.
 
 The maintainer, 2026-11-18:
 
@@ -65,7 +65,7 @@ The maintainer, 2026-11-18:
 
 Carried from M1 and M2:
 
-- "Do not write on any system other people can see, and put nothing private in the public repository."
+- Agents write on no system other people can see, and nothing private goes into this repository.
 - An eval result counts at 40 or more trials per arm.
 - In this repository agents push, open draft pull requests, and publish and merge them once CI passes on Linux, macOS and Windows.
 
@@ -547,7 +547,7 @@ Fourteen of the 17 round-6 rows are fully applied; R7-1, R7-9 and R7-3 finish R6
 
 ## Approval
 
-Not yet approved.
+Approved by: the maintainer, 2026-11-18, on the eighth draft. The maintainer's words are paraphrased in this plan, never quoted.
 
 ## Changes after approval
 

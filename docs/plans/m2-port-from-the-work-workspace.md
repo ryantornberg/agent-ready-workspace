@@ -24,17 +24,17 @@ The plan for the second milestone: bring the features that proved themselves in 
 
 The maintainer, 2026-11-16:
 
-- "The workspace is supposed to have rules for using multiple playwright browsers. Check [the work workspace]. This is one of the many features I wanted moved to the workspace."
-- "First write the porting plan."
-- "You'll have to dig into the workspace for possible features. I'm constantly modifying it so I don't have a particular list."
+- The workspace has rules for using several Playwright browsers at once, ported from the work workspace. They are one of many features meant to move here.
+- The porting plan comes first.
+- Features are found by reading the work workspace, which changes often; there is no fixed list.
 - Turned on GitHub's branch rule for main: all five CI jobs required, direct pushes by the owner still allowed, force pushes and deletion blocked.
 - Turned off "require branches to be up to date" the same day, so each doc push to main does not send every open pull request through a catch-up merge and a fresh CI run. CI on main catches a bad combination after the merge.
-- Asked how to pay for the eval re-recording: "We're fine in my claude subscription right now."
+- The eval re-recording is paid from the maintainer's existing subscription.
 
 Carried from M1, 2026-11-15:
 
-- "Do not write on any system other people can see, and put nothing private in the public repository."
-- "Make sure the plan is written such that I can use the workspace itself to implement the plan."
+- Agents write on no system other people can see, and nothing private goes into this repository.
+- The plan is written so the workspace itself builds it.
 - The second agent tool is Codex CLI.
 - An eval result counts at 40 or more trials per arm.
 
@@ -275,6 +275,10 @@ The maintainer, 2026-11-16, before slice 6:
 
 10. **The parser stays in `no_stage_all.py`.** Moving it into `wslib/` would make `grade.py` depend on the engine again, which slice 0 ended.
 11. **Slice 6's recording keeps slice 0's design and stop rule:** 15 runs per arm in each case, 135 runs, on the small model. If the guided arm does not beat the two-line arm across the cases (one-sided Fisher exact, p < 0.05), or loses any comparison slice 0's recording won, the result is published and the plan stops. The session is capped at 150 agent runs, probes and retries included.
+
+The maintainer, 2026-11-18:
+
+12. **The settled decisions are paraphrased**, instead of quoting the maintainer's words. No decision changed.
 
 ## Results
 
