@@ -194,10 +194,11 @@ A team that adopts the workspace may start with findings it cannot fix at once. 
 - **One file per check**, `baselines/<check>.json`, listing the findings it tolerates. A missing file tolerates nothing. This repository tolerates nothing, so it has none.
 - **A finding is matched by its fingerprint**: a hash of the check's name, the file and the message, not the line, so a finding that only moves stays tolerated. Each entry tolerates one finding, so fixing one finding never makes room for a new one.
 - **The commit and CI read it the same way**, from the snapshot they check: the staged file at the commit, the folder's file in CI.
+- **A change cannot excuse a finding it brings.** An entry tolerates a finding only when the base has that finding too: the last commit for `check` and the commit check, and the merge base with the `--changed-from` commit in CI. Adding the entry in the same pull request, or ahead of the finding, does not help. A team's first baseline passes, because main already has its findings. With no base to compare with, nothing is tolerated. The check runs a second time, on the base, only when its baseline lists something.
 - **Only errors are recorded**, since a warning fails nothing. A file that cannot be read tolerates nothing and is itself an error.
 - `python3 ws.py baseline` writes the files from the folder's current findings. It writes a file only for a check that finds errors, or that has a file already. Add `--phase ci` or `--phase nightly` for the checks of those phases.
 
-The files are machinery: they weaken a check, so they change through a pull request, like the check itself. The output of `check` counts the tolerated findings of each check, so they stay in sight. Baselines apply to `check` in its folder, staged and CI forms. The pre-push and commit-message checks take none.
+The files are machinery: they weaken a check, so they change through a pull request, like the check itself. The output of `check` counts the tolerated findings of each check, so they stay in sight. Baselines apply to `check` in its folder, staged and CI forms. The pre-push and commit-message checks take none. A check that judges only the lines a change adds, such as `line_cites`, finds nothing at a base, so its findings cannot be tolerated.
 
 ## The hook case runner
 

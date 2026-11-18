@@ -32,6 +32,7 @@ class BaselineTests(Folder):
         self.write("a.md", "# A\n\n[one](gone-1.md)\n\n[three](gone-3.md)\n")
 
     def commit(self, *paths):
+        """Commit the paths, so the next check's base, the last commit, holds them."""
         self.git("add", "--", *paths)
         self.git("commit", "-q", "--no-verify", "-m", "change")
 
@@ -99,6 +100,60 @@ class BaselineTests(Folder):
         code, output = self.ws("check", "--phase", "ci", "--changed-from", self.base)
         self.assertEqual(code, 1, output)
         self.assertIn("gone-3.md", output)
+
+    # The fix after C1: a change can excuse a finding its base already has, never one it brings.
+    def entry_for(self, target):
+        from wslib import baseline as baselines
+        found = {"path": "a.md", "line": 5, "message": f"link to missing file: {target}", "level": "error"}
+        return baselines.record("links", [found])["tolerated"][0]
+
+    def test_a_change_cannot_excuse_a_finding_it_brings(self):
+        self.ws("baseline")
+        self.commit("baselines/links.json")
+        base = self.git("rev-parse", "HEAD").stdout.strip()
+        body = self.baseline()
+        body["tolerated"].append(self.entry_for("gone-3.md"))
+        self.write("baselines/links.json", json.dumps(body))
+        self.write("a.md", BROKEN + "\n[three](gone-3.md)\n")
+        for form in (("check",), ("check", "--staged")):
+            with self.subTest(form=form):
+                self.git("add", "--", "a.md", "baselines/links.json")
+                code, output = self.ws(*form)
+                self.assertEqual(code, 1, output)
+                self.assertIn("gone-3.md", output)
+                self.assertIn("does not have", output)
+        self.commit("a.md", "baselines/links.json")
+        code, output = self.ws("check", "--phase", "ci", "--changed-from", base)
+        self.assertEqual(code, 1, output)
+        self.assertIn("gone-3.md", output)
+
+    def test_an_entry_recorded_ahead_of_its_finding_does_not_excuse_it_later(self):
+        self.ws("baseline")
+        body = self.baseline()
+        body["tolerated"].append(self.entry_for("gone-3.md"))
+        self.write("baselines/links.json", json.dumps(body))
+        self.commit("baselines/links.json")
+        self.assertEqual(self.ws("check", "--phase", "ci", "--changed-from", self.base)[0], 0)
+        ahead = self.git("rev-parse", "HEAD").stdout.strip()
+        self.write("a.md", BROKEN + "\n[three](gone-3.md)\n")
+        self.commit("a.md")
+        code, output = self.ws("check", "--phase", "ci", "--changed-from", ahead)
+        self.assertEqual(code, 1, output)
+        self.assertIn("gone-3.md", output)
+
+    def test_a_first_baseline_for_findings_main_already_has_passes_ci(self):
+        self.ws("baseline")
+        self.commit("baselines/links.json")
+        code, output = self.ws("check", "--phase", "ci", "--changed-from", self.base)
+        self.assertEqual(code, 0, output)
+        self.assertIn("2 finding(s) tolerated", output)
+
+    def test_with_no_base_to_compare_nothing_is_tolerated(self):
+        self.ws("baseline")
+        self.commit("baselines/links.json")
+        code, output = self.ws("check", "--phase", "ci", "--changed-from", "0" * 40)
+        self.assertEqual(code, 1, output)
+        self.assertIn("gone-1.md", output)
 
     def test_a_baseline_that_cannot_be_read_tolerates_nothing_and_says_so(self):
         for text in ("not json", "[]", '{"tolerated": [{"fingerprint": "short"}]}', '{"tolerated": {}}'):
