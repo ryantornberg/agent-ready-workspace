@@ -4,6 +4,11 @@
   "scaffold_dir": "evals/scaffold",
   "code_dir": "src",
   "acceptance": "evals/acceptance/big-report.py",
+  "add_files": {
+    "guided": {
+      "docs/rules/orders-api.md": "docs/rules/orders-api.md"
+    }
+  },
   "unchanged": [
     "src/orders-api/sales_report.py"
   ],

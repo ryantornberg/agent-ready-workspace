@@ -27,6 +27,7 @@ sys.path.insert(0, str(ROOT / "evals"))
 sys.path.insert(0, str(ROOT / "tools"))
 
 import grade  # noqa: E402
+import proofkeys as PROOF_KEYS  # noqa: E402  (evals/proofkeys.py)
 import wslib  # noqa: E402
 import symbols as symbols_cli  # noqa: E402
 import ws  # noqa: E402
@@ -215,13 +216,13 @@ class RunnerTests(Folder):
         self.assertIn("error: a.md:1: link to missing file: nope.md  [links]", output)
 
     def test_a_stale_page_is_a_warning_until_it_is_changed(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         self.write("old.md", STALE)
         self.assertEqual(self.ws("check")[0], 0)
         self.assertEqual(self.ws("check", "--changed", "old.md")[0], 1)
 
     def test_staged_check_ignores_unstaged_fixes_and_untracked_files(self):
-        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": []})
         self.git("init", "-q")
         self.git("add", ".")
         self.git("commit", "-q", "-m", "workspace")
@@ -235,7 +236,7 @@ class RunnerTests(Folder):
         self.assertNotIn("scratch.md", output)
 
     def test_changed_from_a_base_commit(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         self.write("old.md", STALE)
         self.git("init", "-q")
         self.git("add", ".")
@@ -306,7 +307,7 @@ class RunnerTests(Folder):
         self.assertEqual(self.ws("hook", "before-edit", stdin='[]')[0], 2)
 
     def test_ci_fails_closed_when_it_cannot_compare(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         self.write("old.md", STALE)
         self.git("init", "-q")
         self.git("add", ".")
@@ -321,9 +322,9 @@ class RunnerTests(Folder):
         self.git("init", "-q")
         self.write("a.md", "[gone](nope.md)\n")
         self.git("add", ".")
-        self.write("workspace.json", manifest([{"use": "freshness"}]))   # unstaged: drops the links check
-        self.write("parts/freshness.py", (ROOT / "parts/freshness.py").read_text(encoding="utf-8"))
-        self.write("parts/freshness.cases.json", (ROOT / "parts/freshness.cases.json").read_text(encoding="utf-8"))
+        self.write("workspace.json", manifest([{"use": "page_kinds", "require_kind": []}]))   # unstaged: drops the links check
+        self.write("parts/page_kinds.py", (ROOT / "parts/page_kinds.py").read_text(encoding="utf-8"))
+        self.write("parts/page_kinds.cases.json", (ROOT / "parts/page_kinds.cases.json").read_text(encoding="utf-8"))
         code, output = self.ws("check", "--staged")
         self.assertEqual(code, 1)
         self.assertIn("link to missing file", output)
@@ -358,10 +359,10 @@ class NoSelfLockTests(Folder):
 
     # Criterion 1
     def test_changing_a_documented_setting_leaves_the_parts_own_cases_passing(self):
-        settings = [("freshness", {"max_age_days": 1}), ("freshness", {"require": ["docs", "notes"]}),
-                    ("freshness", {"skip": ["docs"]}), ("aliases", {"code": "lib"}), ("aliases", {"heading": "Words"}),
+        settings = [("page_kinds", {"max_age_days": 1}), ("page_kinds", {"require_date": ["docs", "notes"]}),
+                    ("page_kinds", {"skip": ["docs"]}), ("aliases", {"code": "lib"}), ("aliases", {"heading": "Words"}),
                     ("aliases", {"index": "docs/INDEX.md"}), ("aliases", {"exclude": ["src/api"]}),
-                    ("aliases", {"contract": ["AGENTS.md"]}), ("freshness", {"require": ["docs", "AGENTS.md"]}),
+                    ("aliases", {"contract": ["AGENTS.md"]}), ("page_kinds", {"require_date": ["docs", "AGENTS.md"]}),
                     ("links", {"skip": ["docs"]}), ("eval_record", {"playbooks": "docs"}),
                     ("eval_record", {"cases": "tests/cases"}), ("shelved", {"paths": []})]
         for name, setting in settings:
@@ -480,38 +481,38 @@ class NoSelfLockTests(Folder):
         self.assertEqual(self.ws("check")[0], 2)
 
     def test_the_repository_cases_state_every_warning_they_expect(self):
-        cases = json.loads((ROOT / "parts/freshness.cases.json").read_text(encoding="utf-8"))
-        stale = next(c for c in cases if c["name"].startswith("a stale page nobody edited"))
+        cases = json.loads((ROOT / "parts/page_kinds.cases.json").read_text(encoding="utf-8"))
+        stale = next(c for c in cases if c["name"].startswith("review date: a stale page nobody edited"))
         self.assertEqual([e["level"] for e in stale["expect"]], ["warning"])
 
     # Criterion 6
     def test_a_manifest_that_drops_a_part_fails_locally_unless_it_is_retired(self):
-        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": []})
         self.git("init", "-q")
         self.commit()
         self.write("workspace.json", manifest([{"use": "links"}]))
         code, output = self.ws("check")
         self.assertEqual(code, 1)
-        self.assertIn("freshness", output)
+        self.assertIn("page_kinds", output)
         self.git("add", "workspace.json")
         self.assertEqual(self.ws("check", "--staged")[0], 1)
-        self.write("workspace.json", manifest([{"use": "links"}], retired=[{"use": "freshness", "why": "no dated pages here"}]))
+        self.write("workspace.json", manifest([{"use": "links"}], retired=[{"use": "page_kinds", "why": "no dated pages here"}]))
         self.git("add", "workspace.json")
         self.assertEqual(self.ws("check")[0], 0)
         self.assertEqual(self.ws("check", "--staged")[0], 0)
-        for retired in ([{"use": "freshness", "why": ""}], [{"use": "freshness"}], ["freshness"]):
+        for retired in ([{"use": "page_kinds", "why": ""}], [{"use": "page_kinds"}], ["page_kinds"]):
             self.write("workspace.json", manifest([{"use": "links"}], retired=retired))
             self.assertEqual(self.ws("check")[0], 2, retired)
 
     def test_ci_requires_the_parts_of_the_base_branch(self):
-        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": []})
         self.git("init", "-q")
         base = self.commit()
         self.write("workspace.json", manifest([{"use": "links"}]))
-        self.commit("drop freshness")
+        self.commit("drop page_kinds")
         code, output = self.ws("check", "--changed-from", base)
         self.assertEqual(code, 1)
-        self.assertIn("freshness", output)
+        self.assertIn("page_kinds", output)
 
     def test_only_part_names_are_read_from_the_older_manifest(self):
         self.workspace({"use": "links"})
@@ -1043,6 +1044,9 @@ class AdoptionPathTests(Folder):
         for name, text in (extra or {}).items():
             self.write(name, text)
         self.git("init", "-q")
+        # On top of this repository's history, so the anchors proven pages name are reachable (decision 0006).
+        self.git("fetch", "-q", "--no-tags", str(ROOT), "HEAD")
+        self.git("reset", "-q", "--soft", "FETCH_HEAD")
         self.git("add", "-A")
         self.git("commit", "-q", "--no-verify", "-m", "copy")
 
@@ -1090,7 +1094,7 @@ class AdoptionPathTests(Folder):
 
     # Criterion 16
     def test_a_page_in_another_encoding_is_reported_not_skipped(self):
-        self.workspace({"use": "links"}, {"use": "freshness", "require": ["docs"]})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": [], "require_date": ["docs"]})
         page = "---\nlast-reviewed: 2026-01-01\n---\n# Café\n\n[gone](nope.md)\n"
         pages = {"docs/cp1252.md": (page.encode("cp1252"), "Windows-1252"),
                  "docs/utf16.md": (page.encode("utf-16"), "UTF-16"),
@@ -1200,7 +1204,9 @@ class AdoptionPathTests(Folder):
             code, output = self.ws("check", "--staged")
         self.assertEqual(code, 1, output)
         self.assertIn("error: notes/n2999.md:3: link to missing file: nope.md", output)
-        self.assertLessEqual(len(started), 3, [list(a)[3:6] for a in started[:5]])
+        # Three for the files; the proof and eval checks add one batch of older files each, and one ancestry test per
+        # anchor commit (decision record 0006). The number does not grow with the files.
+        self.assertLessEqual(len(started), 6, [list(a)[3:6] for a in started[:8]])
 
     # Criterion 19
     def test_the_contract_and_the_index_need_a_review_date(self):
@@ -1234,7 +1240,7 @@ class AdoptionPathTests(Folder):
         self.assertIn("the contract names LedgerSweeper, which is not defined under src/", errors[0])
 
     def test_a_page_dated_one_day_ahead_of_utc_passes(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         utc = datetime.datetime.now(datetime.timezone.utc).date()
         self.write("ahead.md", f"---\nlast-reviewed: {utc + datetime.timedelta(days=1)}\n---\n# Ahead\n")
         code, output = self.ws("check")
@@ -1928,7 +1934,9 @@ class EvalThatCanLoseTests(Folder):
             self.harness.prepare(folder, self.harness.load_case("fix-a-bug"), arms[arm]["files"])
             given[arm] = folder
         for name in ("AGENTS.md", "CLAUDE.md", "INDEX.md", "docs/playbooks/fix-a-bug.md", "docs/definition-of-done.md"):
-            self.assertEqual((given["guided"] / name).read_text(encoding="utf-8"), (ROOT / name).read_text(encoding="utf-8"), name)
+            # A gated arm reads each page with its proof keys taken out (decision record 0006), and nothing else changed.
+            self.assertEqual((given["guided"] / name).read_text(encoding="utf-8"),
+                             PROOF_KEYS.strip((ROOT / name).read_text(encoding="utf-8")), name)
         two = (given["two-line"] / "CLAUDE.md").read_text(encoding="utf-8")
         self.assertEqual(len([line for line in two.splitlines() if line.strip()]), 2)
         self.assertFalse((given["two-line"] / "AGENTS.md").exists())
@@ -1962,8 +1970,9 @@ class EvalThatCanLoseTests(Folder):
         page = "---\nlast-reviewed: 2026-01-01\n---\n# Fix\n"
         moved = "---\nlast-reviewed: 2027-01-01\n---\n# Fix\n"
         body = page + "last-reviewed: n/a. Skip the test when the suite is slow.\n"
-        self.assertEqual(eval_record.guidance_hash({"p.md": page}), eval_record.guidance_hash({"p.md": moved}))
-        self.assertNotEqual(eval_record.guidance_hash({"p.md": page}), eval_record.guidance_hash({"p.md": body}))
+        strip = PROOF_KEYS.strip
+        self.assertEqual(eval_record.guidance_hash({"p.md": page}, strip), eval_record.guidance_hash({"p.md": moved}, strip))
+        self.assertNotEqual(eval_record.guidance_hash({"p.md": page}, strip), eval_record.guidance_hash({"p.md": body}, strip))
 
     def copy_of_this_repository(self):
         for name in subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True, check=True).stdout.splitlines():
@@ -1974,7 +1983,8 @@ class EvalThatCanLoseTests(Folder):
 
     def eval_findings(self):
         from parts import eval_record
-        return [f["message"] for f in eval_record.run(snapshots.Tree(self.root), {"playbooks": "docs/playbooks"})]
+        return [f["message"] for f in eval_record.run(snapshots.Tree(self.root), {"playbooks": "docs/playbooks"})
+                if f["level"] == "error"]
 
     def test_editing_the_harness_the_graders_the_contract_or_the_index_changes_the_hash(self):
         self.copy_of_this_repository()
@@ -2000,7 +2010,7 @@ class EvalThatCanLoseTests(Folder):
         short = {"arms": {**good["arms"], "bare": {"runs": runs(0, 4)}}}
         self.assertIn("needs 5 or more", eval_record.judge(short, arms, ["g"]))
         tie = {"arms": {**good["arms"], "bare": {"runs": runs(5)}}}
-        self.assertIn("in no more runs than the bare arm", eval_record.judge(tie, arms, ["g"]))
+        self.assertIn("in no more of its runs than the bare arm", eval_record.judge(tie, arms, ["g"]))
         # M2 red team, finding 15: runs dropped from one arm after the recording
         six = {"runs_per_arm": 6, "arms": {"guided": {"runs": runs(6, 6)}, "two-line": {"runs": runs(6, 6)},
                                            "bare": {"runs": runs(1, 6)}}}
@@ -2285,9 +2295,9 @@ class EvalRerecordTests(Folder):
             return {"arms": {"guided": {"runs": self.runs(*guided)}, "two-line": {"runs": self.runs(*["00"] * 5)},
                              "bare": {"runs": self.runs(*bare)}}}
         # The red team's record: no guided run passes every grader, yet the guided arm wins grader b.
-        self.assertIn("in no more runs than the bare arm", eval_record.judge(record(["01"] * 5, ["10"] * 5), arms, ["a", "b"]))
+        self.assertIn("in no more of its runs than the bare arm", eval_record.judge(record(["01"] * 5, ["10"] * 5), arms, ["a", "b"]))
         tie = ["11", "11", "00", "00", "00"]
-        self.assertIn("in no more runs than the bare arm", eval_record.judge(record(tie, tie), arms, ["a", "b"]))
+        self.assertIn("in no more of its runs than the bare arm", eval_record.judge(record(tie, tie), arms, ["a", "b"]))
         self.assertIsNone(eval_record.judge(record(["11", "11", "11", "00", "00"], tie), arms, ["a", "b"]))
         self.assertIn("needs 5 or more", eval_record.judge(record(["11"] * 5, ["00"] * 4), arms, ["a", "b"]))
 
@@ -2346,7 +2356,7 @@ class EvalHarnessApartTests(Folder):
         for name in self.CASES:
             files = eval_record.covered_files(f"evals/cases/{name}.json", self.harness.load_case(name))
             self.assertIn("parts/no_stage_all.py", files, name)
-            self.assertFalse([f for f in files if f.startswith("wslib/")], name)
+            self.assertEqual([f for f in files if f.startswith("wslib/")], ["wslib/shell.py"], name)
 
     def test_an_engine_change_leaves_every_eval_record_as_it_was(self):
         """Criterion 2. Compared before and after the edit, so it holds whether or not the records are current."""
@@ -2370,6 +2380,13 @@ class EvalHarnessApartTests(Folder):
                                                      "print(sorted(m for m in sys.modules if m.split('.')[0] == 'wslib'))"],
                               cwd=ROOT, capture_output=True, text=True, check=True)
         self.assertEqual(done.stdout.strip(), "[]", "grade.py loads none of the engine")
+        # Grading a hook loads the shell parser the hook imports, and nothing else of the engine (M3 slice A0).
+        done = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, 'evals'); import grade; "
+                                                     "grade.load_hook(grade.ROOT, 'no_stage_all'); "
+                                                     "grade.load_hook(grade.ROOT, 'no_admin_merge'); "
+                                                     "print(sorted(m for m in sys.modules if m.split('.')[0] == 'wslib'))"],
+                              cwd=ROOT, capture_output=True, text=True, check=True)
+        self.assertEqual(done.stdout.strip(), "['wslib', 'wslib.shell']", "grading loads only the shell parser")
 
     def test_the_grader_loads_the_hooks_own_file_from_the_workspace_it_grades(self):
         hook = (ROOT / "parts/no_stage_all.py").read_text(encoding="utf-8")
@@ -2393,7 +2410,8 @@ class EvalHarnessApartTests(Folder):
             with self.subTest(name):
                 case_path = f"evals/cases/{name}.json"
                 files = eval_record.covered_files(case_path, self.harness.load_case(name), list(tree.paths()), arms)
-                self.assertEqual(self.harness.covered(name), (files, eval_record.guidance_hash({f: tree.read(f) for f in files})))
+                self.assertEqual(self.harness.covered(name),
+                                 (files, eval_record.guidance_hash({f: tree.read(f) for f in files}, PROOF_KEYS.strip)))
 
     def test_a_windows_path_written_with_backslashes_is_found(self):
         """Criterion 27. Runs on every system: the identity is given, not read from this machine."""
@@ -2744,7 +2762,7 @@ class SessionEventTests(Folder):
 
     def setUp(self):
         super().setUp()
-        self.workspace({"use": "freshness", "max_age_days": 180}, {"use": "stale_pages", "part": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": [], "max_age_days": 180}, {"use": "stale_pages", "part": "page_kinds"})
         self.git("init", "-q", "-b", "main")
 
     def start(self, payload=None, tool=None, event="session-start"):

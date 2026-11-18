@@ -1,4 +1,7 @@
 ---
+kind: playbook
+proof: proven
+proven-by: docs/milestones/m1.md, b754e39bc8627f9cf180843b113d264ffb07b079:evals/runs/fix-a-bug/record.json, b754e39bc8627f9cf180843b113d264ffb07b079:evals/runs/nightly-job/record.json, b754e39bc8627f9cf180843b113d264ffb07b079:evals/runs/big-report/record.json
 last-reviewed: 2026-11-14
 ---
 

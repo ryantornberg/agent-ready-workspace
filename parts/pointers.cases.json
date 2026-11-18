@@ -1,0 +1,6 @@
+[
+  {"name": "pointer files that name the contract and the rule pages pass", "config": {"files": [".github/copilot-instructions.md", "opencode.json"]}, "files": {".github/copilot-instructions.md": "Read AGENTS.md, then docs/rules/.", "opencode.json": "{\"instructions\": [\"AGENTS.md\", \"docs/rules/*.md\"]}"}, "expect": []},
+  {"name": "a pointer file that stops naming the rule pages fails", "config": {"files": ["opencode.json"]}, "files": {"opencode.json": "{\"instructions\": [\"AGENTS.md\"]}"}, "expect": ["no longer names docs/rules"]},
+  {"name": "a missing pointer file fails", "config": {"files": [".github/copilot-instructions.md"]}, "files": {}, "expect": ["the pointer file is missing"]},
+  {"name": "no files configured fails", "config": {}, "files": {}, "expect": ["names no pointer file"]}
+]

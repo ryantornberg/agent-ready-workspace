@@ -1,0 +1,9 @@
+{
+  "routed": {
+    "why": "Measured once, at M3's close: does shipping the unproven pages and the wrappers harm what is proven? The guided arm's files, every page under docs/ that the index links to, read as they ship, unstripped, and the wrappers' local plugin enabled.",
+    "base": "guided",
+    "index_links": "INDEX.md",
+    "under": "docs",
+    "plugins": ["plugin"]
+  }
+}

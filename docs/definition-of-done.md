@@ -1,20 +1,25 @@
 ---
-last-reviewed: 2026-11-14
+kind: reference
+last-reviewed: 2026-11-18
 ---
 
 # Definition of done
 
 What evidence a finished change needs. It is for the agent doing the work and the person reading its report. An agent's "done" is a claim, and this page says what the claim has to show.
 
+**In short:** done means a test failed before the fix, no new build warnings, a check in the running app where there is one, an impact check, and a report that marks each claim verified or inferred.
+
 ## The list
 
 A change is done when all of these hold:
 
-1. **A test came first, and it failed before the fix.** A test written after the fix proves only that the code does what the code does.
-2. **The build is clean against where it started.** Compare warnings with the base branch and count only new ones, so old warnings cannot hide a new one.
-3. **The change was checked in the running app**, where there is one, on a local environment that no other session shares.
-4. **An impact check lists what else the changed paths touch.** Name each caller you looked at and each one you did not.
-5. **Every claim in the report is marked verified or inferred.**
+| Rule | Enforced by |
+|---|---|
+| **A test came first, and it failed before the fix.** A test written after the fix proves only that the code does what the code does. | `eval:fix-a-bug` |
+| **The build is clean against where it started.** Compare warnings with the base branch and count only new ones, so old warnings cannot hide a new one. | `prose` |
+| **The change was checked in the running app**, where there is one, on a local environment that no other session shares. | `prose` |
+| **An impact check lists what else the changed paths touch.** Name each caller you looked at and each one you did not. | `prose` |
+| **Every claim in the report is marked verified or inferred.** | `eval:fix-a-bug` |
 
 ## The report
 

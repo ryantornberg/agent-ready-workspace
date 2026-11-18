@@ -1,4 +1,5 @@
 ---
+kind: plan
 last-reviewed: 2026-11-16
 status: approved
 ---

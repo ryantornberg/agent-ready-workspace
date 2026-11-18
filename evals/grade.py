@@ -6,11 +6,12 @@
 
 A transcript is the ordered list of what one run did:
 
-    {"kind": "read|run|edit|report|state", "target": "...", "ok": true|false, "output": "..."}
+    {"kind": "read|run|edit|dispatch|report|state", "target": "...", "ok": true|false, "output": "..."}
 
 "run" is a shell command, "ok" is whether it exited zero, and "output" is the
 end of what it printed. An exit code alone is not enough: `test | tail` exits
-zero whatever the tests did, so a grader can match on the output instead. "report" is the
+zero whatever the tests did, so a grader can match on the output instead. "dispatch" is a
+task handed to a fresh helper session, its target the task's description. "report" is the
 agent's final message. "state" lines are not the agent's word for anything:
 evals/run.py adds them after the run, by inspecting the folder the agent left.
 
@@ -20,11 +21,15 @@ Grader types:
   none         no action matches
   before       an action matching "first" comes before the first action matching "then".
                Fails if "then" comes first, or never comes.
+  report_brief the final report is short and gives what it must: at most "max_lines" non-blank
+               lines, a match for "path" (such as the findings file) and one for "verdict".
+               An adversarial review's reply gives only the file's path and its verdict.
   hook_allows  a workspace hook allows every "run" action. The grader loads the hook's
                own file, parts/<hook>.py, and calls its decide function, so the test and
-               the rule cannot drift apart. It loads nothing from the engine (wslib/),
-               so the eval hash covers that one file, and an engine change leaves the
-               eval records current.
+               the rule cannot drift apart. Of the engine (wslib/) it loads only what the
+               hook imports, the shell parser wslib/shell.py, so the eval hash covers that
+               module and the hook's file, and any other engine change leaves the eval
+               records current.
 
 A matcher is {"kind": ..., "match": regex, "output": regex, "ok": bool}; each part
 is optional. "match" is searched in the target and "output" in the output,
@@ -48,8 +53,9 @@ GRADER_KEYS = {
     "none": {"id", "type"} | MATCHER_KEYS,
     "before": {"id", "type", "first", "then"},
     "hook_allows": {"id", "type", "hook", "kind"},
+    "report_brief": {"id", "type", "path", "verdict", "max_lines"},
 }
-KINDS = {"read", "run", "edit", "report", "state"}
+KINDS = {"read", "run", "edit", "dispatch", "report", "state"}
 
 
 class Malformed(Exception):
@@ -70,6 +76,9 @@ def validate(case, actions):
                 raise Malformed(f"grader {grader['id']}: first and then are matchers with keys from {sorted(MATCHER_KEYS)}")
         if unknown:
             raise Malformed(f"grader {grader['id']}: unknown key(s) {sorted(unknown)}; a typo here would pass silently")
+        if kind == "report_brief" and (not isinstance(grader.get("max_lines"), int) or not grader.get("path")
+                                       or not grader.get("verdict")):
+            raise Malformed(f"grader {grader['id']}: report_brief needs path, verdict and max_lines")
     if not isinstance(actions, list) or not all(isinstance(a, dict) and a.get("kind") in KINDS for a in actions):
         raise Malformed(f"a transcript is a list of actions, each with a kind from {sorted(KINDS)}")
 
@@ -89,6 +98,8 @@ def load_hook(root, name):
     if not isinstance(name, str) or not HOOK_NAME.fullmatch(name):
         raise Malformed(f"a hook_allows grader names a hook under parts/ by its plain name, not {name!r}")
     path = pathlib.Path(root) / "parts" / f"{name}.py"
+    if str(ROOT) not in sys.path:           # a hook imports the shell parser, wslib.shell, from this repository
+        sys.path.insert(0, str(ROOT))
     module = types.ModuleType(f"graded_hook_{name}")
     module.__file__ = str(path)
     try:
@@ -114,6 +125,12 @@ def grade_one(grader, actions, root=ROOT):
             if matches(action, grader["first"]):
                 seen_first = True
         return False
+    if kind == "report_brief":
+        reports = [a for a in actions if a.get("kind") == "report"]
+        text = str(reports[-1].get("target", "")) if reports else ""
+        lines = [line for line in text.splitlines() if line.strip()]
+        return (0 < len(lines) <= grader["max_lines"] and re.search(grader["path"], text, re.I | re.M) is not None
+                and re.search(grader["verdict"], text, re.I | re.M) is not None)
     hook = load_hook(root, grader["hook"])
     return all(hook.decide({"command": a.get("target")}, {}) is None for a in actions if a.get("kind") == "run")
 
@@ -128,7 +145,10 @@ def regrade_records(root=ROOT):
     """Re-grade every stored transcript. Returns a list of differences from what the records say."""
     differences = []
     runs = root / "evals" / "runs"
-    for record_path in sorted(runs.glob("*/record.json")):
+    # The gated records, the baselines, and the one-time arms' records: each is re-graded from its transcripts.
+    found = sorted(runs.glob("*/record.json")) + sorted(runs.glob("*/baseline/record.json")) \
+        + sorted(runs.glob("*/one-time/*/record.json"))
+    for record_path in found:
         where = record_path.relative_to(root).as_posix()
         try:
             record = json.loads(record_path.read_text(encoding="utf-8"))

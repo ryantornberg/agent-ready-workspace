@@ -1,6 +1,7 @@
 ---
+kind: decision
 status: accepted
-last-reviewed: 2026-11-17
+last-reviewed: 2026-11-18
 ---
 
 # 0004: The hook contract
@@ -55,7 +56,15 @@ The path is resolved first: a relative path from the tool's folder, `..` removed
 | Part | May use, and why |
 |---|---|
 | `deny_list` | `os`, `open`, `codecs`, `wslib.snapshot`: it reads the private list from the file `WS_DENY_LIST` names, outside the repository, which no snapshot holds, decodes it, and checks a commit message as a one-file snapshot. |
-| `no_admin_merge` | `pathlib`, `types`, `exec`, `compile`, `__file__`, `__dict__`: it loads `no_stage_all`'s command-line parser from that part's file, beside its own, instead of copying it. `no_stage_all.py` is in the eval hash, so moving the parser waits for a recording. |
+| `no_admin_merge` | `wslib.shell`: it reads the command line with the shell parser it shares with `no_stage_all`, instead of a copy, so both hooks follow the same separators, wrappers and quoting. The eval hash covers that module wherever a case grades a hook. |
+| `eval_record` | `types`, `exec`, `compile`, `__dict__`: it loads `evals/proofkeys.py` from the snapshot's text, as `grade.py` loads a hook's file, so the proof keys it strips before hashing are exactly those the eval runner strips (decision record 0006). |
+| `page_kinds` | `types`, `exec`, `compile`, `__dict__`: it loads the same file from the snapshot, to refuse a proof key in any form but its exact one. |
+| `proof` | `types`, `exec`, `compile`, `__dict__`: it reads the proof marks through the same file. It also asks the snapshot for the base commit's files, other commits' files and ancestry, which the engine reads with git (`wslib/snapshot.py`). |
+| `no_stage_all` | `wslib.shell`: the same shared parser. The eval grader runs this hook, so the module it imports is hashed with it and a change to the parser stales the eval records it could change. |
+
+Amended 2026-11-18, M3 slice A3: the snapshot gained the history the proof checks judge a change by (the base commit's files, a commit's files, ancestry and the manifest's `building` list when a file was added), read by the engine in a fixed number of git processes; and three parts load `evals/proofkeys.py` from the snapshot, as the table says.
+
+Amended 2026-11-18, M3 slice A0: the parser moved from `no_stage_all.py` into `wslib/shell.py`, with the eval hash extended to it, so `no_admin_merge` no longer loads another part's file with `exec`.
 
 ## What it gave up
 

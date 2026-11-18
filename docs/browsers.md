@@ -1,4 +1,7 @@
 ---
+kind: how-to
+proof: unproven
+prove-by: M6
 last-reviewed: 2026-11-16
 ---
 

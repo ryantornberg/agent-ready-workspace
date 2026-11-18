@@ -1,5 +1,5 @@
 ---
-last-reviewed: 2026-11-16
+last-reviewed: 2026-11-18
 ---
 
 # Index
@@ -16,8 +16,12 @@ Where each topic lives, and what the code calls the things people talk about. Ag
 | How much process a change needs | [Size the work](docs/size-the-work.md) |
 | Which model and effort a task gets; delegating | [Orchestration](docs/orchestration.md) |
 | Writing a plan for larger work | [Hand-off plan template](docs/templates/hand-off-plan.md) |
-| The plan being built now | [M2 hand-off plan](docs/plans/m2-port-from-the-work-workspace.md), [its record so far](docs/milestones/m2.md) |
-| What a finished milestone records | [Milestone record template](docs/templates/milestone-record.md), [M1 record](docs/milestones/m1.md) |
+| The milestones being built now, and their plans | `building` in [workspace.json](workspace.json); the plans are in [docs/plans/](docs/plans/) |
+| What a finished milestone records | [Milestone record template](docs/templates/milestone-record.md), [milestone records](docs/milestones/) |
+| Where a page goes; page kinds and their front matter; a commit refused by `page_kinds` | [Layout](docs/layout.md) |
+| What a word means here | [Glossary](docs/glossary.md) |
+| Proven and unproven pages; `proof`, `prove-by`, `proven-by` | [Decision 0006](docs/decisions/0006-what-proven-means.md) |
+| Which rules a check enforces | `python3 ws.py rules` |
 | Changing scripts, parts, hooks or CI | [Changing the machinery](docs/changing-the-machinery.md) |
 | A push to main refused; a merge with `gh pr merge --admin` refused | [Changing the machinery](docs/changing-the-machinery.md#the-path-for-a-machinery-change) |
 | Two agent sessions at once; an edit refused because another session holds the main copy; the lease; when to use a worktree | [Decision 0005](docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md) |
@@ -43,3 +47,19 @@ People and code use different words for the same thing. A search for the everyda
 | the nightly job | `ReconciliationWorker` |
 | a hold | `AccountFreeze` |
 | the big report | `QuarterlyExport` |
+
+## Cross-cutting chains
+
+For each kind of change, every path it touches. The `chains` check fails on a path that does not exist.
+
+| Change | Paths it touches |
+|---|---|
+| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md`, `tests/test_cases_bite.py` |
+| Change a playbook marked proven, the contract or the index | `docs/playbooks/`, `AGENTS.md`, `INDEX.md`, `evals/cases/`, `evals/runs/`, `evals/README.md`, `README.md` |
+| Change the eval harness or a grader | `evals/run.py`, `evals/grade.py`, `evals/proofkeys.py`, `evals/runs/`, `evals/README.md`, `docs/changing-the-machinery.md` |
+| Mark a page proven or unproven | `docs/`, `README.md`, `docs/decisions/0006-what-proven-means.md`, `docs/plans/` |
+| Add a page | `docs/layout.md`, `INDEX.md` |
+| Add a rule page | `docs/rules/`, `INDEX.md` |
+| Change the engine or its version | `wslib/`, `workspace.json`, `CHANGELOG.md`, `docs/decisions/0003-the-engine-in-one-folder.md` |
+| Change what counts as machinery | `workspace.json`, `docs/changing-the-machinery.md`, `tests/test_core.py` |
+| Start or sign off a milestone | `workspace.json`, `docs/plans/`, `docs/milestones/`, `CHANGELOG.md`, `EVIDENCE.md` |

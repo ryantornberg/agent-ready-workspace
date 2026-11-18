@@ -1,0 +1,71 @@
+[
+ {
+  "name": "true tags pass",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "parts/links.cases.json": "[{\"name\": \"a missing file fails\"}]",
+   "evals/cases/fix.json": "{}",
+   "docs/a.md": "# A\n\n| Rule | Enforced by |\n|---|---|\n| Links resolve | `links#a missing file fails` |\n| Claims are marked | `eval:fix`, `prose` |\n| Be kind | `prose` |\n"
+  },
+  "expect": []
+ },
+ {
+  "name": "a part not in the manifest fails",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "docs/a.md": "| Rule | Enforced by |\n|---|---|\n| R | `gone#x` |\n"
+  },
+  "expect": [
+   "names part gone, which the manifest does not use"
+  ]
+ },
+ {
+  "name": "a case the part does not have fails",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "parts/links.cases.json": "[{\"name\": \"a missing file fails\"}]",
+   "docs/a.md": "| Rule | Enforced by |\n|---|---|\n| R | `links#no such case` |\n"
+  },
+  "expect": [
+   "names a case part links does not have"
+  ]
+ },
+ {
+  "name": "an eval case that does not exist fails",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "docs/a.md": "| Rule | Enforced by |\n|---|---|\n| R | `eval:gone` |\n"
+  },
+  "expect": [
+   "names an eval case that does not exist"
+  ]
+ },
+ {
+  "name": "a rule with no tag fails",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "docs/a.md": "| Rule | Enforced by |\n|---|---|\n| R | someone |\n"
+  },
+  "expect": [
+   "has no tag"
+  ]
+ },
+ {
+  "name": "a word that is not a tag fails",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "docs/a.md": "| Rule | Enforced by |\n|---|---|\n| R | `hope` |\n"
+  },
+  "expect": [
+   "'hope' is not a tag"
+  ]
+ },
+ {
+  "name": "other tables are not rules",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "docs/a.md": "| Word | Means |\n|---|---|\n| R | `hope` |\n"
+  },
+  "expect": []
+ }
+]

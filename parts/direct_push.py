@@ -15,6 +15,9 @@ push that edits the list cannot weaken the check that judges it.
 Config: "machinery": paths. A path ending in "/" is a folder and everything under
 it; a "*" matches within one folder, so "evals/*.py" is not "evals/scaffold/a.py".
 "branch" (default "main"): the branch it guards.
+A commit that adds or changes a proof anchor, a proven-by line in a page's front matter or a section's
+proof line, is refused the same way, whatever its paths: the engine marks it "anchors" (decision record 0006).
+
 See docs/changing-the-machinery.md.
 """
 import re
@@ -47,4 +50,10 @@ def run(snapshot, config):
                                              f"changes machinery ({hits[0]}{more}) and is pushed straight to {branch}. "
                                              f"Push it to its own branch and open a draft pull request, where CI runs "
                                              f"on three systems; see {PAGE}"))
+        elif commit.get("anchors"):
+            found.append(finding("docs", 1, f"commit {commit.get('commit', '')[:7]} \"{commit.get('subject', '')}\" "
+                                            f"adds or changes a proof anchor (a proven-by line) and is pushed straight "
+                                            f"to {branch}. An anchor merges through a pull request, so its commit stays "
+                                            f"reachable and CI compares the records; see "
+                                            f"docs/decisions/0006-what-proven-means.md"))
     return found

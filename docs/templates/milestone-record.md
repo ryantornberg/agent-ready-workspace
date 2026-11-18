@@ -1,4 +1,5 @@
 ---
+kind: template
 last-reviewed: 2026-11-15
 ---
 
