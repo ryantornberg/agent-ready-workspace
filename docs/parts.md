@@ -117,9 +117,20 @@ One call can carry several edits. Codex's patch tool can add, change, delete or 
 
 A hook that sets `MODE = "remind"` never refuses. When its `decide` returns a reason, the call goes ahead and the agent is shown the reason as a reminder: through the agent tool's `additionalContext`, next to the command's result, for Claude Code and Codex, or as plain text on standard output for the workspace's own shape. Use it where the real check comes later, as `no_stage_all` does before the commit. Before a part sees a path, the runner follows symbolic links, and on a case-insensitive file system it treats a differently cased path to the workspace as inside it.
 
-[.claude/settings.json](../.claude/settings.json) wires the five events into Claude Code, and [.codex/hooks.json](../.codex/hooks.json) into Codex CLI, which gives a hook no variable naming the project, so its lines find `wslib/launch.sh` from the top of the git repository. Each line calls `wslib/launch.sh`, which runs `ws.py` with the first Python 3.9 or later it finds and exits 2 when there is none, and ends in `|| exit 2`, so a missing launcher refuses too. An agent tool blocks a call only on exit 2; anything else lets it through. Codex also lets a call through when its hook times out, so its wiring sets a 30-second limit. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
+[.claude/settings.json](../.claude/settings.json) wires the five events into Claude Code, and [.codex/hooks.json](../.codex/hooks.json) into Codex CLI, which gives a hook no variable naming the project, so its lines find `wslib/launch.sh` from the top of the git repository. Each line calls `wslib/launch.sh`. A guard's line ends in `|| exit 2`, so a missing launcher, or a Python that crashes, refuses too; a session hook's line ends in `|| exit 0`, so a broken Python never keeps a session from starting or ending. See [the launcher](#the-launcher). An agent tool blocks a call only on exit 2; anything else lets it through. Codex also lets a call through when its hook times out, so its wiring sets a 30-second limit. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
 
 A hook call loads only the hooks for its event. It does not run any check, or any hook for the other event. So a check with a broken case cannot refuse a shell command or an edit, including the edit that repairs it. To know a part's kind without running it, the runner reads its `KIND` and `EVENT` lines. Write each as one plain line, such as `KIND = "hook"`. A part whose lines it cannot read refuses every hook call, because it might be a hook for that event. So does a missing part file, and a manifest it cannot read. Repair those from your own terminal, where the agent's hooks do not run. A hook call does not compare those lines with what the file sets when it runs; `check`, `selftest` and CI do, and refuse a part where they differ.
+
+## The launcher
+
+`wslib/launch.sh` starts Python for every hook, every git hook in `.githooks/` and every CI step. A test fails on wiring, a git hook or a CI step that starts Python any other way.
+
+- **One start per call.** It starts Python once, in UTF-8 mode, with `wslib/start.py`. That file checks the version and then runs the target in the same process. An older Python can read it, so a too-old one says so instead of failing to parse.
+- **Which Python.** The first of `python3`, `python` and `py` on the path that is 3.9 or later. A Python that is too old is passed over for the next. The Windows Store's stand-in for `python3`, in a `WindowsApps` folder, is tried only after every other.
+- **What it runs.** `wslib/launch.sh ws.py check` runs a script, relative to the workspace. `wslib/launch.sh -m unittest discover -b tests` runs a module. Any other first word is taken as `ws.py`'s arguments, which is the form the hook wiring uses, so a running session keeps working when the launcher changes under it.
+- **When it fails.** With no Python that will do, it prints install advice and exits 2. A guard's wiring and the commit and push hooks then refuse. A reminder's wiring and the post-commit hook pass, so a broken Python never keeps a session from finishing.
+
+It needs a POSIX shell. CI runs every step in bash, which on Windows is the bash that comes with Git.
 
 ## The edit ledger
 
@@ -172,6 +183,18 @@ The runner refuses to load:
 A rule written only in prose gets broken, and a check nobody tests stops checking. The cases run on every command that loads the part, so a part cannot quietly stop working between commits. `python3 ws.py selftest` runs them all and lists each failure, where the other commands stop at the first.
 
 The commit check, `check --staged`, reads the staged manifest, the staged parts and their staged cases. An edit you have not staged cannot change its result.
+
+## Baselines
+
+A team that adopts the workspace may start with findings it cannot fix at once. A baseline lets a check pass on those and still fail on every new one.
+
+- **One file per check**, `baselines/<check>.json`, listing the findings it tolerates. A missing file tolerates nothing. This repository tolerates nothing, so it has none.
+- **A finding is matched by its fingerprint**: a hash of the check's name, the file and the message, not the line, so a finding that only moves stays tolerated. Each entry tolerates one finding, so fixing one finding never makes room for a new one.
+- **The commit and CI read it the same way**, from the snapshot they check: the staged file at the commit, the folder's file in CI.
+- **Only errors are recorded**, since a warning fails nothing. A file that cannot be read tolerates nothing and is itself an error.
+- `python3 ws.py baseline` writes the files from the folder's current findings. It writes a file only for a check that finds errors, or that has a file already. Add `--phase ci` or `--phase nightly` for the checks of those phases.
+
+The files are machinery: they weaken a check, so they change through a pull request, like the check itself. The output of `check` counts the tolerated findings of each check, so they stay in sight. Baselines apply to `check` in its folder, staged and CI forms. The pre-push and commit-message checks take none.
 
 ## The hook case runner
 

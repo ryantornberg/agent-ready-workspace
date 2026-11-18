@@ -8,6 +8,7 @@
     python3 ws.py check --changed-from REF   # treat files edited since REF as changed (CI)
     python3 ws.py hook before-shell          # decide one event in the workspace's shape, read as JSON on standard input
     python3 ws.py hook before-edit --tool claude-code   # the same, from one agent tool's own payload
+    python3 ws.py baseline                   # record the checks' current errors as tolerated, in baselines/
     python3 ws.py check --message FILE       # check a commit message and the commit's identities (commit-msg hook)
     python3 ws.py ledger                     # this working copy's edit ledger: open or closed, and its paths
     python3 ws.py ledger --add PATH ...      # record files this session wrote another way, by name
