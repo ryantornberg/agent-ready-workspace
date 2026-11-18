@@ -20,6 +20,7 @@ Docs change freely. The scripts, hooks and CI that check them take a stricter pa
 | `.githooks/`, `.github/`, `.claude/settings.json`, `.codex/hooks.json` | The commit hook, CI and the agent tools' wiring |
 | `.mcp.json`, `.codex/config.toml` | The browser server each agent tool runs; see [browsers](browsers.md) |
 | `tests/` | The tests of all of the above |
+| `baselines/` | The findings each check tolerates; see [baselines](parts.md#baselines) |
 
 Everything else is a doc. The table is the `machinery` list of the `direct_push` part in [workspace.json](../workspace.json), and a test fails when the two differ.
 

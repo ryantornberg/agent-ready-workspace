@@ -2,11 +2,6 @@
 # Check exactly what is being committed: the staged snapshot, not the folder around it.
 # Another session's unsaved edits cannot make this pass or fail.
 # Install once: git config core.hooksPath .githooks
+# The launcher starts Python; with none that will do, or a missing launcher, the commit is refused.
 cd "$(git rev-parse --show-toplevel)" || exit 1
-for candidate in python3 python py; do
-  if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c "import sys; sys.exit(sys.version_info < (3, 9))" 2>/dev/null; then
-    exec "$candidate" ws.py check --staged
-  fi
-done
-echo "pre-commit: no working Python 3.9 or later found; checks NOT run" >&2
-exit 1
+exec sh wslib/launch.sh ws.py check --staged
