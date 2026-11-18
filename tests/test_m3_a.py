@@ -121,8 +121,9 @@ class ArmFilesTests(unittest.TestCase):
         with self.assertRaises(ValueError) as caught:      # the wrappers' plugin arrives in slice B6
             harness.plan_runs(args, case, *harness.covered("nightly-job"))
         self.assertIn("plugin folder plugin", str(caught.exception))
-        command = harness.agent_command("go", "haiku", [pathlib.Path("/tmp/plugin-0")])
-        self.assertEqual(command[-2:], ["--plugin-dir", "/tmp/plugin-0"])
+        plugin = pathlib.Path("/tmp/plugin-0")
+        command = harness.agent_command("go", "haiku", [plugin])
+        self.assertEqual(command[-2:], ["--plugin-dir", str(plugin)])
         self.assertNotIn("--plugin-dir", harness.agent_command("go", "haiku"))
 
     def test_a_one_time_arms_runs_go_to_a_record_the_gate_never_reads(self):
