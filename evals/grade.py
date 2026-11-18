@@ -26,9 +26,10 @@ Grader types:
                An adversarial review's reply gives only the file's path and its verdict.
   hook_allows  a workspace hook allows every "run" action. The grader loads the hook's
                own file, parts/<hook>.py, and calls its decide function, so the test and
-               the rule cannot drift apart. It loads nothing from the engine (wslib/),
-               so the eval hash covers that one file, and an engine change leaves the
-               eval records current.
+               the rule cannot drift apart. Of the engine (wslib/) it loads only what the
+               hook imports, the shell parser wslib/shell.py, so the eval hash covers that
+               module and the hook's file, and any other engine change leaves the eval
+               records current.
 
 A matcher is {"kind": ..., "match": regex, "output": regex, "ok": bool}; each part
 is optional. "match" is searched in the target and "output" in the output,
@@ -97,6 +98,8 @@ def load_hook(root, name):
     if not isinstance(name, str) or not HOOK_NAME.fullmatch(name):
         raise Malformed(f"a hook_allows grader names a hook under parts/ by its plain name, not {name!r}")
     path = pathlib.Path(root) / "parts" / f"{name}.py"
+    if str(ROOT) not in sys.path:           # a hook imports the shell parser, wslib.shell, from this repository
+        sys.path.insert(0, str(ROOT))
     module = types.ModuleType(f"graded_hook_{name}")
     module.__file__ = str(path)
     try:
