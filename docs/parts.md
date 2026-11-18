@@ -1,5 +1,5 @@
 ---
-last-reviewed: 2026-11-16
+last-reviewed: 2026-11-18
 ---
 
 # Parts
@@ -173,6 +173,29 @@ A rule written only in prose gets broken, and a check nobody tests stops checkin
 
 The commit check, `check --staged`, reads the staged manifest, the staged parts and their staged cases. An edit you have not staged cannot change its result.
 
+## The hook case runner
+
+A part's cases call its `decide` function with the facts already filled in. They cannot see the wiring, the launcher, an agent tool's payload, the lease file or git. The hook case runner can:
+
+```
+python3 tests/hook_cases.py
+```
+
+Each case in `tests/hooks/<event>.json` builds a scratch repository from this repository's tracked files. It seeds what the case needs: a lease held by a live or a dead process, a local remote that is ahead, a linked worktree, or uncommitted files. Then it runs the command the agent tool's own settings wire for the event, through `wslib/launch.sh`, with that tool's payload on standard input. It checks the exit code, the output and who holds the lease afterwards. The file `tests/hook_cases.py` documents the case format.
+
+Every call is timed, and the runner prints each event's median. A push (`git push`) and a `gh` write are timed as rows of their own. On Linux and macOS the run fails when a median is over its budget. On Windows it only reports, because starting a process there costs several times more.
+
+| Event or row | Budget |
+|---|---|
+| A before-tool hook, an after-edit hook, the push row, the `gh` write row | 200 milliseconds |
+| `session-start`, against a local remote | 2 seconds |
+| `stop` | 20 seconds, the stop gate's own limit |
+| `session-end` | none; reported only |
+
+Every event the engine knows needs at least one case, so a new event cannot arrive untimed. CI runs the runner on all three systems.
+
+`tests/test_cases_bite.py` holds every part's own cases to the same standard from the other side. It runs each part the manifest lists against a stub that allows everything and finds nothing, and against one that refuses everything and always finds something. Each stub must fail at least one case.
+
 ## Removing a part
 
 A part the last commit's manifest uses must stay in the manifest, or be listed under `retired` with the reason:
@@ -203,6 +226,7 @@ A hook call checks only what its answer depends on: the version, the parts and t
 1. Write `parts/<name>.py` and `parts/<name>.cases.json`.
 2. Add `{"use": "<name>", "why": "<what it guards against>"}` to `workspace.json`, with any settings the part reads from `config`.
 3. Run `python3 ws.py selftest`, then `python3 ws.py check`.
+4. A hook on a new event also needs a case in `tests/hooks/<event>.json`; run `python3 tests/hook_cases.py`.
 
 A part's `config` is its manifest entry without `use` and `why`, plus the manifest's tier binding as `tiers`. The binding lives in one place, so an entry that sets `tiers` itself is refused.
 

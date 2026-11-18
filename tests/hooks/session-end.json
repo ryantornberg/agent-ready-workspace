@@ -1,0 +1,5 @@
+[
+  {"name": "lease: the session's own lease is released", "tool": "claude-code", "setup": {"lease": {"session": "me", "pid": "self"}}, "payload": {"hook_event_name": "SessionEnd", "session_id": "me", "cwd": "{root}"}, "exit": 0, "lease_after": null},
+  {"name": "lease: another session's lease is left alone", "tool": "claude-code", "setup": {"lease": {"session": "other", "pid": "live"}}, "payload": {"hook_event_name": "SessionEnd", "session_id": "me", "cwd": "{root}"}, "exit": 0, "lease_after": "other"},
+  {"name": "codex: the session's own lease is released", "tool": "codex", "setup": {"lease": {"session": "codex-me", "pid": "self"}}, "payload": {"hook_event_name": "SessionEnd", "session_id": "codex-me", "cwd": "{root}"}, "exit": 0, "lease_after": null}
+]

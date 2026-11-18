@@ -30,6 +30,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: python -m unittest discover -b tests
       - run: python ws.py selftest
+      # Every hook event, called through the launcher as the agent tools call it, and timed against its budget.
+      - run: python tests/hook_cases.py
       # Re-grade every stored eval transcript; a grade that differs from its record fails. No agent runs here.
       - run: python evals/grade.py --recorded
       # A teammate who never installed the commit hook is caught here: a page edited
