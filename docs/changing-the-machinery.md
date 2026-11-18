@@ -1,5 +1,8 @@
 ---
-last-reviewed: 2026-11-17
+kind: how-to
+proof: unproven
+prove-by: M4
+last-reviewed: 2026-11-18
 ---
 
 # Changing the machinery
@@ -46,6 +49,16 @@ A branch rule on GitHub requires all five CI jobs to pass before a pull request 
 
 A first push that creates main checks the whole history being pushed. To create main in a new repository, push once with `--no-verify`.
 
+## Rules
+
+| Rule | Enforced by |
+|---|---|
+| A commit that changes a machinery path reaches main only through a pull request. | `direct_push#a commit that changes a part fails, naming the commit and the path` |
+| No merge with `gh pr merge --admin`, which goes past red CI. | `no_admin_merge#a merge with the flag after the number` |
+| A part leaves the manifest only by being listed under `retired`, with a reason. | `prose` |
+| A change the eval covers is not pushed for review until the commit with its new records passes every hook. | `eval_record#an edited playbook fails until its case is run again` |
+| Before each push of a branch committed with `--no-verify`, every commit message passes `python3 ws.py check --message` and every commit's diff passes the deny-list scan. | `prose` |
+
 ## Traps
 
 - **The hooks guard the session that edits them.** A part with a failing case is refused. A hook call loads only the hooks for its event, so a broken check no longer refuses anything, and a broken hook refuses only its own event: with a broken shell hook, the edit tools still work. Four things still refuse every hook call, because the runner cannot tell whether a hook would refuse: a manifest it cannot read, a manifest whose `version` differs from the engine's, a part file that is missing, and a part whose `KIND` line it cannot read. A manifest entry with no `why`, or an unknown key, fails every other command but does not refuse a hook call. [Parts](parts.md#a-hook) says how a part declares its kind.
@@ -53,5 +66,5 @@ A first push that creates main checks the whole history being pushed. To create 
   - If the session is locked out, the person repairs the file from their own terminal, where the agent's hooks do not run.
   - Change the engine's `VERSION` and the manifest's `version` in one step: on a branch in its own working copy, then a merge or a checkout. Edited one at a time in the working copy the session runs in, they lock the session out.
 - **A part leaves the manifest only by being retired.** A manifest that drops a part the last commit used fails `check`, and in CI the base branch's manifest decides. List the part under `retired` with a reason. See [removing a part](parts.md#removing-a-part).
-- **A change the eval covers cannot pass the commit check until the eval has run.** `eval_record` refuses it by design. To save the work before the costly runs, commit it on its branch with `git commit --no-verify`, after `python3 ws.py check --staged` shows only the `eval_record` findings, and run `python3 ws.py check --message FILE` on the message by hand, since `--no-verify` skips that hook too. Push the branch, but open no pull request until the commit with the records passes every hook.
+- **A change the eval covers cannot pass the commit check until the eval has run.** `eval_record` refuses it by design. To save the work before the costly runs, commit it on its branch with `git commit --no-verify`, after `python3 ws.py check --staged` shows only the `eval_record` findings, and run `python3 ws.py check --message FILE` on the message by hand, since `--no-verify` skips that hook too. Before every push of that branch, run the checks `--no-verify` skipped on every commit it holds: `python3 ws.py check --message FILE` on each commit's message, and the `deny_list` check on each commit's diff, since a pushed branch on a public repository is visible at once. Push the branch, but open no pull request until the commit with the records passes every hook.
 - **A check you cannot run in CI.** The `deny_list` check reads a private list from the file `WS_DENY_LIST` names, or from `~/.config/agent-ready-workspace/deny-list.txt`. CI has no list, so it warns and checks nothing. Commit on a machine that has the list.

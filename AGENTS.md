@@ -1,5 +1,5 @@
 ---
-last-reviewed: 2026-11-16
+last-reviewed: 2026-11-18
 ---
 
 # Agent contract
@@ -10,7 +10,7 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 
 ## What lives where
 
-- [src/](src/README.md) holds the code, one repository per folder.
+- [src/](src/README.md) holds the code. In a real workspace each folder there is a pinned code repository; this sample checks in a few files instead.
 - `docs/` holds what the code cannot tell you: decisions, procedures and how the parts fit together.
 - [INDEX.md](INDEX.md) lists every topic and maps everyday words to the names the code uses. Look there before you search.
 - [workspace.json](workspace.json) lists the checks and hooks this workspace runs. [docs/parts.md](docs/parts.md) says how to add one.
@@ -37,9 +37,11 @@ Keep this file to routing and traps. If a rule applies only to some files, or a 
 
 ## Rules
 
-- Mark every claim in a report as **verified** (you ran something and saw the result) or **inferred** (you reasoned your way there).
-- Stage files by name. Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder. The commit check refuses a staged file your edit tools did not write; record one you wrote another way with `python3 ws.py ledger --add PATH`.
-- Open a pull request as a draft. Publish and merge it only after CI passes on Linux, macOS and Windows. In this repository the maintainer lets agents do both; in a team's workspace, a person publishes.
-- If you had to ask a person something this workspace should have answered, add it to the [question log](docs/question-log.md) before you finish.
-- When a page you edit is past its review date, review the whole page and move the date. The commit check and CI both enforce this.
-- A change to a playbook, to this file, to `INDEX.md`, or to anything else the eval covers, needs a new eval run on record in which the guidance beats both the bare model and a two-line instruction. The run costs real agent time, so batch such edits. See [evals](evals/README.md).
+| Rule | Enforced by |
+|---|---|
+| Mark every claim in a report as **verified** (you ran something and saw the result) or **inferred** (you reasoned your way there). | `eval:fix-a-bug` |
+| Stage files by name. Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder. The commit check refuses a staged file your edit tools did not write; record one you wrote another way with `python3 ws.py ledger --add PATH`. | `edit_ledger#a path the ledger does not hold fails, whatever staged it` |
+| Open a pull request as a draft. Publish and merge it only after CI passes on Linux, macOS and Windows. In this repository the maintainer lets agents do both; in a team's workspace, a person publishes. | `prose` |
+| If you had to ask a person something this workspace should have answered, add it to the [question log](docs/question-log.md) before you finish. | `prose` |
+| When a page you edit is past its review date, review the whole page and move the date. The commit check and CI both enforce this. | `page_kinds#review date: a stale page the commit edits must be reviewed` |
+| A change to a playbook marked proven, to this file, to `INDEX.md`, or to anything else the eval covers, needs a new eval run on record in which the guidance beats both the bare model and a two-line instruction. The run costs real agent time, so batch such edits. See [evals](evals/README.md). | `eval_record#an edited playbook fails until its case is run again` |

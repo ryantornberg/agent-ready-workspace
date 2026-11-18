@@ -1,4 +1,7 @@
 ---
+kind: how-to
+proof: unproven
+prove-by: M4
 last-reviewed: 2026-11-16
 ---
 
@@ -185,7 +188,7 @@ Otherwise `check` fails. Locally, the last commit's manifest decides which parts
 
 ## The manifest
 
-`workspace.json` holds four keys, and the runner refuses any other:
+`workspace.json` holds five keys, and the runner refuses any other:
 
 | Key | Holds |
 |---|---|
@@ -193,6 +196,7 @@ Otherwise `check` fails. Locally, the last commit's manifest decides which parts
 | `tiers` | The [tier binding](orchestration.md): `driver`, `worker` and `mechanical`, each with a `model` and an `effort`. Optional; without it, `handoff_tier` refuses every task. |
 | `parts` | The parts in use, each with a `use`, a `why` and its settings. |
 | `retired` | Parts no longer used, each with a `use` and a `why`. |
+| `building` | The milestones being built now, such as `["M3"]`. Each milestone adds itself when its first slice merges and removes itself at sign-off. The proof checks read it; see [decision 0006](decisions/0006-what-proven-means.md). |
 
 The `why` says in a sentence what the part guards against here, so a reader can tell whether it still earns its place. A part does not see it.
 

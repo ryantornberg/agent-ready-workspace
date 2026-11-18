@@ -215,13 +215,13 @@ class RunnerTests(Folder):
         self.assertIn("error: a.md:1: link to missing file: nope.md  [links]", output)
 
     def test_a_stale_page_is_a_warning_until_it_is_changed(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         self.write("old.md", STALE)
         self.assertEqual(self.ws("check")[0], 0)
         self.assertEqual(self.ws("check", "--changed", "old.md")[0], 1)
 
     def test_staged_check_ignores_unstaged_fixes_and_untracked_files(self):
-        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": []})
         self.git("init", "-q")
         self.git("add", ".")
         self.git("commit", "-q", "-m", "workspace")
@@ -235,7 +235,7 @@ class RunnerTests(Folder):
         self.assertNotIn("scratch.md", output)
 
     def test_changed_from_a_base_commit(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         self.write("old.md", STALE)
         self.git("init", "-q")
         self.git("add", ".")
@@ -306,7 +306,7 @@ class RunnerTests(Folder):
         self.assertEqual(self.ws("hook", "before-edit", stdin='[]')[0], 2)
 
     def test_ci_fails_closed_when_it_cannot_compare(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         self.write("old.md", STALE)
         self.git("init", "-q")
         self.git("add", ".")
@@ -321,9 +321,9 @@ class RunnerTests(Folder):
         self.git("init", "-q")
         self.write("a.md", "[gone](nope.md)\n")
         self.git("add", ".")
-        self.write("workspace.json", manifest([{"use": "freshness"}]))   # unstaged: drops the links check
-        self.write("parts/freshness.py", (ROOT / "parts/freshness.py").read_text(encoding="utf-8"))
-        self.write("parts/freshness.cases.json", (ROOT / "parts/freshness.cases.json").read_text(encoding="utf-8"))
+        self.write("workspace.json", manifest([{"use": "page_kinds", "require_kind": []}]))   # unstaged: drops the links check
+        self.write("parts/page_kinds.py", (ROOT / "parts/page_kinds.py").read_text(encoding="utf-8"))
+        self.write("parts/page_kinds.cases.json", (ROOT / "parts/page_kinds.cases.json").read_text(encoding="utf-8"))
         code, output = self.ws("check", "--staged")
         self.assertEqual(code, 1)
         self.assertIn("link to missing file", output)
@@ -358,10 +358,10 @@ class NoSelfLockTests(Folder):
 
     # Criterion 1
     def test_changing_a_documented_setting_leaves_the_parts_own_cases_passing(self):
-        settings = [("freshness", {"max_age_days": 1}), ("freshness", {"require": ["docs", "notes"]}),
-                    ("freshness", {"skip": ["docs"]}), ("aliases", {"code": "lib"}), ("aliases", {"heading": "Words"}),
+        settings = [("page_kinds", {"max_age_days": 1}), ("page_kinds", {"require_date": ["docs", "notes"]}),
+                    ("page_kinds", {"skip": ["docs"]}), ("aliases", {"code": "lib"}), ("aliases", {"heading": "Words"}),
                     ("aliases", {"index": "docs/INDEX.md"}), ("aliases", {"exclude": ["src/api"]}),
-                    ("aliases", {"contract": ["AGENTS.md"]}), ("freshness", {"require": ["docs", "AGENTS.md"]}),
+                    ("aliases", {"contract": ["AGENTS.md"]}), ("page_kinds", {"require_date": ["docs", "AGENTS.md"]}),
                     ("links", {"skip": ["docs"]}), ("eval_record", {"playbooks": "docs"}),
                     ("eval_record", {"cases": "tests/cases"}), ("shelved", {"paths": []})]
         for name, setting in settings:
@@ -480,38 +480,38 @@ class NoSelfLockTests(Folder):
         self.assertEqual(self.ws("check")[0], 2)
 
     def test_the_repository_cases_state_every_warning_they_expect(self):
-        cases = json.loads((ROOT / "parts/freshness.cases.json").read_text(encoding="utf-8"))
-        stale = next(c for c in cases if c["name"].startswith("a stale page nobody edited"))
+        cases = json.loads((ROOT / "parts/page_kinds.cases.json").read_text(encoding="utf-8"))
+        stale = next(c for c in cases if c["name"].startswith("review date: a stale page nobody edited"))
         self.assertEqual([e["level"] for e in stale["expect"]], ["warning"])
 
     # Criterion 6
     def test_a_manifest_that_drops_a_part_fails_locally_unless_it_is_retired(self):
-        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": []})
         self.git("init", "-q")
         self.commit()
         self.write("workspace.json", manifest([{"use": "links"}]))
         code, output = self.ws("check")
         self.assertEqual(code, 1)
-        self.assertIn("freshness", output)
+        self.assertIn("page_kinds", output)
         self.git("add", "workspace.json")
         self.assertEqual(self.ws("check", "--staged")[0], 1)
-        self.write("workspace.json", manifest([{"use": "links"}], retired=[{"use": "freshness", "why": "no dated pages here"}]))
+        self.write("workspace.json", manifest([{"use": "links"}], retired=[{"use": "page_kinds", "why": "no dated pages here"}]))
         self.git("add", "workspace.json")
         self.assertEqual(self.ws("check")[0], 0)
         self.assertEqual(self.ws("check", "--staged")[0], 0)
-        for retired in ([{"use": "freshness", "why": ""}], [{"use": "freshness"}], ["freshness"]):
+        for retired in ([{"use": "page_kinds", "why": ""}], [{"use": "page_kinds"}], ["page_kinds"]):
             self.write("workspace.json", manifest([{"use": "links"}], retired=retired))
             self.assertEqual(self.ws("check")[0], 2, retired)
 
     def test_ci_requires_the_parts_of_the_base_branch(self):
-        self.workspace({"use": "links"}, {"use": "freshness"})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": []})
         self.git("init", "-q")
         base = self.commit()
         self.write("workspace.json", manifest([{"use": "links"}]))
-        self.commit("drop freshness")
+        self.commit("drop page_kinds")
         code, output = self.ws("check", "--changed-from", base)
         self.assertEqual(code, 1)
-        self.assertIn("freshness", output)
+        self.assertIn("page_kinds", output)
 
     def test_only_part_names_are_read_from_the_older_manifest(self):
         self.workspace({"use": "links"})
@@ -1090,7 +1090,7 @@ class AdoptionPathTests(Folder):
 
     # Criterion 16
     def test_a_page_in_another_encoding_is_reported_not_skipped(self):
-        self.workspace({"use": "links"}, {"use": "freshness", "require": ["docs"]})
+        self.workspace({"use": "links"}, {"use": "page_kinds", "require_kind": [], "require_date": ["docs"]})
         page = "---\nlast-reviewed: 2026-01-01\n---\n# Café\n\n[gone](nope.md)\n"
         pages = {"docs/cp1252.md": (page.encode("cp1252"), "Windows-1252"),
                  "docs/utf16.md": (page.encode("utf-16"), "UTF-16"),
@@ -1234,7 +1234,7 @@ class AdoptionPathTests(Folder):
         self.assertIn("the contract names LedgerSweeper, which is not defined under src/", errors[0])
 
     def test_a_page_dated_one_day_ahead_of_utc_passes(self):
-        self.workspace({"use": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": []})
         utc = datetime.datetime.now(datetime.timezone.utc).date()
         self.write("ahead.md", f"---\nlast-reviewed: {utc + datetime.timedelta(days=1)}\n---\n# Ahead\n")
         code, output = self.ws("check")
@@ -2744,7 +2744,7 @@ class SessionEventTests(Folder):
 
     def setUp(self):
         super().setUp()
-        self.workspace({"use": "freshness", "max_age_days": 180}, {"use": "stale_pages", "part": "freshness"})
+        self.workspace({"use": "page_kinds", "require_kind": [], "max_age_days": 180}, {"use": "stale_pages", "part": "page_kinds"})
         self.git("init", "-q", "-b", "main")
 
     def start(self, payload=None, tool=None, event="session-start"):

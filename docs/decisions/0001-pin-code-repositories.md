@@ -1,4 +1,5 @@
 ---
+kind: decision
 status: accepted
 last-reviewed: 2026-11-14
 ---

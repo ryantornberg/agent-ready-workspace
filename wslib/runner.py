@@ -111,11 +111,18 @@ def pushed_commits(root, local, remote):
     if text is None:
         raise partlib.PartError(f"the commits between {remote[:7]} and {local[:7]} cannot be listed. "
                                 f"Fetch first (git fetch), then push again.")
+    # The commits that add or change a proof anchor (decision record 0006), whatever their paths.
+    anchored = _git_text(root, "log", "--no-renames", "--format=%H", "-G", r"^(proven-by: |Proof: proven, proven-by )",
+                         *span, "--")
+    if anchored is None:
+        raise partlib.PartError(f"the commits between {remote[:7]} and {local[:7]} cannot be searched for proof "
+                                f"anchors. Fetch first (git fetch), then push again.")
+    anchors = set(anchored.split())
     commits = []
     for block in text.split("\x01")[1:]:
         head, _, names = block.partition("\n")
         sha, _, subject = head.partition("\x02")
-        commits.append({"commit": sha.strip(), "subject": subject.strip(),
+        commits.append({"commit": sha.strip(), "subject": subject.strip(), "anchors": sha.strip() in anchors,
                         "paths": [line for line in names.split("\n") if line.strip()]})
     return commits
 
@@ -371,6 +378,24 @@ def command_hook(root, args):
     return 0
 
 
+def command_rules(root, _args):
+    """Print the rules register: every rule in a rules table, with its tags, and a count per kind of tag."""
+    manifest = partlib.load_manifest(root)
+    entry = next((e for e in manifest["parts"] if e.get("use") == "rules"), None)
+    if entry is None:
+        raise partlib.PartError("the manifest does not use the rules part, so there is no register to print")
+    part = partlib.load(root, entry, tiers=manifest.get("tiers"))
+    rows = part.module.register(snapshots.Tree(root), entry.get("skip", ("evals/scaffold", "archive")))
+    counts = {}
+    for page, line, rule, tags in rows:
+        print(f"{page}:{line}: {rule}\n    {', '.join(tags) or '(no tag)'}")
+        for tag in tags or ["(none)"]:
+            kind = part.module.kind_of(tag) or "(not a tag)"
+            counts[kind] = counts.get(kind, 0) + 1
+    print(f"\n{len(rows)} rule(s). Tags: " + ", ".join(f"{kind} {count}" for kind, count in sorted(counts.items())))
+    return 0
+
+
 def command_ledger(root, args):
     folder = ledgers.git_dir(root)
     if folder is None:
@@ -416,6 +441,7 @@ def main(argv=None):
     hook = commands.add_parser("hook")
     hook.add_argument("event")
     hook.add_argument("--tool", help="read this agent tool's own payload through its adapter, such as claude-code")
+    commands.add_parser("rules", help="print the rules register, with a count per kind of tag")
     ledger = commands.add_parser("ledger")
     ledger.add_argument("--add", nargs="+", metavar="PATH", help="record files this session wrote another way")
     ledger.add_argument("--close", action="store_true", help="close the ledger, for a person's own commit")
@@ -427,7 +453,7 @@ def main(argv=None):
         return command_session(root, args)      # never fails, so not under the error handling below
     try:
         return {"list": command_list, "selftest": command_selftest, "check": command_check,
-                "hook": command_hook, "ledger": command_ledger}[args.command](root, args)
+                "hook": command_hook, "ledger": command_ledger, "rules": command_rules}[args.command](root, args)
     except (partlib.PartError, NotADirectoryError, RuntimeError) as error:
         print(f"ws: {error}", file=sys.stderr)
         return 2

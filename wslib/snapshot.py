@@ -39,8 +39,20 @@ a Tree compares the file with the base it was given (`check --changed-from`); a 
 A file the last commit did not have is all added lines.
 
 For the pre-push check, `pushed` lists the commits a push adds to a branch, each as
-{"commit": full hash, "subject": first line, "paths": [paths it changes]}. Merge
-commits are left out; the commits they bring in are listed.
+{"commit": full hash, "subject": first line, "paths": [paths it changes], "anchors": whether it changes a
+proof anchor line}. Merge commits are left out; the commits they bring in are listed.
+
+History, for the checks that judge a change against what came before (eval_record's comparisons and the
+proof checks, decision record 0006). The base is the last commit for an Index, the merge base with the
+commit given to `check --changed-from` for a Tree, and none for a plain `check`; a case gives it as
+"history": {"base": {path: text}}. `has_base()` says whether there is one. `base_text(path)` is the file at
+the base, or None when it was not there. `base_path(path)` is the path the file had at the base when the
+change renamed it. `commit_text(sha, path)` reads a file at any commit, `is_ancestor(sha)` says whether a
+commit is in the history of the one being checked, and `building_when_added(path)` is the manifest's
+`building` list at the commit that added the file (the snapshot's own manifest for a file not yet
+committed). A case gives these as "commits": {"sha:path": text}, "ancestors": [sha], "renamed": {new: old}
+and "added_with": {path: [milestones]} inside "history". All of them read git through the engine; a
+part never runs git itself (decision record 0004).
 """
 import codecs
 import difflib
@@ -146,6 +158,100 @@ class Snapshot:
     def _old_text(self, path):
         return None
 
+    # History. A snapshot read from git answers these with git; a Memory snapshot from its case.
+
+    _history = None
+
+    def _base_commit_id(self):
+        """The full hash of the base commit, or None when the snapshot has none."""
+        return None
+
+    def has_base(self):
+        if self._history is not None:
+            return "base" in self._history
+        return self._base_commit_id() is not None
+
+    def base_text(self, path):
+        """The file's text at the base, or None when it was not there or there is no base."""
+        if self._history is not None:
+            return (self._history.get("base") or {}).get(path)
+        base = self._base_commit_id()
+        return None if base is None else self._git_text(f"{base}:./{path}")
+
+    def base_path(self, path):
+        """The path this file had at the base, when the change renamed it there; else the path itself."""
+        if self._history is not None:
+            return (self._history.get("renamed") or {}).get(path, path)
+        base, root = self._base_commit_id(), getattr(self, "root", None)
+        if base is None or root is None:
+            return path
+        found = self._renames().get(path)
+        return found or path
+
+    def _renames(self):
+        if getattr(self, "_rename_map", None) is None:
+            self._rename_map = {}
+            base = self._base_commit_id()
+            args = ["diff", "--name-status", "-M", "-z", base] + (["--cached"] if isinstance(self, Index) else [])
+            try:
+                fields = _names(_git(self.root, *args))
+            except RuntimeError:
+                fields = []
+            index = 0
+            while index < len(fields):
+                status = fields[index]
+                if status.startswith(("R", "C")) and index + 2 < len(fields):
+                    if status.startswith("R"):
+                        self._rename_map[fields[index + 2]] = fields[index + 1]
+                    index += 3
+                else:
+                    index += 2
+        return self._rename_map
+
+    def commit_text(self, sha, path):
+        """The file's text at a commit, or None when git has no such commit or file."""
+        if self._history is not None:
+            return (self._history.get("commits") or {}).get(f"{sha}:{path}")
+        if not re.fullmatch(r"[0-9a-f]{40}", sha or "") or getattr(self, "root", None) is None:
+            return None
+        return self._git_text(f"{sha}:./{path}")
+
+    def is_ancestor(self, sha):
+        """True when the commit is in the history of the commit being checked (HEAD, for a folder or a commit)."""
+        if self._history is not None:
+            return sha in (self._history.get("ancestors") or ())
+        if not re.fullmatch(r"[0-9a-f]{40}", sha or "") or getattr(self, "root", None) is None:
+            return False
+        try:
+            _git(self.root, "merge-base", "--is-ancestor", sha, "HEAD")
+            return True
+        except RuntimeError:
+            return False
+
+    def building_when_added(self, path):
+        """The manifest's "building" list at the commit that added the file. A file no commit has added yet is
+        judged by this snapshot's own manifest. [] when the manifest had no such list."""
+        if self._history is not None:
+            return list((self._history.get("added_with") or {}).get(path, []))
+        root = getattr(self, "root", None)
+        sha = None
+        if root is not None:
+            try:
+                sha = _git(root, "log", "--diff-filter=A", "--format=%H", "-1", "HEAD", "--", path).decode().strip()
+            except RuntimeError:
+                sha = None
+        text = self._git_text(f"{sha}:./workspace.json") if sha else self.read("workspace.json")
+        return _building(text)
+
+    def _git_text(self, name):
+        root = getattr(self, "root", None)
+        if root is None:
+            return None
+        try:
+            return _git(root, "show", name).decode("utf-8-sig", "replace")
+        except RuntimeError:
+            return None
+
     def pin_facts(self):
         """The pins this commit adds or moves, each with its state. Worked out with git the first time it is asked."""
         if self._pins is None:
@@ -201,14 +307,25 @@ class Snapshot:
 
 class Memory(Snapshot):
     def __init__(self, files, changed=(), staged=None, ledger=None, replaying=None, repositories=(), links=(),
-                 pushed=(), pins=(), added=None):
+                 pushed=(), pins=(), added=None, history=None):
         super().__init__(files, changed, staged, ledger, replaying, repositories=repositories, links=links,
                          pushed=pushed, pins=pins, added=added if added is not None else {})
         self._files = files
+        self._history = dict(history or {})
 
     def _bytes(self, path):
         text = self._files[path]
         return text if isinstance(text, bytes) else text.encode("utf-8")
+
+
+def _building(text):
+    """The "building" list of a manifest's text, or [] when it has none or cannot be read."""
+    import json
+    try:
+        found = json.loads(text or "").get("building", [])
+    except (ValueError, AttributeError):
+        return []
+    return [item for item in found if isinstance(item, str)] if isinstance(found, list) else []
 
 
 def added_between(old, new):
@@ -358,6 +475,17 @@ class Tree(Snapshot):
             return ""
         return data.decode("utf-8-sig", "replace")
 
+    def _base_commit_id(self):
+        """The merge base of HEAD and the base given to `check --changed-from`, or None."""
+        if not self._base or set(self._base) == {"0"}:
+            return None
+        if self._base_commit is None:
+            try:
+                self._base_commit = _git(self.root, "merge-base", self._base, "HEAD").decode().strip()
+            except RuntimeError:
+                self._base_commit = ""
+        return self._base_commit or None
+
     def _bytes(self, path):
         disk = self.root / path
         if path in self.links and disk.is_symlink():
@@ -435,6 +563,15 @@ class Index(Snapshot):
                 self._objects[name] = output[at:at + size]
                 at += size + 1
         return self._objects
+
+    def _base_commit_id(self):
+        """The last commit, which the staged commit is judged against; None in a repository with no commit yet."""
+        if getattr(self, "_head", None) is None:
+            try:
+                self._head = _git(self.root, "rev-parse", "-q", "--verify", "HEAD^{commit}").decode().strip()
+            except RuntimeError:
+                self._head = ""
+        return self._head or None
 
     def _old_text(self, path):
         name = self._previous.get(path)

@@ -27,9 +27,11 @@ A part's config is its manifest entry without "use" and "why", plus the manifest
 tier binding as "tiers" when the manifest has one. The binding lives in one place:
 an entry that sets "tiers" itself is refused.
 
-The manifest holds four keys and no others: "version", which must equal the
+The manifest holds five keys and no others: "version", which must equal the
 engine's VERSION; "tiers", which binds each of the three tiers to a model and an
-effort; "parts"; and "retired". Every entry in "parts" and "retired" gives a "why".
+effort; "parts"; "retired"; and "building", the list of milestones being built now,
+such as ["M3"], which the proof checks read (decision record 0006). Every entry in
+"parts" and "retired" gives a "why".
 A hook call checks only what its answer depends on: the version, the parts and the
 tier binding. A missing "why" or an unknown key fails every other command, so it
 cannot reach a commit, and it does not lock the session out.
@@ -39,7 +41,8 @@ A check case:  {"name", "files": {path: text}, "changed": [paths], "config": {},
                "expect": [] means the case must produce no findings. Every finding must be expected.
                For the commit's own state, a case may also give "staged": [paths], "ledger": [paths]
                and "replaying": text; "repositories": [folders] names code repositories, and
-               "symlinks": [paths] names symbolic links (see wslib/snapshot.py).
+               "symlinks": [paths] names symbolic links; "history" gives the base commit's files and other
+               commits' (see wslib/snapshot.py).
 A hook case:   {"name", "event": {...}, "config": {}, "allow": true|false}
                A hook with MODE = "remind" states "remind": true|false instead of "allow".
 
@@ -67,7 +70,8 @@ MODES = ("refuse", "remind")
 PHASES = ("commit", "ci", "nightly", "push")
 DEFAULT_PHASES = ("commit", "ci")
 TIERS = ("driver", "worker", "mechanical")
-TOP_LEVEL = ("version", "tiers", "parts", "retired")
+TOP_LEVEL = ("version", "tiers", "parts", "retired", "building")
+MILESTONE = re.compile(r"^M[1-9][0-9]*$")
 MANIFEST = "workspace.json"
 
 
@@ -123,7 +127,7 @@ class Part:
                     memory = snapshots.Memory(case["files"], case.get("changed", ()), case.get("staged"),
                                               case.get("ledger"), case.get("replaying"), case.get("repositories", ()),
                                               case.get("symlinks", ()), case.get("pushed", ()), case.get("pins", ()),
-                                              case.get("added"))
+                                              case.get("added"), case.get("history"))
                     got = [(f["message"], f["level"]) for f in self.run(memory, config)]
                     want = [_expected(item) for item in case["expect"]]
                     missing = [f"{text} ({level})" for text, level in want
@@ -177,6 +181,10 @@ def parse_manifest(text, where=MANIFEST, hook=False):
         _check_tiers(manifest["tiers"], where)
     if hook:
         return manifest
+    building = manifest.get("building", [])
+    if not isinstance(building, list) or not all(isinstance(m, str) and MILESTONE.match(m) for m in building) \
+            or len(set(building)) != len(building):
+        raise PartError(f'{where}: "building" lists the milestones being built, each once, such as ["M3"]')
     unknown = sorted(set(manifest) - set(TOP_LEVEL))
     if unknown:
         raise PartError(f'{where}: unknown key "{unknown[0]}"; a manifest holds only {", ".join(TOP_LEVEL)}')
@@ -258,7 +266,8 @@ def _read_cases(name, kind, cases_file, text, mode="refuse"):
                         for item in case["expect"])
             well_formed = well_formed and all(isinstance(case.get(key, []), list)
                                               for key in ("staged", "ledger", "repositories", "symlinks", "pushed", "pins")) \
-                and isinstance(case.get("replaying", ""), str) and isinstance(case.get("added", {}), dict)
+                and isinstance(case.get("replaying", ""), str) and isinstance(case.get("added", {}), dict) \
+                and isinstance(case.get("history", {}), dict)
         else:
             answer, other = ("allow", "remind") if mode == "refuse" else ("remind", "allow")
             well_formed = isinstance(case, dict) and isinstance(case.get("name"), str) \

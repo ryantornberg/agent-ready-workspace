@@ -216,5 +216,33 @@
     "expect": [
       "pushed straight to trunk. Push it to its own branch and open a draft pull request, where CI runs on three systems; see docs/changing-the-machinery.md"
     ]
+  },
+  {
+    "name": "a doc commit that changes a proof anchor fails",
+    "files": {},
+    "config": {
+      "machinery": [
+        "ws.py",
+        "wslib/",
+        "parts/",
+        "evals/*.py",
+        ".github/",
+        "workspace.json"
+      ]
+    },
+    "pushed": [
+      {
+        "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "subject": "docs: a page",
+        "paths": [
+          "docs/a.md",
+          "README.md"
+        ],
+        "anchors": true
+      }
+    ],
+    "expect": [
+      "adds or changes a proof anchor"
+    ]
   }
 ]

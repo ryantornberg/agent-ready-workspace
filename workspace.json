@@ -14,25 +14,33 @@
       "effort": "low"
     }
   },
+  "building": [
+    "M3"
+  ],
   "parts": [
     {
       "use": "links",
       "why": "A page that points at a moved or deleted page sends an agent to nothing.",
       "skip": [
-        "evals/scaffold"
+        "evals/scaffold",
+        "archive"
       ]
     },
     {
-      "use": "freshness",
-      "why": "A page nobody has reviewed in months is trusted as if it were current.",
+      "use": "page_kinds",
+      "why": "A page an agent cannot place by kind, or whose opening buries its purpose, is read wrong or not at all; and a page nobody has reviewed in months is trusted as if it were current.",
       "max_age_days": 180,
-      "require": [
+      "require_date": [
         "docs",
         "AGENTS.md",
         "INDEX.md"
       ],
+      "require_kind": [
+        "docs"
+      ],
       "skip": [
-        "evals/scaffold"
+        "evals/scaffold",
+        "archive"
       ]
     },
     {
@@ -50,7 +58,7 @@
     },
     {
       "use": "eval_record",
-      "why": "A playbook stays only while a recorded eval run shows it working, so it cannot change without one.",
+      "why": "A playbook marked proven stays only while a recorded eval run shows it beating the bare model and two lines, so it cannot change without one.",
       "playbooks": "docs/playbooks"
     },
     {
@@ -116,7 +124,7 @@
     {
       "use": "stale_pages",
       "why": "The commit check fails only a stale page the commit edits; the rest stay out of sight until a session starts and is told.",
-      "part": "freshness"
+      "part": "page_kinds"
     },
     {
       "use": "stale_pins",
@@ -146,6 +154,54 @@
       "use": "rule_pages",
       "why": "Some agent tools load path-scoped rules on their own and others do not; every session sees the rules for the file it edits.",
       "folder": "docs/rules"
+    },
+    {
+      "use": "chains",
+      "why": "The index's cross-cutting chains tell an agent every path a kind of change touches; a chain that names a moved path sends it to nothing."
+    },
+    {
+      "use": "pointers",
+      "why": "GitHub Copilot and opencode read their own instruction files; if one stops naming the contract and the rule pages, sessions in that tool work without them.",
+      "files": [
+        ".github/copilot-instructions.md",
+        "opencode.json"
+      ]
+    },
+    {
+      "use": "rules",
+      "why": "A rule that claims a check enforces it, when the check is gone or never tested it, teaches that rules are optional."
+    },
+    {
+      "use": "loaded_size",
+      "why": "Every byte of the always-loaded layer costs every session, and added text can draw attention from the rest.",
+      "limits": [
+        {
+          "what": "the contract and the agent tools' pointer files",
+          "max_bytes": 6000,
+          "files": [
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".github/copilot-instructions.md",
+            "opencode.json"
+          ]
+        },
+        {
+          "what": "the wrappers' descriptions",
+          "max_bytes": 9000,
+          "glob": "plugin/skills/*/SKILL.md",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "use": "proof",
+      "why": "A page marked proven must hold its evidence, an unproven one must name the milestone that will prove it, and neither mark may move quietly: a proven page marked unproven leaves the eval gate."
+    }
+  ],
+  "retired": [
+    {
+      "use": "freshness",
+      "why": "page_kinds holds the review-date rule now, with the same cases, beside the kind and opening rules (M3 slice A1)."
     }
   ]
 }

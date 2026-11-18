@@ -48,7 +48,7 @@ git config core.hooksPath .githooks
 | [workspace.json](workspace.json) | The manifest: which parts this workspace runs, and their settings. |
 | `ws.py`, `wslib/` | The engine. `wslib/` holds all of its code: the runner and the small core the parts plug into. `ws.py` only starts it. |
 | [parts/](docs/parts.md) | Six checks and three hooks, each one file plus its cases. |
-| [docs/](docs/definition-of-done.md) | The definition of done, one playbook, three decision records, the question log, the orchestration rules, and the templates and plan for the current milestone. |
+| [docs/](docs/layout.md) | The pages: the [layout](docs/layout.md) of folders and page kinds, the definition of done, one playbook, the how-tos, the decision records, the question log, the glossary, the templates, and the plans and records of each milestone. |
 | [evals/](evals/README.md) | Three eval cases in a small sample order system, and 45 recorded runs per arm of a real model: with the workspace's guidance, with a two-line instruction instead, and with neither. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [EVIDENCE.md](EVIDENCE.md), [CHANGELOG.md](CHANGELOG.md) | What each claim rests on and how to re-run it; what changed in each version. |
@@ -59,9 +59,12 @@ git config core.hooksPath .githooks
 | Rule | Enforced by | When |
 |---|---|---|
 | A link points at a real file and heading. | `links` check | Commit, CI |
-| Whoever edits a page past its review date reviews it. `AGENTS.md`, `INDEX.md` and every page under `docs/` carry a date. | `freshness` check | Commit, CI |
+| Whoever edits a page past its review date reviews it. `AGENTS.md`, `INDEX.md` and every page under `docs/` carry a date. Every page under `docs/` names its kind, carries the front matter its kind needs, and opens with its title, a purpose sentence of 25 words or fewer and its **In short** line. | `page_kinds` check | Commit, CI |
+| Every path in the index's cross-cutting chains exists; the Copilot and opencode pointer files name the contract and the rule pages; the always-loaded layer stays under its ceilings. | `chains`, `pointers` and `loaded_size` checks | Commit, CI |
+| Every rule in a rules table is tagged with how it is enforced, and a tag that names a part or case is true. `python3 ws.py rules` prints the register. | `rules` check | Commit, CI |
 | An alias in the index, and a code name in backticks in `AGENTS.md`, name something the code still defines. | `aliases` check | Commit, CI |
-| A playbook, `AGENTS.md`, `INDEX.md`, the eval harness and anything else an eval case covers change only with a new eval run on record. In it, counting runs that pass every grader, the guidance beats the bare model in each case, and beats a two-line instruction across the cases by a one-sided Fisher exact test. A stored grade that does not follow from its transcript fails. | `eval_record` check; `evals/grade.py --recorded` | Commit, CI; CI |
+| A playbook marked proven stays only while it beats the bare model: it, `AGENTS.md`, `INDEX.md`, the eval harness and anything else its eval cases cover change only with a new eval run on record. In it, counting runs that pass every grader, the guidance beats the bare model in each case, beats a two-line instruction across the playbook's cases by a one-sided Fisher exact test, and passes no more than 3 runs fewer than the previous record and the anchor its `proven-by` names. A stored grade that does not follow from its transcript fails. | `eval_record` check; `evals/grade.py --recorded` | Commit, CI; CI |
+| Every playbook and how-to says whether it is proven. An unproven page names the milestone that is to prove it, and fails once that milestone is signed off; its `prove-by` moves later only with a failed attempt on record. A proven page names its evidence, and an anchor change or a demotion needs an approved change in the plan being built. | `proof` check; `direct_push` refuses an anchor change pushed straight to main | Commit, CI; before a push |
 | No file, commit message, author or committer holds a term from the maintainer's private deny list. | `deny_list` check | Commit, on a machine that has the list |
 | A commit holds only files the agent session wrote. | `edit_ledger` check, against the paths the edit tools wrote | Commit, while an agent session has edits waiting |
 | Files are staged by name, never all at once. | `no_stage_all` hook, a reminder that never refuses | Before a shell command |
@@ -82,6 +85,23 @@ git config core.hooksPath .githooks
 | The manifest names the engine's version, gives a reason for every part, binds every tier to a model and an effort, and holds no unknown key. | The runner | Every command. A hook call checks the version and the tiers only, so a missing reason cannot lock a session out. |
 
 The commit check reads the staged pages, the staged manifest and the staged parts with their cases, not the folder, so another session's unsaved edits to them cannot make a commit pass or fail. It reads them all in one batch, so it starts three git processes however many files the workspace holds. The working-folder check, `check`, starts from the same git listing and adds the untracked files git does not ignore, so the two see the same files. The page checks read the pages the workspace owns: a page inside a code repository under `src/`, and a symbolic link, are left out. A page that is not UTF-8 is an error; code in Windows-1252 or UTF-16 is read. The core in `wslib/` still runs from disk. CI runs the same checks on Linux, macOS and Windows, with a token that can only read, and compares with the commit before the push, so a teammate who never installed the hook is still caught. The one exception is `deny_list`, which needs a private list that CI does not have. When CI has nothing to compare with, such as a first push or a force push, it treats every file as changed. CI also runs once a week with no push, to catch what changes without a commit, and runs the checks for the nightly phase then.
+
+## Proven and unproven pages
+
+A page marked proven has a real run on record and an eval in which it beats both the bare model and two lines; an unproven page names the milestone that is to prove it. See [decision 0006](docs/decisions/0006-what-proven-means.md). The `proof` check holds this table to the pages' front matter.
+
+| Page | State | Evidence or milestone |
+|---|---|---|
+| [docs/playbooks/fix-a-bug.md](docs/playbooks/fix-a-bug.md) | proven | M1's real run; M2's closing recording, 40, 19 and 0 of 45 |
+| [docs/size-the-work.md](docs/size-the-work.md) | unproven | M9 |
+| [docs/orchestration.md](docs/orchestration.md) | unproven | M4 |
+| [docs/parts.md](docs/parts.md) | unproven | M4 |
+| [docs/changing-the-machinery.md](docs/changing-the-machinery.md) | unproven | M4 |
+| [docs/browsers.md](docs/browsers.md) | unproven | M6 |
+
+Proven: 1. Unproven: 5.
+
+## What stays prose
 
 These rules in [AGENTS.md](AGENTS.md) and the [definition of done](docs/definition-of-done.md) stay prose, because nothing here can check them: open pull requests as drafts and merge only after CI passes, write a goal and non-goals for larger work, log the questions you had to ask, compare build warnings with the base branch, and list the callers you checked. The eval tests two more, see a test fail before editing and mark claims as verified, and whether an agent acts on the contract's facts.
 

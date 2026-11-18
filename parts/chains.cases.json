@@ -1,0 +1,8 @@
+[
+  {"name": "every chain path exists", "files": {"INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths |\n|---|---|\n| A new part | `parts/`, `workspace.json` |\n", "parts/a.py": "", "workspace.json": "{}"}, "expect": []},
+  {"name": "a chain path that does not exist fails", "files": {"INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths |\n|---|---|\n| A new part | `parts/`, `docs/gone.md` |\n", "parts/a.py": ""}, "expect": ["names docs/gone.md, which does not exist"]},
+  {"name": "a folder path must be a folder", "files": {"INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths |\n|---|---|\n| X | `workspace.json/` |\n", "workspace.json": "{}"}, "expect": ["names workspace.json/, which does not exist"]},
+  {"name": "an index with no chain table fails", "files": {"INDEX.md": "# Index\n\n## Topics\n"}, "expect": ["has no chain table"]},
+  {"name": "a row with no path fails", "files": {"INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths |\n|---|---|\n| X | nothing |\n"}, "expect": ["names no path in backticks"]},
+  {"name": "a table under another heading is not a chain", "files": {"INDEX.md": "# Index\n\n## Topics\n\n| Change | Paths |\n|---|---|\n| X | `gone.md` |\n\n## Cross-cutting chains\n\n| Change | Paths |\n|---|---|\n| Y | `INDEX.md` |\n"}, "expect": []}
+]

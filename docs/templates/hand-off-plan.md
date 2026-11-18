@@ -1,5 +1,6 @@
 ---
-last-reviewed: 2026-11-15
+kind: template
+last-reviewed: 2026-11-18
 ---
 
 # Hand-off plan template
@@ -25,15 +26,17 @@ The plan an agent works from when the work is too big for [fix a bug](../playboo
 3. Fill every section. Write "none" rather than deleting one.
 4. Have a fresh session red-team the plan. It gets the plan and the sources, never your reasoning. Record every finding in the triage table.
 5. Ask the person to approve. On approval, set `status: approved` and fill the approval line.
-6. As slices finish, append each slice's report under "Results". Never edit the approved sections. A change of plan is a new dated entry under "Changes after approval", approved the same way.
+6. As slices finish, append each slice's report under "Results". Never edit the approved sections. A change of plan is a new dated entry under "Changes after approval": a `### YYYY-MM-DD` heading, then a line `Approved by: <name>, <date>`, then the change. The front matter is not a section this rule freezes: an approved plan may gain a key, such as `milestone`. See [decision 0006](../decisions/0006-what-proven-means.md) for the anchor and demotion lines an entry may carry.
 7. When a slice's work contradicts a criterion of a slice not yet built, such as a decision record that changes what a hook does, propose the revised criterion in that slice's report. Do not leave it for the later slice to find.
 
 ## Skeleton
 
 ```markdown
 ---
+kind: plan
 last-reviewed: YYYY-MM-DD
 status: draft
+milestone: M<n>
 ---
 
 # <Name>: hand-off plan

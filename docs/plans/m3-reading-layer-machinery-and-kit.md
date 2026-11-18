@@ -1,4 +1,5 @@
 ---
+kind: plan
 last-reviewed: 2026-11-18
 status: approved
 milestone: M3
@@ -551,7 +552,11 @@ Approved by: the maintainer, 2026-11-18, on the eighth draft. The maintainer's w
 
 ## Changes after approval
 
-None yet.
+### 2026-11-18
+
+Approved by: the maintainer, 2026-11-18
+
+A demotion needs an approved change too. A side review during slice A0 found that, under A3 as written, one edit from `proof: proven` to `proof: unproven` takes a page out of the eval gate, and no check refuses it. Criterion 14 gains: a proven page or section marked unproven again, or stripped of its mark, fails unless an approved entry here carries a line `Demote: <page>`, the same form as the anchor rule. The maintainer agreed the same day. Decision record 0006 states the rule, and the `proof` check enforces it with a case.
 
 ## Results
 
