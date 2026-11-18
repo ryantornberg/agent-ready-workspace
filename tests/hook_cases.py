@@ -193,9 +193,11 @@ class Scratch:
         subprocess.run([shell(), str(self.template / "wslib" / "launch.sh"), "--version"], capture_output=True,
                        env=clean_environment(), stdin=subprocess.DEVNULL)
         self.live = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(3600)"])
-        done = subprocess.Popen([sys.executable, "-c", "pass"])
-        done.wait()
-        self.dead = done.pid
+        # A process that has exited. The Popen object is kept: on Windows it holds the process's handle, and Windows
+        # reuses a process id quickly once no handle is open, which would make the "dead" holder alive again.
+        self.exited = subprocess.Popen([sys.executable, "-c", "pass"])
+        self.exited.wait()
+        self.dead = self.exited.pid
         self.count = 0
 
     def close(self):
