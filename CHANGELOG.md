@@ -2,10 +2,11 @@
 
 What changed in each version, for someone deciding whether to take it. The [milestone records](docs/milestones/m1.md) say how each change was made and checked.
 
-## Unreleased: M2, port what the work workspace learned (signed off 2026-11-17)
+## 0.3.0, 2026-11-17: M2, port what the work workspace learned
 
 **Changed:**
 
+- The engine's version is 0.3.0. Set the manifest's `version` to match, in the same step as the engine upgrade.
 - The eval harness no longer depends on the engine. `evals/grade.py` loads the graded hook's own file, and `grade.py` imports nothing from `wslib/`, so an engine change leaves the eval records current. `run.py` still reaches the engine through `parts/eval_record.py`.
 - `eval_record` needs 40 or more runs in every arm, pooled across the cases, before it compares the guided arm with the two-line arm.
 - Git ignores `.claude/worktrees/`.
