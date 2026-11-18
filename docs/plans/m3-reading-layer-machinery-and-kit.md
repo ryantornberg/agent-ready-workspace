@@ -580,6 +580,8 @@ inferred  criterion 57's stop gate: none is wired yet. The test requires every w
 Not done: the stop gate itself (C5). Index rows for the launcher and baselines, queued below for slice Z.
 ```
 
+Fix after merge: a side agent found that a pull request could add a finding and its own baseline entry, and CI would pass; only this repository's test that every baseline is empty stopped it here. An entry now tolerates a finding only when the base has it too. verified: tests/test_baselines.py fails before the fix on a finding and its entry added in one change (folder, commit and CI forms), on an entry recorded ahead of its finding, and on a missing base, and passes after; a first baseline for findings main already has still passes CI.
+
 Decisions made in the slice:
 
 - **No baseline files are shipped.** A missing file tolerates nothing, and a test holds that every baseline here tolerates nothing. One empty file per check would have tied this slice to sub-batch A, which adds checks and retires `freshness`. `python3 ws.py baseline` writes a file when a team needs one.

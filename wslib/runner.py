@@ -230,10 +230,29 @@ def command_check(root, args):
         # Fail closed: the parts that must stay cannot be known.
         findings.append((partlib.finding(partlib.MANIFEST, 1, f"{problem}, so the required parts are unknown"), "runner"))
     tolerated = []
+    # The base a baseline is judged against: the last commit, or in CI the merge base with --changed-from.
+    if args.staged or args.changed_from is None:
+        base_ref = "HEAD"
+    else:
+        base_ref = snapshot._base_commit_id()
+    base_snapshot = []
+
+    def at_base(part):
+        if base_ref is None:
+            return None
+        if not base_snapshot:
+            base_snapshot.append(baselines.at_commit(root, base_ref, snapshot.changed))
+        if base_snapshot[0] is None:
+            return None
+        try:
+            return part.run(base_snapshot[0])
+        except partlib.PartError:
+            return None                # fail closed: a check that cannot run at the base tolerates nothing
+
     for part in parts:
         # A check's baseline comes from the same snapshot as the files it checks: the staged one at the commit.
-        kept, count, trouble = baselines.apply(snapshot, part.name, part.run(snapshot))
-        findings += [(found, part.name) for found in kept + ([trouble] if trouble else [])]
+        kept, count, notes = baselines.apply(snapshot, part.name, part.run(snapshot), lambda part=part: at_base(part))
+        findings += [(found, part.name) for found in kept + notes]
         if count:
             tolerated.append(f"{count} finding(s) tolerated by {baselines.path_of(part.name)}")
     errors = 0
