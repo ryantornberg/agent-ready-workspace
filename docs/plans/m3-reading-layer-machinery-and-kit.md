@@ -11,9 +11,11 @@ The plan for the third milestone: write fresh, in this repository, everything a 
 
 ## Key points
 
-- **A playbook can now ship unproven, but says so.** Today every page in `docs/playbooks/` must have an eval case that beats the bare model. Porting about 60 procedures under that rule would take about 60 cases. Instead every procedure carries a `proof` field. A `proven` page needs a real-run record and a passing eval record; an `unproven` page is labelled as such where agents and people read it. The gate for proven pages gets stricter, not looser: each must beat the two-line arm on its own. Decision record 0006 sets this.
-- **The public sentence "a playbook stays only while it beats the bare model" stops being true as written.** It becomes "a playbook marked proven stays only while it beats the bare model." The README and any other page that says the old sentence change with slice A3.
-- **Three eval recordings of the fix-a-bug cases, plus two proof attempts.** R1 after the harness and structure changes; R2 at close, for the queued contract and index edits. Proof attempts for the adversarial-review and debugging playbooks, each starting with a bare-only baseline. Expected total: 550 agent runs on the small model, or 685 if R1 needs its one retry, plus about 200 short selection runs, at most 150 per session. M2 made two recordings of 135.
+- **A playbook can now ship unproven, but says so.** Today every page in `docs/playbooks/` must have an eval case that beats the bare model. Of the about 60 pages this plan ports, about half are templates, record formats and tutorials, which checks and CI hold instead. About 20 are procedures an agent follows. Proving those now is not honest: cases must come from real tasks, this workspace has two milestones of them, and many procedures need machinery from M4 or M8 before they can run. Instead every procedure carries a `proof` field. A `proven` page needs a real-run record and a passing eval record; an `unproven` page is labelled as such where agents and people read it. The gate for proven pages gets stricter, not looser: each must beat the two-line arm on its own. Decision record 0006 sets this.
+- **Unproven is temporary.** Each unproven page names the milestone that is to prove it, in a `prove-by` field. A check fails an unproven page whose milestone record is closed. "One that cannot be proven is cut" becomes enforced, not prose.
+- **Shipping unproven pages must not hurt what is proven.** M2 showed that added text can: a longer index dropped the guided arm from 45 to 40 of 45. The closing slice adds a fourth arm to R2 that gets every page the index routes to, unproven ones included. If it does worse than R2's guided arm, the plan stops. This is measured once, not gated on every edit, because a gate would make every doc edit cost a recording; the README says so.
+- **The public sentence "a playbook stays only while it beats the bare model" stops being true as written.** It becomes "a playbook marked proven stays only while it beats the bare model", beside the README's count of proven and unproven pages. The README and any other page that says the old sentence change with slice A3.
+- **Three eval recordings of the fix-a-bug cases, a no-harm arm, and two proof attempts.** R1 after the harness and structure changes; R2 at close, for the queued contract and index edits, with the no-harm arm beside it. Proof attempts for the adversarial-review and debugging playbooks, each starting with a bare-only baseline. Expected total: 595 agent runs on the small model, or 730 if R1 needs its one retry, plus about 200 short selection runs, at most 150 per session. M2 made two recordings of 135.
 - **R1 also tests M2's open question.** The guided arm slipped from 45 to 40 of 45 after M2's index grew, and 17 runs went looking for `docs/rules/`, which the scaffold lacks. R1 gives each case's guided arm the rule pages its code paths match.
 - **Lane procedures are drafts with no wrapper.** QA, product, DevOps and automation pages are written and marked unproven. They get no skill wrapper until their lane's milestone proves them, because a wrapper's description loads into every session and would route agents to a procedure that cannot run yet. This narrows the program's "every procedure gets a wrapper" to the core procedures.
 - **The always-loaded layer gets a measured budget.** The contract and tool pointers stay under 6,000 bytes (3,646 today). The wrappers' descriptions, which every session also loads, stay under 9,000 bytes in all. A check enforces both.
@@ -80,7 +82,7 @@ Every slice is built in its own worktree under `.claude/worktrees/`, on a branch
 | A0 | The harness, generalized | A case may name its own arm files. The three fix-a-bug cases' guided arm also gets every rule page in `docs/rules/` whose `applies-to` matches the case's code paths. A bare-only baseline mode writes a record the gate never counts as passing. A per-playbook test pools a playbook's cases and requires guided to beat two-line, one-sided Fisher exact, p < 0.05, with 40 or more runs per arm. A new record that loses a comparison the case's previous record won fails the gate. Graders for a written review (does it name the planted flaw, does it give a verdict) and for a diagnosis (does a regression test fail on the original code, is the debug output gone). Re-grading the stored transcripts gives no difference. | driver | Criteria 1–6 |
 | A1 | Structure | A layout page naming each folder and page kind: playbook, how-to, tutorial, reference, template, record, decision, plan, milestone. Each kind's required front matter, with controlled values, and the opening order: title, a purpose sentence of 25 words or fewer, an **In short** line, key points on plans. `freshness` grows into a `page_kinds` check that enforces them and refuses to pass with no pages checked. An `archive/` folder hidden from search by an ignore file, skipped by the link and page checks, with a tombstone at each old path. A glossary. The index gains cross-cutting chains: for each kind of change, every path it touches; a check fails on a chain path that does not exist. Pointer files for GitHub Copilot and opencode; Claude Code's `CLAUDE.md` and Codex's native reading of `AGENTS.md` stay. Existing pages gain the front matter their kind needs. `AGENTS.md`'s "one repository per folder" and the index's "plan being built now" row are corrected. | driver | Criteria 7–11 |
 | A2 | The rules register | Every rule lives on the page it belongs to, in a rules table with an enforcement tag: `part#case`, `eval:case`, or `prose`. A `rules` check fails a tag that names a part not in the manifest or a case that does not exist. `python3 ws.py rules` prints the register with a count per tag. The contract stays at routing and traps. A `loaded_size` check enforces the budget in the key points. | driver | Criteria 12–13 |
-| A3 | The proof field | Decision record 0006, what proven means. Every playbook and how-to carries `proof: proven` or `proof: unproven`; an unproven page says so in its purpose line. `eval_record` checks proven pages only: each needs a `proven-by` link to a real-run record and passes the per-playbook test. A check holds the README's table of proven and unproven pages to the front matter. `fix-a-bug.md` is marked proven, by M1's runs and the recorded evals. | driver | Criterion 14 |
+| A3 | The proof field | Decision record 0006, what proven means. Every playbook and how-to carries `proof: proven` or `proof: unproven`; an unproven page says so in its purpose line and names, in `prove-by`, the milestone that is to prove it. A check fails an unproven page whose `prove-by` milestone has a closed record in `docs/milestones/`. `eval_record` checks proven pages only: each needs a `proven-by` link to a real-run record and passes the per-playbook test. A check holds the README's table of proven and unproven pages to the front matter. `fix-a-bug.md` is marked proven, by M1's runs and the recorded evals. | driver | Criterion 14 |
 | A4 | Recording R1 | The three fix-a-bug cases, 15 runs per arm in each, 135 runs on the small model, as M2 did. | driver | Criterion 15 |
 
 A0 goes first, so the recording covers the new harness. A1 to A3 go before R1 because each edits a hashed file. Nothing in sub-batch B or C starts before R1 passes, except C1 and C2, which touch no hashed file.
@@ -121,7 +123,7 @@ C1 and C2 may start once A0 has merged; they touch no hashed file. C3 to C9 star
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| Z | Contract, index and recording R2 | The queued edits: index rows for every new page, chain and part; the request map and the guide linked from the contract; the definition of done brought in line with the new record types. The instruction-file review runs on each. Then R2, 135 runs, as R1. | driver | Criterion 53 |
+| Z | Contract, index and recording R2 | The queued edits: index rows for every new page, chain and part; the request map and the guide linked from the contract; the definition of done brought in line with the new record types. The instruction-file review runs on each. Then R2, 135 runs, as R1, with a fourth arm, "routed": the guided arm's files plus every page under `docs/` that the index links to, unproven pages included, 15 runs in each case, 45 in all. The routed arm is recorded once and kept out of the gate's hash. | driver | Criteria 53–54 |
 
 ## Success criteria
 
@@ -140,7 +142,7 @@ Sub-batch A:
 11. `AGENTS.md` no longer says `src/` holds one repository per folder, and the index has no "plan being built now" row pointing at a finished plan. (V2)
 12. `rules` fails a rule tagged with a part that is not in the manifest, or with a case that does not exist. `python3 ws.py rules` prints every rule with its tag and a count per tag. (V2)
 13. `loaded_size` fails when `AGENTS.md`, `CLAUDE.md` and the pointer files exceed 6,000 bytes together, or the wrappers' descriptions exceed 9,000 bytes together. (V2)
-14. Every playbook and how-to has a `proof` field. A page marked proven without a `proven-by` link, or without a passing per-playbook record, fails. The README's proven and unproven table matches the pages. Decision record 0006 exists. (V2)
+14. Every playbook and how-to has a `proof` field, and every unproven one a `prove-by` milestone. A check fails an unproven page whose `prove-by` milestone record is closed. A page marked proven without a `proven-by` link, or without a passing per-playbook record, fails. The README's proven and unproven table matches the pages. Decision record 0006 exists. (V2)
 15. R1 passes the gate and loses no comparison M2's closing recording won. (V3)
 
 Sub-batch B:
@@ -189,6 +191,7 @@ Whole plan:
 51. CI passes on all five jobs for every pull request in this plan. (V4)
 52. `python3 ws.py check` passes on main at the end. (V2)
 53. R2 passes the gate and loses no comparison R1 won. (V3)
+54. The routed arm is not worse than R2's guided arm: a one-sided Fisher exact test that it passes fewer runs gives p ≥ 0.05, pooled across the three cases. `evals/README.md` reports both arms and says the comparison was made once. (V3)
 
 ## Verification
 
@@ -211,11 +214,12 @@ Stop the plan and report when any of these happens:
 
 - R1 fails the gate or loses a comparison M2's closing recording won. One recovery is allowed: revert A1's and A2's edits to `AGENTS.md` and `INDEX.md`, keep the harness, and record again. If that recording also fails, publish both results and stop.
 - R2 fails the gate or loses a comparison R1 won. Publish the result and stop.
+- The routed arm does worse than R2's guided arm (criterion 54). Publish the result and stop; the unproven pages stay out of the index until a person decides.
 - The instruction-file review finds the same class of defect in more than a third of the pages ported so far, counted after each batch. Stop and fix the rewrite brief before the next batch.
 - The engine, a part or a CI test needs a third-party package.
 - More than five catalog items cannot be made generic without a private fact. Fewer are left out, each with its reason in the private ledger.
 - A slice goes past two fix rounds on the same failure.
-- The eval runs reach 700 agent runs, or the selection runs 300, before the plan ends.
+- The eval runs reach 750 agent runs, or the selection runs 300, before the plan ends.
 
 A part that cannot be made safe on Windows within its slice ships for macOS and Linux, says so in the README, and does not weaken the guard. That is not a stop.
 
@@ -233,7 +237,7 @@ A part that cannot be made safe on Windows within its slice ships for macOS and 
 
 - Decision records 0006 (what proven means), the kit's, the disagreements', each ported workspace decision, and the amendment to 0004.
 - The proven and unproven table in the README.
-- The R1 and R2 recordings, the baselines, any proof recordings, and the selection results.
+- The R1 and R2 recordings, the routed arm's runs, the baselines, any proof recordings, and the selection results.
 - The instruction-review trailers on every guidance commit.
 - The two-session demonstration's records.
 - A report per slice under "Results", with each claim marked verified or inferred.
