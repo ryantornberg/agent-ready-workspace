@@ -560,6 +560,32 @@ A demotion needs an approved change too. A side review during slice A0 found tha
 
 ## Results
 
+### C1, launcher and baselines
+
+Built on branch `m3/c1`, from main at `7ebfdcb`. It touches no file the eval hashes.
+
+```
+Fixed: hooks, git hooks and CI now start Python only through wslib/launch.sh, once per call, in UTF-8 mode; a check can tolerate a recorded list of findings and still fails on any new one.
+
+verified  criterion 26: tests/test_launcher.py fails on any wiring entry, git hook or CI run step that starts python, python3 or py by name; it failed on all four git hooks and six CI steps before the change, and passes after
+verified  criterion 27: a counting stand-in python3 records one start for a before-shell and a before-handoff call through the real wiring; the old launcher's probe made it fail first
+verified  criterion 57: through every wiring entry of both agent tools, with no Python, a Python reporting 3.8, a crash (SIGSEGV) and a failed start, the three guard events exit 2 and both session events exit 0; pre-commit, commit-msg and pre-push refuse, post-commit passes
+verified  criterion 30: tests/test_baselines.py, on the links check: two baselined findings pass; fixing one and adding another fails, naming the new one; the same at check --staged, which reads the staged baseline, and at check --phase ci --changed-from; a second copy of a baselined finding fails; an unreadable baseline tolerates nothing and is an error
+verified  the old wiring form, launch.sh hook before-shell, still runs ws.py, so a running session is not locked out when its main copy fast-forwards
+verified  a before-shell hook call through the launcher: median 41 ms against 50 ms with the old launcher, 15 calls each, on the maintainer's Mac
+verified  python3 ws.py selftest, python3 ws.py check and python3 -m unittest discover -b tests (240 tests, 3 skipped) pass; evals/grade.py --recorded finds no difference
+inferred  Windows: the stand-in interpreters are shell scripts, so the start-count and failure-mode tests skip there; the launcher itself runs every Windows CI step, and a test fails when CI's Python differs from the matrix row's
+inferred  criterion 57's stop gate: none is wired yet. The test requires every wired event other than the three guard events to pass when the launcher fails, so the stop gate C5 wires is held to it without a new test
+
+Not done: the stop gate itself (C5). Index rows for the launcher and baselines, queued below for slice Z.
+```
+
+Decisions made in the slice:
+
+- **No baseline files are shipped.** A missing file tolerates nothing, and a test holds that every baseline here tolerates nothing. One empty file per check would have tied this slice to sub-batch A, which adds checks and retires `freshness`. `python3 ws.py baseline` writes a file when a team needs one.
+- **The baseline matches path and message, not the line**, so a finding that moves with an edit above it stays tolerated. Each entry tolerates one finding.
+- **A too-old Python exits 97 from `wslib/start.py`**, and the launcher tries the next one. So a machine whose `python3` is old and whose `python` is current still works, at the cost of a second start on that machine only.
+
 ### Sub-batch A, 2026-11-18
 
 Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
@@ -579,8 +605,10 @@ Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `-
 - Criterion 55 lists guard refusals that only C3 and C5 can show. A0 meets its parser side; the refusal cases belong to criteria 38, 39, 58 and 65 when those slices land.
 - The README promised the commit check starts three git processes. The history the proof checks read adds at most two more, one batch and one ancestry test per anchor commit, whatever the number of files. The README, `docs/parts.md` and the test now say so.
 - A plain `check`, with no base, warns that the guided arm was not compared with its past, as A0's row says it should. The warning shows on every plain `check` of a workspace with a proven playbook.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
 
-None yet.
+- C1, `INDEX.md`, Topics: a row "Which Python the hooks and CI run; a hook refused because Python is missing or too old" linking [the launcher](../parts.md#the-launcher).
+- C1, `INDEX.md`, Topics: a row "A check that fails on old findings an adopting team cannot fix yet; tolerated findings" linking [baselines](../parts.md#baselines).

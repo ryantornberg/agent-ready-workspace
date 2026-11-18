@@ -104,6 +104,7 @@
         ".codex/config.toml",
         ".mcp.json",
         "tests/",
+        "baselines/",
         "evals/one-time.json",
         "opencode.json"
       ]

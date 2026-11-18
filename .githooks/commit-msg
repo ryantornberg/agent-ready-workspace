@@ -2,11 +2,5 @@
 # Check the commit message, the author and the committer against the parts that read them: the private deny list.
 # Install once, with the other hooks: git config core.hooksPath .githooks
 # git runs a hook at the top of the working copy, so the message file's path, relative or not, stays valid there.
-message=$1
-for candidate in python3 python py; do
-  if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c "import sys; sys.exit(sys.version_info < (3, 9))" 2>/dev/null; then
-    exec "$candidate" ws.py check --message "$message"
-  fi
-done
-echo "commit-msg: no working Python 3.9 or later found; the message was NOT checked" >&2
-exit 1
+# The launcher starts Python; with none that will do, or a missing launcher, the commit is refused.
+exec sh wslib/launch.sh ws.py check --message "$1"

@@ -2023,7 +2023,7 @@ class EvalThatCanLoseTests(Folder):
     # Criterion 30
     def test_ci_regrades_every_stored_transcript_and_fails_on_a_difference(self):
         ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
-        self.assertIn("python evals/grade.py --recorded", ci)
+        self.assertIn("wslib/launch.sh evals/grade.py --recorded", ci)
         self.assertEqual(grade.regrade_records(ROOT), [])
         self.copy_of_this_repository()
         record_path = self.root / "evals/runs/nightly-job/record.json"

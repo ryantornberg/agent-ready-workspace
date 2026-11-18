@@ -79,7 +79,8 @@ git config core.hooksPath .githooks
 | Each agent session gets its own browser: the server runs pinned and with `--isolated`, for Claude Code and Codex CLI, and the agent tool's own browser plugin is off. | `browser_isolation` check | Commit, CI |
 | A shelved folder is not edited. | `shelved` hook | Before an edit |
 | A task handed to a helper names its tier, and runs at the model and effort the manifest binds to it. | `handoff_tier` hook | Before a helper starts |
-| A hook refuses an event it cannot read, and the wiring refuses when Python is missing. | The runner and `wslib/launch.sh` | Every hook call |
+| A hook refuses an event it cannot read, and a guard's wiring refuses when Python is missing, too old or crashes. Hooks, git hooks and CI start Python only through the launcher, once per call. | The runner and `wslib/launch.sh` | Every hook call |
+| A check may tolerate a recorded list of known findings, and still fails on any new one. | `baselines/`, read by the runner | Commit, CI |
 | A part's own cases pass, at the level each finding states. | The runner | Every command that loads the part. A hook call loads only the hooks for its event. |
 | A part leaves the manifest only when it is retired with a reason. | The runner | Commit, CI |
 | The manifest names the engine's version, gives a reason for every part, binds every tier to a model and an effort, and holds no unknown key. | The runner | Every command. A hook call checks the version and the tiers only, so a missing reason cannot lock a session out. |

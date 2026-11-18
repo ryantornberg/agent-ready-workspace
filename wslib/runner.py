@@ -26,16 +26,21 @@ nothing and exits 0. Before the session hooks run, the runner adds the facts the
 copy; and "pins", for each pinned repository there, how far its checkout is behind its upstream's
 default branch. See docs/decisions/0004-the-hook-contract.md.
 
+A check may tolerate known findings listed in baselines/<check>.json, read from the same snapshot as the files it
+checks, so the commit and CI decide alike; any other finding still fails. See wslib/baseline.py.
+
 Exit codes: 0 clean; 1 a check found an error or a case failed; 2 a hook refused, or the setup is
 wrong. A hook that cannot decide exits 2 as well: it fails closed.
 """
 import argparse
+import json
 import os
 import pathlib
 import subprocess
 import sys
 
 from . import VERSION
+from . import baseline as baselines
 from . import events
 from . import gitcall
 from . import lease as leases
@@ -224,15 +229,40 @@ def command_check(root, args):
     if problem:
         # Fail closed: the parts that must stay cannot be known.
         findings.append((partlib.finding(partlib.MANIFEST, 1, f"{problem}, so the required parts are unknown"), "runner"))
+    tolerated = []
     for part in parts:
-        findings += [(found, part.name) for found in part.run(snapshot)]
+        # A check's baseline comes from the same snapshot as the files it checks: the staged one at the commit.
+        kept, count, trouble = baselines.apply(snapshot, part.name, part.run(snapshot))
+        findings += [(found, part.name) for found in kept + ([trouble] if trouble else [])]
+        if count:
+            tolerated.append(f"{count} finding(s) tolerated by {baselines.path_of(part.name)}")
     errors = 0
     for found, by in findings:
         errors += found["level"] == "error"
         print(f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{by}]")
+    for line in tolerated:
+        print(line)
     if errors:
         print(f"\n{errors} error(s).")
     return 1 if errors else 0
+
+
+def command_baseline(root, args):
+    """Write baselines/<check>.json for each check of the phase that finds errors in the folder now, and rewrite any
+    that exists. A check with no findings and no file gets none."""
+    manifest = partlib.load_manifest(root)
+    snapshot = snapshots.Tree(root)
+    for part in partlib.load_all(root, manifest):
+        if part.kind != "check" or args.phase not in part.phases:
+            continue
+        body = baselines.record(part.name, part.run(snapshot))
+        path = root / baselines.path_of(part.name)
+        if not body["tolerated"] and not path.exists():
+            continue
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(json.dumps(body, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"{baselines.path_of(part.name)}: {len(body['tolerated'])} finding(s) tolerated")
+    return 0
 
 
 def session_facts(root, hooks, event):
@@ -438,6 +468,8 @@ def main(argv=None):
     check.add_argument("--push", metavar="REMOTE", help="the pre-push hook: check the refs git lists on standard input")
     check.add_argument("--phase", choices=partlib.PHASES, default="commit",
                        help="run only the checks for this phase (default: commit)")
+    baseline = commands.add_parser("baseline", help="record the checks' current findings as tolerated")
+    baseline.add_argument("--phase", choices=partlib.PHASES, default="commit")
     hook = commands.add_parser("hook")
     hook.add_argument("event")
     hook.add_argument("--tool", help="read this agent tool's own payload through its adapter, such as claude-code")
@@ -452,7 +484,7 @@ def main(argv=None):
     if args.command == "hook" and args.event in partlib.SESSION_EVENTS:
         return command_session(root, args)      # never fails, so not under the error handling below
     try:
-        return {"list": command_list, "selftest": command_selftest, "check": command_check,
+        return {"list": command_list, "selftest": command_selftest, "check": command_check, "baseline": command_baseline,
                 "hook": command_hook, "ledger": command_ledger, "rules": command_rules}[args.command](root, args)
     except (partlib.PartError, NotADirectoryError, RuntimeError) as error:
         print(f"ws: {error}", file=sys.stderr)
