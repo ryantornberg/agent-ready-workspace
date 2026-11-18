@@ -71,11 +71,12 @@ class CaseError(Exception):
 def shell():
     """The POSIX shell an agent tool runs a hook command with. On Windows, Git's own bash, never WSL's."""
     if os.name == "nt":
+        # git.exe sits in Git\cmd from a Windows shell and in Git\mingw64\bin from Git bash; bash.exe is in Git\bin.
         git = shutil.which("git")
-        candidate = git and pathlib.Path(git).resolve().parent.parent / "bin" / "bash.exe"
-        if candidate and candidate.exists():
-            return str(candidate)
-        raise CaseError("no Git bash found next to git, so the wiring cannot be run")
+        for folder in pathlib.Path(git).resolve().parents if git else ():
+            if (folder / "bin" / "bash.exe").is_file() and (folder / "usr" / "bin").is_dir():
+                return str(folder / "bin" / "bash.exe")
+        raise CaseError("no Git bash found above git, so the wiring cannot be run")
     found = shutil.which("sh")
     if not found:
         raise CaseError("no sh on the path, so the wiring cannot be run")
