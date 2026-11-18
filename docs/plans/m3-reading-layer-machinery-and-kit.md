@@ -581,9 +581,26 @@ Decisions made in the slice:
 - **The baseline matches path and message, not the line**, so a finding that moves with an edit above it stays tolerated. Each entry tolerates one finding.
 - **A too-old Python exits 97 from `wslib/start.py`**, and the launcher tries the next one. So a machine whose `python3` is old and whose `python` is current still works, at the cost of a second start on that machine only.
 
+### C2, the case runner
+
+Pull request #22, at the driver tier. Criteria 28 and 42 are met.
+
+- **Verified:** `tests/hook_cases.py` runs 27 cases from `tests/hooks/` across all five events the engine knows, for Claude Code and Codex. Each case builds a scratch repository and runs the wiring command from `.claude/settings.json` or `.codex/hooks.json` through `wslib/launch.sh`. Seeded leases use a live process and a dead one. Every `session-start` case runs against a local bare remote. All 27 pass on all five CI jobs, before and after merging C1's launcher into the branch.
+- **Verified:** CI prints every row's median on all three systems. In the run after C1's launcher merged, before-tool calls and the two rows take 65 to 100 milliseconds on Linux, 77 to 130 on macOS, and 158 to 239 on Windows. `session-start` takes 101, 173 to 213, and 354 to 457. On Windows with Python 3.9, four rows are over the 200-millisecond budget; Windows only reports, as criterion 28 allows.
+- **Verified:** `tests/test_hook_cases.py` shows the budgets fail on Linux and macOS and only report on Windows. It also shows a case with a wrong exit code, lease holder or output text is reported as failing, and a missing event or timing row fails the run.
+- **Verified:** `test_cases_bite` reads the 20 parts from the manifest. Every part's cases fail against both stubs. It passed on its first run, so no part's cases were missing teeth. A test of the test shows that a part whose cases only allow, or only find, is caught.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` pass locally, 254 tests after the merge.
+- **Inferred:** the session-start fast-forward already fetches under a timeout (`FETCH_BUDGET`, 15 seconds, in `wslib/lease.py`), so this slice left it unchanged. Against a slow real remote, a session start can still take up to 15 seconds. The 2-second budget holds only against the local remote the cases use, as criterion 28 says.
+- **Proposed revision (template rule 7):** `session-end` has no budget in criterion 28, so the runner prints its time and holds it to nothing. It measures 63 to 202 milliseconds. A later plan could give it the 2-second session-start budget.
+- **Verified:** two fix rounds, each on a different failure. After C1 merged, CI starts the tests from Git bash, where `git` resolves under `mingw64\bin`, and the runner's Git bash lookup failed on Windows. It now walks up from `git` to the folder that holds `bin\bash.exe`.
+- **Verified:** a second failure, on one Windows job: a lease held by a dead process was refused as live. **Inferred** cause: Windows reuses a process id quickly once no handle to the exited process is open, so the "dead" id belonged to a new process. The runner now keeps the exited process's handle open for the whole run. `LeaseTests` in `tests/test_core.py` picks its dead id the same way and may flake on Windows for the same reason.
+- **Inferred:** the same lookup in `tests/test_core.py` now finds no shell on Windows CI, so its wiring tests skip there. Windows skips rose from 3 to 14 between the pre-merge and post-merge runs. The `shell` helper in `test_core.py` needs the same walk; that is outside C2.
+- No file the eval hashes was edited, and `workspace.json` was not touched. No question had to be asked.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
 
 - C1, `INDEX.md`, Topics: a row "Which Python the hooks and CI run; a hook refused because Python is missing or too old" linking [the launcher](../parts.md#the-launcher).
 - C1, `INDEX.md`, Topics: a row "A check that fails on old findings an adopting team cannot fix yet; tolerated findings" linking [baselines](../parts.md#baselines).
+- C2, `INDEX.md`, Topics: a row "How long a hook takes; a hook called for real, through the launcher, in a scratch repository" linking [the hook case runner](../parts.md#the-hook-case-runner).

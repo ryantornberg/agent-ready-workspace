@@ -1,0 +1,5 @@
+[
+  {"name": "a task that names its tier and runs at it goes ahead", "tool": "claude-code", "payload": {"hook_event_name": "PreToolUse", "tool_name": "Agent", "tool_input": {"prompt": "Tier: mechanical\nList the files under docs/.", "description": "list", "model": "haiku", "effort": "low"}, "cwd": "{root}", "session_id": "me"}, "exit": 0},
+  {"name": "a task that names no tier is refused", "tool": "claude-code", "payload": {"hook_event_name": "PreToolUse", "tool_name": "Agent", "tool_input": {"prompt": "List the files under docs/.", "description": "list"}, "cwd": "{root}", "session_id": "me"}, "exit": 2, "output": ["Refused by handoff_tier"]},
+  {"name": "codex: a subagent is refused until a recorded run shows its prompt", "tool": "codex", "payload": {"session_id": "codex-me", "turn_id": "t", "transcript_path": null, "cwd": "{root}", "hook_event_name": "PreToolUse", "model": "a-model", "permission_mode": "default", "tool_name": "spawn_agent", "tool_input": {"message": "Tier: worker\nDo it."}}, "exit": 2, "output": ["spawn_agent"]}
+]
