@@ -2370,6 +2370,13 @@ class EvalHarnessApartTests(Folder):
                                                      "print(sorted(m for m in sys.modules if m.split('.')[0] == 'wslib'))"],
                               cwd=ROOT, capture_output=True, text=True, check=True)
         self.assertEqual(done.stdout.strip(), "[]", "grade.py loads none of the engine")
+        # Grading a hook loads the shell parser the hook imports, and nothing else of the engine (M3 slice A0).
+        done = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, 'evals'); import grade; "
+                                                     "grade.load_hook(grade.ROOT, 'no_stage_all'); "
+                                                     "grade.load_hook(grade.ROOT, 'no_admin_merge'); "
+                                                     "print(sorted(m for m in sys.modules if m.split('.')[0] == 'wslib'))"],
+                              cwd=ROOT, capture_output=True, text=True, check=True)
+        self.assertEqual(done.stdout.strip(), "['wslib', 'wslib.shell']", "grading loads only the shell parser")
 
     def test_the_grader_loads_the_hooks_own_file_from_the_workspace_it_grades(self):
         hook = (ROOT / "parts/no_stage_all.py").read_text(encoding="utf-8")
