@@ -21,6 +21,12 @@ jobs:
           - os: ubuntu-latest   # the hosted Ubuntu image no longer offers Python 3.9
             python: "3.9"
     runs-on: ${{ matrix.os }}
+    # Every step starts Python through wslib/launch.sh, as the hooks do. On Windows this "bash" is Git's.
+    defaults:
+      run:
+        shell: bash
+    env:
+      WS_EXPECT_PYTHON: ${{ matrix.python }}   # a test fails when the launcher picks another Python
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,16 +34,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m unittest discover -b tests
-      - run: python ws.py selftest
+      - run: bash wslib/launch.sh -m unittest discover -b tests
+      - run: bash wslib/launch.sh ws.py selftest
       # Re-grade every stored eval transcript; a grade that differs from its record fails. No agent runs here.
-      - run: python evals/grade.py --recorded
+      - run: bash wslib/launch.sh evals/grade.py --recorded
       # A teammate who never installed the commit hook is caught here: a page edited
       # in this push or pull request, and past its review date, fails.
       - if: github.event_name != 'schedule'
-        run: python ws.py check --phase ci --changed-from "${{ github.event.pull_request.base.sha || github.event.before }}"
+        run: bash wslib/launch.sh ws.py check --phase ci --changed-from "${{ github.event.pull_request.base.sha || github.event.before }}"
       # The weekly run has no push to compare with, so it checks the tree as it stands, then the nightly checks.
       - if: github.event_name == 'schedule'
-        run: python ws.py check --phase ci
+        run: bash wslib/launch.sh ws.py check --phase ci
       - if: github.event_name == 'schedule'
-        run: python ws.py check --phase nightly
+        run: bash wslib/launch.sh ws.py check --phase nightly
