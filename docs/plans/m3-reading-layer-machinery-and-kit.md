@@ -664,6 +664,15 @@ Decisions made in C3a:
 - **A lease that cannot be read counts as held by another live session**, as decision 0005's "a lease bug never lets an edit through" asks.
 - **Plain `worktree remove`, with no `--force`, passes.** git refuses to remove a worktree with changes unless forced.
 - **Parser gaps handled in the guard's own file:** a whole-tree checkout or restore, a stash write, rebase and cherry-pick. The parser does not list them among the forms that drop work. Queued for slice Z below.
+- **The maintainer kept the keyed design** after a side review noted it reversed the first draft of the 0004 amendment, which had the runner hand over the parsed calls.
+
+**C3b, the target resolver.** On branch `m3/c3b`, from main at `8de0aaa`.
+
+- **Verified, criterion 58's target repository:** `TargetTests` in `tests/test_shellfacts.py`, 14 tests on throwaway repositories, no network. For gh: `-R`, `--repo`, `GH_REPO` on the command and in the environment, the set-default value, the only remote, two remotes with no default (unresolved), the folder after a leading `cd`, a repository operand, `gh api`'s literal path winning over `GH_REPO`, its `{owner}/{repo}` placeholders filled from `GH_REPO` and from the remote, and a gist, `gh api user` and GraphQL counted as naming no repository. For a push: two `pushurl` values give both destinations; `-c ... pushInsteadOf`, `GIT_CONFIG_COUNT/KEY/VALUE`, `remote.pushDefault` and a `pushurl` in an `include.path` file are all applied, by asking git; a URL on the command line gets `insteadOf` and not `pushInsteadOf`; a local path and `file://` are local and `host:path` is ssh; `remote.<name>.mirror` and configured `remote.<name>.push` refspecs are reported; with no refspec, `push.default` simple, current and upstream give the branch and its destination, so `-c push.default=upstream push -f` from a branch tracking main resolves to main; matching, `HOME` set on the command, and a variable remote, refspec, config key or folder are unresolved.
+- **Verified:** the facts are worked out only when a hook reads them, as C3a's are. No guard reads them yet, so no hook call starts a git process for them. Measured directly on this repository, a resolved `git push -u origin HEAD` takes about 35 ms and a bare `git push` about 70 ms; C5's guards will add that to the push rows.
+- **Inferred:** gh writes its set-default value under the remote's `gh-resolved` key. The tests set that key themselves; `gh repo set-default` refused a probe repository it could not reach.
+- **Decision:** a target is keyed by the call's folder, program and words, as `target_key` gives them, so a guard in C4 or C5 can look it up from the parser's own output.
+
 
 ### Sub-batch A, 2026-11-18
 
