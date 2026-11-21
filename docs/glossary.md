@@ -1,6 +1,6 @@
 ---
 kind: reference
-last-reviewed: 2026-11-18
+last-reviewed: 2026-11-21
 ---
 
 # Glossary
@@ -12,12 +12,12 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Word | Means |
 |---|---|
 | Anchor | The commit-pinned eval record, `<sha>:evals/runs/<case>/record.json`, that a proven playbook's guided arm is compared with from then on. |
-| Arm | One way an eval case is run: guided (the workspace's pages), two-line (two lines of instruction) or bare (the code alone). |
+| Arm | One way an eval case is run: guided (the workspace's pages), two-line (two lines of instruction) or bare (the code alone). A one-time arm, such as `routed` in `evals/one-time.json`, is recorded once in a record the gate never reads. |
 | Building | The milestones being built now, listed under `building` in `workspace.json`. |
 | Case | Test data a part runs every time it loads; or an eval case, a request an agent is given in each arm. |
-| Check | A part that reads a snapshot of files and reports findings, at the commit and in CI. |
+| Check | A part that reads a snapshot of files and reports findings. By default it runs at the commit and in CI; a check may name other phases, such as the push or the nightly run. |
 | Contract | `AGENTS.md`: the rules every agent reads first. |
-| Hook | A part that decides on one agent tool call before it runs. It refuses, or reminds. |
+| Hook | A part that runs on one agent tool event. Before a tool call it refuses or reminds; when a session starts or ends it only reminds. A git hook, such as the commit-msg or pre-push hook, is a different thing: a script in `.githooks/` that runs the checks. |
 | Kind | What a page is: playbook, how-to, tutorial, reference, template, record, decision, plan or milestone. See [layout](layout.md). |
 | Lease | The claim a live agent session holds on the main working copy while it edits there. See [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md). |
 | Ledger | The list of files an agent's edit tools wrote, which the commit check compares with what is staged. |

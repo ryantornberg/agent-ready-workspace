@@ -2,12 +2,12 @@
 kind: how-to
 proof: unproven
 prove-by: M4
-last-reviewed: 2026-11-18
+last-reviewed: 2026-11-21
 ---
 
 # Changing the machinery
 
-Docs change freely. The scripts, hooks and CI that check them take a stricter path. It is for anyone, person or agent, about to change one of them.
+Docs go straight to main, a guidance page after its instruction review. The scripts, hooks and CI that check them take a stricter path. It is for anyone, person or agent, about to change one of them.
 
 **In short:** a doc change goes straight to the main branch. A machinery change goes to its own branch and merges only after CI passes on Linux, macOS and Windows. Machinery work runs at the driver tier.
 
@@ -57,9 +57,10 @@ A first push that creates main checks the whole history being pushed. To create 
 |---|---|
 | A commit that changes a machinery path reaches main only through a pull request. | `direct_push#a commit that changes a part fails, naming the commit and the path` |
 | No merge with `gh pr merge --admin`, which goes past red CI. | `no_admin_merge#a merge with the flag after the number` |
-| A part leaves the manifest only by being listed under `retired`, with a reason. | `prose` |
-| A change the eval covers is not pushed for review until the commit with its new records passes every hook. | `eval_record#an edited playbook fails until its case is run again` |
-| Before each push of a branch committed with `--no-verify`, every commit message passes `python3 ws.py check --message` and every commit's diff passes the deny-list scan. | `prose` |
+| A part leaves the manifest only by being listed under `retired`, with a reason. The runner refuses any other removal; it is not a part, so the tag is `prose`. | `prose` |
+| A change the eval covers fails the commit check until the eval has run again and its new records are committed. | `eval_record#an edited playbook fails until its case is run again` |
+| Open no pull request for such a change until the commit with its new records passes every hook. | `prose` |
+| Before each push of a branch committed with `--no-verify`, every commit message passes the message checks, which `python3 ws.py check --commits origin/main..HEAD` runs on each commit, and every commit's diff passes the deny-list scan. | `prose` |
 
 ## Traps
 
@@ -68,5 +69,5 @@ A first push that creates main checks the whole history being pushed. To create 
   - If the session is locked out, the person repairs the file from their own terminal, where the agent's hooks do not run.
   - Change the engine's `VERSION` and the manifest's `version` in one step: on a branch in its own working copy, then a merge or a checkout. Edited one at a time in the working copy the session runs in, they lock the session out.
 - **A part leaves the manifest only by being retired.** A manifest that drops a part the last commit used fails `check`, and in CI the base branch's manifest decides. List the part under `retired` with a reason. See [removing a part](parts.md#removing-a-part).
-- **A change the eval covers cannot pass the commit check until the eval has run.** `eval_record` refuses it by design. To save the work before the costly runs, commit it on its branch with `git commit --no-verify`, after `python3 ws.py check --staged` shows only the `eval_record` findings, and run `python3 ws.py check --message FILE` on the message by hand, since `--no-verify` skips that hook too. Before every push of that branch, run the checks `--no-verify` skipped on every commit it holds: `python3 ws.py check --message FILE` on each commit's message, and the `deny_list` check on each commit's diff, since a pushed branch on a public repository is visible at once. Push the branch, but open no pull request until the commit with the records passes every hook.
+- **A change the eval covers cannot pass the commit check until the eval has run.** `eval_record` refuses it by design. To save the work before the costly runs, commit it on its branch with `git commit --no-verify`, after `python3 ws.py check --staged` shows only the `eval_record` findings, and run `python3 ws.py check --message FILE` on the message by hand, since `--no-verify` skips that hook too. Before every push of that branch, run the checks `--no-verify` skipped on every commit it holds: `python3 ws.py check --commits origin/main..HEAD`, which runs the message checks on each commit's message, and the `deny_list` check on each commit's diff, since a pushed branch on a public repository is visible at once. Push the branch, but open no pull request until the commit with the records passes every hook.
 - **A check you cannot run in CI.** The `deny_list` check reads a private list from the file `WS_DENY_LIST` names, or from `~/.config/agent-ready-workspace/deny-list.txt`. CI has no list, so it warns and checks nothing. Commit on a machine that has the list.

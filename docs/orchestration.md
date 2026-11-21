@@ -2,7 +2,7 @@
 kind: how-to
 proof: unproven
 prove-by: M4
-last-reviewed: 2026-11-18
+last-reviewed: 2026-11-21
 ---
 
 # Orchestration: tiers, models and delegation
@@ -16,7 +16,7 @@ Which model and effort a piece of work gets, and how work is handed to a helper 
 | Tier | Does | For example |
 |---|---|---|
 | Driver | Judgment: design, review, deciding what to do next | Writing a hand-off plan; red-teaming a plan that changes a gate |
-| Worker | Bounded work against a written plan | Building one slice; a fix round; a test harness |
+| Worker | Bounded work against a written plan | Building one slice of pages; a fix round on a page; rewriting a page after its review |
 | Mechanical | Reading, listing and sweeping | Finding every caller of a function; collecting check output |
 
 Pick the cheapest tier that fits. Lower the effort before you lower the model.
@@ -34,6 +34,7 @@ The person chooses the model of the session they talk to. The binding governs ev
 A task runs at the driver tier, whatever its size, when it:
 
 - changes a gate: a check, a hook, a grader, CI or the commit hook;
+- changes any other machinery path, as [changing the machinery](changing-the-machinery.md#what-counts-as-machinery) lists, tests included;
 - changes the contract, [AGENTS.md](../AGENTS.md);
 - produces text that someone outside the team will read, such as an upstream pull request.
 
@@ -55,7 +56,7 @@ A reviewer or a red team never shares the author's session. It gets the artifact
 ## Limits
 
 - **An attended review loop** runs while it converges. It ends on a round that only finishes earlier work. It has no fixed round count.
-- **An unattended run** stops after three fix rounds. It then freezes and reports; nothing is published or merged.
+- **An unattended run** stops after the fix rounds its plan allows, and after three when the plan sets no limit. It then freezes and reports; nothing is published or merged.
 
 ## What enforces this
 
@@ -63,9 +64,9 @@ A reviewer or a red team never shares the author's session. It gets the artifact
 |---|---|
 | A delegated task's prompt starts with its tier. | `handoff_tier#no tier named` |
 | A delegated task runs at its tier's model and effort, as the binding sets them. | `handoff_tier#a model off the binding`, `handoff_tier#an effort off the binding` |
-| A slice that changes a gate, the contract or text an outsider reads runs at the driver tier. | `prose` |
+| A slice that changes a gate, any other machinery path, the contract or text an outsider reads runs at the driver tier. | `prose` |
 | A reviewer or red team works in a fresh session, without the author's conclusions. | `prose` |
-| An unattended run stops after three fix rounds, then freezes and reports. | `prose` |
+| An unattended run stops after the fix rounds its plan allows, or three when it sets none, then freezes and reports. | `prose` |
 
 
 The `handoff_tier` hook refuses a delegated task whose prompt does not start with its tier. Where the agent tool lets a task set its model and effort, the hook also refuses a task that sets values other than the binding's for its tier, or leaves one unset, since an unset value inherits the calling session's. A tool that exposes neither setting needs only the tier line. See [parts](parts.md#the-parts-here).

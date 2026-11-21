@@ -70,11 +70,11 @@ A check runs in phases. By default it runs at the commit and in CI. A check that
 | `python3 ws.py check`, `python3 ws.py check --staged` | `commit`. It is the default, so the two agree. |
 | `python3 ws.py check --phase ci` | `ci`. CI runs it. |
 | `python3 ws.py check --phase nightly` | `nightly`. CI's weekly run runs it, for checks too slow for every commit. |
-| `python3 ws.py check --push REMOTE` | `push`. The pre-push hook runs it, with git's list of pushed refs on standard input. The parts and the manifest come from the remote's current tip, and the snapshot's `pushed` lists the commits the push adds, merges left out: each as `{"commit", "subject", "paths"}`. |
+| `python3 ws.py check --push REMOTE` | `push`. The pre-push hook runs it, with git's list of pushed refs on standard input. The parts and the manifest come from the remote's current tip, and the snapshot's `pushed` lists the commits the push adds: each as `{"commit", "subject", "message", "paths", "files", "merge"}`, where a merge's paths are only what it changes itself and `files` reads the commit's tree. On a push to main, the hook then runs the runnable blocks of every tutorial the push changes, in a fresh clone; see [layout](layout.md#tutorials). |
 
 The phases are the part's, not the manifest's, so no manifest edit can move `deny_list` off the commit. `selftest` runs every part's cases, whatever its phases.
 
-A check that sets `COMMIT_MESSAGE = True` also runs from the commit-msg hook, `python3 ws.py check --message FILE`. Its snapshot then holds three files: `commit message`, `author` and `committer`, each identity as git will record it. `deny_list` is the one here.
+A check that sets `COMMIT_MESSAGE = True` also runs from the commit-msg hook, `python3 ws.py check --message FILE`. Its snapshot then holds three files: `commit message`, `author` and `committer`, each identity as git will record it. Its `pushed` holds the commit being made, in the same shape as at the push: the staged paths, deletions included, and the staged files as its tree. In CI, `python3 ws.py check --commits BASE..HEAD` runs the same checks over every commit of the range, each with its own message, identities, paths and tree. `deny_list`, `commit_subject` and `review_trailer` are the ones here.
 
 ## A hook
 
@@ -309,6 +309,8 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
 | `secret_scan` | check | A line the commit adds looks like a token or a private key. `python3 ws.py check --history` runs it over every line the history added. See [commits](commits.md). |
 | `commit_subject` | check, on the commit message | The subject matches none of the manifest's `formats`, conventional commits by default; git's own merge, revert and autosquash subjects pass. Over 72 characters warns. |
+| `review_trailer` | check, on the commit message and at the push | A commit adds, changes or deletes a guidance page, the paths its `guidance` setting lists and `except` does not, with no `Instructions-review:` trailer naming a record the commit adds or changes and that covers the page, and no listed reason to skip. See [the instruction review](playbooks/instruction-review.md). |
+| `review_index` | check | The index of instruction-review records leaves out a record, disagrees with one on its pages or classes, or has no record for a page its `required` setting lists. |
 | `agent_settings` | check | Claude Code's settings lack a deny entry for a secrets pattern or an allow entry for a documentation domain, or Codex CLI's config lacks the profile, one of its denies, or a web search domain. See [agent settings](agent-settings.md). |
 | `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
 | `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `page_kinds` run on the session's working copy. |

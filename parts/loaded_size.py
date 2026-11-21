@@ -14,7 +14,7 @@ from wslib import markdown
 from wslib.parts import finding
 
 KIND = "check"
-PAGE = "docs/orchestration.md"
+PAGE = "docs/layout.md"
 
 
 def _glob(pattern):

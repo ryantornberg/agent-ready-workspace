@@ -7,7 +7,7 @@ last-reviewed: 2026-11-21
 
 What every commit to this workspace must hold, and which checks hold it. It is for anyone, person or agent, about to commit.
 
-**In short:** a commit's subject follows one of the formats the manifest accepts, conventional commits by default, and a commit adds no line that looks like a credential. The commit-msg and pre-commit hooks check both; CI scans the whole history for credentials too.
+**In short:** a commit's subject follows one of the formats the manifest accepts, conventional commits by default, and a commit adds no line that looks like a credential. A commit that changes a guidance page names its instruction review in a trailer. The commit-msg and pre-commit hooks check these; CI checks every commit's message and scans the whole history for credentials too.
 
 ## The subject line
 
@@ -16,6 +16,10 @@ The subject is the message's first line that is neither blank nor a comment. It 
 git's own subjects always pass: a merge, a revert, and an autosquash subject starting `fixup!`, `squash!` or `amend!`. A subject over 72 characters warns; put the detail in the body.
 
 A team sets its own formats in the manifest, such as `"formats": ["^[A-Z]+-[0-9]+ \\S"]` for a ticket key first.
+
+## The instruction-review trailer
+
+A commit that adds, changes or deletes a guidance page carries a line `Instructions-review: <record>` naming the review record it commits, or `Instructions-review: skipped: <reason>` with a listed reason. The [instruction review](playbooks/instruction-review.md) says which pages are guidance, how the review runs and which reasons are listed. Put each on a line of its own, one per record. The check reads such a line anywhere in the message; git's own trailer tools read only the last paragraph, so put them there.
 
 ## Credentials
 
@@ -40,3 +44,4 @@ The scan is a seatbelt, not a vault. A format it does not know, a token split ac
 | A commit's subject follows one of the manifest's formats; git's own merge and revert subjects pass. | `commit_subject#a subject with no type fails` |
 | A commit adds no line that looks like a token or a private key. | `secret_scan#an added line with a GitHub token fails` |
 | Every finding a check prints names the file, the rule's page and a command to run it again. | `prose` |
+| The instruction-review trailers sit in the message's last paragraph. | `prose` |

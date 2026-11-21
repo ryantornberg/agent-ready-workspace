@@ -100,6 +100,8 @@ Amended 2026-11-18, M3 slice A0: the parser moved from `no_stage_all.py` into `w
 
 Amended 2026-11-21, M3 slice C3: before-shell hooks may declare `NEEDS`, and the runner adds the session, the lease as it stands, each git call's working copy and each gh call's and push's target, as "Shell events" says. The discard guard reads the command with `wslib/shell.py`, as its row in the table says. A `post-checkout` git hook copies the local settings file into a new linked worktree.
 
+Amended 2026-11-21, M3 slice B1: a check's `pushed` commits carry their whole message, their tree as `files`, read when a part asks, and whether a merge is being made. The commit-msg hook gives a check the commit being made in that shape, and `ws.py check --commits BASE..HEAD` runs the commit-message checks over each commit of a range, for CI. The pre-push hook also runs the runnable blocks of each tutorial a push to main changes, in a fresh clone. An exception to `wslib/gitcall.py`: these reads of commits, like the runner's other reads at the push, call git directly. They read only local objects; the tutorial's clone and checkout have a time limit.
+
 ## What it gave up
 
 - **A hook cannot look things up for itself.** A new kind of fact means an engine change, a new name in `NEEDS` and a line in this record. That is the point, and also the cost.

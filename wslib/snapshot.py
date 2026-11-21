@@ -647,21 +647,26 @@ def changed_since(root, ref):
 
 
 class Message(Snapshot):
-    """A commit about to be made, as three files: its message, its author and its committer.
+    """A commit about to be made, or one already made, as three files: its message, its author and its committer.
 
     The identities are git's own view, `git var GIT_AUTHOR_IDENT` and `GIT_COMMITTER_IDENT`, which
-    take `--author`, the environment and the config into account. Each is the name and the email,
-    without the date. Not a Memory snapshot: a part never takes it for one of its cases.
+    take `--author`, the environment and the config into account; for a commit already made, its own.
+    Each is the name and the email, without the date. `commit`, when given, is the one entry of `pushed`:
+    the commit with its paths and its tree, for a part that judges what a commit changes.
+    Not a Memory snapshot: a part never takes it for one of its cases.
     """
 
     FILES = ("commit message", "author", "committer")
 
-    def __init__(self, root, message):
+    def __init__(self, root, message, commit=None, identities=None):
         self._files = {"commit message": message}
         for name, variable in (("author", "GIT_AUTHOR_IDENT"), ("committer", "GIT_COMMITTER_IDENT")):
+            if identities is not None:
+                self._files[name] = identities[name].encode("utf-8", "surrogateescape")
+                continue
             ident = _git(root, "var", variable).decode("utf-8", "surrogateescape").strip()
             self._files[name] = (ident[:ident.rfind(">") + 1] if ">" in ident else ident).encode("utf-8", "surrogateescape")
-        super().__init__(self._files)
+        super().__init__(self._files, pushed=[commit] if commit is not None else ())
 
     def _bytes(self, path):
         return self._files[path]

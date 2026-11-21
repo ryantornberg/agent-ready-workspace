@@ -1,0 +1,187 @@
+[
+  {
+    "name": "an index that matches its records passes",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | step, trigger |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n| 1 | step | `## X` | a thing | fixed |\n| 2 | trigger | `## X` | a thing | open |\n| 3 | contradiction | `## X` | a thing | declined: not a defect |\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "a record with no row fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | step, trigger |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n| 1 | step | `## X` | a thing | fixed |\n| 2 | trigger | `## X` | a thing | open |\n| 3 | contradiction | `## X` | a thing | declined: not a defect |\n",
+      "docs/records/instruction-reviews/2026-11-21-b.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/b.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\nNo findings.\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": [
+      "the review record is not in the index"
+    ]
+  },
+  {
+    "name": "a row whose record is missing fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | none |\n| [gone.md](gone.md) | `docs/b.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\nNo findings.\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": [
+      "the row '[gone.md](gone.md)' names no review record that exists"
+    ]
+  },
+  {
+    "name": "a row whose pages differ from the record's covers fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md`, `docs/b.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\nNo findings.\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": [
+      "lists ['docs/a.md', 'docs/b.md'], but the record covers ['docs/a.md']"
+    ]
+  },
+  {
+    "name": "a row whose classes differ from the record's findings fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n| 1 | placement | `## X` | a thing | open |\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": [
+      "gives the classes 'none', but the record's findings count placement"
+    ]
+  },
+  {
+    "name": "a declined finding is not counted",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n| 1 | placement | `## X` | a thing | declined: the text is on its page |\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "a finding class outside the six fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n| 1 | style | `## X` | a thing | open |\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": [
+      "'style' is not a finding class"
+    ]
+  },
+  {
+    "name": "a record with no covers line fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\nNo findings.\n"
+    },
+    "config": {
+      "required": []
+    },
+    "expect": [
+      "the review record has no 'covers:' line"
+    ]
+  },
+  {
+    "name": "a required page with no record fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | step, trigger |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n| 1 | step | `## X` | a thing | fixed |\n| 2 | trigger | `## X` | a thing | open |\n| 3 | contradiction | `## X` | a thing | declined: not a defect |\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md",
+        "docs/c.md"
+      ]
+    },
+    "expect": [
+      "no review record covers docs/c.md, which must have one"
+    ]
+  },
+  {
+    "name": "an index with no table fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\n---\n\n# Instruction reviews\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\nNo findings.\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": [
+      "the index of instruction-review records needs a table"
+    ]
+  },
+  {
+    "name": "a record with no findings table fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\ncovers: docs/a.md\n---\n\n# R\n"
+    },
+    "config": {
+      "required": [
+        "docs/a.md"
+      ]
+    },
+    "expect": [
+      "the review record has no findings table"
+    ]
+  },
+  {
+    "name": "an escaped pipe inside a finding stays in its cell",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md` | step |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\ncovers: docs/a.md\n---\n\n# R\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n| 1 | step | `## X` | the command `a \\| declined` fails | open |\n"
+    },
+    "config": {
+      "required": []
+    },
+    "expect": []
+  },
+  {
+    "name": "a record that covers two pages fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md`, `docs/b.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, docs/b.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\nNo findings.\n"
+    },
+    "config": {
+      "required": []
+    },
+    "expect": [
+      "the review record covers 2 pages; a record covers exactly one"
+    ]
+  }
+]

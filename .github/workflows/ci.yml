@@ -43,6 +43,11 @@ jobs:
       # Every line every commit in HEAD's history added, scanned for credentials (docs/commits.md). A finding the base
       # branch's history already has may be tolerated by baselines/secret_scan.history.json; one this change brings may not.
       - run: bash wslib/launch.sh ws.py check --history --changed-from "${{ github.event.pull_request.base.sha || github.event.before }}"
+      # Every commit of a pull request, and of a push to main, against the checks that read a commit message: its
+      # subject, and the instruction-review trailer a guidance page needs (docs/playbooks/instruction-review.md).
+      # On main this can only report after the push; the pre-push hook is what stops one before it lands.
+      - if: github.event_name != 'schedule'
+        run: bash wslib/launch.sh ws.py check --commits "${{ github.event.pull_request.base.sha || github.event.before }}..${{ github.event.pull_request.head.sha || github.sha }}"
       # A teammate who never installed the commit hook is caught here: a page edited
       # in this push or pull request, and past its review date, fails.
       - if: github.event_name != 'schedule'

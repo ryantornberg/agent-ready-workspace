@@ -41,6 +41,7 @@ import sys
 
 from . import VERSION
 from . import baseline as baselines
+from . import blocks
 from . import events
 from . import gitcall
 from . import lease as leases
@@ -72,7 +73,11 @@ def command_selftest(root, _args):
 
 
 def command_message(root, args):
-    """The commit-msg hook: the message, and the author and committer, against the parts that read them."""
+    """The commit-msg hook: the message, and the author and committer, against the parts that read them.
+
+    The parts also get the commit being made in the snapshot's `pushed`: its message, the staged paths (deletions
+    included), and its tree, the staged files. A merge in progress is marked, since its staged change is
+    everything the other branch brings."""
     try:
         message = pathlib.Path(args.message).read_bytes()
     except OSError as error:
@@ -81,7 +86,11 @@ def command_message(root, args):
     if not index.is_file(partlib.MANIFEST):
         raise partlib.PartError(f"no {partlib.MANIFEST} is staged, so the commit cannot be checked")
     manifest = partlib.parse_manifest(index.read(partlib.MANIFEST) or "", f"staged {partlib.MANIFEST}")
-    snapshot = snapshots.Message(root, message)
+    text = message.decode("utf-8", "replace")
+    merging = _git_text(root, "rev-parse", "-q", "--verify", "MERGE_HEAD") is not None
+    commit = {"commit": "", "subject": _subject(text), "message": text, "paths": sorted(index.staged),
+              "files": StagedFiles(index), "merge": merging}
+    snapshot = snapshots.Message(root, message, commit=commit)
     errors = 0
     for part in partlib.load_all(root, manifest, snapshot=index):
         if part.kind == "check" and getattr(part.module, "COMMIT_MESSAGE", False) is True:
@@ -92,6 +101,42 @@ def command_message(root, args):
     if errors:
         print(f"\n{errors} error(s). Reword the message, or fix the identity, and commit again.")
     return 1 if errors else 0
+
+
+def _subject(text):
+    for line in text.replace("\r\n", "\n").split("\n"):
+        if line.strip() and not line.startswith("#"):
+            return line.strip()
+    return ""
+
+
+class StagedFiles:
+    """A commit's tree, for a part that reads a commit in `pushed`: the staged files."""
+
+    def __init__(self, index):
+        self._index = index
+
+    def __contains__(self, path):
+        return self._index.is_file(path)
+
+    def get(self, path, default=None):
+        return self._index.read(path) if self._index.is_file(path) else default
+
+
+class CommitFiles:
+    """A commit's tree, for a part that reads a commit in `pushed`: each file read from git when first asked for."""
+
+    def __init__(self, root, sha):
+        self._root, self._sha, self._read = root, sha, {}
+
+    def get(self, path, default=None):
+        if path not in self._read:
+            self._read[path] = _git_text(self._root, "show", f"{self._sha}:./{path}")
+        found = self._read[path]
+        return default if found is None else found
+
+    def __contains__(self, path):
+        return self.get(path) is not None
 
 
 ZERO = "0" * 40
@@ -115,8 +160,8 @@ def pushed_commits(root, local, remote):
     A rename lists both its old and its new path, so a machinery file moved away is still machinery. A merge lists
     only what it changes beyond its parents (its combined diff): what it brings in is judged by those commits."""
     span = [local] if remote == ZERO else [f"{remote}..{local}"]
-    text = _git_text(root, "log", "--no-renames", "--cc", "--format=%x01%H%x02%s", "--name-only", *span, "--")
-    if text is None:
+    commits = list_commits(root, span)
+    if commits is None:
         raise partlib.PartError(f"the commits between {remote[:7]} and {local[:7]} cannot be listed. "
                                 f"Fetch first (git fetch), then push again.")
     # The commits that add or change a proof anchor (decision record 0006), whatever their paths.
@@ -126,12 +171,28 @@ def pushed_commits(root, local, remote):
         raise partlib.PartError(f"the commits between {remote[:7]} and {local[:7]} cannot be searched for proof "
                                 f"anchors. Fetch first (git fetch), then push again.")
     anchors = set(anchored.split())
+    for commit in commits:
+        commit["anchors"] = commit["commit"] in anchors
+    return commits
+
+
+def list_commits(root, span):
+    """Each commit git lists for span (newest first), as {"commit", "subject", "message", "author", "committer",
+    "paths", "files", "merge"}, or None when git cannot list them. A merge's paths are its combined diff, so it is
+    judged by what it changes itself; "files" reads the commit's tree."""
+    text = _git_text(root, "log", "--no-renames", "--cc",
+                     "--format=%x01%H%x02%P%x02%an <%ae>%x02%cn <%ce>%x02%B%x03", "--name-only", *span, "--")
+    if text is None:
+        return None
     commits = []
     for block in text.split("\x01")[1:]:
-        head, _, names = block.partition("\n")
-        sha, _, subject = head.partition("\x02")
-        commits.append({"commit": sha.strip(), "subject": subject.strip(), "anchors": sha.strip() in anchors,
-                        "paths": [line for line in names.split("\n") if line.strip()]})
+        head, _, names = block.partition("\x03")
+        sha, parents, author, committer, message = (head.split("\x02", 4) + [""] * 5)[:5]
+        sha = sha.strip()
+        commits.append({"commit": sha, "subject": _subject(message), "message": message, "author": author,
+                        "committer": committer, "merge": False, "parents": len(parents.split()),
+                        "paths": [line for line in names.split("\n") if line.strip()],
+                        "files": CommitFiles(root, sha)})
     return commits
 
 
@@ -183,8 +244,63 @@ def command_push(root, args):
                 errors += found["level"] == "error"
                 print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
                                        "git push"), file=sys.stderr)
+        if remote_ref == "refs/heads/main":
+            errors += push_tutorials(root, local, remote)
     if errors:
         print(f"\n{errors} error(s). The push was refused.", file=sys.stderr)
+    return 1 if errors else 0
+
+
+def push_tutorials(root, local, remote):
+    """Run the runnable blocks of every tutorial a push to main changes, in a fresh clone of the commit pushed.
+    A tutorial edit is a doc and goes straight to main, so this is the check that runs before it lands; CI runs
+    every tutorial after. Returns the number of tutorials that failed."""
+    commits = pushed_commits(root, local, remote)
+    pages = sorted({path for commit in commits for path in commit["paths"] if blocks.is_tutorial(path)})
+    failed = 0
+    for page in pages:
+        if _git_text(root, "cat-file", "-e", f"{local}:./{page}") is None:
+            continue                    # deleted by the push: nothing left to run
+        passed, output = blocks.run_tutorial(root, local, page)
+        if not passed:
+            failed += 1
+            print(f"{page}:1: error: [tutorials] its runnable blocks fail in a fresh clone of {local[:7]}. Fix the "
+                  f"steps or the code they run, then push again; run it with python3 -m unittest tests.test_tutorials. "
+                  f"See docs/layout.md#tutorials\n{output.rstrip()}", file=sys.stderr)
+    return failed
+
+
+def command_commits(root, args):
+    """CI: every check that reads a commit message, run over each commit of a range, BASE..HEAD: a pull request's
+    commits, or a push to main's. Each commit is judged with its own message, identities, paths and tree."""
+    base, _, head = args.commits.partition("..")
+    if not base or set(base) == {"0"} or not head:
+        print(f"warning: the range {args.commits!r} has no base commit, so no commit message was checked")
+        return 0
+    commits = list_commits(root, [f"{base}..{head}"])
+    if commits is None:
+        raise partlib.PartError(f"the commits in {args.commits} cannot be listed. Fetch the whole history "
+                                f"(fetch-depth: 0 in CI), then run it again.")
+    parts = [part for part in partlib.load_all(root)
+             if part.kind == "check" and getattr(part.module, "COMMIT_MESSAGE", False) is True]
+    errors = 0
+    for commit in reversed(commits):
+        message = commit["message"].encode("utf-8", "surrogateescape")
+        snapshot = snapshots.Message(root, message, commit=commit,
+                                     identities={"author": commit["author"], "committer": commit["committer"]})
+        lines = []
+        for part in parts:
+            for found in part.run(snapshot):
+                errors += found["level"] == "error"
+                lines.append(partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
+                                              f"python3 ws.py check --commits {args.commits}"))
+        if lines:
+            print(f"commit {commit['commit'][:7]} \"{commit['subject']}\":")
+            print("\n".join(f"  {line}" for line in lines))
+    print(f"{len(commits)} commit(s) checked")
+    if errors:
+        print(f"\n{errors} error(s). A commit already pushed keeps its message: on a branch, reword it with "
+              f"git commit --amend or git rebase and push again; on main, the next commit cannot undo it, so record why.")
     return 1 if errors else 0
 
 
@@ -233,6 +349,8 @@ def command_history(root, args):
 def command_check(root, args):
     if args.push is not None:
         return command_push(root, args)
+    if args.commits is not None:
+        return command_commits(root, args)
     if args.message is not None:
         return command_message(root, args)
     if args.history:
@@ -619,6 +737,8 @@ def main(argv=None):
                        help="CI: run the checks that read the history over every line every commit added")
     check.add_argument("--message", metavar="FILE", help="check a commit message file, and the commit's identities")
     check.add_argument("--push", metavar="REMOTE", help="the pre-push hook: check the refs git lists on standard input")
+    check.add_argument("--commits", metavar="BASE..HEAD",
+                       help="CI: run the commit-message checks over every commit in the range")
     check.add_argument("--phase", choices=partlib.PHASES, default="commit",
                        help="run only the checks for this phase (default: commit)")
     baseline = commands.add_parser("baseline", help="record the checks' current findings as tolerated")
