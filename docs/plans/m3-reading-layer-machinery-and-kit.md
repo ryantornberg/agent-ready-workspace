@@ -610,6 +610,20 @@ New success criterion:
 
 68. The plan budgets check fails a draft plan whose Key points block holds more than 200 words, and one with a table cell over 60 words. It passes a draft at exactly 200 and 60. It skips an approved, a done and an abandoned plan over both budgets. `docs/plans/decision-queue.md` passes it. Each has a case. (V1, V2)
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+Two items the previous entry left without a home, and one machinery decision. No criterion is dropped or weakened.
+
+**B4 gains a fifth product lane draft.** The narrowed check of a shelved predecessor system: only a major security issue is checked for the same fault in the predecessor, and the result is one origin line, marked verified or inferred, naming the commit checked. For any other bug, the ticket mentions the predecessor only when the filer already knows. It carries `lane: product` and, where it is a playbook or how-to, `proof: unproven` with `prove-by: M9`, as B4's row sets.
+
+**B5 covers lessons 41 to 48.** B5's row and criterion 24 say "the 40 lessons". The catalog now holds 48, and the eight new ones are handled the same way: each becomes the stated reason behind a rule or a part's `why`, or is recorded as retired. A reason that belongs on a hashed page is queued for slice Z, as B5's row says. Criterion 24 now reads:
+
+24. The private port ledger maps each of the 48 lessons to a public rule or `why`, or to "retired". (V5)
+
+**The slow-leg CI rule is not adopted.** It would let a merge go ahead while a slow third CI leg is still queued or running. The contract's requirement that CI passes on Linux, macOS and Windows stays. The rule is revisited only if this repository's CI shows the same wait. This settles that item of the previous entry's machinery comparison; the other three are still compared before C4 starts, and nothing is queued for slice Z.
+
 ## Results
 
 ### C1, launcher and baselines
