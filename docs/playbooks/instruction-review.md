@@ -1,0 +1,92 @@
+---
+kind: playbook
+proof: unproven
+prove-by: M4
+last-reviewed: 2026-11-21
+---
+
+# The instruction review
+
+How a change to a guidance page is reviewed as a program, recorded, and named in its commit. For the author of the change and the reviewer.
+
+**In short:** guidance has no compiler, so a fresh session at the driver tier reads each changed guidance page against six checks and writes a record of its findings. The author settles each finding, commits the record with the pages, and names it in an `Instructions-review:` trailer. The commit hook, the pre-push hook and CI refuse a guidance change that names no record and gives no listed reason to skip.
+
+## When it runs
+
+On every commit that adds, changes or deletes a guidance page. A guidance page is any path the `review_trailer` entry in [workspace.json](../../workspace.json) lists under `guidance` and not under `except`. Today that is `AGENTS.md`, `CLAUDE.md`, the Copilot and opencode pointer files, `INDEX.md`, the README, `evals/README.md`, and every page under `docs/` except plans, milestone records, records and the question log. The list also names `plugin/`, for the wrappers slice B6 of M3 adds there.
+
+Skip the review only for one of these reasons, named in the trailer:
+
+| Reason | When |
+|---|---|
+| `link or typo only` | The change fixes a link target or a spelling, and no sentence means something new. |
+| `front matter only` | The change touches front matter and nothing below it, such as a review date. |
+| `strike` | The maintainer struck the page: the commit removes it and its index rows, wrapper and table row. |
+
+Anything else needs a review. When in doubt, review. The check reads the reason, not the change, so a reason that does not apply passes it; using one is the author's word that it applies.
+
+## Steps
+
+1. **Finish the change first.** The review reads the pages as they will be committed.
+2. **Hand the review to a fresh session at the driver tier.** Its prompt starts `Tier: driver`, as [orchestration](../orchestration.md#handing-work-off) requires. Give it the changed pages, the diff, and the paths of the files loaded beside them: the contract, the index, and the pages they link to. Never give it your reasoning or what you expect it to find.
+3. **The reviewer runs the six checks** below on each page, verifies each finding before recording it, and writes one record per page, with `open` in every Disposition cell. It edits nothing else.
+4. **Settle every finding.** Verify it yourself. Fix the ones that are plainly right. For one that needs a decision, write your recommendation and ask the person who owns it. Write the outcome in the finding's Disposition cell, in one of the forms under "The record".
+5. **Index the record.** Add its row to [the index](../records/instruction-reviews/README.md): the record, the pages it covers, and the classes it found.
+6. **Commit the record with the pages,** staged by name, and name it in the message: `Instructions-review: docs/records/instruction-reviews/<record>.md`. Give one trailer line per record.
+7. **Stop** when every finding has a disposition and the commit check passes. If a fix changes a page again in substance, run the review again on that change.
+
+## The six checks
+
+Each finding gets exactly one class.
+
+| Class | The reviewer looks for |
+|---|---|
+| `contradiction` | Two statements that cannot both hold, on the page or against a file loaded beside it, or an exception that is not labelled as one. |
+| `step` | A step an agent cannot execute as written: a path or command that does not exist, an input that is not defined, a decision with no default, or no stop condition. |
+| `trigger` | Text that decides when guidance applies, such as a purpose line, an **In short** line, a wrapper's description or an index row, firing when it should not, or not firing when it should. |
+| `enforcement` | A must or never with no enforcement stated, or a stated enforcement that is false, such as a rules-table tag whose case does not show the rule. |
+| `placement` | Text on the wrong page, or text in the always-loaded layer that costs every session but belongs on a page loaded only when needed. |
+| `eval-case` | New behavior the page asks of an agent that no eval case covers, where the page is not marked unproven with a `prove-by` milestone. |
+
+## The record
+
+One file per page, in [docs/records/instruction-reviews/](../records/instruction-reviews/README.md). Name it for the date and the page, such as `2026-11-21-layout.md`, adding a word when that name is taken, such as `2026-11-21-b1-layout.md`. The `covers:` line, not the name, ties a record to its page. Its front matter is `kind: record`, `last-reviewed`, `covers:` with the path of the one page it reviewed, and `reviewed-at:`. That names the commit the reviewer read; for a change not yet committed, the commit it sits on, followed by `, with the uncommitted change of <whose>`.
+
+It opens with its title, `# Instruction review: <page>`, a purpose sentence, and an **In short** line with the count of findings per class. Then three sections:
+
+- `## Scope`: what the reviewer read, and which part of the page was in scope.
+- `## Findings`: a table with the header `| # | Class | Where | Finding | Disposition |`. "Where" names a heading or a table, never a line number. Each finding marks its evidence verified or inferred. With no findings, the table keeps its header and the line `No findings.` follows it.
+- `## Checked with no finding`: one line per class with no finding, saying what was checked.
+
+The reviewer writes `open` in each Disposition cell. The author replaces it with one of: `fixed`, `queued for <where>`, `deferred to <slice or milestone>`, or `declined`, each with its reason. A declined finding is not counted in the index.
+
+## Where it is checked
+
+The `review_trailer` check judges each commit by its own message, paths and files. A trailer must name a record that the same commit adds or changes and whose `covers:` line lists every guidance page the commit leaves in place, or give a listed reason. A deleted page needs a trailer, but no record covers it.
+
+| Where | What it judges |
+|---|---|
+| The commit-msg hook | The commit being made, against the staged files. A merge in progress is left to the next two. |
+| The pre-push hook | Every commit a push to main adds, with the check read from the remote's tip. A doc push lands on main before CI runs, so this is what stops one. |
+| CI, `python3 ws.py check --commits BASE..HEAD` | Every commit of a pull request, and of a push to main. On main it can only report a failing run after the push. |
+
+A commit is judged only once its own tree uses the check, so a branch started before the rule reached it is not judged for its older commits. A merge is judged by what it changes itself, not by what it brings in.
+
+The `review_index` check holds [the index](../records/instruction-reviews/README.md) to the records: every record has a row and covers one page, each row's page and classes match its record, and each page in its `required` list has a record.
+
+## Counting for a stop rule
+
+A plan may stop when the same class turns up in too many pages. Count from the index: for each class, the rows that list it, over the pages reviewed in the batch being counted. Each record covers one page, and the index counts a class once per record, however many findings of it the record holds.
+
+## Rules
+
+| Rule | Enforced by |
+|---|---|
+| A commit that adds, changes or deletes a guidance page names a review record, or a listed reason to skip. | `review_trailer#a guidance page changed with no trailer fails`, `review_trailer#a skip reason outside the listed set fails` |
+| The record a commit names exists in that commit, is added or changed by it, and covers every guidance page it leaves in place. | `review_trailer#a named record that does not exist fails`, `review_trailer#an old record the commit does not add or change fails`, `review_trailer#a record that does not cover a changed page fails` |
+| A push to main holding such a commit is refused before it lands. | `review_trailer#of several commits, only the one without a trailer is named` |
+| The index lists every record as it is, and each required page has one. | `review_index#a record with no row fails`, `review_index#a row whose classes differ from the record's findings fails`, `review_index#a required page with no record fails` |
+| A record covers exactly one page. | `review_index#a record that covers two pages fails` |
+| A skip reason is used only when it applies; the check reads the reason, not the change. | `prose` |
+| A fresh session at the driver tier runs the review, without the author's reasoning. | `prose` |
+| The author settles every finding before the commit. | `prose` |

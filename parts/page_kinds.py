@@ -17,8 +17,9 @@ The kinds, their front matter and the opening order are set out in docs/layout.m
 The opening, after the front matter: the title (the first line, "# "), then a purpose sentence of 25 words
 or fewer (a decision record may open with its In short line instead), then the **In short** line (every kind
 but a playbook and a record, which may leave it out), and on a plan, "## Key points" as the first section.
-The 25-word limit does not apply to an approved plan, an accepted decision record or a signed-off milestone
-record: template rule 6 freezes those, and they change only by a dated "Amended" paragraph.
+The 25-word limit does not apply to an approved or done plan, an accepted or superseded decision record or a
+signed-off milestone record: those are frozen. A plan changes by a dated entry under "Changes after approval"
+(template rule 6), a decision or milestone record by a dated "Amended" paragraph.
 
 A page in a kind's own folder (docs/playbooks, docs/decisions, docs/plans, docs/milestones, docs/templates,
 docs/tutorials, docs/records) must be of that kind; a README there is a reference page.

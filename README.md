@@ -52,8 +52,8 @@ git config core.hooksPath .githooks
 | [INDEX.md](INDEX.md) | Topics, and a table that maps everyday words to the names the code uses. |
 | [workspace.json](workspace.json) | The manifest: which parts this workspace runs, and their settings. |
 | `ws.py`, `wslib/` | The engine. `wslib/` holds all of its code: the runner and the small core the parts plug into. `ws.py` only starts it. |
-| [parts/](docs/parts.md) | Six checks and three hooks, each one file plus its cases. |
-| [docs/](docs/layout.md) | The pages: the [layout](docs/layout.md) of folders and page kinds, the definition of done, one playbook, the how-tos, the decision records, the question log, the glossary, the templates, and the plans and records of each milestone. |
+| [parts/](docs/parts.md) | The checks and hooks, each one file plus its cases. `python3 ws.py list` names them. |
+| [docs/](docs/layout.md) | The pages: the [layout](docs/layout.md) of folders and page kinds, the definition of done, the playbooks, the how-tos, the decision records, the question log, the glossary, the templates, and the plans and records of each milestone. |
 | [evals/](evals/README.md) | Three eval cases in a small sample order system, and 45 recorded runs per arm of a real model: with the workspace's guidance, with a two-line instruction instead, and with neither. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [EVIDENCE.md](EVIDENCE.md), [CHANGELOG.md](CHANGELOG.md) | What each claim rests on and how to re-run it; what changed in each version. |
@@ -73,7 +73,10 @@ git config core.hooksPath .githooks
 | Every playbook and how-to says whether it is proven. An unproven page names the milestone that is to prove it, and fails once that milestone is signed off; its `prove-by` moves later only with a failed attempt on record. A proven page names its evidence, and an anchor change or a demotion needs an approved change in the plan being built. | `proof` check; `direct_push` refuses an anchor change pushed straight to main | Commit, CI; before a push |
 | No file, commit message, author or committer holds a term from the maintainer's private deny list. | `deny_list` check | Commit, on a machine that has the list |
 | A commit adds no line that looks like a token or a private key, and the branch's history holds none that a reviewed baseline does not list. | `secret_scan` check; `ws.py check --history` | Commit, CI |
-| A commit's subject follows one of the formats the manifest accepts, conventional commits by default. See [commits](docs/commits.md). | `commit_subject` check | Commit message |
+| A commit's subject follows one of the formats the manifest accepts, conventional commits by default. See [commits](docs/commits.md). | `commit_subject` check | Commit message; CI, on every commit of a pull request and of a push to main |
+| A commit that adds, changes or deletes a guidance page names the instruction review that read it, in an `Instructions-review:` trailer, or a listed reason to skip. The record it names is in the commit and covers each page. See [the instruction review](docs/playbooks/instruction-review.md). | `review_trailer` check | Commit message; before a push to main; CI, on every commit of a pull request and of a push to main |
+| The index of review records matches the records, each record covers one page, and each page on the check's `required` list has one: the guidance M3's plan names from before the review existed. | `review_index` check | Commit, CI |
+| Every command block a tutorial marks runnable passes in a fresh clone. See [layout](docs/layout.md#tutorials). | `tests/test_tutorials.py`; the pre-push hook, for a tutorial a push to main changes | CI, on Linux, macOS and Windows; before a push to main |
 | A commit holds only files the agent session wrote. | `edit_ledger` check, against the paths the edit tools wrote | Commit, while an agent session has edits waiting |
 | Files are staged by name, never all at once. | `no_stage_all` hook, a reminder that never refuses | Before a shell command |
 | Machinery (scripts, hooks, CI) reaches main only through a pull request, where CI runs on three systems. | `direct_push` check; `no_admin_merge` hook | Before a push; before a shell command |
@@ -109,8 +112,9 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/parts.md](docs/parts.md) | unproven | M4 |
 | [docs/changing-the-machinery.md](docs/changing-the-machinery.md) | unproven | M4 |
 | [docs/browsers.md](docs/browsers.md) | unproven | M6 |
+| [docs/playbooks/instruction-review.md](docs/playbooks/instruction-review.md) | unproven | M4 |
 
-Proven: 1. Unproven: 5.
+Proven: 1. Unproven: 6.
 
 ## What stays prose
 

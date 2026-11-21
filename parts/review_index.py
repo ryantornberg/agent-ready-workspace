@@ -6,7 +6,7 @@ link to the record, the pages its `covers:` front matter lists (in backticks, co
 of its findings, or "none". A finding whose disposition starts with "declined" is not counted.
 
 It fails when a record has no row, a row names no record or a missing one, a row's pages or classes differ from
-its record, a record has no covers line, a finding's class is not one of the six, or a page in "required" has no
+its record, a record has no covers line or covers more than one page, a finding's class is not one of the six, or a page in "required" has no
 record. The stop rule counts classes from this index, so it must agree with the records.
 
 Config: "folder" (default docs/records/instruction-reviews), "index" (default <folder>/README.md), "required":
@@ -106,6 +106,10 @@ def run(snapshot, config):
                                             f"add it to its front matter; see {PAGE}"))
             continue
         covered |= pages
+        if len(pages) != 1:
+            found.append(finding(record, 1, f"the review record covers {len(pages)} pages; a record covers exactly one, "
+                                            f"so the stop rule can count per page. Split it, one record per page; "
+                                            f"see {PAGE}"))
         if _listed(cells[1]) != pages:
             found.append(finding(index, number, f"the row for {record} lists {sorted(_listed(cells[1]))}, but the "
                                                 f"record covers {sorted(pages)}; make them agree; see {PAGE}"))

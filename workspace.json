@@ -243,6 +243,7 @@
         "INDEX.md",
         "README.md",
         ".github/copilot-instructions.md",
+        "opencode.json",
         "docs/",
         "evals/README.md",
         "plugin/"

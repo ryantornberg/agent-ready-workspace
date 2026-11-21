@@ -170,5 +170,18 @@
       "required": []
     },
     "expect": []
+  },
+  {
+    "name": "a record that covers two pages fails",
+    "files": {
+      "docs/records/instruction-reviews/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-21\n---\n\n# Instruction reviews\n\n| Record | Covers | Classes found |\n|---|---|---|\n| [2026-11-21-a.md](2026-11-21-a.md) | `docs/a.md`, `docs/b.md` | none |\n",
+      "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, docs/b.md\n---\n\n# Instruction review\n\nWhat.\n\n## Findings\n\n| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\nNo findings.\n"
+    },
+    "config": {
+      "required": []
+    },
+    "expect": [
+      "the review record covers 2 pages; a record covers exactly one"
+    ]
   }
 ]

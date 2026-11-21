@@ -95,11 +95,11 @@ class RunTests(Fixture):
         self.assertFalse(passed)
         self.assertIn("must be followed by a fenced code block", output)
 
-    def test_a_tutorial_with_no_runnable_block_passes_and_says_so(self):
-        sha = self.commit("docs/tutorials/one.md", tutorial())
+    def test_a_tutorial_with_no_runnable_block_fails(self):
+        sha = self.commit("docs/tutorials/one.md", tutorial() + "\n```sh\necho an example\n```\n")
         passed, output = blocks.run_tutorial(self.root, sha, "docs/tutorials/one.md")
-        self.assertTrue(passed, output)
-        self.assertIn("nothing ran", output)
+        self.assertFalse(passed)
+        self.assertIn("no block is marked <!-- runnable -->", output)
 
 
 class PushTests(Fixture):

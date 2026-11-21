@@ -1,7 +1,7 @@
 ---
 kind: decision
 status: accepted
-last-reviewed: 2026-11-18
+last-reviewed: 2026-11-21
 ---
 
 # 0006: What proven means
@@ -39,6 +39,8 @@ From then on the `eval_record` check holds it there. Each new recording's guided
 **Cutting.** A page whose proof attempt shows the bare model doing as well is cut. Cutting a page that holds facts or a rules table removes its procedure steps only. Its facts and rules stay, as a reference page.
 
 **Plans name their milestone.** A plan carries `milestone: M<n>` in its front matter. Front matter is not a section that template rule 6 freezes, so an approved plan may gain it.
+
+Amended 2026-11-21, M3 slice B1, after its instruction review; no rule changes, and each sentence states what the `proof` check already reads. The `milestone` key is optional, and M1's and M2's plans have none; the anchor and demotion lines count only in a plan whose `milestone` is being built. A failed proof attempt is the record that `python3 evals/run.py <case> --baseline --attempt M<n>` writes to `evals/runs/<case>/baseline/record.json`, holding `page`, `milestone` and the verdict `not proven`. For a marked section, the `<page>` in an `Anchor:` or `Demote:` line is the page's path, then `#`, then the heading in lower case, with every character but letters, digits, underscores, hyphens and spaces dropped and each space turned into a hyphen, such as `docs/playbooks/fix-a-bug.md#the-gates`.
 
 ## What it gave up
 

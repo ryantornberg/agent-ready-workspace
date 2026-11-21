@@ -85,15 +85,21 @@ def is_tutorial(path):
     return path.startswith(TUTORIALS + "/") and path.endswith(".md") and path.rsplit("/", 1)[-1].lower() != "readme.md"
 
 
+GIT_TIMEOUT = 120   # seconds for the local clone and the checkout
+
+
 def _git(*args, cwd=None):
     env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
-    return subprocess.run(["git", *args], cwd=cwd, capture_output=True, env=env)
+    try:
+        return subprocess.run(["git", *args], cwd=cwd, capture_output=True, env=env, timeout=GIT_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(args, 1, b"", f"git {args[0]} ran past {GIT_TIMEOUT} seconds".encode())
 
 
 def run_tutorial(root, commit, page, timeout=TIMEOUT):
     """Clone root fresh at commit and run page's runnable blocks there. Returns (passed, output).
 
-    A tutorial with no runnable block passes with nothing run. A marker with no block is a failure."""
+    A tutorial with no runnable block fails, as a marker with no block does: a run must not pass by running nothing."""
     folder = pathlib.Path(tempfile.mkdtemp(prefix="ws-tutorial-"))
     clone = folder / "clone"
     try:
@@ -108,8 +114,6 @@ def run_tutorial(root, commit, page, timeout=TIMEOUT):
             return False, f"{page} is not in the commit {commit[:12]}"
         text = source.read_text(encoding="utf-8")
         try:
-            if not marked(text, RUNNABLE):
-                return True, f"{page}: no block is marked <!-- {RUNNABLE} -->, so nothing ran"
             body = script(page, text, RUNNABLE, prelude=(LAUNCHER,))
         except ValueError as error:
             return False, f"{page}: {error}"
