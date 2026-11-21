@@ -81,6 +81,19 @@ def script(page, text, name, prelude=()):
 LAUNCHER = 'python3() { bash "$WS_CLONE/wslib/launch.sh" "$@"; }'
 
 
+def bash():
+    """The bash that runs the blocks. On Windows, Git's own: the bash.exe found first on the path there may be the
+    launcher for the Windows Subsystem for Linux, which has no distribution on a CI machine. git.exe sits in
+    Git\\cmd or Git\\mingw64\\bin, and Git's bash.exe in Git\\bin, so it is found by walking up from git."""
+    if os.name != "nt":
+        return shutil.which("bash") or "bash"
+    git = shutil.which("git")
+    for folder in pathlib.Path(git).resolve().parents if git else ():
+        if (folder / "bin" / "bash.exe").is_file() and (folder / "usr" / "bin").is_dir():
+            return str(folder / "bin" / "bash.exe")
+    return "bash"
+
+
 def is_tutorial(path):
     return path.startswith(TUTORIALS + "/") and path.endswith(".md") and path.rsplit("/", 1)[-1].lower() != "readme.md"
 
@@ -122,7 +135,7 @@ def run_tutorial(root, commit, page, timeout=TIMEOUT):
         env = dict((key, value) for key, value in os.environ.items() if not key.startswith("GIT_"))
         env["WS_CLONE"] = clone.as_posix()
         try:
-            done = subprocess.run(["bash", (folder / "blocks.sh").as_posix()], cwd=clone, capture_output=True,
+            done = subprocess.run([bash(), (folder / "blocks.sh").as_posix()], cwd=clone, capture_output=True,
                                   env=env, timeout=timeout, stdin=subprocess.DEVNULL)
         except subprocess.TimeoutExpired:
             return False, f"{page}: its runnable blocks ran past {timeout} seconds"
