@@ -569,7 +569,8 @@ class Index(Snapshot):
         self._deleted = [path for path, letter in staged.items() if letter[:1] == "D"]
         # The last commit's copy of each changed file comes in the same batch read, for added_lines(): the doc
         # checks read a page's added lines, and the secret scan every file's.
-        self._previous = {path: f"HEAD:./{path}" for path in changed}
+        # A submodule's pin is not a file: its old copy is a commit, which the batch read cannot give as text.
+        self._previous = {path: f"HEAD:./{path}" for path in changed if path in self._oids}
         self._extra, self._objects, self._failed = ("HEAD",) + tuple(extra) + tuple(self._previous.values()), None, None
         folder = ledgers.git_dir(self.root)
         try:

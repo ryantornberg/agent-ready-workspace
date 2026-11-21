@@ -62,6 +62,9 @@ class CommitSubjectTests(Folder):
         super().setUp()
         self.workspace({"use": "commit_subject", "why": "test"})
         self.git("init", "-q", "-b", "main")
+        # The message check reads the commit's identities from git, which a CI machine has not set.
+        self.git("config", "user.name", "t")
+        self.git("config", "user.email", "t@example.invalid")
         self.git("add", ".")
 
     def message(self, text):
