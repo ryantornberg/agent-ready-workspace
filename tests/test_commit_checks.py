@@ -46,6 +46,51 @@ class SecretScanTests(Folder):
         self.assertRegex(out, r"[0-9a-f]{12}:config/app\.txt:1: adds what looks like a GitHub token")
         self.assertNotIn(TOKEN, out)
 
+    def leak_and_remove(self, branch=None):
+        self.write("config/app.txt", f"token = {TOKEN}\n")
+        self.git("add", "config/app.txt")
+        self.git("commit", "-q", "--no-verify", "-m", "chore: oops")
+        self.write("config/app.txt", "token = from the environment\n")
+        self.git("add", "config/app.txt")
+        self.git("commit", "-q", "--no-verify", "-m", "fix: take the token out")
+
+    def baseline_history(self):
+        code, out = self.ws("baseline", "--history")
+        self.assertEqual(code, 0, out)
+        self.git("add", "baselines/secret_scan.history.json")
+        self.git("commit", "-q", "--no-verify", "-m", "chore: tolerate the revoked token's old commit")
+
+    def test_a_revoked_token_in_the_history_is_tolerated_by_a_reviewed_baseline(self):
+        self.leak_and_remove()
+        self.git("branch", "base")
+        self.baseline_history()
+        text = (self.root / "baselines/secret_scan.history.json").read_text(encoding="utf-8")
+        self.assertNotIn(TOKEN, text)
+        code, out = self.ws("check", "--history", "--changed-from", "base")
+        self.assertEqual(code, 0, out)
+        self.assertIn("1 finding(s) tolerated", out)
+
+    def test_a_change_cannot_excuse_a_token_it_brings(self):
+        self.git("branch", "base")
+        self.leak_and_remove()
+        self.baseline_history()
+        code, out = self.ws("check", "--history", "--changed-from", "base")
+        self.assertEqual(code, 1, out)
+        self.assertIn("a GitHub token", out)
+
+    def test_with_no_base_a_baseline_tolerates_nothing(self):
+        self.leak_and_remove()
+        self.baseline_history()
+        code, out = self.ws("check", "--history")
+        self.assertEqual(code, 1, out)
+
+    def test_a_token_on_another_branch_does_not_fail_this_one(self):
+        self.git("switch", "-q", "-c", "elsewhere")
+        self.leak_and_remove()
+        self.git("switch", "-q", "main")
+        code, out = self.ws("check", "--history")
+        self.assertEqual(code, 0, out)
+
     def test_a_clean_history_passes(self):
         code, out = self.ws("check", "--history")
         self.assertEqual(code, 0, out)

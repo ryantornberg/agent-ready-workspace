@@ -692,6 +692,7 @@ Decisions made in C3a:
 - **Verified:** the discard guard's stash refusal now says to set work aside with a commit on the session's own branch, not a stash.
 - **Verified:** one fix round, on two failures in one CI run. The batch read asked for a submodule pin's old copy, which a newer git answers as `submodule`, not as text; pins are now left out. The message test needed a git identity, which a CI machine has not set.
 - **Verified:** CI passed on all five check jobs and both cold-clone jobs on the merged head commit.
+- **Fix after merge:** a side review found that one token in a merged commit, real or a look-alike, would fail the history step on every later pull request, with no way to accept it: history is never rewritten here, and the step took no baseline. Now `check --history` reads the branch's history, not every branch, and tolerates the entries in `baselines/secret_scan.history.json`, written by `ws.py baseline --history`, only when the base branch's history already has the finding. verified: four tests in `SecretScanTests` failed before the change and pass after: a revoked token's old commit is tolerated by a baseline against a base that has it; a token and its entry brought in one change still fail; with no base, nothing is tolerated; a token on another branch does not fail this one.
 
 **Criteria, all four slices.**
 

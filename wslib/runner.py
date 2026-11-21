@@ -188,8 +188,9 @@ def command_push(root, args):
     return 1 if errors else 0
 
 
-def command_history(root):
-    """CI: the parts that set HISTORY, run over every line every commit in the history added."""
+def command_history(root, args):
+    """CI: the parts that set HISTORY, run over every line every commit in HEAD's history added. A finding listed in
+    baselines/<check>.history.json is tolerated when the base's history has it too (wslib/baseline.py)."""
     manifest = partlib.load_manifest(root)
     parts = [part for part in partlib.load_all(root, manifest)
              if part.kind == "check" and getattr(part.module, "HISTORY", False) is True]
@@ -200,11 +201,29 @@ def command_history(root):
         snapshot = snapshots.history(root)
     except RuntimeError as error:
         raise partlib.PartError(f"the history cannot be read: {error}")
+    folder = snapshots.Tree(root)
+    base = None
+    if args.changed_from and set(args.changed_from) != {"0"}:
+        try:
+            base = snapshots._git(root, "merge-base", args.changed_from, "HEAD").decode().strip() or None
+        except RuntimeError:
+            base = None
+    rerun = "python3 ws.py check --history" + (f" --changed-from {args.changed_from}" if args.changed_from else "")
     errors = 0
     for part in parts:
-        for found in part.run(snapshot):
+        def at_base(part=part):
+            if base is None:
+                return None
+            try:
+                return part.run(snapshots.history(root, base))
+            except (RuntimeError, partlib.PartError):
+                return None            # fail closed: a history that cannot be read tolerates nothing
+        kept, count, notes = baselines.apply(folder, part.name, part.run(snapshot), at_base, history=True)
+        for found in kept + notes:
             errors += found["level"] == "error"
-            print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None), "python3 ws.py check --history"))
+            print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None), rerun))
+        if count:
+            print(f"{count} finding(s) tolerated by {baselines.path_of(part.name, history=True)}")
     print(f"{len(snapshot.changed)} file versions read from the history")
     if errors:
         print(f"\n{errors} error(s). A secret in the history stays there: revoke it with its issuer first.")
@@ -217,7 +236,7 @@ def command_check(root, args):
     if args.message is not None:
         return command_message(root, args)
     if args.history:
-        return command_history(root)
+        return command_history(root, args)
     if args.staged:
         # The commit decides: its manifest, its parts and their cases, not the files on disk.
         # The last commit's manifest comes in the same batch read as the staged files: three git processes for the files.
@@ -304,8 +323,22 @@ def command_check(root, args):
 
 def command_baseline(root, args):
     """Write baselines/<check>.json for each check of the phase that finds errors in the folder now, and rewrite any
-    that exists. A check with no findings and no file gets none."""
+    that exists. A check with no findings and no file gets none. With --history, write baselines/<check>.history.json
+    for each check that reads the history, from HEAD's history."""
     manifest = partlib.load_manifest(root)
+    if args.history:
+        snapshot = snapshots.history(root)
+        for part in partlib.load_all(root, manifest):
+            if part.kind != "check" or getattr(part.module, "HISTORY", False) is not True:
+                continue
+            body = baselines.record(part.name, part.run(snapshot))
+            path = root / baselines.path_of(part.name, history=True)
+            if not body["tolerated"] and not path.exists():
+                continue
+            path.parent.mkdir(exist_ok=True)
+            path.write_text(json.dumps(body, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            print(f"{baselines.path_of(part.name, history=True)}: {len(body['tolerated'])} finding(s) tolerated")
+        return 0
     snapshot = snapshots.Tree(root)
     for part in partlib.load_all(root, manifest):
         if part.kind != "check" or args.phase not in part.phases:
@@ -590,6 +623,8 @@ def main(argv=None):
                        help="run only the checks for this phase (default: commit)")
     baseline = commands.add_parser("baseline", help="record the checks' current findings as tolerated")
     baseline.add_argument("--phase", choices=partlib.PHASES, default="commit")
+    baseline.add_argument("--history", action="store_true",
+                          help="tolerate the findings now in HEAD's history, for the checks that read it")
     hook = commands.add_parser("hook")
     hook.add_argument("event")
     hook.add_argument("--tool", help="read this agent tool's own payload through its adapter, such as claude-code")

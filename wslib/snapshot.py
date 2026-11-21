@@ -667,11 +667,11 @@ class Message(Snapshot):
         return self._files[path]
 
 
-def history(root):
-    """Every line every commit in the history added, as a Memory snapshot: each changed path is
+def history(root, ref="HEAD"):
+    """Every line every commit in ref's history added, as a Memory snapshot: each changed path is
     "<commit>:<path>", and its added lines are the lines that commit added to that file. One git process.
     A binary file adds no lines. Used by `ws.py check --history` for the parts that set HISTORY."""
-    output = _git(root, "-c", "core.quotePath=false", "log", "--all", "-p", "-U0", "--no-color", "--no-ext-diff",
+    output = _git(root, "-c", "core.quotePath=false", "log", ref, "-p", "-U0", "--no-color", "--no-ext-diff",
                   "--no-renames", "--format=%x00commit %H")
     added, commit, path, number = {}, None, None, 0
     for raw in output.decode("utf-8", "surrogateescape").split("\n"):
