@@ -868,7 +868,7 @@ Proposed revisions (template rule 7):
 
 ### B2, core procedures: stopped after batch 1
 
-Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
+Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33, merged as `5100315` after CI passed on Linux, macOS and Windows. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
 
 - **Verified, batch 1:** [test first](../playbooks/test-first.md), [debugging](../playbooks/debugging.md) and [the throwaway prototype](../playbooks/throwaway-prototype.md) as playbooks; [safe refactor](../safe-refactor.md), with the tokenize-then-swap pattern, and [the research ladder](../research-ladder.md) as how-tos; delegation merged into [orchestration](../orchestration.md#delegating) as its own section, with its own proof line. All are `proof: unproven`, `prove-by: M4`, as the table above sets them. The README's table lists each, and the `proof` check passes.
 - **Verified, the review:** 18 findings in 7 records, one per page and one for the README's new rows. 13 were fixed. 5 are queued for slice Z: each is a page with no `INDEX.md` row, which the eval hashes.
