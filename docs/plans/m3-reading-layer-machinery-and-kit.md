@@ -630,6 +630,20 @@ Approved by: the maintainer, 2026-11-21
 
 **C4's merge helper works from a throwaway worktree.** `ws.py merge` makes a throwaway worktree of the remote's main, merges the pull request's branch there, and pushes from it. So the lease on the main working copy does not matter, and the calling working copy is left untouched. Afterwards it deletes the branch and removes the worktree. This settles the merge-script item of the second change of 2026-11-21. No criterion is dropped or weakened.
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+Three items for slice B2, from the maintainer's answers to the workspace queue and to B1's proposed revisions. No criterion is dropped or weakened.
+
+**B2's rewrite brief gains a contradiction pass.** B1's first review found contradictions in 5 of the 8 pages sub-batch A wrote. So before a new page goes to its instruction review, its builder reads every page it links to and removes each statement that cannot hold beside one of them. A contradiction that only a hashed page can settle is queued for slice Z.
+
+**B2's tutorials run in Git's bash on Windows.** Criterion 20 asks for three systems, so a tutorial's runnable block uses only `python3` through the clone's launcher, git, and the tools Git for Windows ships.
+
+**Criterion 62 gains the Copilot pointer file.** Sub-batch A added `.github/copilot-instructions.md` and it has no review record. B2 gives it one, adds it to the review index's required list, and updates the test that holds that list. Criterion 62 now reads:
+
+62. Each page sub-batch A wrote has an instruction-review record: the contract and index edits, the layout page, the glossary, decision record 0006 and the rules tables from B1's first run, and the Copilot pointer file from B2. The review-record index lists each, and its check fails on a missing one. (V2)
+
 ## Results
 
 ### C1, launcher and baselines
