@@ -577,6 +577,39 @@ C3a goes first, since its amendment opens the slice. C3b, C3c and C3d each start
 
 Proposed revision of criterion 34 (template rule 7). `no_stage_all`'s refusal names no page, and `parts/no_stage_all.py` is a file the eval hashes. C3d's test exempts that one message by name. Slice Z adds the page to it and removes the exemption, and the edit joins the list queued for slice Z.
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+The private port catalog gained a part on what changed in the source between 2026-11-14 and 2026-11-20: fifteen items and eight lessons. The maintainer settled where the items go. This entry records that. No approved section is edited, and no criterion is dropped or weakened.
+
+**B3, the bug ticket standard.** B3 builds it in two layers, from the catalog's new description, in place of the nine-heading shape the catalog first described. The top layer is plain language for a product manager, a tester or a triage meeting: a short summary, then four fixed headings. The lower layer sits in one collapsed section for developers. The catalog's changed rules for the title, impact, acceptance criteria and out-of-scope headings come with it. The worked example is an invented ticket on the order system, since this repository has no tracker.
+
+**B3, a reader standard.** B3 gains one more page. Every page kind a person reads names its reader, opens with a top layer under a word budget, uses fixed headings in a fixed order, and gives one worked example. The bug ticket standard is its first instance. It binds pages written from B3 on; retrofitting pages already here is not part of this change.
+
+**B3, budgets for plans.** A Key points block holds at most 200 words. A table cell holds at most 60 words. Slice detail that does not fit a cell goes under a heading per slice, below the table. A new check enforces both budgets, built in B3 at the driver tier, as `claim_marks` is. It reads only plans with `status: draft`. Approved, done and abandoned plans keep their sections frozen, as template rule 6 says, and the check skips them. A word is a run of characters between spaces. `docs/plans/decision-queue.md` is a draft, so it must meet the budgets: the pull request that adds the check trims it, because `check` must pass on that commit.
+
+**B3, decisions made without asking.** The plan standard and the pull request standard each gain a section with that name. It lists each choice the author made on their own, so a reviewer can see and challenge it. The plan standard is `hand-off-plan.md`, which B3 already merges into; the eval does not hash it (verified: none of the three eval cases covers it), so B3 edits it directly and nothing is queued for slice Z.
+
+**B2 gains two procedures, both unproven.**
+
+| Page | `prove-by` | Why that milestone |
+|---|---|---|
+| Search every source before writing: the workspace first, then one read-only helper per outside source, then a merged report | M8 | Its outside sources need the providers M8 connects. |
+| The big-picture pass of architecture review: restate the problem, test its framing, try removals, name at most one simpler alternative | M6 | A section of the architecture-invariant review page, with its own proof line, at that page's milestone. |
+
+The search procedure gets a B6 wrapper with the four selection cases the catalog names: two that must fire and two that must stay quiet.
+
+**B4 gains four product lane drafts.** Triage labels on a bug, the triage meeting run from those labels, the changed grooming of a bug, and the changed rules for pages written for a product reader. Each carries `lane: product` and, where it is a playbook or how-to, `proof: unproven` with `prove-by: M9`, as B4's row sets.
+
+**M4's, not this plan's.** The review orchestrator's proof that the architecture pass ran, and the change to who may accept a declined review finding. Both change M4's review machinery. Nothing in M3 builds them.
+
+**Machinery, checked before anything is built.** Four items: a merge script that works from a throwaway worktree; one script that states when a branch's CI counts as passed, with a slow third leg that does not hold a merge; a session-start notice when main's CI is red; and three small changes to eval reruns, suite selection and the link check. Before C4 starts, a driver-tier session compares each with what this repository already has, and records the result under "Results". Anything it would add needs its own dated entry here first. One conflict is already visible (inferred, from the text alone): the slow-leg rule lets a merge proceed before the third system passes, while `AGENTS.md` requires CI to pass on all three. Changing that would edit a file the eval hashes, so it would also be queued for slice Z.
+
+New success criterion:
+
+68. The plan budgets check fails a draft plan whose Key points block holds more than 200 words, and one with a table cell over 60 words. It passes a draft at exactly 200 and 60. It skips an approved, a done and an abandoned plan over both budgets. `docs/plans/decision-queue.md` passes it. Each has a case. (V1, V2)
+
 ## Results
 
 ### C1, launcher and baselines
