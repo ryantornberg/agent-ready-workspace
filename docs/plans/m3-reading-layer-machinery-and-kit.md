@@ -645,6 +645,24 @@ Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `-
 - The README promised the commit check starts three git processes. The history the proof and eval checks read adds at most three more, one batch of older files for each check and one ancestry test per anchor commit, whatever the number of files. The README, `docs/parts.md` and the test now say so.
 - A plain `check`, with no base, warns that the guided arm was not compared with its past, as A0's row says it should. The warning shows on every plain `check` of a workspace with a proven playbook.
 
+### B0, the port ledger
+
+Built at the worker tier, 2026-11-21, from the private port catalog only; no file of the work workspace was opened. The ledger, its check and the walled-reader brief sit beside the catalog in the maintainer's private repository, not here. This entry and the milestone row are the only changes to this repository. No file the eval hashes was touched.
+
+- **Verified, criteria 16, 24 and 63:** the ledger's check derives 200 items from the catalog and this plan, and prints 0 unmapped. They are 79 procedures and 17 pieces of machinery the batch table gives M3, 18 workspace decisions, 40 lessons, 11 disagreements (the catalog's ten and the eleventh B5 names), 3 ideas kept from left-out items, 24 items the red team found missing (round 1 rows 17 and 18, R2-26, R3-17 and R4-7), and 8 entries too thin to build from (row 20). The check reads the catalog's own tables for the list, so an item added there shows up unmapped.
+- **Verified:** a target is a file that exists here (the check confirms it), a slice of this plan, a milestone from M4 to M12, a reason of four words or more, or a dated "struck by the maintainer". By main target: 32 items map to pages that exist now, 145 to a slice, 20 to a later milestone, and 3 to a reason. The check's self-test shows it fails on a blank target, a deleted row, a missing page, an unknown slice, a one-word reason and a duplicate row, and counts a struck row as mapped.
+- **Inferred:** criterion 24 is met in the ledger now, and in public only once B5 writes the reasons. Of the 40 lessons, 29 name the rule or part `why` B5 is to write, 9 wait for M4's or M5's machinery, and 2 are retired with a reason.
+- **Ordered, not run:** the walled-reader pass for the 8 thin entries: the fix brief's sections, the test-matrix axes, the handoff note's sections, the unit-doc headings per kind, the layout's fixed headings, the security-review surfaces, and two one-line entries. The maintainer starts that session. B2 waits for it, as row 20 requires.
+
+Decisions made in the slice:
+
+- **The two one-line entries.** Row 20 does not name them. B0 chose the standup log and the definition of done's list of obligations: the shortest M3 entries whose structure a builder can find nowhere else in the catalog.
+- **"The layout's fixed headings" is ambiguous.** Two catalog entries could be meant, so the brief asks the reader to name the page before describing it, rather than guess.
+- **Two items inside the batch table's M3 range were built in M1:** the hand-off plan specification and the tier policy. They map to their existing pages.
+- **Disagreements are mapped, not settled.** Each goes to B5's record; the ledger notes only which pages a choice will touch.
+
+**Proposed revision (template rule 7):** the B0 row and V5 say the ledger sits "outside every repository". The catalog it sits beside is in the maintainer's private repository, so the ledger is too, as the maintainer directed. The wording should read "outside every public repository".
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
