@@ -235,6 +235,40 @@
       ]
     },
     {
+      "use": "review_trailer",
+      "why": "Guidance is a program with no compiler: an edit can contradict another page or ask for a step nobody can run, so each change to a guidance page names the review that read it.",
+      "guidance": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "INDEX.md",
+        "README.md",
+        ".github/copilot-instructions.md",
+        "docs/",
+        "evals/README.md",
+        "plugin/"
+      ],
+      "except": [
+        "docs/plans/",
+        "docs/milestones/",
+        "docs/records/",
+        "docs/question-log.md"
+      ]
+    },
+    {
+      "use": "review_index",
+      "why": "The stop rule counts defect classes from the review records, so the index must list every record as it is, and the pages written before the review existed must each have one.",
+      "required": [
+        "AGENTS.md",
+        "INDEX.md",
+        "docs/layout.md",
+        "docs/glossary.md",
+        "docs/decisions/0006-what-proven-means.md",
+        "docs/changing-the-machinery.md",
+        "docs/definition-of-done.md",
+        "docs/orchestration.md"
+      ]
+    },
+    {
       "use": "proof",
       "why": "A page marked proven must hold its evidence, an unproven one must name the milestone that will prove it, and neither mark may move quietly: a proven page marked unproven leaves the eval gate."
     }
