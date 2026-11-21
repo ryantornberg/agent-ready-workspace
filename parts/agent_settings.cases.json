@@ -1,0 +1,333 @@
+[
+  {
+    "name": "both tools deny the secrets and allow the domains",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": []
+  },
+  {
+    "name": "a missing Claude Code deny entry fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [ \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "Claude Code may read .env"
+    ]
+  },
+  {
+    "name": "a missing Claude Code home deny entry fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "Claude Code may read ~/.ssh/**"
+    ]
+  },
+  {
+    "name": "a missing Claude Code web fetch domain fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:example.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "not allowed git-scm.com"
+    ]
+  },
+  {
+    "name": "unreadable Claude Code settings fail",
+    "files": {
+      ".claude/settings.json": "{not json",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "not readable JSON"
+    ]
+  },
+  {
+    "name": "a missing Codex deny entry fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "Codex CLI may read **/*.pem"
+    ]
+  },
+  {
+    "name": "a Codex entry that allows reading fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"read\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "Codex CLI may read .env"
+    ]
+  },
+  {
+    "name": "a Codex profile that is not the default fails when it must be",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "default_permissions does not name"
+    ]
+  },
+  {
+    "name": "a Codex profile that need not be the default passes without it",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": false
+    },
+    "expect": []
+  },
+  {
+    "name": "a missing Codex profile fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "default_permissions does not name",
+      "no permissions profile",
+      "Codex CLI may read .env",
+      "Codex CLI may read **/*.pem"
+    ]
+  },
+  {
+    "name": "a missing Codex web search domain fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "web search is not allowed git-scm.com"
+    ]
+  },
+  {
+    "name": "a missing Codex config fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [
+        ".env",
+        "**/*.pem"
+      ],
+      "home": [
+        "~/.ssh/**"
+      ],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "is missing"
+    ]
+  },
+  {
+    "name": "no secrets configured fails",
+    "files": {
+      ".claude/settings.json": "{\"permissions\": {\"allow\": [\"WebFetch(domain:docs.python.org)\", \"WebFetch(domain:git-scm.com)\"], \"deny\": [\"Read(./.env)\", \"Read(./**/*.pem)\", \"Read(~/.ssh/**)\"]}}",
+      ".codex/config.toml": "default_permissions = \"agent-ready\"\n\n[permissions.agent-ready]\nextends = \":workspace\"\n\n[permissions.agent-ready.filesystem.\":workspace_roots\"]\n\".env\" = \"none\"\n\"**/*.pem\" = \"none\"   # keys\n\n[tools.web_search]\nallowed_domains = [\"docs.python.org\", \"git-scm.com\"]\n"
+    },
+    "changed": [],
+    "config": {
+      "secrets": [],
+      "home": [],
+      "domains": [
+        "docs.python.org",
+        "git-scm.com"
+      ],
+      "profile": "agent-ready",
+      "codex_default": true
+    },
+    "expect": [
+      "lists no secrets patterns"
+    ]
+  }
+]

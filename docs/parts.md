@@ -301,6 +301,7 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `edit_ledger` | check | While the edit ledger is open, a commit stages a path that no edit tool of the agent session wrote. |
 | `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |
 | `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
+| `agent_settings` | check | Claude Code's settings lack a deny entry for a secrets pattern or an allow entry for a documentation domain, or Codex CLI's config lacks the profile, one of its denies, or a web search domain. See [agent settings](agent-settings.md). |
 | `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
 | `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `page_kinds` run on the session's working copy. |
 | `stale_pins` | hook, session-start, reminds | Names each pinned repository whose checkout is behind its upstream's default branch. |
