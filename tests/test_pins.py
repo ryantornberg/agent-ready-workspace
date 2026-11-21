@@ -8,7 +8,6 @@ Run: python3 -m unittest tests.test_pins -b
 """
 import os
 import pathlib
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -85,7 +84,7 @@ class InitializerTests(unittest.TestCase):
 
     def test_a_fresh_clone_gets_the_reachable_pins_and_keeps_the_rest_as_they_were(self):
         fresh = self.workspace(["reachable", "gone", "present"])
-        shutil.rmtree(self.tmp / "gone")
+        (self.tmp / "gone").rename(self.tmp / "moved-away")   # git makes its objects read-only, which Windows will not delete
         git(fresh, "submodule", "update", "--init", "-q", "--", "src/present")
         present = fresh / "src/present"
         (present / "code.txt").write_text("local work, not committed", encoding="utf-8")
@@ -135,7 +134,7 @@ class InitializerTests(unittest.TestCase):
 
     def test_the_command_prints_each_pin_and_fails_only_when_a_checkout_fails(self):
         fresh = self.workspace(["reachable", "gone"])
-        shutil.rmtree(self.tmp / "gone")
+        (self.tmp / "gone").rename(self.tmp / "moved-away")   # git makes its objects read-only, which Windows will not delete
         done = subprocess.run([sys.executable, str(ROOT / "ws.py"), "--root", str(fresh), "pins"],
                               capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
         self.assertEqual(done.returncode, 0, done.stderr)
