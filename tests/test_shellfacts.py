@@ -55,24 +55,24 @@ class KindTests(Repositories):
         self.assertEqual(self.kind("git reset --hard", self.other, ".")[0], "other")
 
     def test_dash_c(self):
-        self.assertEqual(self.kind(f"git -C {self.main} reset --hard", self.linked, str(self.main))[0], "main")
+        self.assertEqual(self.kind(f"git -C {self.main.as_posix()} reset --hard", self.linked, self.main.as_posix())[0], "main")
         self.assertEqual(self.kind("git -C ../linked stash drop", self.main, "../linked")[0], "linked")
 
     def test_git_dir_option_and_variable(self):
-        target = f"{self.main}/.git"
+        target = f"{self.main.as_posix()}/.git"
         self.assertEqual(self.kind(f"git --git-dir={target} reset --hard", self.linked, target)[0], "main")
         self.assertEqual(self.kind(f"GIT_DIR={target} git clean -fdx", self.linked, target)[0], "main")
-        linked_dir = f"{self.main}/.git/worktrees/linked"
+        linked_dir = f"{self.main.as_posix()}/.git/worktrees/linked"
         self.assertEqual(self.kind(f"GIT_DIR={linked_dir} git status", self.main, linked_dir)[0], "linked")
 
     def test_work_tree_option_and_variable(self):
-        self.assertEqual(self.kind(f"git --work-tree={self.main} reset --hard", self.linked, str(self.main))[0], "main")
-        self.assertEqual(self.kind(f"GIT_WORK_TREE={self.main} git reset --hard", self.linked, str(self.main))[0], "main")
+        self.assertEqual(self.kind(f"git --work-tree={self.main.as_posix()} reset --hard", self.linked, self.main.as_posix())[0], "main")
+        self.assertEqual(self.kind(f"GIT_WORK_TREE={self.main.as_posix()} git reset --hard", self.linked, self.main.as_posix())[0], "main")
 
     def test_a_leading_cd_and_pushd(self):
-        self.assertEqual(self.kind(f"cd {self.main} && git reset --hard", self.linked, str(self.main))[0], "main")
-        self.assertEqual(self.kind(f"cd {self.main}; git reset --hard", self.linked, str(self.main))[0], "main")
-        self.assertEqual(self.kind(f"pushd {self.main} && git reset --hard", self.linked, str(self.main))[0], "main")
+        self.assertEqual(self.kind(f"cd {self.main.as_posix()} && git reset --hard", self.linked, self.main.as_posix())[0], "main")
+        self.assertEqual(self.kind(f"cd {self.main.as_posix()}; git reset --hard", self.linked, self.main.as_posix())[0], "main")
+        self.assertEqual(self.kind(f"pushd {self.main.as_posix()} && git reset --hard", self.linked, self.main.as_posix())[0], "main")
 
     def test_a_worktree_remove_operand_is_keyed(self):
         facts = self.facts("git worktree remove --force ../linked", self.main)
@@ -101,9 +101,9 @@ class UnresolvedTests(Repositories):
     """Criterion 58: these leave the folder unresolved, so no fact is given and the guard refuses."""
 
     def test_each_form_leaves_no_fact(self):
-        for command in [f"echo hi; cd {self.main}; git reset --hard", f"(cd {self.main} && git reset --hard)",
-                        f"git -c core.worktree={self.main} reset --hard", "GIT_INDEX_FILE=/tmp/i git reset --hard",
-                        f"GIT_COMMON_DIR={self.main}/.git git reset --hard", 'cd "$D" && git reset --hard']:
+        for command in [f"echo hi; cd {self.main.as_posix()}; git reset --hard", f"(cd {self.main.as_posix()} && git reset --hard)",
+                        f"git -c core.worktree={self.main.as_posix()} reset --hard", "GIT_INDEX_FILE=/tmp/i git reset --hard",
+                        f"GIT_COMMON_DIR={self.main.as_posix()}/.git git reset --hard", 'cd "$D" && git reset --hard']:
             with self.subTest(command):
                 self.assertEqual(self.facts(command, self.linked), {}, command)
 

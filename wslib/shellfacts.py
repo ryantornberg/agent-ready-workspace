@@ -85,6 +85,7 @@ def working_copies(root, command, cwd):
     for key, folder, is_git_dir, operand in keys(command):
         if key in facts:
             continue
+        folder = os.path.expanduser(folder) if folder.startswith("~") else folder
         if not posixpath.isabs(folder) and not os.path.isabs(folder) and not cwd:
             facts[key] = {"unresolved": "the tool did not say which folder the session runs in"}
             continue
