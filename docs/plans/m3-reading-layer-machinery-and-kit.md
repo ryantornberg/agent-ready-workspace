@@ -558,6 +558,25 @@ Approved by: the maintainer, 2026-11-18
 
 A demotion needs an approved change too. A side review during slice A0 found that, under A3 as written, one edit from `proof: proven` to `proof: unproven` takes a page out of the eval gate, and no check refuses it. Criterion 14 gains: a proven page or section marked unproven again, or stripped of its mark, fails unless an approved entry here carries a line `Demote: <page>`, the same form as the anchor rule. The maintainer agreed the same day. Decision record 0006 states the rule, and the `proof` check enforces it with a case.
 
+### 2026-11-21
+
+Approved by: pending, proposed by slice C3
+
+Slice C3 is too large for one reviewable pull request. It holds seven separate pieces of machinery: the shell facts, the target resolver, the agent tools' settings and their check, the worktree settings copy, the discard guard, the secret scan with its CI job, and the commit-subject check, plus a message rule across every part. Slices C1, C2 and C7 each merged as one pull request of 616 to 818 added lines. Several of C3's pieces are each that size, so one pull request would run to about 3,000 lines (inferred, an estimate from the row's parts). Slice C3 stopped after its decision record 0004 amendment, which stays its opening step.
+
+The change splits C3 into four slices, each its own branch and pull request at the driver tier. Nothing in the row or its criteria is dropped or weakened.
+
+| Slice | Work, from C3's row | Done when |
+|---|---|---|
+| C3a, shell facts and the discard guard | The 0004 amendment. The runner adds `session`, `lease` and `calls` to a before-shell event, with each git call's working copy. The discard guard as a new part, and the 0005 amendment on worktree sessions. | Criterion 31; criterion 64's third sentence; criterion 58 except the target repository |
+| C3b, the target resolver | Each gh call's and push's target, from every source the row names, with `pushurl`, `insteadOf`, `pushInsteadOf`, `push.default` and the upstream modelled. No guard reads it until C4 and C5. | Criterion 58's target repository, from each source |
+| C3c, settings | Allow and deny lists for both agent tools, the check that fails on a missing deny entry, the `post-checkout` copy of the local settings file, and both `.gitignore` entries. | Criterion 29; criterion 64's first two sentences |
+| C3d, the commit | The secret scan, at the commit and over the whole history in CI. The commit-subject check, reading the manifest's formats. Every finding names its file, the rule's page and a fix or re-run command. | Criteria 32, 33, 34 |
+
+C3a goes first, since its amendment opens the slice. C3b, C3c and C3d each start from main once C3a merges, and may run in parallel. C4 needs C3a. C5 needs C3a and C3b.
+
+Proposed revision of criterion 34 (template rule 7). `no_stage_all`'s refusal names no page, and `parts/no_stage_all.py` is a file the eval hashes. C3d's test exempts that one message by name. Slice Z adds the page to it and removes the exemption, and the edit joins the list queued for slice Z.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -624,6 +643,14 @@ Decisions made in the slice:
 - **Setup pages are `README.md` only for now**, listed once as `SETUP_PAGES`. C8's kit adds its own pages to that list.
 - **An exemption that tolerates nothing fails.** The plan asked only that a bad exemption fail. Without this, a fixed link would leave its exemption behind, silently widening the check later.
 - **`ws.py pins` exits 0 when it skips an unreachable remote**, and 1 only when a remote answered and the checkout then failed. A person without access to one repository can still set up the rest.
+
+### C3, settings, guards and the commit
+
+Stopped after its opening step, on branch `m3/c3` from main at `598d756`, at the driver tier. It touches no file the eval hashes.
+
+- **Verified:** decision record 0004 is amended. A before-shell hook may declare `NEEDS`: the session, the lease as it stands, and the parsed calls, each git call with its working copy and each gh call and push with its target. The record also names the `post-checkout` hook that copies the local settings file into a new worktree. A probe in a throwaway repository showed `post-checkout` runs on `git worktree add` with an all-zero previous head, which is how the hook tells that checkout apart.
+- **Inferred:** gh keeps its set-default value under the remote's `gh-resolved` git config key. `gh repo set-default` refused a probe repository it could not reach, so this rests on gh's known behaviour. C3b's cases settle it.
+- **Not done:** criteria 29, 31 to 34, 58 and 64. The slice is too large for one reviewable pull request. The proposed split is under "Changes after approval", 2026-11-21, waiting for the maintainer's yes.
 
 ### Sub-batch A, 2026-11-18
 
