@@ -1,0 +1,2217 @@
+[
+  {
+    "name": "in the main copy, while another live session holds the lease, a hard reset is refused",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a hard reset passes",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, reset --keep is refused",
+    "event": {
+      "command": "git reset --keep HEAD~1",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, reset --keep passes",
+    "event": {
+      "command": "git reset --keep HEAD~1",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, reset --merge is refused",
+    "event": {
+      "command": "git reset --merge",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, reset --merge passes",
+    "event": {
+      "command": "git reset --merge",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a whole-tree checkout is refused",
+    "event": {
+      "command": "git checkout -- .",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a whole-tree checkout passes",
+    "event": {
+      "command": "git checkout -- .",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a whole-tree checkout with no -- is refused",
+    "event": {
+      "command": "git checkout .",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a whole-tree checkout with no -- passes",
+    "event": {
+      "command": "git checkout .",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a whole-tree checkout from the top is refused",
+    "event": {
+      "command": "git checkout HEAD -- :/",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a whole-tree checkout from the top passes",
+    "event": {
+      "command": "git checkout HEAD -- :/",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a whole-tree restore is refused",
+    "event": {
+      "command": "git restore .",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a whole-tree restore passes",
+    "event": {
+      "command": "git restore .",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a whole-tree restore from a subfolder is refused",
+    "event": {
+      "command": "git restore -- ../..",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a whole-tree restore from a subfolder passes",
+    "event": {
+      "command": "git restore -- ../..",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, checkout -f is refused",
+    "event": {
+      "command": "git checkout -f main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, checkout -f passes",
+    "event": {
+      "command": "git checkout -f main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, switch -f is refused",
+    "event": {
+      "command": "git switch -f main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, switch -f passes",
+    "event": {
+      "command": "git switch -f main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, read-tree -u --reset is refused",
+    "event": {
+      "command": "git read-tree -u --reset HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, read-tree -u --reset passes",
+    "event": {
+      "command": "git read-tree -u --reset HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a forced clean is refused",
+    "event": {
+      "command": "git clean -fdx",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a forced clean passes",
+    "event": {
+      "command": "git clean -fdx",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a plain stash is refused",
+    "event": {
+      "command": "git stash",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a plain stash passes",
+    "event": {
+      "command": "git stash",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, stash push is refused",
+    "event": {
+      "command": "git stash push -m wip",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, stash push passes",
+    "event": {
+      "command": "git stash push -m wip",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, stash save is refused",
+    "event": {
+      "command": "git stash save wip",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, stash save passes",
+    "event": {
+      "command": "git stash save wip",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a rebase is refused",
+    "event": {
+      "command": "git rebase main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a rebase passes",
+    "event": {
+      "command": "git rebase main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a cherry-pick is refused",
+    "event": {
+      "command": "git cherry-pick abc123",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a cherry-pick passes",
+    "event": {
+      "command": "git cherry-pick abc123",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a rebasing pull is refused",
+    "event": {
+      "command": "git pull --rebase",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a rebasing pull passes",
+    "event": {
+      "command": "git pull --rebase",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a rebase with autostash by -c is refused",
+    "event": {
+      "command": "git -c rebase.autoStash=true rebase main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a rebase with autostash by -c passes",
+    "event": {
+      "command": "git -c rebase.autoStash=true rebase main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a merge with --autostash is refused",
+    "event": {
+      "command": "git merge --autostash topic",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a merge with --autostash passes",
+    "event": {
+      "command": "git merge --autostash topic",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in the main copy, while another live session holds the lease, a rebasing pull with --autostash is refused",
+    "event": {
+      "command": "git pull --rebase --autostash",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a rebasing pull with --autostash passes",
+    "event": {
+      "command": "git pull --rebase --autostash",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a linked worktree, stash drop is refused: the stash and worktree list are shared",
+    "event": {
+      "command": "git stash drop",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from the main copy, stash drop is refused",
+    "event": {
+      "command": "git stash drop",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "with the lease free, stash drop passes",
+    "event": {
+      "command": "git stash drop",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": null
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a linked worktree, stash pop is refused: the stash and worktree list are shared",
+    "event": {
+      "command": "git stash pop stash@{1}",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from the main copy, stash pop is refused",
+    "event": {
+      "command": "git stash pop stash@{1}",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "with the lease free, stash pop passes",
+    "event": {
+      "command": "git stash pop stash@{1}",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": null
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a linked worktree, stash clear is refused: the stash and worktree list are shared",
+    "event": {
+      "command": "git stash clear",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from the main copy, stash clear is refused",
+    "event": {
+      "command": "git stash clear",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "with the lease free, stash clear passes",
+    "event": {
+      "command": "git stash clear",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": null
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a linked worktree, worktree prune is refused: the stash and worktree list are shared",
+    "event": {
+      "command": "git worktree prune",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from the main copy, worktree prune is refused",
+    "event": {
+      "command": "git worktree prune",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "with the lease free, worktree prune passes",
+    "event": {
+      "command": "git worktree prune",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": null
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "worktree remove --force of another session's worktree is refused",
+    "event": {
+      "command": "git worktree remove --force ../c",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        },
+        "./../c": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/c"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "worktree remove --force of the main copy is refused",
+    "event": {
+      "command": "git worktree remove --force /m",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        },
+        "/m": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "worktree remove --force of a worktree that cannot be placed is refused",
+    "event": {
+      "command": "git worktree remove --force ../c",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "worktree remove --force of the session's own worktree passes",
+    "event": {
+      "command": "git -C /m worktree remove --force /m/.claude/worktrees/b",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/m": {
+          "kind": "main",
+          "top": "/m"
+        },
+        "/m/.claude/worktrees/b": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "worktree remove without --force passes: git refuses a dirty worktree itself",
+    "event": {
+      "command": "git worktree remove ../c",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        },
+        "./../c": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/c"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, cd to the main copy then a hard reset is refused",
+    "event": {
+      "command": "cd /m; git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/m": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, git -C the main copy then a hard reset is refused",
+    "event": {
+      "command": "git -C /m reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/m": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, GIT_DIR naming the main copy then a forced clean is refused",
+    "event": {
+      "command": "GIT_DIR=/m/.git git clean -fdx",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/m/.git": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, --work-tree naming the main copy then a hard reset is refused",
+    "event": {
+      "command": "git --work-tree=/m reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/m": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a hard reset in the main copy passes when the lease is free",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": null
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a hard reset in the main copy passes when this session holds the lease",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "mine",
+        "holder": {
+          "session": "s-this",
+          "pid": 7,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a rebase in the main copy passes for the lease holder",
+    "event": {
+      "command": "git pull --rebase --autostash",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "mine",
+        "holder": {
+          "session": "s-this",
+          "pid": 7,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a hard reset in the main copy passes when the holder is dead",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-dead",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a lease that cannot be read counts as held",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "unknown",
+        "holder": null,
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "no lease facts at all count as held",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": null,
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a hard reset in another repository passes",
+    "event": {
+      "command": "git -C /elsewhere reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/elsewhere": {
+          "kind": "other",
+          "top": "/elsewhere"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a cd to a variable before a hard reset is refused",
+    "event": {
+      "command": "cd \"$D\" && git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a cd inside a subshell before a hard reset is refused",
+    "event": {
+      "command": "(cd /m && git reset --hard)",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "core.worktree on the command is refused",
+    "event": {
+      "command": "git -c core.worktree=/m reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "GIT_INDEX_FILE on the command is refused",
+    "event": {
+      "command": "GIT_INDEX_FILE=/tmp/i git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a git subcommand that is a variable is refused",
+    "event": {
+      "command": "git \"$OP\" --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a program that is a variable is refused",
+    "event": {
+      "command": "\"$G\" reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an unknown git alias is refused",
+    "event": {
+      "command": "git rh",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "arguments supplied by xargs are refused",
+    "event": {
+      "command": "echo --hard | xargs git reset",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a hard reset whose folder has no fact is refused",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a folder the runner could not place is refused",
+    "event": {
+      "command": "git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "unresolved": "git did not answer in time"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git status in the main copy passes",
+    "event": {
+      "command": "git status && git log -1",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "unstaging the whole tree passes: it drops no file",
+    "event": {
+      "command": "git restore --staged .",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a checkout of one file passes",
+    "event": {
+      "command": "git checkout -- src/a.md",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "switching branch without --force passes",
+    "event": {
+      "command": "git switch main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "stash list and apply pass",
+    "event": {
+      "command": "git stash list && git stash apply stash@{0}",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "cd to a variable then make passes: no git call drops work",
+    "event": {
+      "command": "cd \"$D\" && make",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "a commit with a heredoc message passes",
+    "event": {
+      "command": "git commit -F - <<'EOF'\nreset --hard in the message\nEOF",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  }
+]

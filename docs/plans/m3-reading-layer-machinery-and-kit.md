@@ -558,6 +558,25 @@ Approved by: the maintainer, 2026-11-18
 
 A demotion needs an approved change too. A side review during slice A0 found that, under A3 as written, one edit from `proof: proven` to `proof: unproven` takes a page out of the eval gate, and no check refuses it. Criterion 14 gains: a proven page or section marked unproven again, or stripped of its mark, fails unless an approved entry here carries a line `Demote: <page>`, the same form as the anchor rule. The maintainer agreed the same day. Decision record 0006 states the rule, and the `proof` check enforces it with a case.
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+Slice C3 is too large for one reviewable pull request. It holds seven separate pieces of machinery: the shell facts, the target resolver, the agent tools' settings and their check, the worktree settings copy, the discard guard, the secret scan with its CI job, and the commit-subject check, plus a message rule across every part. Slices C1, C2 and C7 each merged as one pull request of 616 to 818 added lines. Several of C3's pieces are each that size, so one pull request would run to about 3,000 lines (inferred, an estimate from the row's parts). Slice C3 stopped after its decision record 0004 amendment, which stays its opening step.
+
+The change splits C3 into four slices, each its own branch and pull request at the driver tier. Nothing in the row or its criteria is dropped or weakened.
+
+| Slice | Work, from C3's row | Done when |
+|---|---|---|
+| C3a, shell facts and the discard guard | The 0004 amendment. The runner adds `session`, `lease` and `calls` to a before-shell event, with each git call's working copy. The discard guard as a new part, and the 0005 amendment on worktree sessions. | Criterion 31; criterion 64's third sentence; criterion 58 except the target repository |
+| C3b, the target resolver | Each gh call's and push's target, from every source the row names, with `pushurl`, `insteadOf`, `pushInsteadOf`, `push.default` and the upstream modelled. No guard reads it until C4 and C5. | Criterion 58's target repository, from each source |
+| C3c, settings | Allow and deny lists for both agent tools, the check that fails on a missing deny entry, the `post-checkout` copy of the local settings file, and both `.gitignore` entries. | Criterion 29; criterion 64's first two sentences |
+| C3d, the commit | The secret scan, at the commit and over the whole history in CI. The commit-subject check, reading the manifest's formats. Every finding names its file, the rule's page and a fix or re-run command. | Criteria 32, 33, 34 |
+
+C3a goes first, since its amendment opens the slice. C3b, C3c and C3d each start from main once C3a merges, and may run in parallel. C4 needs C3a. C5 needs C3a and C3b.
+
+Proposed revision of criterion 34 (template rule 7). `no_stage_all`'s refusal names no page, and `parts/no_stage_all.py` is a file the eval hashes. C3d's test exempts that one message by name. Slice Z adds the page to it and removes the exemption, and the edit joins the list queued for slice Z.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -625,6 +644,27 @@ Decisions made in the slice:
 - **An exemption that tolerates nothing fails.** The plan asked only that a bad exemption fail. Without this, a fixed link would leave its exemption behind, silently widening the check later.
 - **`ws.py pins` exits 0 when it skips an unreachable remote**, and 1 only when a remote answered and the checkout then failed. A person without access to one repository can still set up the rest.
 
+### C3, settings, guards and the commit
+
+Built as four slices, as the change of 2026-11-21 split it, each at the driver tier, from main, touching no file the eval hashes. The slice first stopped after its 0004 amendment, as the stop rule for a slice too large to review asks.
+
+**C3a, shell facts and the discard guard.** Pull request #27, on branch `m3/c3` from main at `598d756`.
+
+- **Verified, criterion 31:** `parts/no_discard.cases.json`, 87 cases. While another live session holds the lease, each form C3 names is refused in the main working copy and passes in a linked worktree: hard reset, `reset --keep` and `--merge`, whole-tree checkout and restore, `checkout -f`, `switch -f`, `read-tree -u --reset`, a forced clean, a stash write, rebase, cherry-pick, a rebasing pull and autostash. `stash drop`, `pop`, `clear` and `worktree prune` are refused from the main copy and from a worktree. `worktree remove --force` of another worktree or the main copy is refused, and of the session's own passes. `cd <main>; git reset --hard`, `git -C <main>`, `GIT_DIR` and `--work-tree` naming the main copy are refused from a worktree. With the lease free, held by this session or held by a dead session, the forms pass.
+- **Verified, criterion 64's third sentence:** `git pull --rebase --autostash` in the main copy is refused to a session that does not hold the lease, in a part case and in a real call (`tests/hooks/before-shell.json`).
+- **Verified, criterion 58 except the target repository:** `tests/test_shellfacts.py`, on throwaway repositories with a linked worktree. The working copy's kind is right for the session folder, `-C`, `--git-dir`, `GIT_DIR`, `--work-tree`, `GIT_WORK_TREE`, a leading `cd` and a leading `pushd`. A non-leading `cd`, a `cd` in a subshell, `core.worktree`, `GIT_INDEX_FILE`, `GIT_COMMON_DIR` and a `cd` to a variable give no fact, and the guard refuses a call with no fact. The session and its own working copy are given; the lease reads `free`, `mine`, `other-live`, `other-dead` and `unknown`, and reading it never writes it.
+- **Verified:** nine real calls through the wiring and the launcher, with seeded leases held by a live and a dead process. Five of them, the refusals, failed with the manifest from main and pass with the part. All 36 hook cases pass; before-shell's median is 64 ms locally against its 200 ms budget.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` pass locally, 467 tests, 3 skipped. `tests.test_cases_bite` passes: `no_discard`'s cases fail against both stubs.
+- **Verified:** three fix rounds, each on a different failure. On Windows CI the new test wrote folders with backslashes into shell commands, which the parser reads as escapes; it now writes them with forward slashes, as an agent's shell command would, and `~` in a git folder is expanded. Two real-call cases passed a Windows folder unquoted, which no shell reads as that folder; they now quote it. On one macOS job, before-shell's median rose to 217 ms, over its 200 ms budget, because every shell command now started git to place its folders. The git facts are now worked out only when a hook reads them, so the guard with the lease free, held by this session or by a dead one starts no git process; `LazyFactsTests` holds it.
+- **Inferred:** a command a guard cannot judge is refused only while another live session holds the lease. A person working alone, or the lease holder, never sees this guard.
+
+Decisions made in C3a:
+
+- **Facts are keyed by the parser's own folder text**, not handed over as the parser's output. Cases stay short and still test the guard with the parser, and a key with no fact refuses. Decision 0004 records it.
+- **A lease that cannot be read counts as held by another live session**, as decision 0005's "a lease bug never lets an edit through" asks.
+- **Plain `worktree remove`, with no `--force`, passes.** git refuses to remove a worktree with changes unless forced.
+- **Parser gaps handled in the guard's own file:** a whole-tree checkout or restore, a stash write, rebase and cherry-pick. The parser does not list them among the forms that drop work. Queued for slice Z below.
+
 ### Sub-batch A, 2026-11-18
 
 Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
@@ -672,3 +712,5 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C2, `INDEX.md`, Topics: a row "How long a hook takes; a hook called for real, through the launcher, in a scratch repository" linking [the hook case runner](../parts.md#the-hook-case-runner).
 - C7, `INDEX.md`, Topics: a row "Check out the code repositories after a fresh clone; a pinned repository is missing or unreachable" linking [pinned repositories](../parts.md#pinned-repositories).
 - C7, `INDEX.md`, Topics: a row "Whether the README's setup still works; a nightly fresh clone; a link that cannot resolve on purpose" linking [the cold-clone job](../parts.md#the-cold-clone-job).
+- C3a, `wslib/shell.py`: list a whole-tree checkout or restore (`.`, `:/`, `*` and paths of only `.` and `..`, or `--pathspec-from-file`), a stash write (`push`, `save`, `store` and a plain `stash`), `rebase` and `cherry-pick` among the `discard` forms, and remove their handling from `parts/no_discard.py`.
+- C3a, `INDEX.md`, Topics: a row "A hard reset, stash drop or rebase refused while another session works here; which working copy a git command acts on" linking [decision 0005](../decisions/0005-concurrent-sessions-and-the-edit-ledger.md) and [decision 0004](../decisions/0004-the-hook-contract.md#decision).

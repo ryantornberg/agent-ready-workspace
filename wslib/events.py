@@ -25,7 +25,8 @@ delete or move several files. Its adapter gives one before-edit event per path, 
 destination both, and the runner refuses the whole call when any one of them is refused.
 
 The event a part sees:
-    before-shell     {"command": text}
+    before-shell     {"command": text, "session": text or None, "pid": int or None}. The runner adds the facts a
+                                      shell hook declares in NEEDS (wslib/shellfacts.py).
     before-edit      {"path": text, "working_copy": text or None, "main": bool, "absolute": text}
                                       "path" is relative to the working copy of this repository that holds the
                                       file: the main one or a linked worktree, wherever that sits. A file in no
@@ -135,6 +136,8 @@ def versioned(root, event, payload):
     allowed = {"version", "session", "cwd"} if event in SESSION_EVENTS else {"version", field, *OPTIONAL.get(event, ())}
     if event == "before-edit":
         allowed |= {"session", "pid"}      # the writing-session lease's identity, for a tool with no adapter
+    if event == "before-shell":
+        allowed |= {"session", "pid", "cwd"}   # the shell facts' identity and folder (decision 0004, "Shell events")
     unknown = sorted(set(payload) - allowed)
     if unknown:
         raise PartError(f"a {event} event has no field {unknown[0]!r}; it takes {sorted(allowed)}")
@@ -147,6 +150,13 @@ def versioned(root, event, payload):
         found["pid"] = payload.get("pid") if type(payload.get("pid")) is int else None
         return found
     found = {field: value}
+    if event == "before-shell":
+        found["session"] = payload.get("session") if isinstance(payload.get("session"), str) else None
+        found["pid"] = payload.get("pid") if type(payload.get("pid")) is int else None
+        cwd = payload.get("cwd")
+        if cwd is not None and not (isinstance(cwd, str) and pathlib.Path(cwd).is_absolute()):
+            raise PartError(f'a before-shell event\'s "cwd" must be an absolute folder, not {cwd!r}')
+        found["cwd"] = cwd
     for key in OPTIONAL.get(event, ()):
         if key in payload:
             found[key] = _text(payload[key], f'a {event} event\'s "{key}"')
@@ -192,7 +202,7 @@ def claude_code(root, event, payload):
                         "The wiring and the adapter disagree")
     value = _text(given.get(fields[tool]), f'the {tool} tool\'s "{fields[tool]}"')
     if event == "before-shell":
-        return {"command": value}
+        return {"command": value, "session": _session(payload), "pid": None}
     if event == "before-edit":
         base = payload.get("cwd")
         if not pathlib.Path(value).is_absolute() and not (isinstance(base, str) and pathlib.Path(base).is_absolute()):
@@ -251,7 +261,7 @@ def codex(root, event, payload):
                         "The wiring and the adapter disagree")
     value = _text(given.get(fields[tool]), f'the {tool} tool\'s "{fields[tool]}"')
     if event == "before-shell":
-        return [{"command": value}]
+        return [{"command": value, "session": _session(payload), "pid": None}]
     paths = patch_paths(value)
     base = payload.get("cwd")
     if not (isinstance(base, str) and pathlib.Path(base).is_absolute()):
