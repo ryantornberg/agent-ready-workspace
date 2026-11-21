@@ -624,6 +624,12 @@ Two items the previous entry left without a home, and one machinery decision. No
 
 **The slow-leg CI rule is not adopted.** It would let a merge go ahead while a slow third CI leg is still queued or running. The contract's requirement that CI passes on Linux, macOS and Windows stays. The rule is revisited only if this repository's CI shows the same wait. This settles that item of the previous entry's machinery comparison; the other three are still compared before C4 starts, and nothing is queued for slice Z.
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+**C4's merge helper works from a throwaway worktree.** `ws.py merge` makes a throwaway worktree of the remote's main, merges the pull request's branch there, and pushes from it. So the lease on the main working copy does not matter, and the calling working copy is left untouched. Afterwards it deletes the branch and removes the worktree. This settles the merge-script item of the second change of 2026-11-21. No criterion is dropped or weakened.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -757,6 +763,20 @@ verified  64: the allow lists (Claude Code verified, Codex CLI accepted, its eff
 No question had to be asked that the workspace should have answered: the split, the keyed design and the Codex default each turned on the maintainer's choice. No file the eval hashes was edited.
 
 **Proposed revision (template rule 7).** Criterion 64 names the kit's `.gitignore`, which does not exist until slice C8. C8's criteria should hold it: the kit's `.gitignore` names `.claude/settings.local.json`, and the kit carries `.githooks/post-checkout`.
+
+### The machinery comparison, 2026-11-21
+
+Made at the driver tier, as the second change of 2026-11-21 asks before C4 starts. Each machinery item in the private catalog's part of 2026-11-21, compared with this repository.
+
+| Item | Here today | Result |
+|---|---|---|
+| A merge script that works from a throwaway worktree | Nothing: no `ws.py merge`. Agents run `gh pr merge`, and `no_admin_merge` refuses its `--admin` flag (verified, `parts/no_admin_merge.py`). | Approved for C4 in the change above. It conflicts with the push check; see below. |
+| A CI status rule with a slow third leg | Nothing. | Not adopted, by the third change of 2026-11-21. |
+| A session-start notice when main's CI failed | Session-start reminders exist, `fast_forward` and `stale_pins`; none reads CI (verified, `parts/`). | A new reminder part in C5. The maintainer approved it for C5 on 2026-11-21; C5's builder records that entry before building. |
+| Eval reruns on a flaky failure; suite selection by every page a wrapper names | Neither exists. `evals/run.py` records arms per case, with no base-and-head suites and no reruns (verified, read). Wrappers arrive in B6. | Nothing added in M3. The private ledger maps both to M4's eval system. |
+| The link check sees locally what CI sees | No suffix matching: a backticked path is read from the top of the workspace (verified, `parts/links.py`). But a local `check` and the commit check list the files inside a checked-out pinned repository (verified, read in `wslib/snapshot.py`), and CI checks none out (verified, `.github/workflows/ci.yml`). So a link into a pinned repository can pass locally and fail in CI (inferred: this repository pins none, so it was not run). | Nothing added without its own entry. Queued for the maintainer, with M5's first instance, which has pinned repositories, recommended. |
+
+**The conflict, which stops C4 before it builds.** Verified, in a scratch clone with a local bare remote: a branch changing `wslib/` was merged with a merge commit in a throwaway worktree of `origin/main`, and `git push origin HEAD:main` was refused by `direct_push`. The pre-push check judges the commits a merge brings in, and those change machinery. Inferred, from GitHub's documented branch rule: GitHub also refuses that push for anyone the rule binds, since the new merge commit has no passing checks. The maintainer is not bound here, because the rule does not apply to administrators (verified, the branch protection settings). So the approved design cannot merge without a change to the push check or a skipped hook, and neither is approved. The choice is queued for the maintainer with three options. The recommendation is to merge on GitHub with `gh pr merge --merge --match-head-commit`, after the helper's own check of the head commit's CI: it keeps the approval's aim, since no working copy is used at all. C4 waits for the answer. Its push guard and its `no_admin_merge` changes do not depend on it.
 
 
 ### Sub-batch A, 2026-11-18
