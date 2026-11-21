@@ -646,11 +646,24 @@ Decisions made in the slice:
 
 ### C3, settings, guards and the commit
 
-Stopped after its opening step, on branch `m3/c3` from main at `598d756`, at the driver tier. It touches no file the eval hashes.
+Built as four slices, as the change of 2026-11-21 split it, each at the driver tier, from main, touching no file the eval hashes. The slice first stopped after its 0004 amendment, as the stop rule for a slice too large to review asks.
 
-- **Verified:** decision record 0004 is amended. A before-shell hook may declare `NEEDS`: the session, the lease as it stands, and the parsed calls, each git call with its working copy and each gh call and push with its target. The record also names the `post-checkout` hook that copies the local settings file into a new worktree. A probe in a throwaway repository showed `post-checkout` runs on `git worktree add` with an all-zero previous head, which is how the hook tells that checkout apart.
-- **Inferred:** gh keeps its set-default value under the remote's `gh-resolved` git config key. `gh repo set-default` refused a probe repository it could not reach, so this rests on gh's known behaviour. C3b's cases settle it.
-- **Not done:** criteria 29, 31 to 34, 58 and 64. The slice is too large for one reviewable pull request. The proposed split is under "Changes after approval", 2026-11-21, waiting for the maintainer's yes.
+**C3a, shell facts and the discard guard.** Pull request #27, on branch `m3/c3` from main at `598d756`.
+
+- **Verified, criterion 31:** `parts/no_discard.cases.json`, 87 cases. While another live session holds the lease, each form C3 names is refused in the main working copy and passes in a linked worktree: hard reset, `reset --keep` and `--merge`, whole-tree checkout and restore, `checkout -f`, `switch -f`, `read-tree -u --reset`, a forced clean, a stash write, rebase, cherry-pick, a rebasing pull and autostash. `stash drop`, `pop`, `clear` and `worktree prune` are refused from the main copy and from a worktree. `worktree remove --force` of another worktree or the main copy is refused, and of the session's own passes. `cd <main>; git reset --hard`, `git -C <main>`, `GIT_DIR` and `--work-tree` naming the main copy are refused from a worktree. With the lease free, held by this session or held by a dead session, the forms pass.
+- **Verified, criterion 64's third sentence:** `git pull --rebase --autostash` in the main copy is refused to a session that does not hold the lease, in a part case and in a real call (`tests/hooks/before-shell.json`).
+- **Verified, criterion 58 except the target repository:** `tests/test_shellfacts.py`, on throwaway repositories with a linked worktree. The working copy's kind is right for the session folder, `-C`, `--git-dir`, `GIT_DIR`, `--work-tree`, `GIT_WORK_TREE`, a leading `cd` and a leading `pushd`. A non-leading `cd`, a `cd` in a subshell, `core.worktree`, `GIT_INDEX_FILE`, `GIT_COMMON_DIR` and a `cd` to a variable give no fact, and the guard refuses a call with no fact. The session and its own working copy are given; the lease reads `free`, `mine`, `other-live`, `other-dead` and `unknown`, and reading it never writes it.
+- **Verified:** nine real calls through the wiring and the launcher, with seeded leases held by a live and a dead process. Five of them, the refusals, failed with the manifest from main and pass with the part. All 36 hook cases pass; before-shell's median is 69 ms against its 200 ms budget.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` pass locally, 467 tests, 3 skipped. `tests.test_cases_bite` passes: `no_discard`'s cases fail against both stubs.
+- **Verified:** one fix round. On Windows CI the new test wrote folders with backslashes into shell commands, which the parser reads as escapes. The test now writes them with forward slashes, as an agent's shell command would; `~` in a git folder is now expanded.
+- **Inferred:** a command a guard cannot judge is refused only while another live session holds the lease. A person working alone, or the lease holder, never sees this guard.
+
+Decisions made in C3a:
+
+- **Facts are keyed by the parser's own folder text**, not handed over as the parser's output. Cases stay short and still test the guard with the parser, and a key with no fact refuses. Decision 0004 records it.
+- **A lease that cannot be read counts as held by another live session**, as decision 0005's "a lease bug never lets an edit through" asks.
+- **Plain `worktree remove`, with no `--force`, passes.** git refuses to remove a worktree with changes unless forced.
+- **Parser gaps handled in the guard's own file:** a whole-tree checkout or restore, a stash write, rebase and cherry-pick. The parser does not list them among the forms that drop work. Queued for slice Z below.
 
 ### Sub-batch A, 2026-11-18
 
@@ -681,3 +694,5 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C2, `INDEX.md`, Topics: a row "How long a hook takes; a hook called for real, through the launcher, in a scratch repository" linking [the hook case runner](../parts.md#the-hook-case-runner).
 - C7, `INDEX.md`, Topics: a row "Check out the code repositories after a fresh clone; a pinned repository is missing or unreachable" linking [pinned repositories](../parts.md#pinned-repositories).
 - C7, `INDEX.md`, Topics: a row "Whether the README's setup still works; a nightly fresh clone; a link that cannot resolve on purpose" linking [the cold-clone job](../parts.md#the-cold-clone-job).
+- C3a, `wslib/shell.py`: list a whole-tree checkout or restore (`.`, `:/`, `*` and paths of only `.` and `..`, or `--pathspec-from-file`), a stash write (`push`, `save`, `store` and a plain `stash`), `rebase` and `cherry-pick` among the `discard` forms, and remove their handling from `parts/no_discard.py`.
+- C3a, `INDEX.md`, Topics: a row "A hard reset, stash drop or rebase refused while another session works here; which working copy a git command acts on" linking [decision 0005](../decisions/0005-concurrent-sessions-and-the-edit-ledger.md) and [decision 0004](../decisions/0004-the-hook-contract.md#decision).
