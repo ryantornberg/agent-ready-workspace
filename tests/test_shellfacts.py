@@ -140,5 +140,36 @@ class SessionAndLeaseTests(Repositories):
         self.assertEqual((self.main / ".git" / "ws-lease.json").read_text(), before)
 
 
+
+class LazyFactsTests(unittest.TestCase):
+    """The facts that need git are worked out only when a hook reads them, so the discard guard with the lease
+    free, held by this session or by a dead one starts no git process (criterion 28's budget)."""
+
+    def test_a_quiet_lease_reads_no_git_fact(self):
+        from parts import no_discard
+        from wslib.runner import LazyEvent
+
+        def boom():
+            raise AssertionError("a git fact was worked out")
+        for state in ("free", "mine", "other-dead"):
+            event = LazyEvent({"command": "git reset --hard", "lease": {"state": state}},
+                              {"working_copies": boom, "own_working_copy": boom})
+            self.assertIsNone(no_discard.decide(event, {}))
+
+    def test_a_held_lease_reads_them_once(self):
+        from parts import no_discard
+        from wslib.runner import LazyEvent
+        calls = []
+
+        def copies():
+            calls.append(1)
+            return {".": {"kind": "main", "top": "/m"}}
+        event = LazyEvent({"command": "git reset --hard && git clean -fdx", "lease": {"state": "other-live"}},
+                          {"working_copies": copies, "own_working_copy": lambda: "/m"})
+        self.assertIsNotNone(no_discard.decide(event, {}))
+        self.assertEqual(event.get("working_copies"), {".": {"kind": "main", "top": "/m"}})
+        self.assertEqual(calls, [1])
+
+
 if __name__ == "__main__":
     unittest.main()

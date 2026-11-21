@@ -378,21 +378,48 @@ def lease_fact(root, event, tool):
     return {"state": state, "holder": holder, "file": file}
 
 
-def shell_facts(root, event, hooks, tool, cwd):
-    """The facts the before-shell hooks declare in NEEDS (decision 0004, "Shell events"; wslib/shellfacts.py).
-    cwd: the folder the agent tool says the session runs in; the workspace's own shape may give it in the event."""
+class LazyEvent(dict):
+    """An event whose costly facts are worked out the first time a hook reads them. A guard that returns early,
+    such as the discard guard with the lease free, then starts no git process at all."""
+
+    def __init__(self, base, makers):
+        super().__init__(base)
+        self._makers = dict(makers)
+
+    def _fill(self, key):
+        if key in self._makers and not dict.__contains__(self, key):
+            self[key] = self._makers.pop(key)()
+
+    def get(self, key, default=None):
+        self._fill(key)
+        return dict.get(self, key, default)
+
+    def __getitem__(self, key):
+        self._fill(key)
+        return dict.__getitem__(self, key)
+
+    def __contains__(self, key):
+        return dict.__contains__(self, key) or key in self._makers
+
+
+def shell_event(root, event, hooks, tool, cwd):
+    """The event with the facts the before-shell hooks declare in NEEDS (decision 0004, "Shell events";
+    wslib/shellfacts.py). The session and the lease are read at once, from files; the facts that need git are
+    worked out only when a hook reads them. cwd: the folder the agent tool says the session runs in; the
+    workspace's own shape may give it in the event."""
     needs = {need for part in hooks for need in getattr(part.module, "NEEDS", ())}
     if not needs:
-        return {}
+        return event
     cwd = event.get("cwd") or cwd
-    facts = {}
+    facts, makers = dict(event), {}
     if "session" in needs or "lease" in needs:
-        facts.update(shellfacts.session(event, tool, cwd))
+        facts.update(shellfacts.session(event, tool, cwd, top=False))
+        makers["own_working_copy"] = lambda: shellfacts.own_working_copy(cwd)
     if "lease" in needs:
         facts["lease"] = shellfacts.lease(root, event.get("session"))
     if "working_copies" in needs:
-        facts["working_copies"] = shellfacts.working_copies(root, event["command"], cwd)
-    return facts
+        makers["working_copies"] = lambda: shellfacts.working_copies(root, event["command"], cwd)
+    return LazyEvent(facts, makers)
 
 
 def command_hook(root, args):
@@ -411,7 +438,7 @@ def command_hook(root, args):
     if any("rule_pages" in getattr(part.module, "NEEDS", ()) for part in hooks):
         found = [dict(event, rule_pages=rule_pages(root, event, hooks)) for event in found]
     if args.event == "before-shell":
-        found = [dict(event, **shell_facts(root, event, hooks, tool, cwd)) for event in found]
+        found = [shell_event(root, event, hooks, tool, cwd) for event in found]
     # The lease is taken only for an edit every other hook allows, so a refused edit takes no lease.
     leasing = [part for part in hooks if args.event == "before-edit" and "lease" in getattr(part.module, "NEEDS", ())]
     ordered = [part for part in hooks if part not in leasing] + leasing

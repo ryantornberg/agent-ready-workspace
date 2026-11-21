@@ -26,14 +26,19 @@ from . import shell
 TIMEOUT = 3.0          # seconds for one folder's git call; a call cut off leaves the folder unresolved
 
 
-def session(event, tool, cwd):
-    """The session's identity and folder. cwd: the folder the tool says the session runs in, or None."""
+def session(event, tool, cwd, top=True):
+    """The session's identity and folder. cwd: the folder the tool says the session runs in, or None.
+    top=False leaves out own_working_copy, which needs git; the runner works it out only when a hook reads it."""
     pid = event.get("pid") if type(event.get("pid")) is int else leases.tool_pid(tool)
-    top = None
-    if cwd:
-        found = _kind(pathlib.Path(cwd), None)
-        top = found.get("top")
-    return {"session": event.get("session"), "pid": pid, "cwd": cwd, "own_working_copy": top}
+    found = {"session": event.get("session"), "pid": pid, "cwd": cwd}
+    if top:
+        found["own_working_copy"] = own_working_copy(cwd)
+    return found
+
+
+def own_working_copy(cwd):
+    """The top folder of the working copy that holds the session's folder, or None."""
+    return _kind(pathlib.Path(cwd), None).get("top") if cwd else None
 
 
 def lease(root, session_id):
