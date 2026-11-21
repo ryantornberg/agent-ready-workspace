@@ -223,6 +223,30 @@ Every event the engine knows needs at least one case, so a new event cannot arri
 
 `tests/test_cases_bite.py` holds every part's own cases to the same standard from the other side. It runs each part the manifest lists against a stub that allows everything and finds nothing, and against one that refuses everything and always finds something. Each stub must fail at least one case.
 
+## Pinned repositories
+
+A workspace pins its code repositories as submodules under `src/` ([decision 0001](decisions/0001-pin-code-repositories.md)). A fresh clone holds the pins but not the code. This checks the code out:
+
+```
+python3 ws.py pins
+```
+
+- **Every remote is probed at once**, with `git ls-remote`, prompts off and a ten-second limit each. A remote that needs a password it does not have fails at once instead of asking, so one unreachable repository costs ten seconds in all, not a hung terminal.
+- **Each one that answers is initialized and checked out** at its pin, one at a time.
+- **One that does not answer is skipped with a note**, and the command still exits 0. It exits 1 only when a remote answered and the checkout then failed.
+- **A folder that already holds a checkout, or any files, is never touched**: no fetch, no reset, no switch. Run it as often as you like.
+- A relative URL in `.gitmodules`, such as `../orders-api.git`, is read against the workspace's own `origin`, as git reads it.
+
+`tests/test_pins.py` runs it on fixture repositories: one reachable, one gone, one hanging, and one already checked out with local work in it.
+
+## The cold-clone job
+
+`.github/workflows/cold-clone.yml` clones the repository fresh on Linux and macOS, with the machine's own git and `python3`. It follows the README's marked setup steps and nothing else, then runs `selftest`, `check` and the tests. A step is a fenced block right after a line `<!-- setup -->`; `tools/setup_steps.py` turns the marked blocks into one script that stops at the first failure, and fails when no block is marked.
+
+It runs every night, on main. It also runs on a pull request, and on a push to main, that changes a setup page, `tools/setup_steps.py` or the job itself. Doc changes go straight to main, so a pull request alone would miss most changes to the README. The setup pages are `SETUP_PAGES` in `tools/setup_steps.py`, and `tests/test_cold_clone.py` holds the job's paths to that list.
+
+The README's steps start `python3` by name, as a person would. That is the one place CI starts Python other than through the launcher. Windows is left out, because a Windows install of Python provides no `python3`.
+
 ## Removing a part
 
 A part the last commit's manifest uses must stay in the manifest, or be listed under `retired` with the reason:
@@ -264,7 +288,7 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 
 | Part | Kind | Fails or refuses when |
 |---|---|---|
-| `links` | check | A link points at a missing file or heading, or a line is too long to read: over 10,000 characters. |
+| `links` | check | A link points at a missing file or heading, or a line is too long to read: over 10,000 characters. On the pages its `backticked` setting lists, a backticked path with a slash whose first folder exists, such as `src/orders-api`, points at nothing. An entry in its `exempt` setting, `{"source": page, "target": exact target, "reason": why}`, tolerates one such finding; an entry with no source, target or reason fails, and so does one that tolerates nothing. |
 | `page_kinds` | check | A page under `docs/` names no kind or a kind outside the nine, lacks the front matter its kind needs, or opens out of order: title, a purpose sentence of 25 words or fewer, the **In short** line, and `## Key points` on a plan (see [layout](layout.md)). A proof key in any form but its exact one. And the review-date rule `freshness` held: a commit edits a page past its review date, a required page has no date, or a date is more than a day ahead of today in UTC. It fails when it checks no pages. |
 | `chains` | check | A path in the index's cross-cutting chains does not exist, or the index has no chain table. |
 | `pointers` | check | The GitHub Copilot or opencode pointer file is missing, or no longer names `AGENTS.md` and the rule pages. |

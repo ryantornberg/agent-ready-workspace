@@ -24,6 +24,23 @@
       "skip": [
         "evals/scaffold",
         "archive"
+      ],
+      "backticked": [
+        "AGENTS.md",
+        "INDEX.md",
+        "README.md"
+      ],
+      "exempt": [
+        {
+          "source": "AGENTS.md",
+          "target": ".claude/worktrees/",
+          "reason": "git ignores the folder; each session makes its worktree there, so a fresh clone has none"
+        },
+        {
+          "source": "README.md",
+          "target": "parts/no_empty_pages.cases.json",
+          "reason": "the worked example names a file the reader creates"
+        }
       ]
     },
     {

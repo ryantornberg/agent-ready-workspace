@@ -1,0 +1,57 @@
+name: cold-clone
+# A fresh clone, set up by the README's marked steps and nothing else, then the checks and the tests.
+# It runs every night, and on a pull request or a push to main that changes a setup page: doc changes
+# go straight to main, so a pull request alone would miss most of them. The paths below are the setup
+# pages, the script that reads their marked steps, and this file; tests/test_cold_clone.py holds them
+# to SETUP_PAGES in tools/setup_steps.py.
+on:
+  schedule:
+    - cron: "41 7 * * *"   # nightly, 07:41 UTC; a scheduled run always tests main
+  pull_request:
+    paths:
+      - README.md
+      - tools/setup_steps.py
+      - .github/workflows/cold-clone.yml
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - tools/setup_steps.py
+      - .github/workflows/cold-clone.yml
+
+# The job only reads the repository, and clones it the way a person would, without a token.
+permissions:
+  contents: read
+
+jobs:
+  cold-clone:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows is left out: the README's steps call python3, which a Windows install of Python does not provide.
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # No checkout action and no setup-python: the machine's own git and python3, as a newcomer has them.
+      - name: Clone fresh, at the commit under test
+        run: |
+          git clone --quiet "https://github.com/${GITHUB_REPOSITORY}.git" "$RUNNER_TEMP/fresh"
+          cd "$RUNNER_TEMP/fresh"
+          git fetch --quiet origin "$GITHUB_REF"
+          git checkout --quiet --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Follow the README's marked setup steps, and nothing else
+        working-directory: ${{ runner.temp }}/fresh
+        run: |
+          bash wslib/launch.sh tools/setup_steps.py README.md > "$RUNNER_TEMP/setup.sh"
+          cat "$RUNNER_TEMP/setup.sh"
+          bash "$RUNNER_TEMP/setup.sh"
+      - name: The checks and the tests, on the clone as set up
+        working-directory: ${{ runner.temp }}/fresh
+        run: |
+          bash wslib/launch.sh ws.py selftest
+          bash wslib/launch.sh ws.py check
+          bash wslib/launch.sh -m unittest discover -b tests

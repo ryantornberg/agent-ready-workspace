@@ -13,8 +13,12 @@ The longer description of the pattern is at [ryantornberg.com/workspace](https:/
 
 ## Try it
 
+Clone the repository and run these from its top folder. An HTML comment, `<!-- setup -->`, marks each block a fresh clone needs. A [nightly job](.github/workflows/cold-clone.yml) clones the repository, runs those blocks and nothing else, and then runs the checks and the tests.
+
+<!-- setup -->
 ```
 python3 ws.py --version     # the engine's version, which the manifest must name
+python3 ws.py pins          # check out the pinned code repositories under src/ (this sample pins none)
 python3 ws.py list          # the parts this workspace uses, and the phases each check runs in
 python3 ws.py selftest      # every part's own cases
 python3 ws.py check         # run the checks on this repository
@@ -35,6 +39,7 @@ Rename the class in `src/orders-api/ReconciliationWorker.cs` and `python3 ws.py 
 
 To run the checks before every commit, and on every commit message:
 
+<!-- setup -->
 ```
 git config core.hooksPath .githooks
 ```
@@ -58,7 +63,8 @@ git config core.hooksPath .githooks
 
 | Rule | Enforced by | When |
 |---|---|---|
-| A link points at a real file and heading. | `links` check | Commit, CI |
+| A link points at a real file and heading, and on the pages the manifest opts in, a backticked path such as `src/orders-api` exists. A link that cannot resolve on purpose is exempted in the manifest by page and target, with a reason; an exemption with no reason or target, or one that no longer tolerates anything, fails. | `links` check | Commit, CI |
+| A fresh clone works by following the README's marked setup steps alone: the checks and the tests pass on it. | The `cold-clone` job, on Linux and macOS | Nightly; a pull request or a push to main that changes the README or the job |
 | Whoever edits a page past its review date reviews it. `AGENTS.md`, `INDEX.md` and every page under `docs/` carry a date. Every page under `docs/` names its kind, carries the front matter its kind needs, and opens with its title, a purpose sentence of 25 words or fewer and its **In short** line. | `page_kinds` check | Commit, CI |
 | Every path in the index's cross-cutting chains exists; the Copilot and opencode pointer files name the contract and the rule pages; the always-loaded layer stays under its ceilings. | `chains`, `pointers` and `loaded_size` checks | Commit, CI |
 | Every rule in a rules table is tagged with how it is enforced, and a tag that names a part or case is true. `python3 ws.py rules` prints the register. | `rules` check | Commit, CI |
@@ -138,7 +144,7 @@ In the recorded runs, fifteen per arm in each of the three cases on a small mode
 ## Use it for your own team
 
 1. Replace the facts in `AGENTS.md` with the ones a model gets wrong about your code. Leave out anything it gets right from the code alone.
-2. Put your code repositories under `src/` as submodules, and remove the samples. Add `submodules: true` to the checkout step in `.github/workflows/ci.yml`. The checks do not read the pages inside them, so their own links and dates do not fail yours.
+2. Put your code repositories under `src/` as submodules, and remove the samples. Add `submodules: true` to the checkout step in `.github/workflows/ci.yml`. The checks do not read the pages inside them, so their own links and dates do not fail yours. On a fresh clone, `python3 ws.py pins` checks out each one whose remote answers. It asks for no password, gives each remote ten seconds, skips one it cannot reach with a note, and never touches a folder that already holds a checkout or any files.
 3. Fill the alias table from the words your team actually says.
 4. Write a playbook for the task you repeat most, and one eval case for it.
 5. Start the question log. Each entry is a gap; fix the page, then note the fix.
@@ -150,7 +156,8 @@ Add a part when the same mistake shows up twice.
 ## Limits
 
 - **`symbols.py` reads C#, TypeScript and JavaScript one line at a time.** It finds types, methods, constructors, properties, functions and constants declared on one line in the usual style. It is a lookup for names you already know, not a parser. It misses a declaration split across lines or behind an attribute; C# fields, events, delegates, indexers and operators; TypeScript class fields, getters, one-line method bodies and CommonJS exports; Python module-level constants; and anything generated at build time. It can report a declaration that sits inside a multi-line string.
-- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, headings produced by HTML tags, or the second candidate in a `srcset`. It checks links inside HTML comments and indented code blocks, and it reads `a[0][1]` in prose as a reference link; put such text in backticks. A line over 10,000 characters is reported as an error, not read. Its anchors follow GitHub's rules as I understand them; another renderer may differ.
+- **`links` reads the common ways to link**: inline links and images, reference definitions, and HTML `href`, `src`, `srcset`, `id` and `name`. It does not read autolinks, headings inside list items, headings produced by HTML tags, or the second candidate in a `srcset`. It checks links inside HTML comments and indented code blocks, and it reads `a[0][1]` in prose as a reference link; put such text in backticks. A line over 10,000 characters is reported as an error, not read. Its anchors follow GitHub's rules as I understand them; another renderer may differ. It checks backticked paths only on the pages the manifest opts in, reads them from the top of the workspace, and skips one whose first folder does not exist there, so a typo in that first folder passes.
+- **The cold-clone job runs on Linux and macOS only**, with the machine's own `python3`. It proves the marked steps work on a fresh clone of main, not on a person's machine with other tools in the way.
 - **The checks prove that nothing is dangling. They cannot prove a page is true.** A page that contradicts last week's decision passes every one.
 - **The hooks are wired for two agent tools**, Claude Code ([.claude/settings.json](.claude/settings.json)) and Codex CLI ([.codex/hooks.json](.codex/hooks.json)), each through its own adapter in `wslib/events.py`. Another tool's payload is refused until it has an adapter and its own few lines of wiring. The wiring runs `wslib/launch.sh`, which needs a POSIX shell; on Windows that is the bash that comes with Git. When it finds no Python, or is missing itself, every call is refused.
 - **Under Codex CLI, less is proven and less is enforced.** One recorded run of codex-cli 0.169.0 ([tests/records/codex-cli-run.json](tests/records/codex-cli-run.json)) shows three things: the reminder on `git add -A`, the sweep refused at the commit, and a patch into the shelved folder refused. A test replays its hook payloads. Nothing else has been run under Codex.
