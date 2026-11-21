@@ -2,3 +2,23 @@
 [mcp_servers.playwright]
 command = "npx"
 args = ["@playwright/mcp@0.0.84", "--isolated"]
+
+# A permissions profile that denies reading the secrets files: see docs/agent-settings.md. It is defined, not made
+# the default, so a person's own sandbox setting still decides. Select it with: codex -c default_permissions="agent-ready"
+# Codex applies it to every process the agent starts, so it denies only paths inside the workspace: a home
+# folder entry such as ~/.ssh would also stop git from pushing.
+[permissions.agent-ready]
+extends = ":workspace"
+
+[permissions.agent-ready.filesystem.":workspace_roots"]
+".env" = "none"
+".env.*" = "none"
+"**/.env" = "none"
+"**/.env.*" = "none"
+"**/*.pem" = "none"
+"**/*.key" = "none"
+"**/secrets/**" = "none"
+
+# Codex has no web fetch; its web search may read these documentation domains.
+[tools.web_search]
+allowed_domains = ["docs.python.org", "git-scm.com", "docs.github.com", "cli.github.com", "code.claude.com", "docs.anthropic.com", "developers.openai.com", "learn.microsoft.com"]

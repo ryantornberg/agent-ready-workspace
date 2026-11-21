@@ -70,6 +70,10 @@ def shell():
     return shutil.which("sh")
 
 
+# Git hooks written in plain sh that start no Python: post-checkout copies one file into a new worktree.
+SHELL_ONLY_HOOKS = {"post-checkout"}
+
+
 class LauncherWiringTests(unittest.TestCase):
     """Criterion 26: nothing wired starts Python except through the launcher."""
 
@@ -98,8 +102,11 @@ class LauncherWiringTests(unittest.TestCase):
         for hook in hooks:
             with self.subTest(hook=hook.name):
                 body = comment_free(hook.read_text(encoding="utf-8"))
-                self.assertIn("wslib/launch.sh", body)
                 self.assertFalse(starts_python(body), body)
+                if hook.name in SHELL_ONLY_HOOKS:   # starts no Python at all, so it needs no launcher
+                    self.assertNotIn("ws.py", body)
+                    continue
+                self.assertIn("wslib/launch.sh", body)
 
     def test_every_ci_step_goes_through_the_launcher_and_windows_runs_it_in_bash(self):
         for workflow in sorted((ROOT / ".github/workflows").glob("*.yml")):

@@ -1,0 +1,17 @@
+#!/bin/sh
+# git worktree add: copy the agent tools' ignored local settings from the main working copy into the new worktree,
+# so a session there runs with the same local permissions (decision 0004, "The worktree's settings copy").
+# git runs this hook after `git worktree add` with an all-zero previous head; every other checkout is left alone.
+# It never overwrites a file already there, and never fails the checkout.
+[ "$1" = "0000000000000000000000000000000000000000" ] || exit 0
+top=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || exit 0
+main=$(dirname "$common")
+[ "$main" = "$top" ] && exit 0
+for name in .claude/settings.local.json; do
+  if [ -f "$main/$name" ] && [ ! -e "$top/$name" ]; then
+    mkdir -p "$(dirname "$top/$name")" && cp "$main/$name" "$top/$name" \
+      || echo "post-checkout: $name was not copied into the new worktree; copy it from $main by hand" >&2
+  fi
+done
+exit 0

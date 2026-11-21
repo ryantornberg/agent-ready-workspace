@@ -131,6 +131,15 @@
       "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in."
     },
     {
+      "use": "agent_settings",
+      "why": "An agent that reads a secrets file puts it in its context; a deny entry dropped from either tool's settings is noticed at the commit.",
+      "secrets": [".env", ".env.*", "**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/secrets/**"],
+      "home": ["~/.ssh/**", "~/.aws/**", "~/.netrc", "~/.git-credentials", "~/.config/gh/hosts.yml", "~/.config/agent-ready-workspace/**"],
+      "domains": ["docs.python.org", "git-scm.com", "docs.github.com", "cli.github.com", "code.claude.com", "docs.anthropic.com", "developers.openai.com", "learn.microsoft.com"],
+      "profile": "agent-ready",
+      "codex_default": false
+    },
+    {
       "use": "no_discard",
       "why": "While another live session holds the main working copy, a hard reset, forced checkout, rebase or stash drop by this one erases its uncommitted work."
     },
