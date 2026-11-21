@@ -866,6 +866,35 @@ Proposed revisions (template rule 7):
 - Criterion 20 says the blocks run green "on three systems". B2's tutorials must then run in Git's bash on Windows. A block that starts Python gets the clone's launcher, so `python3 ws.py check` works there; a block that needs another tool must be one Git for Windows ships.
 - Criterion 62's list leaves out `.github/copilot-instructions.md`, which sub-batch A also added. It has no record. The README and the index now say the required list is the plan's.
 
+### B2, core procedures: stopped after batch 1
+
+Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
+
+- **Verified, batch 1:** [test first](../playbooks/test-first.md), [debugging](../playbooks/debugging.md) and [the throwaway prototype](../playbooks/throwaway-prototype.md) as playbooks; [safe refactor](../safe-refactor.md), with the tokenize-then-swap pattern, and [the research ladder](../research-ladder.md) as how-tos; delegation merged into [orchestration](../orchestration.md#delegating) as its own section, with its own proof line. All are `proof: unproven`, `prove-by: M4`, as the table above sets them. The README's table lists each, and the `proof` check passes.
+- **Verified, the review:** 18 findings in 7 records, one per page and one for the README's new rows. 13 were fixed. 5 are queued for slice Z: each is a page with no `INDEX.md` row, which the eval hashes.
+- **Verified, the stop rule fired.** Over the 6 pages ported so far, three classes passed a third: trigger in 5, contradiction in 4 and step in 4. Placement and enforcement were found in 1 each. The README record is not a ported page and is not counted.
+- **Inferred, why the contradiction pass missed 4:** two were with the contract's routing and worktree lines, one was between two pages of the same batch, and one was inside a page. The pass read only the pages each new page links to.
+- **Verified, criterion 62 as amended:** the Copilot pointer file has a review record, and `review_index`'s `required` list and its test name it; pull request #33. Its contradiction is deferred to M5: a second review found Copilot's documentation saying it reads this repository's agent hooks, so the fix first made, a line saying no hook runs under Copilot, was reverted.
+- **Verified:** the private ledger's batch 1 rows now map to their pages, and its check prints 0 unmapped.
+
+Proposed fixes to the rewrite brief, for the maintainer's decision before batch 2 (queued as Q9 in the workspace queue):
+
+1. **Routing first.** Batch 2 opens with the playbook catalog and the how-to index, and each later batch adds its pages to them in the same commit. Every page then has a route before slice Z adds its `INDEX.md` row.
+2. **A wider contradiction pass.** Besides the pages it links to, a builder checks the contract's "How work flows" and "Facts" sections and every page written in the same batch. A page that departs from the contract says so as an exception, and the contract edit is queued for slice Z.
+3. **A step pass.** Each step names its input, a default for each decision, and when to stop. Each command on the page is run once, read-only or in a scratch clone, before review. A step sends the reader back only on a condition that step can detect.
+4. **Builders of one batch read each other's drafts** before they report.
+
+The question with the fixes: whether the stop rule's count restarts with the fixed brief. It counts every page ported so far, so with batch 1 in it the rule would likely fire again after batch 2 (inferred).
+
+Decisions made in the slice:
+
+- **Five batches,** grouped by `prove-by`: M4's procedures first, then M9's ladder pages, M6's development pages, M5's, M8's and M10's pages with the search procedure, and last the tutorials, the catalog, the how-to index and the request map.
+- **Where pages sit:** playbooks in `docs/playbooks/`, how-tos at the top of `docs/`, as the layout page says. The merged section in orchestration is headed "Delegating".
+- **The throwaway prototype builds in a scratch folder outside the repository,** a UI prototype in a clone of it, so it needs no worktree and touches no working copy another session uses.
+- **The README's rows are added with each batch,** since the `proof` check refuses a marked page without one, and each change gets its own review record.
+
+Not done in B2: batches 2 to 5. That is the decision interview, adversarial document review, the feature ladder and the spec process in `size-the-work.md`; impact analysis, the reuse checklist, the review orchestrator's page and its explainer, architecture-invariant review with its big-picture pass, reviewing a pull request in a worktree, escape analysis, the feedback walk-through and handoff; extending, maintaining and adopting the workspace and the machine self-check; the tracker and git-host spines, the docs audit, the prompt retrospective and searching every source; the two tutorials, the playbook catalog, the how-to index and the request map; and the fix path's section, queued for slice Z.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -884,3 +913,7 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - B1, `INDEX.md`, cross-cutting chains: "Add a page" gains `README.md`; "Mark a page proven or unproven" gains `evals/cases/` and `evals/runs/`; "Change the eval harness or a grader" gains `evals/cases/`.
 - B1, `INDEX.md`, Topics: a row "Review a guidance page; a commit refused for a missing Instructions-review trailer" linking [the instruction review](../playbooks/instruction-review.md), and a row "A tutorial's runnable blocks; a push refused because a tutorial fails" linking [layout](../layout.md#tutorials).
 - B1, `docs/definition-of-done.md`: tag the rule on marking claims as for the contract; the test-first row applies where the change has behavior a test can show; the clean-build row applies where the work has a build, as the running-app row does.
+- B2, `INDEX.md`, Topics: rows "Test first; a regression test; red-green proof" linking [test first](../playbooks/test-first.md); "Debugging; finding a cause; a repro; a flaky failure" linking [debugging](../playbooks/debugging.md); "A prototype; a spike; trying screen variants" linking [the throwaway prototype](../playbooks/throwaway-prototype.md); "Restructuring code without changing behavior; replacing a repeated value everywhere" linking [safe refactor](../safe-refactor.md); "Where to look first; which lookup to use; writing down a finding" linking [the research ladder](../research-ladder.md).
+- B2, `AGENTS.md`, "Finding things": link [the research ladder](../research-ladder.md). "How work flows": a small refactor passes the same gate and follows [safe refactor](../safe-refactor.md), not fix a bug.
+- B2, `docs/playbooks/fix-a-bug.md`: link [test first](../playbooks/test-first.md) for the red-green proof and [debugging](../playbooks/debugging.md) for an unknown cause.
+- B2, `docs/definition-of-done.md`, the test-first row: for a change that fixes nothing, such as a refactor, the test that came first is a characterization test that passed before the change and still passes after it.
