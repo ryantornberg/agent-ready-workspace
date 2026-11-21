@@ -419,6 +419,8 @@ def shell_event(root, event, hooks, tool, cwd):
         facts["lease"] = shellfacts.lease(root, event.get("session"))
     if "working_copies" in needs:
         makers["working_copies"] = lambda: shellfacts.working_copies(root, event["command"], cwd)
+    if "targets" in needs:
+        makers["targets"] = lambda: shellfacts.targets(root, event["command"], cwd)
     return LazyEvent(facts, makers)
 
 
