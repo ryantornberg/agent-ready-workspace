@@ -23,6 +23,7 @@ from wslib import markdown
 from wslib.parts import finding
 
 KIND = "check"
+PAGE = "docs/parts.md#the-parts-here"   # the rule's page, which every finding names (criterion 34)
 
 MANIFEST = "workspace.json"
 CODE_SPAN = re.compile(r"(`+)(?!`)(.*?)(?<!`)\1(?!`)")

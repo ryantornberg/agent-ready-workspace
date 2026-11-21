@@ -15,6 +15,7 @@ from wslib import markdown
 from wslib.parts import finding
 
 KIND = "check"
+PAGE = "docs/layout.md"   # the rule's page, which every finding names (criterion 34)
 LIMIT = 15
 LINE = re.compile(r"^\s*(?:>\s*)?\*\*In short:?\*\*:?")
 

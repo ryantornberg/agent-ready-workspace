@@ -8,6 +8,7 @@ upstream that cannot be reached, or anything else that goes wrong prints nothing
 it is a heads-up, never a gate. See docs/decisions/0001-pin-code-repositories.md.
 """
 KIND = "hook"
+PAGE = "docs/decisions/0001-pin-code-repositories.md"   # the rule's page, which every finding names (criterion 34)
 EVENT = "session-start"
 MODE = "remind"
 NEEDS = ("pins",)

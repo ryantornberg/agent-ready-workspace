@@ -8,6 +8,7 @@ the session's own working copy, so the notice and the gate never disagree. It li
 ten pages at most, then a count. It prints nothing when no page is stale.
 """
 KIND = "hook"
+PAGE = "docs/layout.md"   # the rule's page, which every finding names (criterion 34)
 EVENT = "session-start"
 MODE = "remind"
 NEEDS = ("findings",)

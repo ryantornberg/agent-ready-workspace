@@ -20,6 +20,7 @@ find nothing.
 from wslib.parts import finding
 
 KIND = "check"
+PAGE = "docs/decisions/0002-hooks-remind-the-commit-enforces.md"   # the rule's page, which every finding names (criterion 34)
 HOW = ("Unstage it with: git restore --staged -- {path}. If this session wrote it with a shell command or a "
        "generator, record it by name with: python3 ws.py ledger --add {path}. If this is a person's own commit, "
        "close the ledger with: python3 ws.py ledger --close")

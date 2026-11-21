@@ -26,6 +26,7 @@ from wslib import markdown, symbols
 from wslib.parts import finding
 
 KIND = "check"
+PAGE = "INDEX.md#search-aliases"   # the rule's page, which every finding names (criterion 34)
 NAME = re.compile(r"^`([A-Za-z_$][\w$]*)`$")
 SPAN = re.compile(r"(?<!`)`([A-Za-z][A-Za-z0-9]*)`(?!`)")
 

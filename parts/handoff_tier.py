@@ -17,6 +17,7 @@ Config: "tiers", which the runner fills from the manifest. A case gives its own.
 import re
 
 KIND = "hook"
+PAGE = "docs/orchestration.md"   # the rule's page, which every finding names (criterion 34)
 EVENT = "before-handoff"
 
 TIERS = ("driver", "worker", "mechanical")
@@ -37,13 +38,13 @@ def decide(event, config):
         return f'"{match.group(1)}" is not a tier. {HOW}'
     binding = (config.get("tiers") or {}).get(tier)
     if not isinstance(binding, dict):
-        return f'the manifest\'s "tiers" binds nothing to the {tier} tier, so the task cannot be checked.'
+        return f'the manifest\'s "tiers" binds nothing to the {tier} tier, so the task cannot be checked. Set a model and effort for it in workspace.json.'
     for setting in ("model", "effort"):
         if setting not in event:
             continue   # this agent tool does not let a task set it
         want = binding.get(setting)
         if not isinstance(want, str) or not want.strip():
-            return f'the manifest\'s "tiers" gives the {tier} tier no {setting}, so the task cannot be checked.'
+            return f'the manifest\'s "tiers" gives the {tier} tier no {setting}, so the task cannot be checked. Set it in workspace.json.'
         got = event[setting]
         if got is None:
             return (f"the {tier} tier runs with {setting} {want}. Set it on the task: left unset, "

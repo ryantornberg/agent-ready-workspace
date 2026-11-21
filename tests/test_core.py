@@ -1051,11 +1051,13 @@ class AdoptionPathTests(Folder):
         self.git("commit", "-q", "--no-verify", "-m", "copy")
 
     def both(self):
-        """(exit code, error lines) of `check`, then of `check --staged`."""
+        """(exit code, error lines) of `check`, then of `check --staged`. Each line's page and re-run command are
+        left out: the two commands name themselves there."""
         results = []
         for args in (["check"], ["check", "--staged"]):
             code, output = self.ws(*args)
-            results.append((code, sorted(line for line in output.splitlines() if line.startswith("error:"))))
+            results.append((code, sorted(re.sub(r"  \[(\w+)\] .*$", r"  [\1]", line)
+                                         for line in output.splitlines() if line.startswith("error:"))))
         return tuple(results)
 
     def deny(self, term):
@@ -1235,7 +1237,7 @@ class AdoptionPathTests(Folder):
         code, output = self.ws("check")
         self.assertEqual(code, 1)
         # The edit also changes what the eval's guided arm is given, so eval_record fails too; count only the names.
-        errors = [row for row in output.splitlines() if row.startswith("error:") and not row.endswith("[eval_record]")]
+        errors = [row for row in output.splitlines() if row.startswith("error:") and "  [eval_record]" not in row]
         self.assertEqual(len(errors), 1, errors)
         self.assertIn("the contract names LedgerSweeper, which is not defined under src/", errors[0])
 

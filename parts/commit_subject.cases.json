@@ -1,0 +1,139 @@
+[
+  {
+    "name": "a conventional subject passes",
+    "files": {
+      "commit message": "fix(lease): keep the holder's start time\n\nBody.\n"
+    },
+    "changed": [],
+    "expect": []
+  },
+  {
+    "name": "a subject with no type fails",
+    "files": {
+      "commit message": "Update stuff\n"
+    },
+    "changed": [],
+    "expect": [
+      "matches none of the accepted formats"
+    ]
+  },
+  {
+    "name": "a type with no colon fails",
+    "files": {
+      "commit message": "feat add a thing\n"
+    },
+    "changed": [],
+    "expect": [
+      "matches none"
+    ]
+  },
+  {
+    "name": "a breaking change mark passes",
+    "files": {
+      "commit message": "feat(api)!: drop the old event shape\n"
+    },
+    "changed": [],
+    "expect": []
+  },
+  {
+    "name": "git's merge subject passes",
+    "files": {
+      "commit message": "Merge pull request #27 from octo/m3/c3\n"
+    },
+    "changed": [],
+    "expect": []
+  },
+  {
+    "name": "git's merge of a branch passes",
+    "files": {
+      "commit message": "Merge branch 'main' into m3/c3\n"
+    },
+    "changed": [],
+    "expect": []
+  },
+  {
+    "name": "git's revert subject passes",
+    "files": {
+      "commit message": "Revert \"feat: a thing\"\n\nThis reverts commit abc.\n"
+    },
+    "changed": [],
+    "expect": []
+  },
+  {
+    "name": "an autosquash subject passes",
+    "files": {
+      "commit message": "fixup! feat: a thing\n"
+    },
+    "changed": [],
+    "expect": []
+  },
+  {
+    "name": "comment lines before the subject are skipped",
+    "files": {
+      "commit message": "# Please enter the commit message\n\ndocs: a page\n"
+    },
+    "changed": [],
+    "expect": []
+  },
+  {
+    "name": "an empty message fails",
+    "files": {
+      "commit message": "\n# only a comment\n"
+    },
+    "changed": [],
+    "expect": [
+      "no subject line"
+    ]
+  },
+  {
+    "name": "a subject over 72 characters warns",
+    "files": {
+      "commit message": "docs: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+    },
+    "changed": [],
+    "expect": [
+      {
+        "message": "over 72",
+        "level": "warning"
+      }
+    ]
+  },
+  {
+    "name": "a format from the config replaces the default",
+    "files": {
+      "commit message": "ABC-12 add a thing\n"
+    },
+    "changed": [],
+    "config": {
+      "formats": [
+        "^[A-Z]+-[0-9]+ \\S"
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "with a config format, a conventional subject no longer passes",
+    "files": {
+      "commit message": "feat: a thing\n"
+    },
+    "changed": [],
+    "config": {
+      "formats": [
+        "^[A-Z]+-[0-9]+ \\S"
+      ]
+    },
+    "expect": [
+      "matches none"
+    ]
+  },
+  {
+    "name": "a snapshot with no commit message finds nothing",
+    "files": {
+      "README.md": "# x\n"
+    },
+    "changed": [
+      "README.md"
+    ],
+    "expect": []
+  }
+]
