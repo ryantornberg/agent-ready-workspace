@@ -204,6 +204,8 @@ A team that adopts the workspace may start with findings it cannot fix at once. 
 
 The files are machinery: they weaken a check, so they change through a pull request, like the check itself. The output of `check` counts the tolerated findings of each check, so they stay in sight. Baselines apply to `check` in its folder, staged and CI forms. The pre-push and commit-message checks take none. A check that judges only the lines a change adds, such as `line_cites`, finds nothing at a base, so its findings cannot be tolerated.
 
+A check that reads the history, such as `secret_scan`, keeps the findings it tolerates there in a file of its own, `baselines/<check>.history.json`, written by `python3 ws.py baseline --history`. `check --history --changed-from REF` tolerates an entry only when the history of the merge base with REF already has that finding. With no base, it tolerates nothing. It reads the history of the branch being checked, not every branch, so a token on another branch does not fail this one.
+
 ## The hook case runner
 
 A part's cases call its `decide` function with the facts already filled in. They cannot see the wiring, the launcher, an agent tool's payload, the lease file or git. The hook case runner can:

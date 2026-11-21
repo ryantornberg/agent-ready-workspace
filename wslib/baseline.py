@@ -19,6 +19,11 @@ since a warning fails nothing. A file that cannot be read tolerates nothing and 
 The files are machinery: they change through a pull request, like the checks they weaken. A check that judges only
 the lines a change adds, such as line_cites, finds nothing at a base, so its findings cannot be tolerated.
 `python3 ws.py baseline` writes them from the folder's current findings.
+
+A check that reads the history (`check --history`) keeps the findings it tolerates there in
+baselines/<check>.history.json, read from the working folder, under the same rule: the base is the history of the
+merge base with the commit `--changed-from` names, so a pull request cannot excuse a commit it brings. Each entry
+names one commit and one file, and never the secret itself. `python3 ws.py baseline --history` writes it.
 """
 import collections
 import hashlib
@@ -31,8 +36,10 @@ FOLDER = "baselines"
 FINGERPRINT = re.compile(r"^[0-9a-f]{16}$")
 
 
-def path_of(check):
-    return f"{FOLDER}/{check}.json"
+def path_of(check, history=False):
+    """A check's baseline file. Findings in the history, from `check --history`, have a file of their own, so that
+    rewriting a check's baseline from the folder never drops them."""
+    return f"{FOLDER}/{check}.history.json" if history else f"{FOLDER}/{check}.json"
 
 
 def fingerprint(check, found):
@@ -47,9 +54,9 @@ def record(check, findings):
     return {"tolerated": sorted(tolerated, key=lambda entry: (entry["path"], entry["message"]))}
 
 
-def read(snapshot, check):
+def read(snapshot, check, history=False):
     """(Counter of tolerated fingerprints, problem or None). A missing file is an empty baseline."""
-    path = path_of(check)
+    path = path_of(check, history)
     if not snapshot.is_file(path):
         return collections.Counter(), None
     text = snapshot.read(path)
@@ -94,18 +101,18 @@ def at_commit(root, ref, changed=()):
     return snapshots.Memory(files, changed=changed, links=links)
 
 
-def apply(snapshot, check, findings, at_base):
+def apply(snapshot, check, findings, at_base, history=False):
     """(findings that still count, how many were tolerated, findings about the baseline itself).
 
     at_base: a function that returns the check's findings at the base, or None when there is no base. It is called
     only when the baseline lists something."""
-    entries, problem = read(snapshot, check)
-    notes = [{"path": path_of(check), "line": 1, "message": problem, "level": "error"}] if problem else []
+    entries, problem = read(snapshot, check, history)
+    notes = [{"path": path_of(check, history), "line": 1, "message": problem, "level": "error"}] if problem else []
     base = None
     if entries:
         found_at_base = at_base()
         if found_at_base is None:
-            notes.append({"path": path_of(check), "line": 1, "level": "warning",
+            notes.append({"path": path_of(check, history), "line": 1, "level": "warning",
                           "message": "there is no base commit to compare with, or the check cannot run there, so this baseline tolerates nothing"})
         else:
             base = collections.Counter(fingerprint(check, found) for found in found_at_base if found["level"] == "error")
@@ -121,7 +128,7 @@ def apply(snapshot, check, findings, at_base):
                 brought += 1
             kept.append(found)
     if brought:
-        notes.append({"path": path_of(check), "line": 1, "level": "warning",
+        notes.append({"path": path_of(check, history), "line": 1, "level": "warning",
                       "message": f"{brought} finding(s) it lists are not tolerated, because the base does not have "
                                  f"them: a change cannot excuse a finding it brings"})
     return kept, tolerated, notes

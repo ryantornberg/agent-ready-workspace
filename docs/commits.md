@@ -19,13 +19,15 @@ A team sets its own formats in the manifest, such as `"formats": ["^[A-Z]+-[0-9]
 
 ## Credentials
 
-The secret scan reads every line a commit adds, at the commit against the last commit and in CI against the base branch. It matches the formats of common tokens and private keys: GitHub, AWS access key ids, private key blocks, Slack, Anthropic, OpenAI, Google API keys, Stripe live keys and npm tokens. In CI, `python3 ws.py check --history` reads every line every commit in the history added.
+The secret scan reads every line a commit adds, at the commit against the last commit and in CI against the base branch. It matches the formats of common tokens and private keys: GitHub, AWS access key ids, private key blocks, Slack, Anthropic, OpenAI, Google API keys, Stripe live keys and npm tokens. In CI, `python3 ws.py check --history` reads every line every commit in the branch's history added.
 
 A finding names the format and the first four characters only, so the output is safe to paste. If it fires:
 
 1. Take the value out of the file.
 2. Revoke the token with its issuer. A token that reached a pushed commit is exposed, and deleting it later leaves it in the history.
 3. Run `python3 ws.py check --staged` again.
+
+**A token that already reached the history** stays there: rewriting a shared history is refused here. Revoke it first. Then, in a pull request a person reviews, run `python3 ws.py baseline --history` and commit `baselines/secret_scan.history.json`. Each entry names one commit and one file, and never the token. CI tolerates an entry only when the base branch's history already has that finding, so a pull request cannot excuse a token it brings, even by adding its entry in the same change.
 
 A test value is built from pieces at run time, or written with JSON escapes in a cases file, so the file's text never holds a whole token.
 
