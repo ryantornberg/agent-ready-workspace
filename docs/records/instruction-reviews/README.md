@@ -39,3 +39,8 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-b2-orchestration.md](2026-11-21-b2-orchestration.md) | `docs/orchestration.md` | contradiction |
 | [2026-11-21-b2-readme.md](2026-11-21-b2-readme.md) | `README.md` | contradiction |
 | [2026-11-21-copilot-instructions.md](2026-11-21-copilot-instructions.md) | `.github/copilot-instructions.md` | contradiction |
+| [2026-11-21-c4-readme.md](2026-11-21-c4-readme.md) | `README.md` | step, placement, contradiction, enforcement |
+| [2026-11-21-c4-changing-the-machinery.md](2026-11-21-c4-changing-the-machinery.md) | `docs/changing-the-machinery.md` | contradiction, enforcement |
+| [2026-11-21-c4-parts.md](2026-11-21-c4-parts.md) | `docs/parts.md` | enforcement |
+| [2026-11-21-c4-decision-0004.md](2026-11-21-c4-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction |
+| [2026-11-21-c4-decision-0005.md](2026-11-21-c4-decision-0005.md) | `docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md` | enforcement, contradiction, trigger |

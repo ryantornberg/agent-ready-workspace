@@ -131,5 +131,222 @@
       "command": ""
     },
     "allow": true
+  },
+  {
+    "name": "a squash merge",
+    "event": {
+      "command": "gh pr merge 12 --squash"
+    },
+    "allow": false
+  },
+  {
+    "name": "a rebase merge",
+    "event": {
+      "command": "gh pr merge 12 --rebase --delete-branch"
+    },
+    "allow": false
+  },
+  {
+    "name": "the short squash flag",
+    "event": {
+      "command": "gh pr merge 12 -s"
+    },
+    "allow": false
+  },
+  {
+    "name": "the short rebase flag",
+    "event": {
+      "command": "gh pr merge -r 12"
+    },
+    "allow": false
+  },
+  {
+    "name": "a squash flag grouped with another short flag",
+    "event": {
+      "command": "gh pr merge 12 -ds"
+    },
+    "allow": false
+  },
+  {
+    "name": "a squash set to true",
+    "event": {
+      "command": "gh pr merge 12 --squash=true"
+    },
+    "allow": false
+  },
+  {
+    "name": "a squash merge with a repository named after the number",
+    "event": {
+      "command": "gh pr merge 12 -R owner/repo --squash"
+    },
+    "allow": false
+  },
+  {
+    "name": "a squash merge behind a wrapper",
+    "event": {
+      "command": "env GH_PROMPT_DISABLED=1 gh pr merge 12 --squash"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api merge whose method is squash",
+    "event": {
+      "command": "gh api -X PUT repos/owner/repo/pulls/12/merge -f merge_method=squash"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api merge whose method is rebase, with placeholders",
+    "event": {
+      "command": "gh api repos/{owner}/{repo}/pulls/12/merge -X PUT -F merge_method=rebase"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api merge whose method is read from a file",
+    "event": {
+      "command": "gh api -X PUT repos/owner/repo/pulls/12/merge -F merge_method=@method.txt"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api merge whose method is a variable",
+    "event": {
+      "command": "gh api -X PUT repos/owner/repo/pulls/12/merge -f merge_method=$METHOD"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api merge whose body comes from --input",
+    "event": {
+      "command": "gh api -X PUT repos/owner/repo/pulls/12/merge --input body.json"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api merge by full URL",
+    "event": {
+      "command": "gh api -X PUT https://api.github.com/repos/owner/repo/pulls/12/merge -f merge_method=squash"
+    },
+    "allow": false
+  },
+  {
+    "name": "a GraphQL merge with mergeMethod SQUASH",
+    "event": {
+      "command": "gh api graphql -f query='mutation { mergePullRequest(input: {pullRequestId: \"PR_1\", mergeMethod: SQUASH}) { clientMutationId } }'"
+    },
+    "allow": false
+  },
+  {
+    "name": "a GraphQL auto-merge with mergeMethod REBASE",
+    "event": {
+      "command": "gh api graphql -f query='mutation { enablePullRequestAutoMerge(input: {pullRequestId: \"PR_1\", mergeMethod: REBASE}) { clientMutationId } }'"
+    },
+    "allow": false
+  },
+  {
+    "name": "a GraphQL merge whose method is a variable",
+    "event": {
+      "command": "gh api graphql -f query='mutation($m: PullRequestMergeMethod) { mergePullRequest(input: {pullRequestId: \"PR_1\", mergeMethod: $m}) { clientMutationId } }' -f m=SQUASH"
+    },
+    "allow": false
+  },
+  {
+    "name": "a GraphQL query read from a file",
+    "event": {
+      "command": "gh api graphql -F query=@merge.graphql"
+    },
+    "allow": false
+  },
+  {
+    "name": "a merge with a merge commit, by its short flag",
+    "event": {
+      "command": "gh pr merge 12 -m --match-head-commit abc123"
+    },
+    "allow": true
+  },
+  {
+    "name": "a body that looks like a flag",
+    "event": {
+      "command": "gh pr merge 12 --merge -b --squash"
+    },
+    "allow": true
+  },
+  {
+    "name": "a subject given in a group of short flags",
+    "event": {
+      "command": "gh pr merge 12 --merge -dt --rebase"
+    },
+    "allow": true
+  },
+  {
+    "name": "a squash set to false",
+    "event": {
+      "command": "gh pr merge 12 --merge --squash=false"
+    },
+    "allow": true
+  },
+  {
+    "name": "an api merge whose method is merge",
+    "event": {
+      "command": "gh api -X PUT repos/owner/repo/pulls/12/merge -f merge_method=merge"
+    },
+    "allow": true
+  },
+  {
+    "name": "an api merge that names no method, which GitHub makes a merge commit",
+    "event": {
+      "command": "gh api -X PUT repos/owner/repo/pulls/12/merge -f sha=abc123"
+    },
+    "allow": true
+  },
+  {
+    "name": "reading whether a pull request merged",
+    "event": {
+      "command": "gh api repos/owner/repo/pulls/12/merge"
+    },
+    "allow": true
+  },
+  {
+    "name": "a GraphQL merge with mergeMethod MERGE",
+    "event": {
+      "command": "gh api graphql -f query='mutation { mergePullRequest(input: {pullRequestId: \"PR_1\", mergeMethod: MERGE}) { clientMutationId } }'"
+    },
+    "allow": true
+  },
+  {
+    "name": "a GraphQL query that merges nothing",
+    "event": {
+      "command": "gh api graphql -f query='query { viewer { login } }'"
+    },
+    "allow": true
+  },
+  {
+    "name": "a squash merge quoted in a commit message",
+    "event": {
+      "command": "git commit -m 'never run gh pr merge --squash'"
+    },
+    "allow": true
+  },
+  {
+    "name": "an api write whose path is a variable",
+    "event": {
+      "command": "gh api -X PUT repos/owner/repo/pulls/$N/merge -f merge_method=squash"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api write whose whole path is a variable, with its body from a file",
+    "event": {
+      "command": "gh api -X PUT $P --input body.json"
+    },
+    "allow": false
+  },
+  {
+    "name": "an api read whose path is a variable",
+    "event": {
+      "command": "gh api repos/owner/repo/pulls/$N"
+    },
+    "allow": true
   }
 ]

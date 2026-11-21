@@ -128,7 +128,7 @@
     },
     {
       "use": "no_admin_merge",
-      "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in."
+      "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in; a squash or rebase merge drops the branch's commits, and the proof anchors pinned to them, from main's history."
     },
     {
       "use": "secret_scan",
@@ -150,6 +150,10 @@
     {
       "use": "no_discard",
       "why": "While another live session holds the main working copy, a hard reset, forced checkout, rebase or stash drop by this one erases its uncommitted work."
+    },
+    {
+      "use": "push_lease",
+      "why": "While another live session holds the main working copy, a push from it by this one publishes that session's unfinished commits."
     },
     {
       "use": "browser_isolation",

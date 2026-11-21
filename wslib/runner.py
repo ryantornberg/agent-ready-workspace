@@ -46,6 +46,7 @@ from . import events
 from . import gitcall
 from . import lease as leases
 from . import ledger as ledgers
+from . import merge as merges
 from . import parts as partlib
 from . import pins as pinlib
 from . import shellfacts
@@ -719,6 +720,17 @@ def command_pins(root, _args):
     return 1 if counts.get("failed") else 0
 
 
+def command_merge(root, args):
+    """Merge one pull request on GitHub once CI passed on its head commit (wslib/merge.py)."""
+    if not ROOT.samefile(root):
+        raise partlib.PartError(f"merge acts only on the repository that holds this ws.py ({ROOT}), so --root "
+                                f"cannot point it at another one")
+    try:
+        return merges.merge(root, args.number)
+    except merges.MergeError as error:
+        raise partlib.PartError(str(error))
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):  # a finding may quote text the console cannot encode
         if hasattr(stream, "reconfigure"):
@@ -750,6 +762,9 @@ def main(argv=None):
     hook.add_argument("--tool", help="read this agent tool's own payload through its adapter, such as claude-code")
     commands.add_parser("rules", help="print the rules register, with a count per kind of tag")
     commands.add_parser("pins", help="check out each pinned repository whose remote answers; skip the rest")
+    merge = commands.add_parser("merge", help="merge a pull request with a merge commit, once every required check "
+                                              "passed on its head commit")
+    merge.add_argument("number", type=int, help="the pull request's number; the repository is always origin's")
     ledger = commands.add_parser("ledger")
     ledger.add_argument("--add", nargs="+", metavar="PATH", help="record files this session wrote another way")
     ledger.add_argument("--close", action="store_true", help="close the ledger, for a person's own commit")
@@ -761,7 +776,8 @@ def main(argv=None):
         return command_session(root, args)      # never fails, so not under the error handling below
     try:
         return {"list": command_list, "selftest": command_selftest, "check": command_check, "baseline": command_baseline,
-                "hook": command_hook, "ledger": command_ledger, "rules": command_rules, "pins": command_pins}[args.command](root, args)
+                "hook": command_hook, "ledger": command_ledger, "rules": command_rules, "pins": command_pins,
+                "merge": command_merge}[args.command](root, args)
     except (partlib.PartError, NotADirectoryError, RuntimeError) as error:
         print(f"ws: {error}", file=sys.stderr)
         return 2

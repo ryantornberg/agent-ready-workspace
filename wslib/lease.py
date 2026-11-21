@@ -307,35 +307,67 @@ def fast_forward(root, cwd, session, budget=FETCH_BUDGET):
         here = ledgers.working_copy(os.path.join(os.path.realpath(cwd), "probe"), common)
         if here is None or not ledgers._same(here[0], top):
             return None
-        deadline = time.monotonic() + budget
-
-        def git(*args):
-            left = deadline - time.monotonic()
-            return None if left < 0.5 else gitcall.run(top, *args, timeout=left)
-
-        head = git("symbolic-ref", "-q", "HEAD")
-        if head is None or head.strip() != f"refs/heads/{BRANCH}" or ledgers.replaying(common):
-            return None
-        status = git("status", "--porcelain", "--untracked-files=no", "--ignore-submodules=dirty")
-        if status is None:
-            return None
-        if status.strip():
-            return ("The main working copy has uncommitted changes to tracked files, so it was not brought up to "
-                    "date with origin/main. Commit or set them aside, then pull.")
-        lease, live = query(root)
-        if lease and live and lease.get("session") != session:
-            return (f"Another live agent session ({str(lease.get('session'))[:8]}) holds the main working copy, so it "
-                    "was not brought up to date with origin/main. Work in a worktree of your own.")
-        if git("fetch", "-q", "--no-tags", "origin", f"+refs/heads/{BRANCH}:refs/remotes/origin/{BRANCH}") is None:
-            return None
-        if git("merge", "--ff-only", "-q", f"refs/remotes/origin/{BRANCH}") is not None:
-            return None
-        ahead = git("log", "--format=%h %s", "-3", f"refs/remotes/origin/{BRANCH}..HEAD") or ""
-        if ahead.strip():
-            named = "; ".join(line for line in ahead.splitlines() if line.strip())
-            return (f"main has commits that are not on origin/main ({named}), so it could not fast-forward. They "
-                    "are a person's unpushed work: report them, and do not move them.")
-        return ("main could not fast-forward to origin/main: another git process may hold its lock, or uncommitted "
-                "files clash with incoming ones.")
+        outcome, message = bring_up_to_date(top, common, lambda lease: lease.get("session") == session, budget)
+        return message if outcome == "held" else None
     except Exception:
         return None
+
+
+def update_main(root, own_pid=None, budget=FETCH_BUDGET):
+    """Bring the main working copy up to origin/main after a merge, under the session-start conditions, wherever
+    the caller runs. own_pid: the caller's agent tool process, whose own lease does not hold it back. Returns
+    (outcome, what to tell the caller); outcome is "moved", "current", "held" or "quiet". Never raises."""
+    try:
+        found = main_copy(root)
+        if found is None:
+            return "quiet", "There is no main working copy to bring up to date."
+        top, common = found
+        return bring_up_to_date(top, common, lambda lease: own_pid is not None and lease.get("pid") == own_pid,
+                                budget)
+    except Exception as error:
+        return "quiet", f"The main working copy was not brought up to date: {error}."
+
+
+def bring_up_to_date(top, common, mine, budget=FETCH_BUDGET):
+    """Fast-forward main in the main working copy at top to origin/main, only when it is on main, has no tracked
+    change and no merge or rebase in progress, and no other live session holds its lease. mine(lease): whether a
+    lease is the caller's own. Returns (outcome, message): "moved" or "current" when main is at origin/main;
+    "held" when it was left alone for a reason the caller should hear (changes, another session, unpushed commits,
+    a clash); "quiet" when it was left alone because it is elsewhere or git did not answer."""
+    deadline = time.monotonic() + budget
+
+    def git(*args):
+        left = deadline - time.monotonic()
+        return None if left < 0.5 else gitcall.run(top, *args, timeout=left)
+
+    head = git("symbolic-ref", "-q", "HEAD")
+    if head is None or head.strip() != f"refs/heads/{BRANCH}":
+        where = head.strip()[len("refs/heads/"):] if head and head.strip().startswith("refs/heads/") else None
+        return "quiet", (f"The main working copy is on {where}, not {BRANCH}, so it was left alone." if where else
+                         f"The main working copy is not on {BRANCH}, so it was left alone.")
+    replay = ledgers.replaying(common)
+    if replay:
+        return "quiet", f"The main working copy is in the middle of a merge or rebase ({replay}), so it was left alone."
+    status = git("status", "--porcelain", "--untracked-files=no", "--ignore-submodules=dirty")
+    if status is None:
+        return "quiet", "git did not answer about the main working copy, so it was left alone."
+    if status.strip():
+        return "held", ("The main working copy has uncommitted changes to tracked files, so it was not brought up to "
+                        "date with origin/main. Commit or set them aside, then pull.")
+    lease, live = query(top)
+    if lease and live and not mine(lease):
+        return "held", (f"Another live agent session ({str(lease.get('session'))[:8]}) holds the main working copy, "
+                        "so it was not brought up to date with origin/main. Work in a worktree of your own.")
+    before = git("rev-parse", "HEAD")
+    if git("fetch", "-q", "--no-tags", "origin", f"+refs/heads/{BRANCH}:refs/remotes/origin/{BRANCH}") is None:
+        return "quiet", "The fetch of origin/main failed, so the main working copy was left alone."
+    if git("merge", "--ff-only", "-q", f"refs/remotes/origin/{BRANCH}") is not None:
+        after = git("rev-parse", "HEAD")
+        return ("current" if before and after and before.strip() == after.strip() else "moved"), None
+    ahead = git("log", "--format=%h %s", "-3", f"refs/remotes/origin/{BRANCH}..HEAD") or ""
+    if ahead.strip():
+        named = "; ".join(line for line in ahead.splitlines() if line.strip())
+        return "held", (f"main has commits that are not on origin/main ({named}), so it could not fast-forward. They "
+                        "are a person's unpushed work: report them, and do not move them.")
+    return "held", ("main could not fast-forward to origin/main: another git process may hold its lock, or "
+                    "uncommitted files clash with incoming ones.")

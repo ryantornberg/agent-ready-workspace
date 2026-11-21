@@ -1,0 +1,586 @@
+[
+  {
+    "name": "in the main copy, while another live session holds the lease, a push is refused",
+    "event": {
+      "command": "git push -u origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a bare push from the main copy is refused",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push of another branch from the main copy is refused",
+    "event": {
+      "command": "git push origin m3/c4",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push to main from the main copy is refused",
+    "event": {
+      "command": "git push origin main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push after another command is refused",
+    "event": {
+      "command": "git commit -m 'a fix' && git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push inside sh -c is refused",
+    "event": {
+      "command": "sh -c 'git push origin HEAD'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push naming the main copy with -C from a worktree is refused",
+    "event": {
+      "command": "git -C /m push origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/m": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push after a leading cd into the main copy is refused",
+    "event": {
+      "command": "cd /m && git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/m": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a lease that cannot be read counts as held",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "unknown",
+        "holder": null,
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a folder the runner could not place is refused",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "unresolved": "git did not answer in time"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a folder the parser could not place is refused",
+    "event": {
+      "command": "cd \"$D\" && git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a git subcommand that is a variable is refused",
+    "event": {
+      "command": "git $ACTION origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a git alias it does not read is refused",
+    "event": {
+      "command": "git publish",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "arguments supplied at run time are refused",
+    "event": {
+      "command": "echo origin | xargs git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a dry run from the main copy passes",
+    "event": {
+      "command": "git push --dry-run origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in a linked worktree, while another live session holds the lease, a push passes",
+    "event": {
+      "command": "git push -u origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a push in another repository passes",
+    "event": {
+      "command": "git -C /elsewhere push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        "/elsewhere": {
+          "kind": "other",
+          "top": "/elsewhere"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "other git commands in the main copy pass",
+    "event": {
+      "command": "git status && git log --oneline -3",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "with the lease free, a push from the main copy passes",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "the lease holder itself may push from the main copy",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "mine",
+        "holder": {
+          "session": "s-this",
+          "pid": 7,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "with the lease held by a dead session, a push from the main copy passes",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-dead",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a push quoted in a commit message passes",
+    "event": {
+      "command": "git commit -m 'then git push'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "no command at all",
+    "event": {
+      "command": "",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": true
+  }
+]

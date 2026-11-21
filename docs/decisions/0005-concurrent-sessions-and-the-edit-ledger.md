@@ -6,7 +6,7 @@ last-reviewed: 2026-11-21
 
 # 0005: Concurrent sessions and the edit ledger
 
-**In short:** the first live agent session that edits a tracked file in the main working copy holds a lease on it. Any other live session is refused there and sent to a worktree of its own. A person working with one session sees no change. The lease is taken over only when its holder is dead, or when the main copy has nothing to protect and the lease is at least five seconds old. It is released when its session ends. While another live session holds it, git commands that would drop that session's work are refused.
+**In short:** the first live agent session that edits a tracked file in the main working copy holds a lease on it. Any other live session is refused there and sent to a worktree of its own. A person working with one session sees no change. The lease is taken over only when its holder is dead, or when the main copy has nothing to protect and the lease is at least five seconds old. It is released when its session ends. While another live session holds it, git commands that would drop that session's work, and a push from the main working copy, are refused.
 
 ## Context
 
@@ -59,11 +59,15 @@ The probe shares one deadline of 1.5 seconds across its git calls, runs them wit
 
 The runner tells it which working copy each git call acts on, read from the command's `-C`, `--git-dir`, `--work-tree`, their variables and a leading `cd` or `pushd`, and asked of git; see [decision 0004](0004-the-hook-contract.md), "Shell events". So `cd <main>; git reset --hard` from a worktree is judged as a reset in the main copy.
 
+**The push guard.** Amended 2026-11-21, M3 slice C4. A push from the main working copy can publish the lease holder's unpushed commits, which it has not finished. So the `push_lease` hook refuses a `git push` whose folder is the main working copy, under the same condition as the discard guard: only while the lease is held by a live session other than this one, or cannot be read. A dry run passes, since it publishes nothing. A push from a linked worktree passes. So does a push in another repository. A push whose folder cannot be placed, and a command the guard cannot judge, are refused. A session that needs to push works in a worktree of its own. The guard does not judge what a push from a worktree sends: every working copy shares one set of branches, so a worktree's push of the branch the main copy has checked out, or of all branches, can still publish the holder's commits.
+
+**The merge helper and the lease.** Amended 2026-11-21, M3 slice C4. `python3 ws.py merge NUMBER` merges a pull request on GitHub, so no working copy takes part in the merge and the lease does not bar it. After the merge it brings the main working copy up to date under the conditions of the start-of-session fast-forward: on main, no tracked change, no merge or rebase in progress, and no other live holder. Unlike that fast-forward, it acts from any working copy, and it says why it held back in every case. A holder whose process id is the caller's own Claude Code process, as `CLAUDE_PID` names it, does not hold it back. Under Codex the helper cannot tell its own process, so any live holder holds it back, the caller's own lease included. See [changing the machinery](../changing-the-machinery.md#the-path-for-a-machinery-change).
+
 ## What it gave up
 
 - **An accepted race.** A holder whose edit cleared the hook a moment before a takeover, or sat on a permission prompt past the minimum age, may get that one edit in. Its next commit is refused by the ledger, and it moves to a worktree.
 - **A shell write takes no lease.** It does not pass the edit hook. The lease check at commit, which would close that, is in the plan's "Later".
-- **Worktree sessions are recorded nowhere.** A session in a worktree takes no lease, so the discard guard cannot tell that one is working there. Nothing stops the lease holder from dropping a worktree session's stash or removing its worktree. M5's worktree work may record them.
+- **Worktree sessions are recorded nowhere.** A session in a worktree takes no lease, so the discard and push guards cannot tell that one is working there. Nothing stops the lease holder from dropping a worktree session's stash or removing its worktree. M5's worktree work may record them.
 - **Codex on Windows** cannot hold a lease until a recorded run shows where its process id is.
 
 ## Rejected
