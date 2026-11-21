@@ -31,3 +31,10 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-b1-orchestration.md](2026-11-21-b1-orchestration.md) | `docs/orchestration.md` | contradiction |
 | [2026-11-21-b1-parts.md](2026-11-21-b1-parts.md) | `docs/parts.md` | contradiction |
 | [2026-11-21-b1-readme.md](2026-11-21-b1-readme.md) | `README.md` | contradiction |
+| [2026-11-21-b2-test-first.md](2026-11-21-b2-test-first.md) | `docs/playbooks/test-first.md` | trigger, placement |
+| [2026-11-21-b2-debugging.md](2026-11-21-b2-debugging.md) | `docs/playbooks/debugging.md` | step, trigger, enforcement |
+| [2026-11-21-b2-throwaway-prototype.md](2026-11-21-b2-throwaway-prototype.md) | `docs/playbooks/throwaway-prototype.md` | contradiction, step, trigger |
+| [2026-11-21-b2-safe-refactor.md](2026-11-21-b2-safe-refactor.md) | `docs/safe-refactor.md` | contradiction, step, trigger |
+| [2026-11-21-b2-research-ladder.md](2026-11-21-b2-research-ladder.md) | `docs/research-ladder.md` | step, contradiction, trigger |
+| [2026-11-21-b2-orchestration.md](2026-11-21-b2-orchestration.md) | `docs/orchestration.md` | contradiction |
+| [2026-11-21-b2-readme.md](2026-11-21-b2-readme.md) | `README.md` | contradiction |

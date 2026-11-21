@@ -102,7 +102,7 @@ The commit check reads the staged pages, the staged manifest and the staged part
 
 ## Proven and unproven pages
 
-A page marked proven has a real run on record and an eval in which it beats both the bare model and two lines; an unproven page names the milestone that is to prove it. See [decision 0006](docs/decisions/0006-what-proven-means.md). The `proof` check holds this table to the pages' front matter.
+A page marked proven has a real run on record and an eval in which it beats both the bare model and two lines; an unproven page names the milestone that is to prove it. See [decision 0006](docs/decisions/0006-what-proven-means.md). The `proof` check holds this table to the pages' proof marks: a page's front matter, or the proof line under a merged section's heading.
 
 | Page | State | Evidence or milestone |
 |---|---|---|
@@ -113,8 +113,14 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/changing-the-machinery.md](docs/changing-the-machinery.md) | unproven | M4 |
 | [docs/browsers.md](docs/browsers.md) | unproven | M6 |
 | [docs/playbooks/instruction-review.md](docs/playbooks/instruction-review.md) | unproven | M4 |
+| [docs/orchestration.md#delegating](docs/orchestration.md#delegating) | unproven | M4 |
+| [docs/playbooks/test-first.md](docs/playbooks/test-first.md) | unproven | M4 |
+| [docs/playbooks/debugging.md](docs/playbooks/debugging.md) | unproven | M4 |
+| [docs/playbooks/throwaway-prototype.md](docs/playbooks/throwaway-prototype.md) | unproven | M4 |
+| [docs/safe-refactor.md](docs/safe-refactor.md) | unproven | M4 |
+| [docs/research-ladder.md](docs/research-ladder.md) | unproven | M4 |
 
-Proven: 1. Unproven: 6.
+Proven: 1. Unproven: 12.
 
 ## What stays prose
 

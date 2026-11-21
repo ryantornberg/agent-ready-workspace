@@ -40,14 +40,36 @@ A task runs at the driver tier, whatever its size, when it:
 
 Work *about* such a change is not stakes. Listing the callers of a hook is still mechanical.
 
+## Delegating
+
+Proof: unproven, prove-by M4.
+
+Delegating saves context, not tokens. A helper reads widely so the main session does not have to. The bill drops only when the helper runs on a cheaper tier or at lower effort.
+
+Delegate when the reading is wide and the answer is short. Keep the work when it is small or bound up with what you are editing.
+
+| The work | Delegate? |
+|---|---|
+| Reading several files you will not edit, to answer one question | Yes, at the mechanical tier. |
+| A sweep: every caller of a function, every use of a name, collecting check output | Yes, at the mechanical tier. |
+| Several questions that do not depend on each other | Yes, one helper each, run in parallel. |
+| A review or red team the plan or a playbook calls for | Yes, to a fresh session, as [fresh context for critics](#fresh-context-for-critics) says. |
+| A slice of an approved plan | Yes, at the tier the plan names. |
+| An exact name or a known file | No. Look it up yourself, as the [research ladder](research-ladder.md) says. |
+| A handful of tool calls | No. It is cheaper done than delegated. |
+| Work tightly bound to the change you are making | No. |
+| Checking your own work before you report it | No. See below. |
+
+- **One helper per job.** Do not chain helpers on tightly coupled work, and do not redo work a helper returned.
+- **Name the shape of the return.** Say what comes back and how long it may be: a table of file, line and finding, a yes or no with its evidence, or a list of at most ten items. Ask for each claim marked verified or inferred, so you know which ones to check.
+- **Write down what must outlive the session.** A helper's report reaches only you, and it ends with the session. Before you finish, put each finding that matters in the record your task names, such as the plan's results or a fix record. A finding that belongs on a guidance page goes through the [research ladder's offer](research-ladder.md#offer-to-write-a-finding-down), and is written there only on a yes.
+- **Checking your own work stays in the main session.** When you decide to verify something, such as running the tests or reading a changed caller, do it yourself. A helper's check comes back as a claim, not as a result you saw. A review the plan or a playbook calls for is different: it goes to a fresh session.
+
 ## Handing work off
 
 - **Every handoff names its tier.** A hand-off plan names one per slice. A delegated task starts its prompt with `Tier: driver`, `Tier: worker` or `Tier: mechanical`, and sets the model and effort from the binding.
-- **A delegated task carries** one tight question, the shape of the answer, and what is already ruled out.
-- **A helper returns conclusions**: file, line and finding. It never returns whole files. Anything that must outlive the session is written down.
-- **Delegating saves context, not tokens.** A helper reads widely so the main session does not have to. The bill drops only when the helper runs on a cheaper tier or at lower effort.
-- **Keep small work in the main session.** A handful of tool calls is cheaper done than delegated.
-- **One helper per job.** Run helpers in parallel only on independent work. Do not chain helpers on tightly coupled work, and do not redo work a helper returned.
+- **A delegated task carries** one tight question, the [shape of the answer](#delegating), and what is already ruled out.
+- **A helper returns conclusions**: file, line and finding. It never returns whole files.
 
 ## Fresh context for critics
 
@@ -65,6 +87,8 @@ A reviewer or a red team never shares the author's session. It gets the artifact
 | A delegated task's prompt starts with its tier. | `handoff_tier#no tier named` |
 | A delegated task runs at its tier's model and effort, as the binding sets them. | `handoff_tier#a model off the binding`, `handoff_tier#an effort off the binding` |
 | A slice that changes a gate, any other machinery path, the contract or text an outsider reads runs at the driver tier. | `prose` |
+| One helper per job: never chain helpers on tightly coupled work, and never redo work a helper returned. | `prose` |
+| Checking your own work stays in the main session; it is never delegated. | `prose` |
 | A reviewer or red team works in a fresh session, without the author's conclusions. | `prose` |
 | An unattended run stops after the fix rounds its plan allows, or three when it sets none, then freezes and reports. | `prose` |
 
