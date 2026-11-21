@@ -87,18 +87,21 @@ The facts are worked out only for a hook that needs them, only for the git and g
 | Part | May use, and why |
 |---|---|
 | `deny_list` | `os`, `open`, `codecs`, `wslib.snapshot`: it reads the private list from the file `WS_DENY_LIST` names, outside the repository, which no snapshot holds, decodes it, and checks a commit message as a one-file snapshot. |
-| `no_admin_merge` | `wslib.shell`: it reads the command line with the shell parser it shares with `no_stage_all`, instead of a copy, so both hooks follow the same separators, wrappers and quoting. The eval hash covers that module wherever a case grades a hook. |
+| `no_admin_merge` | `wslib.shell`: it reads the command line with the shell parser it shares with `no_stage_all`, instead of a copy, so both hooks follow the same separators, wrappers and quoting, and reads a `gh api` call's method and fields from it. The eval hash covers that module wherever a case grades a hook. |
 | `eval_record` | `types`, `exec`, `compile`, `__dict__`: it loads `evals/proofkeys.py` from the snapshot's text, as `grade.py` loads a hook's file, so the proof keys it strips before hashing are exactly those the eval runner strips (decision record 0006). |
 | `page_kinds` | `types`, `exec`, `compile`, `__dict__`: it loads the same file from the snapshot, to refuse a proof key in any form but its exact one. |
 | `proof` | `types`, `exec`, `compile`, `__dict__`: it reads the proof marks through the same file. It also asks the snapshot for the base commit's files, other commits' files and ancestry, which the engine reads with git (`wslib/snapshot.py`). |
 | `no_stage_all` | `wslib.shell`: the same shared parser. The eval grader runs this hook, so the module it imports is hashed with it and a change to the parser stales the eval records it could change. |
 | `no_discard` | `wslib.shell`: the same shared parser, to find each git call and the folder its facts are keyed by. The eval hashes no case that grades this hook, so a parser gap it finds is handled in its own file until slice Z. |
+| `push_lease` | `wslib.shell`: the same shared parser, to find each `git push` and the folder its facts are keyed by, as `no_discard` does. |
 
 Amended 2026-11-18, M3 slice A3: the snapshot gained the history the proof checks judge a change by (the base commit's files, a commit's files, ancestry and the manifest's `building` list when a file was added), read by the engine in a fixed number of git processes; and three parts load `evals/proofkeys.py` from the snapshot, as the table says.
 
 Amended 2026-11-18, M3 slice A0: the parser moved from `no_stage_all.py` into `wslib/shell.py`, with the eval hash extended to it, so `no_admin_merge` no longer loads another part's file with `exec`.
 
 Amended 2026-11-21, M3 slice C3: before-shell hooks may declare `NEEDS`, and the runner adds the session, the lease as it stands, each git call's working copy and each gh call's and push's target, as "Shell events" says. The discard guard reads the command with `wslib/shell.py`, as its row in the table says. A `post-checkout` git hook copies the local settings file into a new linked worktree.
+
+Amended 2026-11-21, M3 slice C4: the table gained `push_lease`, which uses the shared parser as `no_discard` does, and `no_admin_merge`'s row now says it reads a `gh api` call's method and fields from the parser.
 
 Amended 2026-11-21, M3 slice B1: a check's `pushed` commits carry their whole message, their tree as `files`, read when a part asks, and whether a merge is being made. The commit-msg hook gives a check the commit being made in that shape, and `ws.py check --commits BASE..HEAD` runs the commit-message checks over each commit of a range, for CI. The pre-push hook also runs the runnable blocks of each tutorial a push to main changes, in a fresh clone. An exception to `wslib/gitcall.py`: these reads of commits, like the runner's other reads at the push, call git directly. They read only local objects; the tutorial's clone and checkout have a time limit.
 

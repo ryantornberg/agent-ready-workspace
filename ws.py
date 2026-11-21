@@ -14,6 +14,7 @@
     python3 ws.py ledger --add PATH ...      # record files this session wrote another way, by name
     python3 ws.py ledger --close             # close it, for a person's own commit
     python3 ws.py ledger --committed         # drop the last commit's paths (the post-commit hook)
+    python3 ws.py merge NUMBER               # merge a pull request with a merge commit, once CI passed on its head
 
 The engine is the folder wslib/; this file only starts it. wslib/runner.py says how the commands work.
 """

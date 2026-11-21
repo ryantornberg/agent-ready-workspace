@@ -1,0 +1,162 @@
+{
+  "about": "gh's answers for ws.py merge's tests (tests/test_merge.py). 'recorded' holds real answers from gh 2.96.0 on this repository, 2026-11-21: pull request 32, its head commit c57ded3 and its merge commit ffbdc3d. Large API answers are trimmed to the fields the helper reads. 'made_up' holds answers no safe read could record, each with the reason; the tests say which they use.",
+  "recorded": {
+    "view": {
+      "call": [
+        "gh",
+        "pr",
+        "view",
+        "32",
+        "-R",
+        "github.com/ryantornberg/agent-ready-workspace",
+        "--json",
+        "number,state,isDraft,baseRefName,headRefName,headRefOid,isCrossRepository,url"
+      ],
+      "exit": 0,
+      "stdout": "{\"baseRefName\":\"main\",\"headRefName\":\"m3/b1\",\"headRefOid\":\"c57ded34de5d96d5fc296d4a756bf26993728781\",\"isCrossRepository\":false,\"isDraft\":false,\"number\":32,\"state\":\"MERGED\",\"url\":\"https://github.com/ryantornberg/agent-ready-workspace/pull/32\"}\n",
+      "stderr": ""
+    },
+    "view_missing": {
+      "call": [
+        "gh",
+        "pr",
+        "view",
+        "9999",
+        "-R",
+        "github.com/ryantornberg/agent-ready-workspace",
+        "--json",
+        "number,state,isDraft,baseRefName,headRefName,headRefOid,isCrossRepository,url"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "GraphQL: Could not resolve to a PullRequest with the number of 9999. (repository.pullRequest)\n"
+    },
+    "branch_rule": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/branches/main"
+      ],
+      "exit": 0,
+      "stdout": "{\"name\": \"main\", \"protected\": true, \"protection\": {\"enabled\": true, \"required_status_checks\": {\"checks\": [{\"app_id\": 15368, \"context\": \"check (ubuntu-latest, 3.13)\"}, {\"app_id\": 15368, \"context\": \"check (macos-latest, 3.9)\"}, {\"app_id\": 15368, \"context\": \"check (macos-latest, 3.13)\"}, {\"app_id\": 15368, \"context\": \"check (windows-latest, 3.9)\"}, {\"app_id\": 15368, \"context\": \"check (windows-latest, 3.13)\"}], \"contexts\": [\"check (ubuntu-latest, 3.13)\", \"check (macos-latest, 3.9)\", \"check (macos-latest, 3.13)\", \"check (windows-latest, 3.9)\", \"check (windows-latest, 3.13)\"], \"enforcement_level\": \"non_admins\"}}}\n",
+      "stderr": ""
+    },
+    "rulesets": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/rules/branches/main"
+      ],
+      "exit": 0,
+      "stdout": "[]",
+      "stderr": ""
+    },
+    "check_runs": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/commits/c57ded34de5d96d5fc296d4a756bf26993728781/check-runs?per_page=100"
+      ],
+      "exit": 0,
+      "stdout": "{\"check_runs\": [{\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838256, \"name\": \"check (ubuntu-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838211, \"name\": \"check (windows-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838186, \"name\": \"check (windows-latest, 3.9)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838121, \"name\": \"check (macos-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838022, \"name\": \"check (macos-latest, 3.9)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970837927, \"name\": \"cold-clone (ubuntu-latest)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970837819, \"name\": \"cold-clone (macos-latest)\", \"status\": \"completed\"}], \"total_count\": 7}\n",
+      "stderr": ""
+    },
+    "statuses": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/commits/c57ded34de5d96d5fc296d4a756bf26993728781/status?per_page=100"
+      ],
+      "exit": 0,
+      "stdout": "{\"sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"state\": \"pending\", \"statuses\": [], \"total_count\": 0}\n",
+      "stderr": ""
+    },
+    "merged": {
+      "call": [
+        "gh",
+        "pr",
+        "view",
+        "32",
+        "-R",
+        "github.com/ryantornberg/agent-ready-workspace",
+        "--json",
+        "state,mergeCommit"
+      ],
+      "exit": 0,
+      "stdout": "{\"mergeCommit\":{\"oid\":\"ffbdc3db3567eecba70ceee18b0321660c256f96\"},\"state\":\"MERGED\"}\n",
+      "stderr": ""
+    },
+    "commit": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/commits/ffbdc3db3567eecba70ceee18b0321660c256f96"
+      ],
+      "exit": 0,
+      "stdout": "{\"parents\": [{\"sha\": \"166bbc741126173b655bb2a044bd0e796380396f\"}, {\"sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\"}], \"sha\": \"ffbdc3db3567eecba70ceee18b0321660c256f96\"}\n",
+      "stderr": ""
+    },
+    "commit_one_parent": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/commits/c57ded34de5d96d5fc296d4a756bf26993728781"
+      ],
+      "exit": 0,
+      "stdout": "{\"parents\": [{\"sha\": \"e92db18998716fb09ee3cd275c37e45e67e5cab1\"}], \"sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\"}\n",
+      "stderr": ""
+    },
+    "delete_missing": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "-X",
+        "DELETE",
+        "repos/ryantornberg/agent-ready-workspace/git/refs/heads/m3/no-such-branch-c4-probe"
+      ],
+      "exit": 1,
+      "stdout": "{\"message\":\"Reference does not exist\",\"documentation_url\":\"https://docs.github.com/rest/git/refs#delete-a-reference\",\"status\":\"422\"}",
+      "stderr": "gh: Reference does not exist (HTTP 422)\n"
+    }
+  },
+  "made_up": {
+    "merge": {
+      "why": "a real merge cannot be recorded without merging; gh prints nothing on success when its output is not a terminal (inferred)",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "merge_head_moved": {
+      "why": "the text gh prints when --match-head-commit no longer matches, as GitHub's API words it (inferred)",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "GraphQL: Head branch was modified. Review and try the merge again. (mergePullRequest)\n"
+    },
+    "delete": {
+      "why": "a real delete cannot be recorded without deleting a branch; GitHub answers 204 with no body",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "rulesets_with_checks": {
+      "why": "this repository has no ruleset; the shape is GitHub's documented answer for a branch's rules",
+      "exit": 0,
+      "stdout": "[{\"type\": \"required_status_checks\", \"ruleset_source_type\": \"Repository\", \"ruleset_source\": \"owner/repo\", \"ruleset_id\": 1, \"parameters\": {\"strict_required_status_checks_policy\": false, \"required_status_checks\": [{\"context\": \"lint\", \"integration_id\": 15368}]}}]\n",
+      "stderr": ""
+    }
+  }
+}
