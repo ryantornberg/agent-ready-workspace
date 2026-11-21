@@ -666,12 +666,49 @@ Decisions made in C3a:
 - **Parser gaps handled in the guard's own file:** a whole-tree checkout or restore, a stash write, rebase and cherry-pick. The parser does not list them among the forms that drop work. Queued for slice Z below.
 - **The maintainer kept the keyed design** after a side review noted it reversed the first draft of the 0004 amendment, which had the runner hand over the parsed calls.
 
-**C3b, the target resolver.** On branch `m3/c3b`, from main at `8de0aaa`.
+**C3b, the target resolver.** Pull request #28, on branch `m3/c3b`, from main at `8de0aaa`.
 
 - **Verified, criterion 58's target repository:** `TargetTests` in `tests/test_shellfacts.py`, 14 tests on throwaway repositories, no network. For gh: `-R`, `--repo`, `GH_REPO` on the command and in the environment, the set-default value, the only remote, two remotes with no default (unresolved), the folder after a leading `cd`, a repository operand, `gh api`'s literal path winning over `GH_REPO`, its `{owner}/{repo}` placeholders filled from `GH_REPO` and from the remote, and a gist, `gh api user` and GraphQL counted as naming no repository. For a push: two `pushurl` values give both destinations; `-c ... pushInsteadOf`, `GIT_CONFIG_COUNT/KEY/VALUE`, `remote.pushDefault` and a `pushurl` in an `include.path` file are all applied, by asking git; a URL on the command line gets `insteadOf` and not `pushInsteadOf`; a local path and `file://` are local and `host:path` is ssh; `remote.<name>.mirror` and configured `remote.<name>.push` refspecs are reported; with no refspec, `push.default` simple, current and upstream give the branch and its destination, so `-c push.default=upstream push -f` from a branch tracking main resolves to main; matching, `HOME` set on the command, and a variable remote, refspec, config key or folder are unresolved.
 - **Verified:** the facts are worked out only when a hook reads them, as C3a's are. No guard reads them yet, so no hook call starts a git process for them. Measured directly on this repository, a resolved `git push -u origin HEAD` takes about 35 ms and a bare `git push` about 70 ms; C5's guards will add that to the push rows.
 - **Inferred:** gh writes its set-default value under the remote's `gh-resolved` key. The tests set that key themselves; `gh repo set-default` refused a probe repository it could not reach.
 - **Decision:** a target is keyed by the call's folder, program and words, as `target_key` gives them, so a guard in C4 or C5 can look it up from the parser's own output.
+- **Verified:** CI passed on all five check jobs on the merged head commit.
+
+**C3c, settings.** Pull request #29, on branch `m3/c3c`, from main at `8de0aaa`.
+
+- **Verified, criterion 29, Claude Code:** `.claude/settings.json` denies `Read` of `.env`, `.env.*`, `*.pem`, `*.key` and `secrets/` anywhere in the workspace, and of `~/.ssh`, `~/.aws`, `~/.netrc`, `~/.git-credentials`, gh's sign-in file and the private deny list's folder. The new `agent_settings` check, 13 cases, fails a missing deny entry in either tool, and `python3 ws.py check` passes on the committed settings.
+- **Verified, criterion 29, Codex CLI's syntax:** `codex sandbox -c ...` with the same profile, `extends = ":workspace"` and each pattern `"none"` under `":workspace_roots"`, refused reading `.env`, `.env.local`, `sub/.env`, `*.pem`, `*.key` and a `secrets/` folder, and read a plain file. **Inferred:** that Codex loads the profile from `.codex/config.toml` in a trusted project; a deliberately invalid value there raised no error from this worktree, so the project file was not shown being read.
+- **Inferred, criterion 29, Codex CLI's effect:** the profile is defined but not the default, as the maintainer chose on 2026-11-21. Making it the default would replace a person's own sandbox setting for this project, and `:workspace` turns off network access and writes to the home folder. So a Codex session denies the secrets files only when started with `-c default_permissions="agent-ready"`. The README and `docs/agent-settings.md` say so. Codex's profile reaches every process, so it holds no home folder entries: denying `~/.ssh` would also stop `git push`.
+- **Verified, criterion 64's first sentence:** Claude Code allows `WebFetch` for eight documentation domains, and `agent_settings` fails a missing one. Codex CLI lists them in `allowed_domains` under `[tools.web_search]`; Codex accepted that setting on the command line and refused a wrong type for it. **Inferred:** that its web search then keeps to them; no recorded Codex run shows it.
+- **Verified, criterion 64's second sentence, this repository:** `tests/test_settings.py`, on throwaway repositories with the real `.githooks/post-checkout`. `git worktree add` copies `.claude/settings.local.json` into the new worktree; a later checkout and a branch switch copy nothing; a missing file leaves the worktree add succeeding. `git check-ignore` shows `.gitignore` names the file. With the hook removed, every test in the file errors. **Pending:** the kit's `.gitignore`, which slice C8 creates.
+- **Verified:** `tests/test_launcher.py` required every git hook to start the launcher. The new hook is plain `sh` and starts no Python, so the test now lets a named shell-only hook skip the launcher, and still fails it if it starts Python or names `ws.py`.
+- **Verified:** CI passed on all five check jobs on the merged head commit.
+
+**C3d, the commit.** Pull request #30, on branch `m3/c3d`, from main at `8de0aaa`.
+
+- **Verified, criterion 32:** `secret_scan`, 14 cases, reads the lines a commit adds. `tests/test_commit_checks.py`: a staged line with a GitHub token fails `check --staged` without printing the token, and `check --history` fails on a token one commit added and a later one deleted, in a throwaway repository. CI runs `check --history` on every push and pull request; it reads 1,437 file versions here and finds nothing. The commit check now reads the last commit's copy of every changed file in its one batch read, not only pages.
+- **Verified, criterion 33:** `commit_subject`, 14 cases, and `CommitSubjectTests` through `check --message`, the commit-msg hook's command. A conventional subject passes and one with no type fails; git's merge, revert and autosquash subjects pass; a subject over 72 characters warns; a `formats` setting in the manifest replaces the default.
+- **Verified, criterion 34:** every part sets `PAGE`. The runner prints each finding with its page, when the message does not name it, and the command that runs the check again; a hook's refusal or reminder names its page too. `FindingsNameTheirPageTests` runs every part's cases and fails a message that lacks the file, the page or a fix or command. It found 77 problems before the change, 76 messages and one part with no page. Two parts are exempt by name: `no_stage_all`, whose file the eval hashes, queued for slice Z as the change of 2026-11-21 says, and `rule_pages`, whose reminder is the rule pages themselves, not a finding.
+- **Verified:** the discard guard's stash refusal now says to set work aside with a commit on the session's own branch, not a stash.
+- **Verified:** one fix round, on two failures in one CI run. The batch read asked for a submodule pin's old copy, which a newer git answers as `submodule`, not as text; pins are now left out. The message test needed a git identity, which a CI machine has not set.
+- **Verified:** CI passed on all five check jobs and both cold-clone jobs on the merged head commit.
+
+**Criteria, all four slices.**
+
+```
+verified  29: Claude Code denies reading the secrets files; agent_settings fails a missing entry in either tool (13 cases)
+inferred  29: Codex CLI denies them only in its opt-in profile, by the maintainer's choice; the profile's syntax is verified, its loading from the project file is not
+verified  31: no_discard, 87 cases and 9 real calls (C3a)
+verified  32: SecretScanTests, staged and history; the CI history step passes here
+verified  33: commit_subject, 14 cases; CommitSubjectTests through check --message
+verified  34: FindingsNameTheirPageTests over every part's cases; no_stage_all waits for slice Z, rule_pages is not a finding
+verified  58: working copy, session and lease (C3a), target repository from each source (C3b), in tests/test_shellfacts.py
+verified  64: the allow lists (Claude Code verified, Codex CLI accepted, its effect inferred); the worktree copy and this repository's .gitignore; the rebase family with autostash refused (C3a). Pending: the kit's .gitignore, in C8
+```
+
+No question had to be asked that the workspace should have answered: the split, the keyed design and the Codex default each turned on the maintainer's choice. No file the eval hashes was edited.
+
+**Proposed revision (template rule 7).** Criterion 64 names the kit's `.gitignore`, which does not exist until slice C8. C8's criteria should hold it: the kit's `.gitignore` names `.claude/settings.local.json`, and the kit carries `.githooks/post-checkout`.
 
 
 ### Sub-batch A, 2026-11-18
@@ -723,3 +760,6 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C7, `INDEX.md`, Topics: a row "Whether the README's setup still works; a nightly fresh clone; a link that cannot resolve on purpose" linking [the cold-clone job](../parts.md#the-cold-clone-job).
 - C3a, `wslib/shell.py`: list a whole-tree checkout or restore (`.`, `:/`, `*` and paths of only `.` and `..`, or `--pathspec-from-file`), a stash write (`push`, `save`, `store` and a plain `stash`), `rebase` and `cherry-pick` among the `discard` forms, and remove their handling from `parts/no_discard.py`.
 - C3a, `INDEX.md`, Topics: a row "A hard reset, stash drop or rebase refused while another session works here; which working copy a git command acts on" linking [decision 0005](../decisions/0005-concurrent-sessions-and-the-edit-ledger.md) and [decision 0004](../decisions/0004-the-hook-contract.md#decision).
+- C3c, `INDEX.md`, Topics: a row "What an agent may read or fetch; secrets files; a worktree missing local settings; Codex's permissions profile" linking [agent settings](../agent-settings.md).
+- C3d, `INDEX.md`, Topics: a row "Commit subject format; a token or key in a commit; the history scan" linking [commits](../commits.md).
+- C3d, `parts/no_stage_all.py`: set `PAGE` to the page that states the staging rule, and remove `no_stage_all` from `EXEMPT` in `tests/test_commit_checks.py`.
