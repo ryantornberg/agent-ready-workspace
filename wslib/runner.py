@@ -87,7 +87,8 @@ def command_message(root, args):
         if part.kind == "check" and getattr(part.module, "COMMIT_MESSAGE", False) is True:
             for found in part.run(snapshot):
                 errors += found["level"] == "error"
-                print(f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{part.name}]")
+                print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
+                                       f"python3 ws.py check --message {args.message}"))
     if errors:
         print(f"\n{errors} error(s). Reword the message, or fix the identity, and commit again.")
     return 1 if errors else 0
@@ -180,10 +181,33 @@ def command_push(root, args):
             snapshot = snapshots.Memory({}, pushed=pushed_commits(root, local, remote))
             for found in part.run(snapshot):
                 errors += found["level"] == "error"
-                print(f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{part.name}]",
-                      file=sys.stderr)
+                print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
+                                       "git push"), file=sys.stderr)
     if errors:
         print(f"\n{errors} error(s). The push was refused.", file=sys.stderr)
+    return 1 if errors else 0
+
+
+def command_history(root):
+    """CI: the parts that set HISTORY, run over every line every commit in the history added."""
+    manifest = partlib.load_manifest(root)
+    parts = [part for part in partlib.load_all(root, manifest)
+             if part.kind == "check" and getattr(part.module, "HISTORY", False) is True]
+    if not parts:
+        print("no check reads the history")
+        return 0
+    try:
+        snapshot = snapshots.history(root)
+    except RuntimeError as error:
+        raise partlib.PartError(f"the history cannot be read: {error}")
+    errors = 0
+    for part in parts:
+        for found in part.run(snapshot):
+            errors += found["level"] == "error"
+            print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None), "python3 ws.py check --history"))
+    print(f"{len(snapshot.changed)} file versions read from the history")
+    if errors:
+        print(f"\n{errors} error(s). A secret in the history stays there: revoke it with its issuer first.")
     return 1 if errors else 0
 
 
@@ -192,6 +216,8 @@ def command_check(root, args):
         return command_push(root, args)
     if args.message is not None:
         return command_message(root, args)
+    if args.history:
+        return command_history(root)
     if args.staged:
         # The commit decides: its manifest, its parts and their cases, not the files on disk.
         # The last commit's manifest comes in the same batch read as the staged files: three git processes for the files.
@@ -258,9 +284,17 @@ def command_check(root, args):
         if count:
             tolerated.append(f"{count} finding(s) tolerated by {baselines.path_of(part.name)}")
     errors = 0
+    pages = {part.name: getattr(part.module, "PAGE", None) for part in parts}
+    pages["runner"] = "docs/changing-the-machinery.md#traps"
+    if args.staged:
+        rerun = "python3 ws.py check --staged"
+    elif args.changed_from is not None:
+        rerun = f"python3 ws.py check --phase {args.phase} --changed-from {args.changed_from}"
+    else:
+        rerun = "python3 ws.py check" + (f" --phase {args.phase}" if args.phase != "commit" else "")
     for found, by in findings:
         errors += found["level"] == "error"
-        print(f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{by}]")
+        print(partlib.describe(found, by, pages.get(by), rerun))
     for line in tolerated:
         print(line)
     if errors:
@@ -329,7 +363,7 @@ def command_session(root, args):
             for part in hooks:
                 reason = part.decide(event)
                 if reason:
-                    notes.append(reason)
+                    notes.append(partlib.with_page(reason, getattr(part.module, "PAGE", None)))
         if notes:
             print(events.remind(tool, "\n\n".join(dict.fromkeys(notes)), args.event))
     except Exception:      # a session start or end is never refused, and never shows a traceback
@@ -455,9 +489,9 @@ def command_hook(root, args):
         if reason is None:
             continue
         if part.mode == "remind":
-            reminders.append(f"{part.name}: {reason}")
+            reminders.append(f"{part.name}: {partlib.with_page(reason, getattr(part.module, 'PAGE', None))}")
             continue
-        print(f"Refused by {part.name}: {reason}", file=sys.stderr)
+        print(f"Refused by {part.name}: {partlib.with_page(reason, getattr(part.module, 'PAGE', None))}", file=sys.stderr)
         return 2
     reminders = list(dict.fromkeys(reminders))
     if args.event == "before-edit":
@@ -548,6 +582,8 @@ def main(argv=None):
     check.add_argument("--staged", action="store_true")
     check.add_argument("--changed", nargs="*", default=[])
     check.add_argument("--changed-from", metavar="REF")
+    check.add_argument("--history", action="store_true",
+                       help="CI: run the checks that read the history over every line every commit added")
     check.add_argument("--message", metavar="FILE", help="check a commit message file, and the commit's identities")
     check.add_argument("--push", metavar="REMOTE", help="the pre-push hook: check the refs git lists on standard input")
     check.add_argument("--phase", choices=partlib.PHASES, default="commit",

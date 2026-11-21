@@ -131,6 +131,14 @@
       "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in."
     },
     {
+      "use": "secret_scan",
+      "why": "A token pushed to a public repository is exposed at once, and a later commit that deletes it leaves it in the history."
+    },
+    {
+      "use": "commit_subject",
+      "why": "A subject in one agreed format lets people and tools read the history; the format is the team's, set here."
+    },
+    {
       "use": "agent_settings",
       "why": "An agent that reads a secrets file puts it in its context; a deny entry dropped from either tool's settings is noticed at the commit.",
       "secrets": [".env", ".env.*", "**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/secrets/**"],

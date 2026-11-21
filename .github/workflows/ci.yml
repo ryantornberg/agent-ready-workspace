@@ -40,6 +40,8 @@ jobs:
       - run: bash wslib/launch.sh tests/hook_cases.py
       # Re-grade every stored eval transcript; a grade that differs from its record fails. No agent runs here.
       - run: bash wslib/launch.sh evals/grade.py --recorded
+      # Every line every commit in the history added, scanned for credentials (docs/commits.md).
+      - run: bash wslib/launch.sh ws.py check --history
       # A teammate who never installed the commit hook is caught here: a page edited
       # in this push or pull request, and past its review date, fails.
       - if: github.event_name != 'schedule'

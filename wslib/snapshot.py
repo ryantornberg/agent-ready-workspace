@@ -567,8 +567,10 @@ class Index(Snapshot):
         staged = dict(zip(status[1::2], status[0::2]))
         changed = [path for path, letter in staged.items() if letter[:1] in "ACMR"]
         self._deleted = [path for path, letter in staged.items() if letter[:1] == "D"]
-        # The last commit's copy of each changed page comes in the same batch read, for added_lines().
-        self._previous = {path: f"HEAD:./{path}" for path in changed if path.lower().endswith(".md")}
+        # The last commit's copy of each changed file comes in the same batch read, for added_lines(): the doc
+        # checks read a page's added lines, and the secret scan every file's.
+        # A submodule's pin is not a file: its old copy is a commit, which the batch read cannot give as text.
+        self._previous = {path: f"HEAD:./{path}" for path in changed if path in self._oids}
         self._extra, self._objects, self._failed = ("HEAD",) + tuple(extra) + tuple(self._previous.values()), None, None
         folder = ledgers.git_dir(self.root)
         try:
@@ -663,3 +665,27 @@ class Message(Snapshot):
 
     def _bytes(self, path):
         return self._files[path]
+
+
+def history(root):
+    """Every line every commit in the history added, as a Memory snapshot: each changed path is
+    "<commit>:<path>", and its added lines are the lines that commit added to that file. One git process.
+    A binary file adds no lines. Used by `ws.py check --history` for the parts that set HISTORY."""
+    output = _git(root, "-c", "core.quotePath=false", "log", "--all", "-p", "-U0", "--no-color", "--no-ext-diff",
+                  "--no-renames", "--format=%x00commit %H")
+    added, commit, path, number = {}, None, None, 0
+    for raw in output.decode("utf-8", "surrogateescape").split("\n"):
+        if raw.startswith("\0commit "):
+            commit, path = raw[len("\0commit "):].strip()[:12], None
+        elif raw.startswith("+++ "):
+            target = raw[4:]
+            path = None if target == "/dev/null" else (target[2:] if target.startswith("b/") else target)
+        elif raw.startswith("@@ "):
+            try:
+                number = int(raw.split("+", 1)[1].split(" ", 1)[0].split(",", 1)[0])
+            except (IndexError, ValueError):
+                number = 0
+        elif raw.startswith("+") and commit and path is not None:
+            added.setdefault(f"{commit}:{path}", []).append((number, raw[1:]))
+            number += 1
+    return Memory({key: "" for key in added}, list(added), added=added)

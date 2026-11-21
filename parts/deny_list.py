@@ -47,6 +47,7 @@ from wslib.parts import finding
 from wslib.snapshot import Memory
 
 KIND = "check"
+PAGE = "docs/changing-the-machinery.md#traps"   # the rule's page, which every finding names (criterion 34)
 COMMIT_MESSAGE = True   # `ws.py check --message` runs it on the commit message and the author and committer too
 VARIABLE = "WS_DENY_LIST"
 DEFAULT = "~/.config/agent-ready-workspace/deny-list.txt"

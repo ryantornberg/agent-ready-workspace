@@ -13,6 +13,7 @@ import posixpath
 import unicodedata
 
 KIND = "hook"
+PAGE = "AGENTS.md#facts-a-model-cannot-derive"   # the rule's page, which every finding names (criterion 34)
 EVENT = "before-edit"
 
 

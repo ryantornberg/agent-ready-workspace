@@ -80,6 +80,23 @@ class PartError(Exception):
     pass
 
 
+def describe(found, name, page=None, rerun=None):
+    """A finding as the runner prints it: the file and line, the message, the part, the rule's page when the message
+    does not name it, and the command that runs the check again (criterion 34 of the M3 plan)."""
+    tail = []
+    if page and page not in found["message"]:
+        tail.append(f"See {page}.")
+    if rerun:
+        tail.append(f"Re-run: {rerun}")
+    text = f"{found['level']}: {found['path']}:{found['line']}: {found['message']}  [{name}]"
+    return text + (" " + " ".join(tail) if tail else "")
+
+
+def with_page(reason, page):
+    """A hook's refusal or reminder, naming the rule's page when the reason does not."""
+    return reason if not page or page in reason else f"{reason.rstrip()} See {page}."
+
+
 def finding(path, line, message, level="error"):
     return {"path": path, "line": line, "message": message, "level": level}
 

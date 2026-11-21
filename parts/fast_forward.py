@@ -8,6 +8,7 @@ fetch that fails, another branch or a linked worktree is left alone without a wo
 See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md.
 """
 KIND = "hook"
+PAGE = "docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md"   # the rule's page, which every finding names (criterion 34)
 EVENT = "session-start"
 MODE = "remind"
 NEEDS = ("fast_forward",)

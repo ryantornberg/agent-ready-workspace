@@ -20,6 +20,7 @@ Config: "folder" (default "docs/rules").
 import re
 
 KIND = "hook"
+PAGE = "docs/parts.md#the-parts-here"   # the rule's page, which every finding names (criterion 34)
 EVENT = "before-edit"
 MODE = "remind"
 NEEDS = ("rule_pages",)

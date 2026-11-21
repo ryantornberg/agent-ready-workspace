@@ -59,6 +59,10 @@ What a check can ask the snapshot:
 
 A finding is an error unless it says `level="warning"`. An error fails the commit.
 
+Every part sets `PAGE`, the page that states its rule. The runner prints each finding with its file and line, the part, the page when the message does not name it, and the command that runs the check again. A refusal or reminder from a hook names the page the same way. A message still says how to fix what it found. A test runs every part's cases and fails a message that lacks any of these.
+
+A check that sets `HISTORY = True` also runs under `python3 ws.py check --history`, over a snapshot whose changed paths are `<commit>:<path>` and whose added lines are every line each commit in the history added. CI runs it on every push and pull request.
+
 A check runs in phases. By default it runs at the commit and in CI. A check that sets `PHASES` names its own, from `"commit"`, `"ci"`, `"nightly"` and `"push"`:
 
 | Command | Runs the checks whose phases hold |
@@ -301,6 +305,8 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `edit_ledger` | check | While the edit ledger is open, a commit stages a path that no edit tool of the agent session wrote. |
 | `no_stage_all` | hook, before-shell, reminds | Reminds, and never refuses, when a command stages everything instead of naming files. |
 | `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
+| `secret_scan` | check | A line the commit adds looks like a token or a private key. `python3 ws.py check --history` runs it over every line the history added. See [commits](commits.md). |
+| `commit_subject` | check, on the commit message | The subject matches none of the manifest's `formats`, conventional commits by default; git's own merge, revert and autosquash subjects pass. Over 72 characters warns. |
 | `agent_settings` | check | Claude Code's settings lack a deny entry for a secrets pattern or an allow entry for a documentation domain, or Codex CLI's config lacks the profile, one of its denies, or a web search domain. See [agent settings](agent-settings.md). |
 | `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
 | `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `page_kinds` run on the session's working copy. |
