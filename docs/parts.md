@@ -307,6 +307,7 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `direct_push` | check, at the push | A push to main adds a commit that changes a path on its `machinery` list. See [changing the machinery](changing-the-machinery.md). |
 | `secret_scan` | check | A line the commit adds looks like a token or a private key. `python3 ws.py check --history` runs it over every line the history added. See [commits](commits.md). |
 | `commit_subject` | check, on the commit message | The subject matches none of the manifest's `formats`, conventional commits by default; git's own merge, revert and autosquash subjects pass. Over 72 characters warns. |
+| `agent_settings` | check | Claude Code's settings lack a deny entry for a secrets pattern or an allow entry for a documentation domain, or Codex CLI's config lacks the profile, one of its denies, or a web search domain. See [agent settings](agent-settings.md). |
 | `no_admin_merge` | hook, before-shell | A shell command merges a pull request with `gh pr merge --admin`. |
 | `stale_pages` | hook, session-start, reminds | Lists the pages past their review date, from `page_kinds` run on the session's working copy. |
 | `stale_pins` | hook, session-start, reminds | Names each pinned repository whose checkout is behind its upstream's default branch. |

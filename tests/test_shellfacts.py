@@ -171,5 +171,126 @@ class LazyFactsTests(unittest.TestCase):
         self.assertEqual(calls, [1])
 
 
+class TargetTests(Repositories):
+    """Criterion 58's target repository, from each source (decision 0004, "Shell events")."""
+
+    def setUp(self):
+        super().setUp()
+        git(self.main, "remote", "add", "origin", "https://github.com/acme/workspace.git")
+
+    def target(self, command, cwd=None, environ=None):
+        facts = shellfacts.targets(self.main, command, (cwd or self.main).as_posix(), environ=environ or {})
+        self.assertEqual(len(facts), 1, facts)
+        return next(iter(facts.values()))
+
+    def repos(self, fact):
+        self.assertIsNone(fact["unresolved"], fact)
+        return [(d.get("host"), d.get("owner"), d.get("name")) if not d.get("local") else ("local", d["path"])
+                for d in fact["destinations"]]
+
+    def test_the_key_is_the_folder_and_the_words(self):
+        from wslib import shell
+        call = next(c for c in shell.analyze("cd /x && gh pr list -R a/b") if c.get("gh"))
+        self.assertEqual(shellfacts.target_key(call), '["/x", "gh", ["pr", "list", "-R", "a/b"]]')
+
+    def test_gh_repo_flag_and_variable(self):
+        self.assertEqual(self.repos(self.target("gh pr create -R octo/one")), [("github.com", "octo", "one")])
+        self.assertEqual(self.repos(self.target("gh pr create --repo octo/one")), [("github.com", "octo", "one")])
+        self.assertEqual(self.repos(self.target("GH_REPO=octo/two gh pr merge 3")), [("github.com", "octo", "two")])
+        self.assertEqual(self.repos(self.target("gh pr merge 3", environ={"GH_REPO": "octo/three"})),
+                         [("github.com", "octo", "three")])
+
+    def test_gh_set_default_then_the_only_remote(self):
+        self.assertEqual(self.repos(self.target("gh pr list")), [("github.com", "acme", "workspace")])
+        git(self.main, "remote", "add", "upstream", "git@github.com:octo/upstream.git")
+        fact = self.target("gh pr create")
+        self.assertEqual(fact["destinations"], [])
+        self.assertIn("two or more remotes", fact["unresolved"])
+        git(self.main, "config", "remote.upstream.gh-resolved", "base")
+        self.assertEqual(self.repos(self.target("gh pr create")), [("github.com", "octo", "upstream")])
+
+    def test_gh_folder_follows_the_parser(self):
+        git(self.other, "remote", "add", "origin", "https://github.com/octo/other.git")
+        self.assertEqual(self.repos(self.target(f"cd {self.other.as_posix()} && gh pr list")),
+                         [("github.com", "octo", "other")])
+
+    def test_gh_api_literal_path_and_placeholders(self):
+        fact = self.target("gh api repos/octo/n/issues -f title=x", environ={"GH_REPO": "acme/workspace"})
+        self.assertEqual(self.repos(fact), [("github.com", "octo", "n")])
+        self.assertEqual(self.repos(self.target("gh api repos/{owner}/{repo}/pulls -f title=x",
+                                                environ={"GH_REPO": "octo/filled"})), [("github.com", "octo", "filled")])
+        self.assertEqual(self.repos(self.target("gh api repos/{owner}/{repo}/pulls -f title=x")),
+                         [("github.com", "acme", "workspace")])
+
+    def test_gh_with_no_repository(self):
+        for command in ["gh api user", "gh gist create notes.md", "gh api graphql -f query=x"]:
+            with self.subTest(command):
+                fact = self.target(command)
+                self.assertTrue(fact["no_repository"], fact)
+                self.assertEqual(fact["destinations"], [])
+
+    def test_gh_repository_operand(self):
+        self.assertEqual(self.repos(self.target("gh repo view octo/r")), [("github.com", "octo", "r")])
+
+    def test_push_with_no_refspec_follows_push_default_and_the_upstream(self):
+        fact = self.target("git push")
+        self.assertEqual(self.repos(fact), [("github.com", "acme", "workspace")])
+        self.assertEqual(fact["remote"], "origin")
+        self.assertEqual(fact["refspecs"], [{"src": "refs/heads/main", "dst": "refs/heads/main", "force": False}])
+        git(self.main, "checkout", "-q", "-b", "topic")
+        git(self.main, "config", "branch.topic.remote", "origin")
+        git(self.main, "config", "branch.topic.merge", "refs/heads/main")
+        fact = self.target("git -c push.default=upstream push -f")
+        self.assertEqual(fact["refspecs"], [{"src": "refs/heads/topic", "dst": "refs/heads/main", "force": False}])
+        self.assertIn("matching", self.target("git -c push.default=matching push")["unresolved"])
+
+    def test_push_urls_and_rewrites_come_from_git(self):
+        git(self.main, "config", "remote.origin.pushurl", "https://github.com/acme/a.git")
+        git(self.main, "config", "--add", "remote.origin.pushurl", "git@github.com:acme/b.git")
+        self.assertEqual(self.repos(self.target("git push origin main")),
+                         [("github.com", "acme", "a"), ("github.com", "acme", "b")])
+        git(self.main, "config", "--unset-all", "remote.origin.pushurl")
+        fact = self.target("git -c url.https://github.com/octo/.pushInsteadOf=https://github.com/acme/ push origin main")
+        self.assertEqual(self.repos(fact), [("github.com", "octo", "workspace")])
+        env_form = ("GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=remote.origin.pushurl "
+                    "GIT_CONFIG_VALUE_0=https://github.com/octo/env.git git push origin main")
+        self.assertEqual(self.repos(self.target(env_form)), [("github.com", "octo", "env")])
+        git(self.main, "config", "remote.pushDefault", "upstream")
+        git(self.main, "remote", "add", "upstream", "https://github.com/octo/up.git")
+        self.assertEqual(self.repos(self.target("git push")), [("github.com", "octo", "up")])
+
+    def test_push_config_from_an_included_file(self):
+        extra = self.base / "extra.config"
+        extra.write_text('[remote "origin"]\n\tpushurl = https://github.com/octo/included.git\n')
+        git(self.main, "config", "include.path", extra.as_posix())
+        self.assertEqual(self.repos(self.target("git push origin main")), [("github.com", "octo", "included")])
+
+    def test_a_url_on_the_command_line_gets_insteadof_only(self):
+        git(self.main, "config", "url.https://github.com/octo/.insteadOf", "gh:")
+        git(self.main, "config", "url.https://github.com/evil/.pushInsteadOf", "https://github.com/acme/")
+        self.assertEqual(self.repos(self.target("git push gh:thing.git HEAD:main")), [("github.com", "octo", "thing")])
+        self.assertEqual(self.repos(self.target("git push https://github.com/acme/x.git HEAD:main")),
+                         [("github.com", "acme", "x")])
+
+    def test_local_and_ssh_destinations(self):
+        self.assertEqual(self.repos(self.target("git push ../bare.git main")), [("local", "../bare.git")])
+        self.assertEqual(self.repos(self.target("git push file:///srv/bare.git main")), [("local", "/srv/bare.git")])
+        self.assertEqual(self.repos(self.target("git push example.com:octo/x.git main")), [("example.com", "octo", "x")])
+
+    def test_a_mirror_remote_and_configured_push_refspecs(self):
+        git(self.main, "config", "remote.origin.mirror", "true")
+        self.assertTrue(self.target("git push")["mirror"])
+        git(self.main, "config", "--unset", "remote.origin.mirror")
+        git(self.main, "config", "remote.origin.push", "+refs/heads/*:refs/heads/*")
+        self.assertEqual(self.target("git push")["refspecs"],
+                         [{"src": "refs/heads/*", "dst": "refs/heads/*", "force": True}])
+
+    def test_what_is_not_modelled_is_unresolved(self):
+        for command in ["HOME=/tmp git push", 'git push "$R" main', "git push origin \"$(git branch --show-current)\"",
+                        'git -c "$K"=x push', 'cd "$D" && git push']:
+            with self.subTest(command):
+                self.assertTrue(self.target(command)["unresolved"], command)
+
+
 if __name__ == "__main__":
     unittest.main()
