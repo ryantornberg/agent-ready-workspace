@@ -225,5 +225,169 @@
       "line 3 is 10,001 characters, over the 10,000 the link reader reads",
       "link to missing file: nope2.md"
     ]
+  },
+  {
+    "name": "an exemption tolerates its exact target on its own page, and nothing else",
+    "files": {
+      "a.md": "# A\n\nSee [the worktrees](.claude/worktrees/) and [gone](docs/gone.md).\n",
+      "b.md": "# B\n\n[the worktrees](.claude/worktrees/)\n"
+    },
+    "config": {
+      "exempt": [
+        {
+          "source": "a.md",
+          "target": ".claude/worktrees/",
+          "reason": "git ignores the folder; sessions make their worktrees there"
+        }
+      ]
+    },
+    "expect": [
+      "link to missing file: docs/gone.md",
+      "link to missing file: .claude/worktrees/"
+    ]
+  },
+  {
+    "name": "an exemption with no reason fails",
+    "files": {
+      "a.md": "# A\n\n[the worktrees](.claude/worktrees/)\n"
+    },
+    "config": {
+      "exempt": [
+        {
+          "source": "a.md",
+          "target": ".claude/worktrees/"
+        }
+      ]
+    },
+    "expect": [
+      "an exemption has no reason",
+      "link to missing file: .claude/worktrees/"
+    ]
+  },
+  {
+    "name": "an exemption that names no target fails",
+    "files": {
+      "a.md": "# A\n\nNothing here.\n"
+    },
+    "config": {
+      "exempt": [
+        {
+          "source": "a.md",
+          "target": " ",
+          "reason": "it was moved"
+        }
+      ]
+    },
+    "expect": [
+      "an exemption has no target"
+    ]
+  },
+  {
+    "name": "an exemption with no source, or that is not an object, fails",
+    "files": {
+      "a.md": "# A\n"
+    },
+    "config": {
+      "exempt": [
+        {
+          "target": "x.md",
+          "reason": "r"
+        },
+        "a.md -> x.md"
+      ]
+    },
+    "expect": [
+      "an exemption has no source",
+      "an exemption must be an object"
+    ]
+  },
+  {
+    "name": "an exemption that tolerates nothing fails, so a fixed link does not leave it behind",
+    "files": {
+      "a.md": "# A\n\n[b](b.md)\n",
+      "b.md": "# B\n"
+    },
+    "config": {
+      "exempt": [
+        {
+          "source": "a.md",
+          "target": "gone.md",
+          "reason": "it was moved"
+        },
+        {
+          "source": "nowhere.md",
+          "target": "b.md",
+          "reason": "r"
+        }
+      ]
+    },
+    "expect": [
+      "the exemption for 'gone.md' on a.md tolerates nothing",
+      "nowhere.md is not a page this check reads"
+    ]
+  },
+  {
+    "name": "an opted-in page fails a backticked path that does not exist",
+    "files": {
+      "docs/a.md": "# A\n\nThe live code is in `src/orders-api`, not `src/orders-apl`; see `docs/a.md`.\n",
+      "src/orders-api/Order.cs": "class Order {}"
+    },
+    "config": {
+      "backticked": [
+        "docs"
+      ]
+    },
+    "expect": [
+      "backticked path does not exist: src/orders-apl"
+    ]
+  },
+  {
+    "name": "backticked text that is not a workspace path is not checked",
+    "files": {
+      "docs/a.md": "# A\n\nRun `git push origin/main`, compare `origin/main`, read `~/.config/x`, `<repo>/x`, `docs/*.md`, `/etc/hosts`, `https://x.example/a`, `a/b` and `src/x y`.\n\n```\nsrc/missing\n```\n",
+      "src/orders-api/Order.cs": "class Order {}"
+    },
+    "config": {
+      "backticked": [
+        "docs"
+      ]
+    },
+    "expect": []
+  },
+  {
+    "name": "backticked paths are checked only on opted-in pages",
+    "files": {
+      "a.md": "# A\n\n`src/gone`\n",
+      "docs/b.md": "# B\n\n`src/gone` and `src/here/`\n",
+      "src/here/x.cs": ""
+    },
+    "config": {
+      "backticked": [
+        "docs/b.md"
+      ]
+    },
+    "expect": [
+      "backticked path does not exist: src/gone"
+    ]
+  },
+  {
+    "name": "an exemption tolerates a backticked path",
+    "files": {
+      "AGENTS.md": "# Agents\n\nWork in `.claude/worktrees/`.\n",
+      ".claude/settings.json": "{}"
+    },
+    "config": {
+      "backticked": [
+        "AGENTS.md"
+      ],
+      "exempt": [
+        {
+          "source": "AGENTS.md",
+          "target": ".claude/worktrees/",
+          "reason": "git ignores it"
+        }
+      ]
+    },
+    "expect": []
   }
 ]

@@ -46,6 +46,7 @@ from . import gitcall
 from . import lease as leases
 from . import ledger as ledgers
 from . import parts as partlib
+from . import pins as pinlib
 from . import snapshot as snapshots
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent   # the workspace: the folder that holds ws.py and wslib/
@@ -469,6 +470,21 @@ def command_ledger(root, args):
     return 0
 
 
+def command_pins(root, _args):
+    """Check out each pinned code repository whose remote answers; never touch one already there."""
+    results = pinlib.initialize(root)
+    if not results:
+        print("No pinned repositories: nothing to initialize.")
+        return 0
+    for path, outcome, note in results:
+        print(f"{path}: {outcome}: {note}")
+    counts = {}
+    for _, outcome, _ in results:
+        counts[outcome] = counts.get(outcome, 0) + 1
+    print(", ".join(f"{count} {outcome}" for outcome, count in sorted(counts.items())))
+    return 1 if counts.get("failed") else 0
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):  # a finding may quote text the console cannot encode
         if hasattr(stream, "reconfigure"):
@@ -493,6 +509,7 @@ def main(argv=None):
     hook.add_argument("event")
     hook.add_argument("--tool", help="read this agent tool's own payload through its adapter, such as claude-code")
     commands.add_parser("rules", help="print the rules register, with a count per kind of tag")
+    commands.add_parser("pins", help="check out each pinned repository whose remote answers; skip the rest")
     ledger = commands.add_parser("ledger")
     ledger.add_argument("--add", nargs="+", metavar="PATH", help="record files this session wrote another way")
     ledger.add_argument("--close", action="store_true", help="close the ledger, for a person's own commit")
@@ -504,7 +521,7 @@ def main(argv=None):
         return command_session(root, args)      # never fails, so not under the error handling below
     try:
         return {"list": command_list, "selftest": command_selftest, "check": command_check, "baseline": command_baseline,
-                "hook": command_hook, "ledger": command_ledger, "rules": command_rules}[args.command](root, args)
+                "hook": command_hook, "ledger": command_ledger, "rules": command_rules, "pins": command_pins}[args.command](root, args)
     except (partlib.PartError, NotADirectoryError, RuntimeError) as error:
         print(f"ws: {error}", file=sys.stderr)
         return 2
