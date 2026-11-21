@@ -151,8 +151,9 @@ def decide(event, config):
         shared = sorted(found & SHARED)
         if shared:
             return (f"git {shared[0]} reaches the stash or the worktree list every working copy shares, and "
-                    f"another live agent session ({who}) is working here. Leave them; to restore a stash of your "
-                    f"own, use git stash apply with its id, and drop nothing. See {PAGE}")
+                    f"another live agent session ({who}) is working here, and no one can tell whose entry it is. "
+                    f"Leave them. To set work aside, commit it on your own branch instead of stashing; to get a "
+                    f"stash of your own back, use git stash apply with its id. See {PAGE}")
         if "worktree remove --force" in found:
             for operand in _remove_operands(git):
                 target = copies.get(posixpath.join(folder, operand))
