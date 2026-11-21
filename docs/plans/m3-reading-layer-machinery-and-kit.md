@@ -604,6 +604,26 @@ Pull request #22, at the driver tier. Criteria 28 and 42 are met.
 - **Inferred:** the same lookup in `tests/test_core.py` now finds no shell on Windows CI, so its wiring tests skip there. Windows skips rose from 3 to 14 between the pre-merge and post-merge runs. The `shell` helper in `test_core.py` needs the same walk; that is outside C2.
 - No file the eval hashes was edited, and `workspace.json` was not touched. No question had to be asked.
 
+### C7, clones and checkouts
+
+Pull request #26, on branch `m3/c7` from main at `9b8a6ef`, at the driver tier. It touches no file the eval hashes.
+
+- **Verified, criterion 44:** `tests/test_pins.py` runs `ws.py pins` on a fresh clone of a fixture workspace. It checks out the reachable pin. It skips a pin whose remote is gone, with a note. It leaves a pin already checked out, on its own branch with uncommitted work, exactly as it was. Three remotes that hang are probed at once and skipped at a 2-second limit, in under 5.5 seconds in all. A folder with files but no checkout, and a pin with no URL, are left alone.
+- **Verified, criterion 45:** `links` fails an exemption with no reason, no target or no source, and one that tolerates nothing. Six of the nine new cases failed against the old part; the other three pass either way, since they expect a finding the old part also gives or none at all.
+- **Verified:** with `backticked` on for `AGENTS.md`, `INDEX.md` and `README.md`, two paths fail, and each is exempted with its reason: `.claude/worktrees/` in `AGENTS.md`, which git ignores, and the README's worked example `parts/no_empty_pages.cases.json`. On every page, the same reading finds 32, nearly all in plans and milestone records that name files still to come or since moved. So the setting stays on the three entry pages.
+- **Verified:** a cold clone of this branch from a local clone ran the README's marked steps, `selftest`, `check` and the tests, all passing.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check`, `python3 -m unittest discover -b tests` (454 tests, 3 skipped) and `python3 tests/hook_cases.py` (27 of 27) pass locally.
+- **Pending, criterion 66:** the job's run on this pull request, and on the push to main the merge makes. `tests/test_cold_clone.py` holds the job's paths to `SETUP_PAGES`; that a pull request changing neither does not run it is shown by the next one that changes neither.
+- **Pending, criterion 43:** three consecutive scheduled nights, the last after slice Z merges. A scheduled run tests main only, so the nights start after this merges.
+
+Decisions made in the slice:
+
+- **The job runs the machine's own `python3`, with no checkout action and no setup-python.** It tests what a newcomer has. The README's steps start `python3` by name, so this is the one place CI starts Python other than through the launcher; the job's own steps still use the launcher, and the launcher test still passes.
+- **Linux and macOS only.** A Windows install of Python provides no `python3`, so the README's steps would fail there for a reason the README already implies. The README's limits say so.
+- **Setup pages are `README.md` only for now**, listed once as `SETUP_PAGES`. C8's kit adds its own pages to that list.
+- **An exemption that tolerates nothing fails.** The plan asked only that a bad exemption fail. Without this, a fixed link would leave its exemption behind, silently widening the check later.
+- **`ws.py pins` exits 0 when it skips an unreachable remote**, and 1 only when a remote answered and the checkout then failed. A person without access to one repository can still set up the rest.
+
 ### Sub-batch A, 2026-11-18
 
 Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
@@ -631,3 +651,5 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C1, `INDEX.md`, Topics: a row "Which Python the hooks and CI run; a hook refused because Python is missing or too old" linking [the launcher](../parts.md#the-launcher).
 - C1, `INDEX.md`, Topics: a row "A check that fails on old findings an adopting team cannot fix yet; tolerated findings" linking [baselines](../parts.md#baselines).
 - C2, `INDEX.md`, Topics: a row "How long a hook takes; a hook called for real, through the launcher, in a scratch repository" linking [the hook case runner](../parts.md#the-hook-case-runner).
+- C7, `INDEX.md`, Topics: a row "Check out the code repositories after a fresh clone; a pinned repository is missing or unreachable" linking [pinned repositories](../parts.md#pinned-repositories).
+- C7, `INDEX.md`, Topics: a row "Whether the README's setup still works; a nightly fresh clone; a link that cannot resolve on purpose" linking [the cold-clone job](../parts.md#the-cold-clone-job).
