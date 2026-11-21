@@ -1,12 +1,12 @@
 ---
 kind: decision
 status: accepted
-last-reviewed: 2026-11-16
+last-reviewed: 2026-11-21
 ---
 
 # 0005: Concurrent sessions and the edit ledger
 
-**In short:** the first live agent session that edits a tracked file in the main working copy holds a lease on it. Any other live session is refused there and sent to a worktree of its own. A person working with one session sees no change. The lease is taken over only when its holder is dead, or when the main copy has nothing to protect and the lease is at least five seconds old. It is released when its session ends.
+**In short:** the first live agent session that edits a tracked file in the main working copy holds a lease on it. Any other live session is refused there and sent to a worktree of its own. A person working with one session sees no change. The lease is taken over only when its holder is dead, or when the main copy has nothing to protect and the lease is at least five seconds old. It is released when its session ends. While another live session holds it, git commands that would drop that session's work are refused.
 
 ## Context
 
@@ -50,10 +50,20 @@ The probe shares one deadline of 1.5 seconds across its git calls, runs them wit
 
 **The start-of-session fast-forward.** At `session-start`, the main copy is brought up to `origin/main` only when the session runs in the main copy, on main, with no tracked change, no merge or rebase in progress, and no other live holder. It fetches with prompts off and a time limit, then merges fast-forward only, fifteen seconds in all. It reports why it held back. A fetch that fails, another branch or a linked worktree is left alone without a word. It never fails the session.
 
+**The discard guard.** Amended 2026-11-21, M3 slice C3a. A lease on the edit tools does not stop a shell command from erasing another session's work. So the `no_discard` hook refuses git commands that drop work, and only while another live session is on record: the lease is held by a live session other than this one. A person working with one session, and the lease holder itself, see no change. A lease that cannot be read counts as held.
+
+- **In the main working copy** it refuses a hard reset, `reset --keep` and `--merge`, a whole-tree checkout or restore, `checkout -f`, `switch -f`, `read-tree -u --reset`, a forced clean, a stash write, and the rebase family: rebase, cherry-pick, a rebasing pull, and anything with autostash.
+- **From any working copy** it refuses `stash drop`, `pop` and `clear`, since every worktree shares one stash; `worktree prune`; and `worktree remove --force` of a worktree the session is not in.
+- **In a linked worktree** every other form passes.
+- **A command it cannot judge is refused**: a program or git subcommand that is a variable, a git alias, arguments supplied at run time, or a folder that cannot be placed.
+
+The runner tells it which working copy each git call acts on, read from the command's `-C`, `--git-dir`, `--work-tree`, their variables and a leading `cd` or `pushd`, and asked of git; see [decision 0004](0004-the-hook-contract.md), "Shell events". So `cd <main>; git reset --hard` from a worktree is judged as a reset in the main copy.
+
 ## What it gave up
 
 - **An accepted race.** A holder whose edit cleared the hook a moment before a takeover, or sat on a permission prompt past the minimum age, may get that one edit in. Its next commit is refused by the ledger, and it moves to a worktree.
 - **A shell write takes no lease.** It does not pass the edit hook. The lease check at commit, which would close that, is in the plan's "Later".
+- **Worktree sessions are recorded nowhere.** A session in a worktree takes no lease, so the discard guard cannot tell that one is working there. Nothing stops the lease holder from dropping a worktree session's stash or removing its worktree. M5's worktree work may record them.
 - **Codex on Windows** cannot hold a lease until a recorded run shows where its process id is.
 
 ## Rejected

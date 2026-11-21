@@ -309,6 +309,7 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `in_short` | check | A plan, decision record or milestone page has no **In short:** line within 15 lines of its title. |
 | `rule_pages` | hook, before-edit, reminds | Shows the agent each page in `docs/rules/` whose `applies-to` patterns match the edited file. |
 | `lease` | hook, before-edit | Another live agent session holds the main working copy, or the lease cannot be checked. The edit goes to a worktree instead. |
+| `no_discard` | hook, before-shell | While another live session holds the main working copy's lease: a git command that drops work there (hard reset, `reset --keep`, a whole-tree checkout or restore, `checkout -f`, `switch -f`, `read-tree -u --reset`, a forced clean, a stash write, or the rebase family), a stash drop, pop or clear or `worktree prune` from any working copy, `worktree remove --force` of another session's worktree, or a command it cannot resolve. See [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md). |
 | `fast_forward` | hook, session-start, reminds | Says why the main working copy was not brought up to `origin/main`, when it held back. |
 | `browser_isolation` | check | The project settings do not turn the browser plugin off by name, or an agent tool's config runs the browser server without `--isolated` or at an inexact version. See [browsers](browsers.md). |
 | `shelved` | hook, before-edit | An edit tool touches a folder marked read-only. |

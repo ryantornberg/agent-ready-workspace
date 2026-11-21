@@ -560,7 +560,7 @@ A demotion needs an approved change too. A side review during slice A0 found tha
 
 ### 2026-11-21
 
-Approved by: pending, proposed by slice C3
+Approved by: the maintainer, 2026-11-21
 
 Slice C3 is too large for one reviewable pull request. It holds seven separate pieces of machinery: the shell facts, the target resolver, the agent tools' settings and their check, the worktree settings copy, the discard guard, the secret scan with its CI job, and the commit-subject check, plus a message rule across every part. Slices C1, C2 and C7 each merged as one pull request of 616 to 818 added lines. Several of C3's pieces are each that size, so one pull request would run to about 3,000 lines (inferred, an estimate from the row's parts). Slice C3 stopped after its decision record 0004 amendment, which stays its opening step.
 

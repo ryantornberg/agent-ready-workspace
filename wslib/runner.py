@@ -47,6 +47,7 @@ from . import lease as leases
 from . import ledger as ledgers
 from . import parts as partlib
 from . import pins as pinlib
+from . import shellfacts
 from . import snapshot as snapshots
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent   # the workspace: the folder that holds ws.py and wslib/
@@ -377,6 +378,23 @@ def lease_fact(root, event, tool):
     return {"state": state, "holder": holder, "file": file}
 
 
+def shell_facts(root, event, hooks, tool, cwd):
+    """The facts the before-shell hooks declare in NEEDS (decision 0004, "Shell events"; wslib/shellfacts.py).
+    cwd: the folder the agent tool says the session runs in; the workspace's own shape may give it in the event."""
+    needs = {need for part in hooks for need in getattr(part.module, "NEEDS", ())}
+    if not needs:
+        return {}
+    cwd = event.get("cwd") or cwd
+    facts = {}
+    if "session" in needs or "lease" in needs:
+        facts.update(shellfacts.session(event, tool, cwd))
+    if "lease" in needs:
+        facts["lease"] = shellfacts.lease(root, event.get("session"))
+    if "working_copies" in needs:
+        facts["working_copies"] = shellfacts.working_copies(root, event["command"], cwd)
+    return facts
+
+
 def command_hook(root, args):
     if args.event in partlib.SESSION_EVENTS:
         return command_session(root, args)
@@ -392,8 +410,10 @@ def command_hook(root, args):
     found, tool, cwd = events.read_call(root, args.event, stream.read(), args.tool)
     if any("rule_pages" in getattr(part.module, "NEEDS", ()) for part in hooks):
         found = [dict(event, rule_pages=rule_pages(root, event, hooks)) for event in found]
+    if args.event == "before-shell":
+        found = [dict(event, **shell_facts(root, event, hooks, tool, cwd)) for event in found]
     # The lease is taken only for an edit every other hook allows, so a refused edit takes no lease.
-    leasing = [part for part in hooks if "lease" in getattr(part.module, "NEEDS", ())]
+    leasing = [part for part in hooks if args.event == "before-edit" and "lease" in getattr(part.module, "NEEDS", ())]
     ordered = [part for part in hooks if part not in leasing] + leasing
     reminders = []
     # One call can edit several files: all are decided before any is recorded. Every other hook decides every

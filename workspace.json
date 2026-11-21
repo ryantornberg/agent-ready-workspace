@@ -131,6 +131,10 @@
       "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in."
     },
     {
+      "use": "no_discard",
+      "why": "While another live session holds the main working copy, a hard reset, forced checkout, rebase or stash drop by this one erases its uncommitted work."
+    },
+    {
       "use": "browser_isolation",
       "why": "Two sessions that share one browser profile collide, and the second cannot open a browser; each session gets its own, and the agent tool's own plugin stays off.",
       "settings": ".claude/settings.json",

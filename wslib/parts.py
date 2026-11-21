@@ -64,7 +64,8 @@ TOOL_EVENTS = ("before-shell", "before-edit", "before-handoff")
 SESSION_EVENTS = ("session-start", "session-end")
 EVENTS = TOOL_EVENTS + SESSION_EVENTS
 # Facts a hook may ask the runner for, by event; see wslib/runner.py and decisions 0004 and 0005.
-NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease", "rule_pages")}
+NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease", "rule_pages"),
+         "before-shell": ("session", "lease", "working_copies")}
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")
 PHASES = ("commit", "ci", "nightly", "push")
