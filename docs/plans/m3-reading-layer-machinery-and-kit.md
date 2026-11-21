@@ -817,6 +817,35 @@ Decisions made in the slice:
 
 **Proposed revision (template rule 7):** the B0 row and V5 say the ledger sits "outside every repository". The catalog it sits beside is in the maintainer's private repository, so the ledger is too, as the maintainer directed. The wording should read "outside every public repository".
 
+### B1, the instruction review
+
+Pull request #32, on branch `m3/b1` from main at `166bbc7`, merged as `ffbdc3d`, at the driver tier. Both runs of the review were made by fresh helper sessions at the driver tier, given the pages and the diff and none of the author's reasoning. No file the eval hashes was edited.
+
+- **Verified, criterion 17:** `review_trailer`, 19 cases, and `tests/test_instruction_review.py`, 19 tests on throwaway repositories with a bare remote. At the commit-msg hook's own command, a staged guidance page with no trailer fails; a listed skip reason passes; a named record that is missing, or on disk but not staged, fails; a staged record that covers the page passes; a deletion needs a trailer; a merge in progress is left to the push and CI. At `check --push`, a push to main holding one commit without a trailer is refused, naming only that commit, and a push to another branch is left to CI. `check --commits BASE..HEAD` fails a range holding such a commit, fails a record committed a commit late, runs `commit_subject` over every commit too, and judges a merge by its own changes. Commits whose own tree does not use the part are not judged, so a branch started before B1 merged keeps its old commits. A test holds the CI step's range to the pull request's base and head, and to the push's before and after.
+- **Verified, criterion 17, on this branch:** the live commit-msg hook accepted the second commit, whose ten trailers name the ten records it adds, and `python3 ws.py check --commits origin/main..HEAD` passed on the branch.
+- **Pending, criterion 17:** CI reporting a failing run on main after a push that holds such a commit. The step runs on every push to main; no such push has been made.
+- **Verified, criterion 20:** `tests/test_tutorials.py`, 8 tests, runs every tutorial's `<!-- runnable -->` blocks in a fresh clone of the commit; with none yet it passes and prints `0 tutorial(s) at HEAD`. On fixture repositories it passes passing blocks, with `python3` started through the clone's launcher; fails a failing block and runs none after it; fails a marker with no block and a tutorial with no marked block. The pre-push hook refuses a push to main that changes a failing tutorial, and passes a passing one. CI runs the file on Linux, macOS and Windows.
+- **Verified, criterion 62:** `review_index`, 13 cases. Eight records cover the pages sub-batch A wrote: `AGENTS.md`, `INDEX.md`, the layout page, the glossary, decision 0006, and the rules tables on the machinery, definition-of-done and orchestration pages. The index lists them, `required` holds that list, and a test holds `required` to criterion 62.
+- **Verified, the first run, sub-batch A's pages:** 31 findings in 8 records. 18 were fixed, on the layout, glossary, orchestration and machinery pages and by a dated Amended paragraph on decision 0006. 7 are queued for slice Z, since `AGENTS.md`, `INDEX.md` and the definition of done are hashed. 2 are deferred to B2 and C4, 3 are queued for the maintainer, and 1 was declined.
+- **Verified, the second run, this slice's pages:** 22 findings in 10 records. 20 were fixed, including two code changes: a record now covers exactly one page, and a tutorial with no marked block fails. 1 is queued for slice Z, an index row for the playbook, and 1 for the maintainer.
+- **Inferred, the stop rule:** it did not fire. It counts pages ported in B2's batches, and these pages were not. Contradictions were found in 5 of the 8 pages sub-batch A wrote, well above a third; that rate is queued for the maintainer as a question on B2's rewrite brief.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check`, `check --phase ci --changed-from origin/main`, `check --history --changed-from origin/main` and `python3 -m unittest discover -b tests` (526 tests, 3 skipped) pass locally; `python3 tests/hook_cases.py` passes 36 of 36; `python3 evals/grade.py --recorded` finds no difference.
+- **Verified:** one fix round. On both Windows jobs, the tutorial runner's `bash` was Windows' launcher for its Linux subsystem, which has no distribution there. It now walks up from `git` to Git's own `bash.exe`, as the hook case runner does.
+
+Decisions made in the slice:
+
+- **A guidance page is set by path, in the manifest:** the contract and its pointer files, `INDEX.md`, the README, `evals/README.md`, `plugin/` for B6's wrappers, and `docs/` minus plans, milestone records, records and the question log. A test holds the lists to every page's kind.
+- **The named record must be added or changed by the same commit, and cover each page.** The row asks only that the record exist. Presence alone would let any old record excuse a new edit, the gap round 1's finding 21 named.
+- **The pre-push check judges pushes to main only.** A branch's commits are judged by CI on its pull request, and a new branch's push would otherwise list the whole history.
+- **A commit is judged only once its own tree uses the part,** so slices in flight when B1 merges are not failed for commits made before it.
+- **The trailer is read anywhere in the message,** not only in git's last paragraph; the commits page asks for the last paragraph, as prose.
+- **`loaded_size` now names the layout page,** which holds its rule, as the first review found.
+
+Proposed revisions (template rule 7):
+
+- Criterion 20 says the blocks run green "on three systems". B2's tutorials must then run in Git's bash on Windows. A block that starts Python gets the clone's launcher, so `python3 ws.py check` works there; a block that needs another tool must be one Git for Windows ships.
+- Criterion 62's list leaves out `.github/copilot-instructions.md`, which sub-batch A also added. It has no record. The README and the index now say the required list is the plan's.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -831,3 +860,7 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C3c, `INDEX.md`, Topics: a row "What an agent may read or fetch; secrets files; a worktree missing local settings; Codex's permissions profile" linking [agent settings](../agent-settings.md).
 - C3d, `INDEX.md`, Topics: a row "Commit subject format; a token or key in a commit; the history scan" linking [commits](../commits.md).
 - C3d, `parts/no_stage_all.py`: set `PAGE` to the page that states the staging rule, and remove `no_stage_all` from `EXEMPT` in `tests/test_commit_checks.py`.
+- B1, `AGENTS.md`, rules table: tag the rule on marking claims with B3's `claim_marks` case once it lands, and say the eval grades one marked claim only.
+- B1, `INDEX.md`, cross-cutting chains: "Add a page" gains `README.md`; "Mark a page proven or unproven" gains `evals/cases/` and `evals/runs/`; "Change the eval harness or a grader" gains `evals/cases/`.
+- B1, `INDEX.md`, Topics: a row "Review a guidance page; a commit refused for a missing Instructions-review trailer" linking [the instruction review](../playbooks/instruction-review.md), and a row "A tutorial's runnable blocks; a push refused because a tutorial fails" linking [layout](../layout.md#tutorials).
+- B1, `docs/definition-of-done.md`: tag the rule on marking claims as for the contract; the test-first row applies where the change has behavior a test can show; the clean-build row applies where the work has a build, as the running-app row does.
