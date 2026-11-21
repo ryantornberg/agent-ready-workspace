@@ -226,7 +226,8 @@ class ThisWorkspaceTests(unittest.TestCase):
     def test_the_required_records_are_criterion_62_s_pages(self):
         self.assertEqual(sorted(config("review_index")["required"]), sorted([
             "AGENTS.md", "INDEX.md", "docs/layout.md", "docs/glossary.md", "docs/decisions/0006-what-proven-means.md",
-            "docs/changing-the-machinery.md", "docs/definition-of-done.md", "docs/orchestration.md"]))
+            "docs/changing-the-machinery.md", "docs/definition-of-done.md", "docs/orchestration.md",
+            ".github/copilot-instructions.md"]))
 
     def test_ci_checks_every_commit_of_a_pull_request_and_of_a_push_to_main(self):
         text = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
