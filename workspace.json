@@ -266,7 +266,8 @@
         "docs/decisions/0006-what-proven-means.md",
         "docs/changing-the-machinery.md",
         "docs/definition-of-done.md",
-        "docs/orchestration.md"
+        "docs/orchestration.md",
+        ".github/copilot-instructions.md"
       ]
     },
     {

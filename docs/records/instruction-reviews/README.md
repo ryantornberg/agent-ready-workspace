@@ -38,3 +38,4 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-b2-research-ladder.md](2026-11-21-b2-research-ladder.md) | `docs/research-ladder.md` | step, contradiction, trigger |
 | [2026-11-21-b2-orchestration.md](2026-11-21-b2-orchestration.md) | `docs/orchestration.md` | contradiction |
 | [2026-11-21-b2-readme.md](2026-11-21-b2-readme.md) | `README.md` | contradiction |
+| [2026-11-21-copilot-instructions.md](2026-11-21-copilot-instructions.md) | `.github/copilot-instructions.md` | contradiction |
