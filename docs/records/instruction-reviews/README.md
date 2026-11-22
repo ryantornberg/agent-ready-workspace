@@ -105,3 +105,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-c5d-decision-0005.md](2026-11-22-c5d-decision-0005.md) | `docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md` | contradiction |
 | [2026-11-22-c5d-pr-readme.md](2026-11-22-c5d-pr-readme.md) | `README.md` | contradiction, enforcement |
 | [2026-11-22-c5d-parts.md](2026-11-22-c5d-parts.md) | `docs/parts.md` | contradiction, enforcement |
+| [2026-11-22-c5b-handoff.md](2026-11-22-c5b-handoff.md) | `docs/playbooks/handoff.md` | step, trigger, enforcement |
+| [2026-11-22-c5b-parts.md](2026-11-22-c5b-parts.md) | `docs/parts.md` | contradiction, trigger |
+| [2026-11-22-c5b-decision-0004.md](2026-11-22-c5b-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction, enforcement |
+| [2026-11-22-c5b-readme.md](2026-11-22-c5b-readme.md) | `README.md` | contradiction |

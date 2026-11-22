@@ -1,7 +1,7 @@
 ---
 kind: decision
 status: accepted
-last-reviewed: 2026-11-21
+last-reviewed: 2026-11-22
 ---
 
 # 0004: The hook contract
@@ -27,6 +27,9 @@ A hook that reaches for these itself is hard to test and easy to get wrong. The 
 - A **hook** reads its event. A session hook may also declare `NEEDS`, and the runner adds those facts to the event before calling it:
   - `"findings"`: the findings of the check the hook's config names in `"part"`, run on the session's own working copy.
   - `"pins"`: for each pinned repository in that working copy, its upstream's default branch and how many commits the checkout is behind.
+  - `"fast_forward"`, added to this list 2026-11-22 by M3 slice C5b, though M2 built it: why the main working copy was not brought up to `origin/main`, when the start-of-session fast-forward held back, as [decision 0005](0005-concurrent-sessions-and-the-edit-ledger.md) says.
+  - `"ci"`, amended 2026-11-22 by M3 slice C5b: whether the newest CI run of the workflow the hook's config names, on the branch it names, failed, read from GitHub with `gh`. It gives how many of the runs it read failed in a row, passed-over runs aside, and "at least" when that streak reaches the oldest of a full list; when the first of them started; the failing steps of the newest and its link; `{"failed": 0}` when the newest passed; and nothing on any error. Runs from pull requests, unfinished runs and cancelled or skipped runs are passed over.
+  - `"handoffs"`, amended 2026-11-22 by M3 slice C5b: the pending handoff markers of the working copy the session runs in, each with its branch, its note's path and when it was written, and the note's text when exactly one is pending. Worked out after `"fast_forward"`, whose fetch may move `origin/main`.
 - A **before-shell hook** may declare `NEEDS` too. Its facts are in "Shell events" below.
 - A **before-edit hook** may declare `"git_config"`, amended 2026-11-21 by M3 slice C5c: the same fact a before-shell hook gets, described in "Shell events" below, read once for the tool call.
 - An **after-edit hook** and a **stop hook** may declare `NEEDS` too, amended 2026-11-21 by M3 slice C5a. Their facts are in "After-edit and stop events" below.
@@ -39,6 +42,8 @@ A hook that reaches for these itself is hard to test and easy to get wrong. The 
 - **Git** runs in `wslib/gitcall.py`. Every call strips the variables git sets for a hook, turns off credential prompts, and stops at a time limit enforced in Python. A call that fails or times out returns nothing, and the caller decides what that means.
 - **The snapshot** reads files: the working folder, the staged commit, or a case.
 - **The stop gate's runs** of the check and the tests, amended 2026-11-21 by M3 slice C5a, start in `wslib/gate.py`, with the variables git sets for a hook stripped, nothing on standard input, and one deadline.
+- **`gh`, at session start,** amended 2026-11-22 by M3 slice C5b, runs in `wslib/ci.py`. The repository is `origin`, read from the repository's own config file through `wslib/gitcall.py`. An `origin` that is a local path, or names no owner and repository, gets no call; any other host is asked, and gh's failure there gives nothing. Each call comes from a build function and is read by a parse function, so tests run it on recorded answers. gh's `GH_REPO` and `GH_HOST` are removed from its environment and its prompts are off. The origin read and both calls share one deadline of 3 seconds. The runner works the fact out in a thread beside the other session facts, and waits for it at most half a second past that deadline. No `gh`, a failed call, the deadline or an answer it cannot read gives nothing.
+- **The handoff markers,** amended 2026-11-22 by M3 slice C5b, are read and written in `wslib/handoff.py`: one JSON file per branch in the git folder of each working copy, under `ws-handoff/`, as each working copy's edit ledger is kept. `python3 ws.py handoff NOTE` writes the marker for the branch checked out, and `--done` removes one. An agent may not write in a git folder itself, so this command is how an agent writes a marker. The `git_folder` guards refuse an edit tool's write there and every shell write the parser reports; an interpreter can still write there, as the README's limits say. Whether a branch has merged is asked of git, through `wslib/gitcall.py`.
 
 **How a path is placed.** A before-edit event carries four fields:
 
@@ -151,10 +156,12 @@ Amended 2026-11-22, M3 slice C5d, on the maintainer's answer to Q18: the In shor
 
 Amended 2026-11-22, M3 slice C5d: "More config writes and aliases" and "What a push sends", above; the push target's `branch` and `main_branch`, and alias expansion before the runner works a target out; `no_force_push` in the table; `push_lease`'s row for what a push sends; `git_folder_shell`'s row for aliases. The In short line says the guards on git commands judge an alias, since `git_folder_shell` now does too, and names the force-push guard.
 
+Amended 2026-11-22, M3 slice C5b: two session-start needs, `"ci"` and `"handoffs"`, with the hooks that read them, `ci_notice` and `handoff_loader`; `gh` at session start, run by the engine in `wslib/ci.py` under one deadline; and the handoff markers, which `python3 ws.py handoff` writes in a git folder, where an agent may not. The list of session needs also names `"fast_forward"`, which M2 added without a line here.
+
 ## What it gave up
 
 - **A hook cannot look things up for itself.** A new kind of fact means an engine change, a new name in `NEEDS` and a line in this record. That is the point, and also the cost.
-- **The engine's facts cost time at session start.** The pins need one fetch per pinned repository, ten seconds at most each.
+- **The engine's facts cost time at session start.** The pins need one fetch per pinned repository, ten seconds at most each. The CI fact reads `origin` and makes up to two `gh` calls, three seconds at most for all three, worked out beside the other facts. Amended 2026-11-22, M3 slice C5b.
 - **Shell facts cost time on every guarded command.** A git or gh call in a command adds a few git processes before the command runs. A fact cut off by the time limit is unresolved, and the guard refuses, so a slow machine can see a refusal a fast one would not. The refusal says to run the command again.
 - **The stop gate costs time at each stop.** Amended 2026-11-21, M3 slice C5a. A session with edits of its own waits for the check and the fast tests, up to 20 seconds, every time it tries to finish while those entries are in a ledger.
 - **The target is git's and gh's answer at hook time.** A command that changes a remote, a default or a config value earlier in the same line acts on a target the runner did not see. The guards count those as unresolved.

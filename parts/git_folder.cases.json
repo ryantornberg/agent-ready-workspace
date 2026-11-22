@@ -522,5 +522,47 @@
       "absolute": "/m/.git/config"
     },
     "allow": false
+  },
+  {
+    "name": "an edit to a handoff marker in the git folder is refused",
+    "event": {
+      "path": ".git/ws-handoff/3f1c0e2a9b8d7c6e.json",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/ws-handoff/3f1c0e2a9b8d7c6e.json",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit to a linked worktree's handoff marker is refused",
+    "event": {
+      "path": "/m/.git/worktrees/side/ws-handoff/3f1c0e2a9b8d7c6e.json",
+      "working_copy": null,
+      "main": false,
+      "absolute": "/m/.git/worktrees/side/ws-handoff/3f1c0e2a9b8d7c6e.json",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
   }
 ]

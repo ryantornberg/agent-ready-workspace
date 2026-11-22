@@ -15,6 +15,9 @@
     python3 ws.py ledger --close             # close it, for a person's own commit
     python3 ws.py ledger --committed         # drop the last commit's paths (the post-commit hook)
     python3 ws.py merge NUMBER               # merge a pull request with a merge commit, once CI passed on its head
+    python3 ws.py handoff NOTE               # mark NOTE as this branch's handoff note, shown at the next session start
+    python3 ws.py handoff --done             # clear this branch's handoff marker (--done BRANCH: another branch's)
+    python3 ws.py handoff                    # list this working copy's handoff markers, pending or merged
 
 The engine is the folder wslib/; this file only starts it. wslib/runner.py says how the commands work.
 """

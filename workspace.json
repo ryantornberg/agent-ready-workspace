@@ -196,6 +196,17 @@
       "why": "Two sessions in one working copy commit, reset or switch away each other's work; the first writer keeps the main copy and any other goes to a worktree."
     },
     {
+      "use": "ci_notice",
+      "why": "A red CI run on main alerts nobody unless something tells each session, and sessions go on building and pushing onto it.",
+      "workflow": "ci.yml",
+      "branch": "main"
+    },
+    {
+      "use": "handoff_loader",
+      "why": "A session that resumes another's work starts from nothing unless it is shown the note that session left; with two notes pending, only the person knows which one to resume.",
+      "branch": "main"
+    },
+    {
       "use": "fast_forward",
       "why": "Hooks and pages run from the main working copy's files, so a fix merged by another session does nothing until the main copy is brought up to date."
     },

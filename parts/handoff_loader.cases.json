@@ -1,0 +1,115 @@
+[
+  {
+    "name": "one pending marker: its note is shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "handoffs": [
+        {
+          "branch": "m3/c5b",
+          "note": "/home/me/handoffs/2026-11-22-agent-ready-workspace-the-loader.md",
+          "written": "2026-11-22T21:00:00Z",
+          "text": "# Handoff: agent-ready-workspace, 2026-11-22, the loader\n\n## Goal\n\nBuild the loader.\n",
+          "cut": false
+        }
+      ]
+    },
+    "remind": true
+  },
+  {
+    "name": "a note longer than the loader shows is cut, and still shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "handoffs": [
+        {
+          "branch": "m3/c5b",
+          "note": "/home/me/handoffs/2026-11-22-agent-ready-workspace-the-loader.md",
+          "written": "2026-11-22T21:00:00Z",
+          "text": "# Handoff: agent-ready-workspace, 2026-11-22, the loader\n\n## Goal\n\nBuild the loader.\n",
+          "cut": true
+        }
+      ]
+    },
+    "remind": true
+  },
+  {
+    "name": "one pending marker whose note cannot be read: the marker is named",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "handoffs": [
+        {
+          "branch": "m3/c5b",
+          "note": "/home/me/handoffs/2026-11-22-agent-ready-workspace-the-loader.md",
+          "written": "2026-11-22T21:00:00Z",
+          "text": null,
+          "cut": false
+        }
+      ]
+    },
+    "remind": true
+  },
+  {
+    "name": "two pending markers: none is shown, both are listed",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "handoffs": [
+        {
+          "branch": "m3/c5b",
+          "note": "/home/me/handoffs/2026-11-22-agent-ready-workspace-the-loader.md",
+          "written": "2026-11-22T21:00:00Z",
+          "text": null,
+          "cut": false
+        },
+        {
+          "branch": "m3/c5e",
+          "note": "/home/me/handoffs/2026-11-22-agent-ready-workspace-outward.md",
+          "written": "2026-11-22T22:00:00Z",
+          "text": null,
+          "cut": false
+        }
+      ]
+    },
+    "remind": true
+  },
+  {
+    "name": "no pending marker: nothing is shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "handoffs": []
+    },
+    "remind": false
+  },
+  {
+    "name": "no fact at all is quiet",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null
+    },
+    "remind": false
+  },
+  {
+    "name": "a marker with no note is not shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "handoffs": [
+        {
+          "branch": "x",
+          "note": ""
+        }
+      ]
+    },
+    "remind": false
+  }
+]
