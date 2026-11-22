@@ -14,17 +14,25 @@ It refuses:
   they reach;
 - a `git config` that sets, unsets, edits, renames or removes a key A0 lists, in any scope: `remote.*`, `url.*`,
   `push.*`, `branch.*.pushRemote`, `branch.*.merge`, `remote.pushDefault`, `include.*`, `includeIf.*`, `alias.*`,
-  `core.worktree` and `core.sshCommand`, or a key it cannot read. Every guard reads those keys from config.
+  `core.worktree` and `core.sshCommand`, or a key it cannot read. Every guard reads those keys from config. So is
+  `core.hooksPath`, which turns off every commit and push check (M3 slice C5d, Q16), and a section renamed to a
+  name that holds such a key;
+- through a git alias, read from config at hook time as the discard and push guards read it, so `git cf
+  remote.origin.url URL` with `cf = config` is judged as that `git config` (M3 slice C5d, Q17). A call that is not
+  one of git's own commands is refused when its aliases could not be read, or when the command changes the config
+  git reads them from, with HOME, XDG_CONFIG_HOME, GIT_CONFIG_GLOBAL, GIT_CONFIG_SYSTEM, GIT_CONFIG_NOSYSTEM or an
+  include: git may then run an alias the runner never saw.
 
 It is always on: these files are shared by every session and by the person. A write it cannot see, the README
-lists: an interpreter, a script, a symbolic link, a folder removed whole. The rules are wslib/gitrules.py's.
+lists: an interpreter, a script, a symbolic link, a folder removed whole, a `!` alias a person stored, and a
+program named git-NAME. The rules are wslib/gitrules.py's.
 See docs/decisions/0004-the-hook-contract.md.
 """
 from wslib import gitrules
 
 KIND = "hook"
 EVENT = "before-shell"
-NEEDS = ("session", "git_config")
+NEEDS = ("session", "git_config", "aliases")
 PAGE = "docs/decisions/0004-the-hook-contract.md"
 
 

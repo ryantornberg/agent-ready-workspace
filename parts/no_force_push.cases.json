@@ -1,0 +1,2294 @@
+[
+  {
+    "name": "--force naming main is refused",
+    "event": {
+      "command": "git push --force origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-f naming main is refused",
+    "event": {
+      "command": "git push -f origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a + refspec naming main is refused",
+    "event": {
+      "command": "git push origin +main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"+main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--force-with-lease with no ref, pushing main, is refused",
+    "event": {
+      "command": "git push --force-with-lease origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force-with-lease\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--force-with-lease naming main is refused",
+    "event": {
+      "command": "git push --force-with-lease=main:abc123 origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force-with-lease=main:abc123\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-f of HEAD while on main is refused",
+    "event": {
+      "command": "git push -f origin HEAD",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "main",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a bare push -f while on main is refused",
+    "event": {
+      "command": "git push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/main",
+              "dst": "refs/heads/main",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "main",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a bare push -f that push.default=upstream sends to main is refused",
+    "event": {
+      "command": "git push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/main",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-f of another branch onto main is refused",
+    "event": {
+      "command": "git push -f origin feature:main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"feature:main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-f of HEAD onto refs/heads/main is refused",
+    "event": {
+      "command": "git push -f origin HEAD:refs/heads/main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"HEAD:refs/heads/main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a + refspec onto heads/main is refused",
+    "event": {
+      "command": "git push origin +feature:heads/main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"+feature:heads/main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--all with --force is refused",
+    "event": {
+      "command": "git push --all --force origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"--force\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--branches with -f is refused",
+    "event": {
+      "command": "git push --branches -f origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--branches\", \"-f\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--all with --force-with-lease is refused",
+    "event": {
+      "command": "git push --all --force-with-lease origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"--force-with-lease\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--all with --force-with-lease naming main is refused",
+    "event": {
+      "command": "git push --all --force-with-lease=main origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"--force-with-lease=main\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--mirror is refused",
+    "event": {
+      "command": "git push --mirror origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--mirror\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a remote set as a mirror in config is refused",
+    "event": {
+      "command": "git push backup",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"backup\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "backup",
+          "refspecs": null,
+          "mirror": true,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--delete of main is refused",
+    "event": {
+      "command": "git push --delete origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--delete\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-d of main is refused",
+    "event": {
+      "command": "git push -d origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-d\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a :main refspec is refused",
+    "event": {
+      "command": "git push origin :main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \":main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--prune with a glob is refused",
+    "event": {
+      "command": "git push --prune origin 'refs/heads/*:refs/heads/*'",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--prune\", \"origin\", \"refs/heads/*:refs/heads/*\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "--prune with --all is refused",
+    "event": {
+      "command": "git push --all --prune origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"--prune\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a glob refspec with -f is refused",
+    "event": {
+      "command": "git push -f origin 'refs/heads/*:refs/heads/*'",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"refs/heads/*:refs/heads/*\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a forced glob refspec is refused",
+    "event": {
+      "command": "git push origin '+refs/heads/*:refs/heads/*'",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"+refs/heads/*:refs/heads/*\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a forced glob refspec onto m* is refused",
+    "event": {
+      "command": "git push origin '+refs/heads/*:refs/heads/m*'",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"+refs/heads/*:refs/heads/m*\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a configured forced remote.*.push glob is refused on a bare push",
+    "event": {
+      "command": "git push",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/*",
+              "dst": "refs/heads/*",
+              "force": true
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a configured remote.*.push that forces feature onto main is refused",
+    "event": {
+      "command": "git push origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/main",
+              "force": true
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a configured remote.*.push to main, pushed with -f, is refused",
+    "event": {
+      "command": "git push -f origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "main",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push -f under push.default=matching is refused, since its target is unresolved",
+    "event": {
+      "command": "git push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": "push.default is matching, which pushes every branch both sides have",
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-f of HEAD on a detached HEAD is refused",
+    "event": {
+      "command": "git push -f origin HEAD",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": null,
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a forced push to a destination that pushurl or insteadOf redirects is judged by its refspec and refused",
+    "event": {
+      "command": "git push -f origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "example.com",
+              "owner": "x",
+              "name": "y",
+              "url": "https://example.com/x/y"
+            },
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a forced push to main of a local remote is refused too",
+    "event": {
+      "command": "git push -f scratch main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"scratch\", \"main\"]]": {
+          "destinations": [
+            {
+              "local": true,
+              "path": "/tmp/scratch.git",
+              "url": "/tmp/scratch.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "scratch",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the default branch comes from the config",
+    "event": {
+      "command": "git push -f origin trunk",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"trunk\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false,
+    "config": {
+      "branch": "trunk"
+    }
+  },
+  {
+    "name": "a push of a substituted branch name is refused, pointing to git push -u origin HEAD",
+    "event": {
+      "command": "git push origin \"$(git branch --show-current)\"",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"$(git branch --show-current)\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push of a branch in a variable is refused",
+    "event": {
+      "command": "git push -u origin \"$B\"",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"$B\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push to a remote in a variable is refused",
+    "event": {
+      "command": "git push \"$R\" main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"$R\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push with no target worked out is refused",
+    "event": {
+      "command": "git push -f origin feature",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a push from a folder after a cd it cannot follow is refused",
+    "event": {
+      "command": "cd \"$D\" && git push",
+      "cwd": "/m",
+      "targets": {
+        "[null, \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": "a cd or pushd that is not the leading command",
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "refspecs that xargs supplies are refused",
+    "event": {
+      "command": "echo main | xargs git push -f origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a git subcommand that xargs supplies is refused",
+    "event": {
+      "command": "echo push | xargs git",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a program word that is a variable is refused",
+    "event": {
+      "command": "$G push -f origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "text piped into a shell is refused",
+    "event": {
+      "command": "echo 'git push -f origin main' | sh",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "eval of a variable is refused",
+    "event": {
+      "command": "eval \"$CMD\"",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a stored alias that force-pushes main is refused",
+    "event": {
+      "command": "git fp",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {
+            "fp": "push -f origin main"
+          }
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"fp\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias given by -c that force-pushes main is refused",
+    "event": {
+      "command": "git -c alias.p='push -f' p origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"-c\", \"alias.p=push -f\", \"p\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a stored alias that runs a shell command is refused",
+    "event": {
+      "command": "git sync",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {
+            "sync": "!git push -f origin main"
+          }
+        }
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias whose folder's aliases were not read is refused",
+    "event": {
+      "command": "git fp",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "unresolved": "git did not answer in time"
+        }
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a subcommand that is no alias at hook time, with GIT_CONFIG_GLOBAL set, is refused",
+    "event": {
+      "command": "GIT_CONFIG_GLOBAL=/tmp/a.cfg git fp",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {}
+        }
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a stored alias with HOME set on it is refused",
+    "event": {
+      "command": "HOME=/tmp/h git pb",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {
+            "pb": "push origin feature"
+          }
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"pb\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a pushurl given by -c is refused as a config write",
+    "event": {
+      "command": "git -c remote.origin.pushurl=git@github.com:o/r.git push -f origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"-c\", \"remote.origin.pushurl=git@github.com:o/r.git\", \"push\", \"-f\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a pushInsteadOf given by -c is refused as a config write",
+    "event": {
+      "command": "git -c url.git@github.com:o/r.git.pushInsteadOf=git@github.com:o/s.git push origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"-c\", \"url.git@github.com:o/r.git.pushInsteadOf=git@github.com:o/s.git\", \"push\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a destination redirected through GIT_CONFIG_* is refused as a config write",
+    "event": {
+      "command": "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=remote.origin.pushurl GIT_CONFIG_VALUE_0=git@github.com:o/r.git git push origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "HOME set on a push is refused as a config write",
+    "event": {
+      "command": "HOME=/tmp/h git push origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a checkout earlier in the line, then a bare push -f, is refused",
+    "event": {
+      "command": "git checkout main && git push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git branch -u earlier in the line, then a bare push -f, is refused",
+    "event": {
+      "command": "git branch -u origin/main && git push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git branch --set-upstream-to earlier in the line is refused",
+    "event": {
+      "command": "git branch --set-upstream-to=origin/main; git push --force",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a tracking switch earlier in the line is refused",
+    "event": {
+      "command": "git switch -c x --track origin/main && git push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a worktree add from a remote branch earlier in the line is refused",
+    "event": {
+      "command": "git worktree add -b x ../w origin/main && git -C ../w push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\"../w\", \"git\", [\"-C\", \"../w\", \"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git remote earlier in the line is refused",
+    "event": {
+      "command": "git remote set-url origin git@github.com:o/s.git && git push -f origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "gh repo set-default earlier in the line is refused",
+    "event": {
+      "command": "gh repo set-default o/r && git push -f origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git push -u earlier in the line, then a bare push -f, is refused",
+    "event": {
+      "command": "git push -u origin HEAD:main && git push -f",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"HEAD:main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        },
+        "[\".\", \"git\", [\"push\", \"-f\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push of the current branch passes",
+    "event": {
+      "command": "git push -u origin HEAD",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a push of main that only adds to it passes",
+    "event": {
+      "command": "git push origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a push of HEAD onto main that only adds to it passes",
+    "event": {
+      "command": "git push origin HEAD:main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"HEAD:main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "--force-with-lease to another branch passes",
+    "event": {
+      "command": "git push --force-with-lease origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force-with-lease\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "-f to another branch passes",
+    "event": {
+      "command": "git push -f origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a + refspec to another branch passes",
+    "event": {
+      "command": "git push origin +feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"+feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "--force-with-lease naming another branch, with main pushed too, passes",
+    "event": {
+      "command": "git push --force-with-lease=feature origin feature main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force-with-lease=feature\", \"origin\", \"feature\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a bare --force-with-lease on a feature branch passes",
+    "event": {
+      "command": "git push --force-with-lease",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force-with-lease\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a rebase, then a bare forced push of the feature branch, passes",
+    "event": {
+      "command": "git rebase main && git push --force-with-lease",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force-with-lease\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a new branch, then a push of it, passes",
+    "event": {
+      "command": "git checkout -b x && git push -u origin x",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"x\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "--all without a force passes",
+    "event": {
+      "command": "git push --all origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "--all with --force-with-lease naming another branch passes",
+    "event": {
+      "command": "git push --all --force-with-lease=feature origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"--force-with-lease=feature\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a glob refspec without a force or prune passes",
+    "event": {
+      "command": "git push origin 'refs/heads/*:refs/heads/*'",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"refs/heads/*:refs/heads/*\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "--force-if-includes alone forces nothing and passes",
+    "event": {
+      "command": "git push --force-if-includes origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force-if-includes\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a dry run passes",
+    "event": {
+      "command": "git push --dry-run -f origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--dry-run\", \"-f\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "--tags with -f pushes no branch and passes",
+    "event": {
+      "command": "git push --tags -f origin",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--tags\", \"-f\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a forced tag passes",
+    "event": {
+      "command": "git push -f origin v1.0",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"v1.0\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "--delete of another branch passes",
+    "event": {
+      "command": "git push --delete origin feature",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--delete\", \"origin\", \"feature\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a configured remote.*.push to another branch passes",
+    "event": {
+      "command": "git push",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/feature",
+              "dst": "refs/heads/feature",
+              "force": true
+            }
+          ],
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a stored alias that pushes a branch passes",
+    "event": {
+      "command": "git pb",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {
+            "pb": "push -u origin feature"
+          }
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"pb\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a stored alias for status passes",
+    "event": {
+      "command": "git st",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {
+            "st": "status"
+          }
+        }
+      },
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "a git-NAME program, neither built in nor an alias, passes",
+    "event": {
+      "command": "git lfs pull",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {}
+        }
+      },
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "-f to main passes when the configured branch is another",
+    "event": {
+      "command": "git push -f origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true,
+    "config": {
+      "branch": "trunk"
+    }
+  },
+  {
+    "name": "cd to a variable, then make, passes",
+    "event": {
+      "command": "cd \"$D\" && make",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "the heredoc commit idiom passes",
+    "event": {
+      "command": "git commit -F - <<'EOF'\nfix: a subject\n\nA body.\nEOF",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "the pull-request idiom passes",
+    "event": {
+      "command": "gh pr create --draft --title 'fix: a' --body \"$(cat <<'EOF'\nA body.\nEOF\n)\"",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "a command with no push passes",
+    "event": {
+      "command": "git status --short && ls",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  }
+]
