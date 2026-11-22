@@ -682,7 +682,7 @@ Three items from the maintainer's answers to the workspace queue on slice C4's r
 
 ### 2026-11-21
 
-Approved by: pending, proposed by slice C5
+Approved by: the maintainer, 2026-11-21
 
 Slice C5 is too large for one reviewable pull request, as C3 was. Its row holds at least eight separate pieces of machinery: the after-edit event with the chain reminder, the stop gate, the handoff loader, the guard on `.git` and git config writes, the force-push guard, the outward-write guard with its repository list, the secrets guard with `ws.py with-secrets`, and the two approved additions above. C3's four pull requests added 4,884 lines in all, the largest 2,899, and C4's added 2,183 (verified, `git diff --shortstat` of each merge). C5's row is longer than C3's, so one pull request would run to about 6,000 lines (inferred, an estimate from the row's parts). Slice C5 stopped after its recorded tool runs, which the row puts before building.
 
@@ -698,6 +698,8 @@ The change splits C5 into six slices, each its own branch and pull request at th
 | C5f, secrets | Environment dumps and secrets-file reads refused, and `ws.py with-secrets`. | Criterion 40 |
 
 C5a goes first, since its amendment opens the slice; it starts from branch `m3/c5`, which holds the recorded runs. C5c follows, since C5b, C5d and C5e reuse its rules on config writes and aliases. C5b, C5d and C5e each start from main once C5c merges, and may run in parallel. C5f starts from main once C5a merges.
+
+The maintainer approved the split as written, with criterion 69 and the criterion 36 sentence, answering Q12 in the workspace queue. The maintainer set the build order: C5a, then C5c, then C5b, C5d and C5e, then C5f.
 
 Two criterion changes go with the split, since the approved additions above have no criterion:
 
