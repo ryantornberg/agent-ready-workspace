@@ -17,6 +17,7 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Case | Test data a part runs every time it loads; or an eval case, a request an agent is given in each arm. |
 | Check | A part that reads a snapshot of files and reports findings. By default it runs at the commit and in CI; a check may name other phases, such as the push or the nightly run. |
 | Contract | `AGENTS.md`: the rules every agent reads first. |
+| Critic | A fresh session that reviews an artifact, such as a plan, without the author's reasoning. See [fresh context for critics](orchestration.md#fresh-context-for-critics) and [adversarial review](playbooks/adversarial-review.md). |
 | Hook | A part that runs on one agent tool event. Before a tool call it refuses or reminds; when a session starts or ends it only reminds. A git hook, such as the commit-msg or pre-push hook, is a different thing: a script in `.githooks/` that runs the checks. |
 | Kind | What a page is: playbook, how-to, tutorial, reference, template, record, decision, plan or milestone. See [layout](layout.md). |
 | Lease | The claim a live agent session holds on the main working copy while it edits there. See [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md). |
@@ -26,6 +27,8 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Part | One check or hook: a Python file and its cases. See [parts](parts.md). |
 | Proven | A playbook or how-to with a real run on record and an eval that beats both the bare model and two lines. See [decision 0006](decisions/0006-what-proven-means.md). |
 | Rule page | A page under `docs/rules/` shown to the agent when it edits a file its `applies-to` matches. |
+| Spec | What a piece of work will make true: the goal, non-goals and success criteria of its hand-off plan, which a person agrees to before the rest of the plan is written. See [the spec process](size-the-work.md#the-spec-process). |
 | Tier | Driver, worker or mechanical: the model and effort a task runs at. See [orchestration](orchestration.md). |
 | Unproven | A playbook or how-to shipped without that proof yet. It names the milestone that is to prove it in `prove-by`. |
+| Wrapper | A skill an agent tool loads: its description says when it fires, and its body points at a procedure page, a playbook or a how-to, which stays canonical. Slice B6 of M3 adds them; see the [playbook catalog](playbooks/README.md). |
 | Worktree | A second working copy of the repository, under `.claude/worktrees/`, where a session works apart from others. |

@@ -121,8 +121,12 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/playbooks/throwaway-prototype.md](docs/playbooks/throwaway-prototype.md) | unproven | M4 |
 | [docs/safe-refactor.md](docs/safe-refactor.md) | unproven | M4 |
 | [docs/research-ladder.md](docs/research-ladder.md) | unproven | M4 |
+| [docs/playbooks/decision-interview.md](docs/playbooks/decision-interview.md) | unproven | M9 |
+| [docs/playbooks/adversarial-review.md](docs/playbooks/adversarial-review.md) | unproven | M9 |
+| [docs/size-the-work.md#the-feature-ladder](docs/size-the-work.md#the-feature-ladder) | unproven | M9 |
+| [docs/size-the-work.md#the-spec-process](docs/size-the-work.md#the-spec-process) | unproven | M9 |
 
-Proven: 1. Unproven: 12.
+Proven: 1. Unproven: 16.
 
 ## What stays prose
 

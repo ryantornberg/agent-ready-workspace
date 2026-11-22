@@ -38,6 +38,14 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-b2-research-ladder.md](2026-11-21-b2-research-ladder.md) | `docs/research-ladder.md` | step, contradiction, trigger |
 | [2026-11-21-b2-orchestration.md](2026-11-21-b2-orchestration.md) | `docs/orchestration.md` | contradiction |
 | [2026-11-21-b2-readme.md](2026-11-21-b2-readme.md) | `README.md` | contradiction |
+| [2026-11-21-b2-decision-interview.md](2026-11-21-b2-decision-interview.md) | `docs/playbooks/decision-interview.md` | contradiction, step, enforcement |
+| [2026-11-21-b2-adversarial-review.md](2026-11-21-b2-adversarial-review.md) | `docs/playbooks/adversarial-review.md` | contradiction, step, trigger, enforcement |
+| [2026-11-21-b2-size-the-work.md](2026-11-21-b2-size-the-work.md) | `docs/size-the-work.md` | contradiction |
+| [2026-11-21-b2-playbook-catalog.md](2026-11-21-b2-playbook-catalog.md) | `docs/playbooks/README.md` | trigger |
+| [2026-11-21-b2-how-tos.md](2026-11-21-b2-how-tos.md) | `docs/how-tos.md` | trigger, contradiction, placement |
+| [2026-11-21-b2-batch2-readme.md](2026-11-21-b2-batch2-readme.md) | `README.md` | none |
+| [2026-11-21-b2-glossary.md](2026-11-21-b2-glossary.md) | `docs/glossary.md` | contradiction |
+| [2026-11-21-b2-hand-off-plan.md](2026-11-21-b2-hand-off-plan.md) | `docs/templates/hand-off-plan.md` | contradiction |
 | [2026-11-21-copilot-instructions.md](2026-11-21-copilot-instructions.md) | `.github/copilot-instructions.md` | contradiction |
 | [2026-11-21-c4-readme.md](2026-11-21-c4-readme.md) | `README.md` | step, placement, contradiction, enforcement |
 | [2026-11-21-c4-changing-the-machinery.md](2026-11-21-c4-changing-the-machinery.md) | `docs/changing-the-machinery.md` | contradiction, enforcement |
