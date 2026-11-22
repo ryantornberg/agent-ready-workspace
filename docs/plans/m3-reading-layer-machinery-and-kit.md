@@ -749,6 +749,18 @@ Three items for slice C5d, from the maintainer's answers to Q16, Q17 and Q18 in 
 
 **`git_folder_shell` expands git aliases (Q17).** It reads the command through `gitrules.read`, as the discard and push guards do, so a stored alias that runs `git config` is judged as that `git config`. Cases cover a stored alias to config, including one set through `GIT_CONFIG_GLOBAL` or `HOME`.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+Slice B2 stopped after batch 4 under the stop rule. The maintainer's answer to the workspace queue (Q19) settles how B2 resumes at batch 5, and a later answer amends the rule of Q14. No criterion is dropped or weakened.
+
+**A fix sweeps its shared rule.** A fix that touches a rule several pages share re-reads every page that holds the rule. The fresh re-check covers every page holding a changed rule, not only the fixed page.
+
+**Batch 4's items come first.** Batch 5 opens with one fix round on the 16 items batch 4's re-check found, then builds the two tutorials and the request map. The rule of Q14 stays: the stop rule's B2 item fires when a finding survives a batch's one fix round, or when the fresh re-check finds a fix broke something.
+
+**The re-check rules on declined findings.** The fresh re-check also rules on every finding the builder declined. A decline the re-check rejects counts as a finding that survived the fix round.
+
 ## Results
 
 ### C1, launcher and baselines
