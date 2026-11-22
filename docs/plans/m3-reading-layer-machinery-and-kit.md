@@ -1139,7 +1139,7 @@ Proposed revisions (template rule 7):
 - Criterion 20 says the blocks run green "on three systems". B2's tutorials must then run in Git's bash on Windows. A block that starts Python gets the clone's launcher, so `python3 ws.py check` works there; a block that needs another tool must be one Git for Windows ships.
 - Criterion 62's list leaves out `.github/copilot-instructions.md`, which sub-batch A also added. It has no record. The README and the index now say the required list is the plan's.
 
-### B2, core procedures: stopped after batch 4
+### B2, core procedures: stopped at batch 5's opening fix round
 
 Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33, merged as `5100315` after CI passed on Linux, macOS and Windows. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
 
@@ -1271,6 +1271,46 @@ Decisions made in batch 4:
 - **Outward writes follow one rule on every page:** a write the request names is its yes; another person's item, an unasked item, a reassignment, a rejection, closing a parent and any post on a pull request ask first; nothing is written on a repository outside this one and those pinned under `src/`.
 - **The periodic duties run once per milestone, before its record is signed off,** owned by the maintainer named as approver in the current plan, until M10 schedules the docs audit.
 - **The report rule carries `eval:fix-a-bug`,** the tag the contract gives it, on every page of the batch.
+
+#### Batch 5's opening fix round, 2026-11-22
+
+Built at the worker tier under the maintainer's answer to Q19, recorded under "Changes after approval" before any fix. The approval was recorded as `1fa880a`. The builder made one fix round on batch 4's 16 re-check items in the main working copy, which no other session held, and swept each shared rule a fix touched across every page holding it. Three fresh driver-tier sessions then re-checked every fixed page and every page holding a changed rule. No file the eval hashes was edited. Batch 5's own pages were not built: the stop rule fired first.
+
+- **Verified, the sweep:** how a question-log entry is committed now lives once, in the [question log](../question-log.md)'s "Adding an entry", and every page that logs one links it. Who pushes follows [changing the machinery](../changing-the-machinery.md#the-path-for-a-machinery-change)'s step 5 on git-host operations and the feedback walk-through. An eval-covered change is queued by default, and goes on a branch when a check or an approved plan needs it, on extend and maintain alike.
+- **Verified, the fix round, per page:** all 16 items fixed, none surviving, as each record's "Second re-check" section says.
+
+| Page | Items | Fixed | Broke, at the second re-check | Missed, at the second re-check |
+|---|---|---|---|---|
+| Adopt the workspace | 1 | 1 | 1: the milestone listing misses section proof lines, and its sort puts M9 after M10 | 0 |
+| Extend the workspace | 1 | 1 | 1: steps 6 and 7 give no path for the commit that step 5's new eval branch makes | 0 |
+| Maintain the workspace | 1 | 1 | 0 | 0 |
+| Docs audit | 1 | 1 | 0 | 1: the first rules row still says the audit changes no line it reads |
+| Prompt retrospective | 0, a sweep change | none due | 0 | 0 |
+| Git-host operations | 2 | 2 | 1: the Create row's "that page" lost its antecedent | 1: the push and `gh pr create` act on the checked-out branch, which may not be the one the request names |
+| Tracker operations | 2 | 2 | 1: step 4 asks for a yes on a security review comment not written until step 5 | 0 |
+| Search every source | 2 | 2 | 1: reading an item through tracker operations' step 2 inherits its stop when the person does not answer | 1: the purpose line and the report's "Written" line leave no room for the question-log entry |
+| Feedback walk-through | 2 | 2 | 0 | 0 |
+| Playbook catalog | 1 | 1 | 0 | 0 |
+| Machine self-check | 3 | 3 | 1: the new rules row logs a question before the report, the closing paragraph before finishing | 1: with no Python, step 1 and the refused-shell branch skip different steps |
+| Decision interview, a new record for its sweep change | 0, a sweep change | none due | 2 findings: the rules row omits the commit; step 10 does not say whether the plan's commit is pushed, which the log's push rule needs | 0 |
+
+- **Verified, the stop rule fired a fifth time,** under the rule of Q14: no item survived the fix round, but the re-check found 6 things the fixes broke, on 6 pages, and the sweep's change to the decision interview drew 2 findings.
+- **Inferred, also found:** the question log's new paragraph, which is a record and takes no review, drew four defects from a re-checker who read it: staging the whole file takes another session's uncommitted rows; its push sentence cites a step about branches; it does not say where a worktree's commit lands; and an entry logged after the report has no report left for a refusal. Handoff's step 2 still restates the commit instead of linking the log, and the review orchestrator's "nothing is committed" lines have no exception for the entry. None is fixed: a second fix round is the next decision, not this run's.
+- **Inferred, why:** breaks fell from 10 to 6, and none is about the shared rules the sweep moved. Four of the six sit where a step hands off to another step or page: an approval asked before its text exists, a stop inherited from another page's step, a commit path a new branch did not get, and a log entry timed against the report. The sweep closed the rules; each new sentence still meets its neighbours at a new edge.
+- **Verified:** the private ledger's check prints 0 unmapped. Its batch 5 rows stay on slice B2, since no batch 5 page was built.
+- **Verified, ready for batch 5:** the shared-interface sheet is at version 2. Its refusal idiom works under the runner's `set -eu`, it gives the first task a default change (a practice row in the question log, which needs no review trailer), and it carries each shared rule to its end. The rewrite brief's fifth version carries the sweep.
+
+The question for the maintainer, queued as Q29 in the workspace queue: how B2 resumes. The options are to carry these items into batch 5's one fix round and build now, which is recommended since breaks are shrinking and criterion 20 needs the tutorials; one more fix round on batch 4's pages first, a third round that needs a yes; repeating fix rounds while each re-check finds fewer breaks; or ending B2's porting here.
+
+Decisions made in batch 5's opening:
+
+- **A shared rule is stated once and linked.** The question-log commit moved to the log's own page, where the contract's rule already sends every session, rather than restated on eight pages.
+- **The fix round ran in one session,** not in helpers, since every fix touched a rule several pages share.
+- **The re-check covered every page holding a changed rule,** not only the fixed pages, as Q19 asks, and a page with a sweep change and no batch 4 record got a record of its own.
+
+Not done: batch 5, the two tutorials and the request map; the 6 breaks, the 4 older defects and the decision interview's 2 findings in the table; the question log's four defects; and the handoff and review orchestrator lines.
+Parked: Q29.
+Next: the maintainer — answer Q29 in the workspace queue, then a B2 session resumes batch 5.
 
 ### Queued for slice Z
 

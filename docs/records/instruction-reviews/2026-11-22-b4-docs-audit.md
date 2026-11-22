@@ -44,3 +44,24 @@ Broke:
 - The In short line: "The audit changes nothing it reads", yet judgment item 5 reads the question log and step 5 may add an entry to it. Verified by reading; that the fix round wrote the line is inferred.
 
 Missed: none.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: the In short line says the audit changes nothing it reads | fixed: the In short line and "When it runs" now say the audit fixes nothing and edits no page, and the most it adds is a question-log entry, committed as the log's page says. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: the In short line says the audit changes nothing it reads | fixed | Verified: the In short line now says the audit fixes nothing and edits no page, and names a question-log entry as the most it adds. |
+
+Broke: none.
+
+Missed:
+- Rules, the first row: it still says the audit "changes no line of the pages, code or records it reads", though judgment item 5 reads the question log and step 5 may add an entry to it. The fix round reworded the In short line and "When it runs", not this row. Verified.

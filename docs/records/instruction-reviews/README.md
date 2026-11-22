@@ -99,6 +99,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-b4-how-tos.md](2026-11-22-b4-how-tos.md) | `docs/how-tos.md` | trigger, placement |
 | [2026-11-22-b4-glossary.md](2026-11-22-b4-glossary.md) | `docs/glossary.md` | none |
 | [2026-11-22-b4-parts.md](2026-11-22-b4-parts.md) | `docs/parts.md` | none |
+| [2026-11-22-b5-decision-interview.md](2026-11-22-b5-decision-interview.md) | `docs/playbooks/decision-interview.md` | enforcement, step |
 | [2026-11-22-c5d-decision-0004.md](2026-11-22-c5d-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction |
 | [2026-11-22-c5d-readme.md](2026-11-22-c5d-readme.md) | `README.md` | contradiction |
 | [2026-11-22-c5d-pr-decision-0004.md](2026-11-22-c5d-pr-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction, trigger, placement |

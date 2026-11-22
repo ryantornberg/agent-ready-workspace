@@ -46,3 +46,22 @@ Broke:
 - When a duty falls due, step 5: it commits a question-log entry "as step 4 says", and step 4 names the instruction review's trailer, though `review_trailer` excepts `docs/question-log.md` and commits asks a trailer only for guidance pages. Verified.
 
 Missed: none.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: step 5 commits a question-log entry through step 4's review trailer | fixed: step 5 commits it as the log's page says, which needs no trailer. Step 4 and its rules row also take an eval-covered change an approved plan makes, to match extend's step 5. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: step 5 commits a question-log entry through step 4's review trailer | fixed | Verified: step 5 now commits the entry as the question log's page says, whose "Adding an entry" needs no trailer, matching `review_trailer`'s `except` list in `workspace.json`. |
+
+Broke: none.
+Missed: none.

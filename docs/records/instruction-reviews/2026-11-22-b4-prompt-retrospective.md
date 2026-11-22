@@ -42,3 +42,22 @@ A fresh session re-read the page on 2026-11-22, after the fix round.
 
 Broke: none.
 Missed: none.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| No item; the question-log sweep | changed: "When it runs" and step 6 link the log's page for the commit instead of restating it. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| No item; the question-log sweep | fixed | Verified: "When it runs" and step 6 now commit the entry as the question log's page says, and its "Adding an entry" covers the staging by name and a refused commit that step 6 used to state; the rules row's "staged by name" agrees. |
+
+Broke: none.
+Missed: none.

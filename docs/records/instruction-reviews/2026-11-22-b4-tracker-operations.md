@@ -45,3 +45,26 @@ Broke: none.
 Missed:
 - Steps, step 7 and the stop line: the page adds a question-log entry but "commits nothing", while docs audit, prompt retrospective and maintain commit that entry; verified by reading all four.
 - The post-merge security review, step 5, and the operations row: a review sub-task already assigned to someone else is another person's item, yet its comment and close count as named; inferred.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Missed: no commit path for the question-log entry | fixed: step 7 commits it as the log's page says, the stop line excepts it, and a rules row holds it. |
+| Missed: a comment on another person's review sub-task counts as named | fixed: the operations row and the security review's step 5 make the comment and the close ask-first when the sub-task is assigned to another person. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Missed: no commit path for the question-log entry | fixed | Step 7 adds the entry before the report and commits it as the log's page says, the stop line excepts it, and a rules row holds it; verified by reading the page and the question log's "Adding an entry". |
+| Missed: a comment on another person's review sub-task counts as named | fixed | The operations row makes the result comment and the close ask-first when the sub-task is assigned to another person, and the security review's step 5 posts and closes it only on step 4's yes; verified by reading both. |
+
+Broke:
+- The post-merge security review, step 5, with Steps, step 4: the result comment, now ask-first, is asked about in step 4 "with the new value", but the review that writes it runs inside step 5, so the person approves text they cannot see; verified by reading steps 4 and 5 and the section's "This section runs inside step 5".
+
+Missed: none.

@@ -45,3 +45,27 @@ Broke:
 
 Missed:
 - Step 5 and the closing paragraph: "Nothing was written, so nothing is committed" sits beside the contract's question-log write; the page never says how that entry is committed, while the docs audit says to commit it staged by name. Verified by reading both pages.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: reading an item through tracker operations lets its writes fire | fixed: "When to use it" reads the item as tracker operations' steps 1 and 2 say, and makes none of its writes. |
+| Missed: no commit path for the question-log entry | fixed: step 5 and the closing paragraph commit it as the log's page says; the In short line and the first rules row now carve it out; a rules row holds it. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: reading an item through tracker operations lets its writes fire | fixed | "When to use it" now reads the item only as tracker operations' steps 1 and 2 say and makes none of its writes, and those two steps hold no write; verified by reading both pages. |
+| Missed: no commit path for the question-log entry | fixed | Step 5, the closing paragraph and a new rules row commit the entry as the log's page says, and the In short line and the first rules row now carve it out; verified by reading the page and the question log's "Adding an entry". |
+
+Broke:
+- "When to use it", the steps-1-and-2 sentence: tracker operations' step 2 sends a missing answer to its step 7, which stops, so an unread item ends the run before this page searches, and this page gives no default; inferred, from reading both pages.
+
+Missed:
+- The purpose line ("without writing anything") and the report shape's "Written: nothing" line leave no place for the question-log entry step 5 now commits; verified by reading the page.

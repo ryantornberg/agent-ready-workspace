@@ -51,3 +51,24 @@ Broke:
 - What does not transfer, the milestone-state row: "a number no record in `docs/milestones/` uses" allows M4, which nine kept pages name as `prove-by` and the kept draft plan `decision-queue.md` names as `milestone`. Signing off the instance's M4 would then fail `proof` on pages this workspace meant for its own M4. Verified for the names and the M1 to M3 records; the consequence is inferred from `proof`'s docstring.
 
 Missed: none.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: the milestone-state row allows M4 | fixed: the row now says to pick a number above every milestone a kept page or plan names in `prove-by` or `milestone`, and gives the `git grep` that lists them. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: the milestone-state row allows M4 | fixed | Verified: the row now asks for a number above every `prove-by` or `milestone` a kept page or plan names, and the highest today is M10, so M4 is ruled out. |
+
+Broke:
+- What does not transfer, the milestone-state row: its `git grep` matches front matter only, so it misses the four section lines `Proof: unproven, prove-by M<n>.` the sentence covers; and `sort -u` lists M10 first and M9 last. Verified by running it; that a reader takes M9 as the highest and picks M10, the `prove-by` of the docs audit and the prompt retrospective, is inferred.
+
+Missed: none.

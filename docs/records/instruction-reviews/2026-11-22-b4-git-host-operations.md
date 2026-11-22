@@ -48,3 +48,27 @@ Broke:
 
 Missed:
 - Steps, step 7 and the stop line: the page adds a question-log entry but "commits nothing", while docs audit, prompt retrospective and maintain commit that entry; verified by reading all four.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: Create pushes "as the sending page says" | fixed: the Create row says pushing is part of a request to open the pull request: an agent may push in this repository, and a person pushes in a team's workspace. |
+| Missed: no commit path for the question-log entry | fixed: step 7 commits it as the log's page says, the stop line excepts it, and a rules row holds it. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: Create pushes "as the sending page says" | fixed | The Create row no longer defers to the sending page: pushing is part of the request, an agent may push here with `git push -u origin HEAD`, and a person pushes in a team's workspace, matching changing the machinery's step 5; verified by reading both. |
+| Missed: no commit path for the question-log entry | fixed | Step 7 adds the entry before the report and commits it "as that page says", the stop line excepts it, and a rules row holds it, matching the question log's "Adding an entry"; verified by reading both. |
+
+Broke:
+- The operations, Create a pull request: removing "the page that sent you" left "When that page or the plan asked for a review" with changing the machinery as its only antecedent; verified by reading the row and its diff.
+
+Missed:
+- The operations, Create a pull request: `git push -u origin HEAD` and `gh pr create` without `--head` both act on the checked-out branch, while step 2 accepts a branch the request names, and no step checks they match; verified by reading and `gh pr create --help` (head defaults to the current branch).
