@@ -978,7 +978,7 @@ Proposed revisions (template rule 7):
 - Criterion 20 says the blocks run green "on three systems". B2's tutorials must then run in Git's bash on Windows. A block that starts Python gets the clone's launcher, so `python3 ws.py check` works there; a block that needs another tool must be one Git for Windows ships.
 - Criterion 62's list leaves out `.github/copilot-instructions.md`, which sub-batch A also added. It has no record. The README and the index now say the required list is the plan's.
 
-### B2, core procedures: stopped after batch 2
+### B2, core procedures: stopped after batch 3
 
 Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33, merged as `5100315` after CI passed on Linux, macOS and Windows. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
 
@@ -1036,6 +1036,33 @@ Decisions made in batch 2:
 - **Adversarial review records** go in `docs/records/adversarial-reviews/`, one dated file per review; a plan's triage stays in its own red-team table, under a link to the record.
 - **The glossary rows were written here,** not queued, since the glossary is not hashed.
 
+#### Batch 3, 2026-11-21
+
+Built at the worker tier under the third rewrite brief, which carries the three fixes of the maintainer's answer to Q13, recorded under "Changes after approval". Docs straight to main as `5e6789f`. Four worker-tier helper sessions wrote the pages, ran the self-review, cross-read each other's drafts twice and fixed what they found; seven fresh driver-tier sessions reviewed them and named each finding's cause. No file the eval hashes was edited.
+
+- **Verified, batch 3:** [the review orchestrator](../playbooks/review-orchestrator.md), [architecture review](../playbooks/architecture-review.md) with [the big-picture pass](../playbooks/architecture-review.md#the-big-picture-pass) as a section with its own proof line, [the reuse checklist](../playbooks/reuse-checklist.md), [impact analysis](../playbooks/impact-analysis.md), [escape analysis](../playbooks/escape-analysis.md), [the feedback walk-through](../playbooks/feedback-walkthrough.md) and [handoff](../playbooks/handoff.md) as playbooks; [review in a worktree](../review-in-a-worktree.md) as a how-to; [code review](../code-review.md), the orchestrator's explainer, as a reference page with no proof field. All procedures are `proof: unproven`, `prove-by: M6`, as the table above sets them. The README's table lists each, and the `proof` check passes.
+- **Verified, routed in and out:** each page has a row in the playbook catalog or the how-to index, which gains a review stage after the commit. Each builder added one route in on a page that is not hashed: the feature ladder's steps 5 and 6, test first, debugging, adversarial review, orchestration and changing the machinery. The glossary gains dimension, escape, handoff note and invariant.
+- **Verified, the review:** 19 records, 9 for the ported pages and 10 for the pages the batch touched. On the ported pages, 41 findings: 39 fixed in one fix round, 1 queued for slice Z (escape analysis's route in from fix a bug), and 1 declined (the explainer's numbered steps on a reference page, which this slice's row sets). On the touched pages, 11 findings, all fixed.
+- **Verified, the stop rule fired a third time,** counted by recurring cause over the 9 ported pages, as the change of Q13 asks, leaving out the declined finding: a contradiction the builder's pass missed in 7 pages, a step the builder's pass missed in 5. The next causes were page-specific slips in 4 pages and a shared rule restated instead of linked in 3, which is not more than a third.
+- **Inferred, why:** most contradictions lie in the interface between pages: the orchestrator's dispatch template, the lines a dispatched reviewer's reply ends with, where a review is recorded, and which repositories a review may post on. Builders changed that interface during cross-reading, and a page that had already aligned did not see the last change. Most step findings are failure paths a sample with no pinned repositories cannot run, such as removing a worktree whose pins are checked out. As in batch 2, every accepted finding was fixed in one round, so the review works as the gate.
+- **Verified:** the private ledger's batch 3 rows now map to their pages, and its check prints 0 unmapped.
+
+Proposed fixes, for the maintainer's decision before batch 4 (queued as Q14 in the workspace queue):
+
+1. **A shared-interface sheet.** Before drafting, the orchestrating session writes what the batch's pages share: templates, reply lines, record places and write scopes. A builder that needs a change asks for it, and every builder re-reads the sheet before it reports.
+2. **Gate on the fix round.** The B2 stop rule fires when a finding survives the batch's one fix round, or a fresh re-check of the fixes finds one that broke something. Three batches under three counting rules each fired, and each fixed every accepted finding in one round.
+
+Not done in B2: batches 4 and 5. That is extending, maintaining and adopting the workspace and the machine self-check; the tracker and git-host spines, the docs audit, the prompt retrospective and searching every source; the two tutorials and the request map; and the fix path's section, queued for slice Z.
+
+Decisions made in batch 3:
+
+- **Where the pages sit:** the explainer is `docs/code-review.md` and the worktree how-to `docs/review-in-a-worktree.md`, at the top of `docs/` as the layout page says; the seven procedures in `docs/playbooks/`.
+- **Every review dimension runs at the driver tier,** since orchestration makes review driver work. The catalog's raised tier for a high-stakes diff is dropped, and so is its higher effort for the whole-branch pass, which the tier binding refuses.
+- **A review worktree is an exception to the contract's worktree rule,** labelled on the how-to with its reason. The contract's edit is queued for slice Z.
+- **Architecture review ships one invariant,** that the shelved service never changes, rather than an empty list, so the reviewer has something to check. The contract states it and the `shelved` hook enforces it.
+- **Posting a review or a reply needs the person's yes,** and only on this repository or one it pins under `src/`, as the outward-write guard planned in C5e will hold.
+- **The handoff note is written by hand until C5b,** which builds the marker and the loader; it goes to a folder outside the repository, and its tracked mode waits for B3's record type.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -1061,3 +1088,6 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - B2, `INDEX.md`, Topics: rows "Which playbook to follow; every playbook and its proof state" linking [the playbook catalog](../playbooks/README.md); "Where to go for a task; how-tos and reference pages by task" linking [the how-to index](../how-tos.md); "Interview me on this; settling design questions before a plan" linking [the decision interview](../playbooks/decision-interview.md); "Red team; adversarial review; a critic attacks a plan" linking [adversarial review](../playbooks/adversarial-review.md); "Building a feature; writing a spec; spec approval; when a spec changes" linking [the feature ladder](../size-the-work.md#the-feature-ladder).
 - C4, `INDEX.md`, Topics: a row "Merge a pull request; a squash or rebase merge refused; a push refused while another session holds the main copy" linking [changing the machinery](../changing-the-machinery.md#the-path-for-a-machinery-change) and [decision 0005](../decisions/0005-concurrent-sessions-and-the-edit-ledger.md); and the existing decision 0005 row names a refused push as well as a refused edit.
 - C4, `AGENTS.md`, rules table: the rule on opening a pull request as a draft says an agent merges with `python3 ws.py merge NUMBER`.
+- B2, `INDEX.md`, Topics: rows "Reviewing a branch or pull request; review dimensions" linking [the review orchestrator](../playbooks/review-orchestrator.md); "What the code review checks; answering a review comment" linking [code review](../code-review.md); "Checking out a pull request to review it" linking [review in a worktree](../review-in-a-worktree.md); "Does a change keep what the system decided; a symptom fix; a simpler alternative" linking [architecture review](../playbooks/architecture-review.md); "Is there a helper for this already; duplicated logic; design debt" linking [the reuse checklist](../playbooks/reuse-checklist.md); "What a change touches; callers; docs likely stale" linking [impact analysis](../playbooks/impact-analysis.md); "Why a review missed a defect" linking [escape analysis](../playbooks/escape-analysis.md); "Walk me through the review comments" linking [the feedback walk-through](../playbooks/feedback-walkthrough.md); "Hand off; low on context; resume a session" linking [handoff](../playbooks/handoff.md).
+- B2, `AGENTS.md`, "Facts a model cannot derive": the worktree line also allows a worktree to read a pull request or a commit for a review, as [review in a worktree](../review-in-a-worktree.md) says.
+- B2, `docs/playbooks/fix-a-bug.md`: step 6 sends a committed fix of code a review covered to [escape analysis](../playbooks/escape-analysis.md); step 2 links [the reuse checklist](../playbooks/reuse-checklist.md) before new logic is written.
