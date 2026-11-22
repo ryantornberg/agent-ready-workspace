@@ -840,6 +840,60 @@
     "allow": false
   },
   {
+    "name": "-f of the branch checked out before is refused, since it may be main",
+    "event": {
+      "command": "git push -f origin @{-1}",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"@{-1}\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a reflog entry with no destination is refused",
+    "event": {
+      "command": "git push -f origin 'HEAD@{1}'",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"HEAD@{1}\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
     "name": "a forced push to a destination that pushurl or insteadOf redirects is judged by its refspec and refused",
     "event": {
       "command": "git push -f origin main",

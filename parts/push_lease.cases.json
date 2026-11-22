@@ -1928,5 +1928,107 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "from a worktree, a switch then a push of HEAD in reflog form is refused",
+    "event": {
+      "command": "git switch --ignore-other-worktrees main && git push origin 'HEAD@{0}:refs/heads/y'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"HEAD@{0}:refs/heads/y\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a push of the branch checked out before is refused",
+    "event": {
+      "command": "git push origin '@{-1}:refs/heads/y'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"@{-1}:refs/heads/y\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
   }
 ]

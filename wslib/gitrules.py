@@ -547,6 +547,10 @@ def push_updates(call, fact):
             found["updates"].append({"src": None, "dst": dst, "force": True, "delete": True,
                                      "glob": bool(spec.get("glob")), "every": False})
             continue
+        if "@{-" in src or ("@{" in src and dst is None):
+            found["unresolved"] = (f"{src} names a branch checked out earlier, or a reflog entry, so the branch it "
+                                   f"sends or updates cannot be read from the line")
+            return found
         if src in ("HEAD", "@") or src.startswith(("HEAD~", "HEAD^", "@~", "@^")):
             if dst is None:
                 if not branch:

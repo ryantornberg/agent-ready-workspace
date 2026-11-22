@@ -167,6 +167,9 @@ class ForcePushTests(Repository):
                         "echo 'git push -f origin main' | sh", 'cd "$D" && git push'):
             self.assertRefused(command)
         self.assertIn("git push -u origin HEAD", self.refused('git push origin "$(git branch --show-current)"'))
+        git(self.repo, "switch", "-q", "main")
+        git(self.repo, "switch", "-q", "feature")
+        self.assertRefused("git push -f origin @{-1}")
         self.assertPasses('cd "$D" && make')
 
 
@@ -193,6 +196,9 @@ class WorktreePushTests(Repository):
     def test_a_switch_to_the_main_copy_s_branch_earlier_in_the_line(self):
         self.assertIsNotNone(self.decide("git switch -q --ignore-other-worktrees main && git push"))
         self.assertIsNotNone(self.decide("git push origin 'main@{0}:refs/heads/x'"))
+        self.assertIsNotNone(self.decide(
+            "git switch -q --ignore-other-worktrees main && git push origin 'HEAD@{0}:refs/heads/y'"))
+        self.assertIsNotNone(self.decide("git push origin '@{-1}:refs/heads/y'"))
         self.assertIsNone(self.decide("git switch -q -c fresh && git push -u origin fresh"))
 
     def test_the_worktree_s_own_branch_passes(self):

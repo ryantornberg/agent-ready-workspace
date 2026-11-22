@@ -101,8 +101,7 @@ def _shared(call, target, earlier):
     change the branch, which makes a push of HEAD, or a bare push, one the target cannot judge."""
     push = (call.get("git") or {}).get("push") or {}
     sources = [spec.get("src") or "" for spec in push.get("refspecs") or ()]
-    if earlier and (not sources or any(src in ("HEAD", "@") or src.startswith(("HEAD~", "HEAD^", "@~", "@^"))
-                                       for src in sources)):
+    if earlier and (not sources or any(src.startswith(("HEAD", "@")) for src in sources)):
         return f"sends HEAD or the current branch, and {earlier}, after the push's target was worked out"
     updates = gitrules.push_updates(call, target)
     if updates["unresolved"]:
