@@ -1,0 +1,35 @@
+{
+ "what": "Whether each agent tool shows a session the handoff note the loader gives it at session start, from one recorded run of each, for criterion 59 of the M3 plan. Made by slice C5b in a scratch copy of its branch, with one pending marker written by python3 ws.py handoff. Paths are redacted.",
+ "date": "2026-11-22",
+ "setup": [
+  "The tracked files of branch m3/c5b, uncommitted change included, copied to /scratch/ws and committed there; origin is a local bare repository, /scratch/origin.git, so the CI notice makes no gh call.",
+  "A handoff note written to /scratch/handoffs/2026-11-22-ws-probe.md, whose Goal is the line PROBE-GOAL: finish the lantern inventory for the night shift.",
+  "python3 ws.py handoff /scratch/handoffs/2026-11-22-ws-probe.md, run in /scratch/ws on main."
+ ],
+ "prompt": "If your context holds a handoff note that a session-start hook showed you, reply with the line of that note that starts with PROBE-GOAL, verbatim, then the branch the notice names. Otherwise reply: none",
+ "runs": {
+  "claude-code": {
+   "tool": "Claude Code 2.1.330",
+   "command": "claude -p \"$PROMPT\" --model haiku --max-turns 1 --output-format stream-json --verbose",
+   "note": "The copy's own wiring in .claude/settings.json ran. The person's own global session hooks also ran and printed nothing.",
+   "notice": {
+    "hook_event": "SessionStart",
+    "outcome": "success",
+    "exit_code": 0,
+    "output": {
+     "hookSpecificOutput": {
+      "hookEventName": "SessionStart",
+      "additionalContext": "A handoff note is pending for the branch main in this working copy: /scratch/handoffs/2026-11-22-ws-probe.md, written 2026-11-22T21:31:49Z. When the person's request is to resume this work, follow the handoff page's \"Resuming\", which checks the note against the working copy first. For any other request, do what was asked, and tell the person once that this note is pending. When its work is done or the person drops it, clear it, from this working copy, with: python3 ws.py handoff --done main\n\n# Handoff: ws, 2026-11-22, the probe\n\n## Goal\n\nPROBE-GOAL: finish the lantern inventory for the night shift.\n\n## Current state\n\nNothing is built. Verified: the working copy is clean.\n\n## Decisions made\n\nNone.\n\n## Open threads and next step\n\nNext: count the lanterns in the shed.\n\n## Key references\n\nNone.\n\n## Do not redo\n\nNothing.\n\n[The end of the handoff note.] See docs/playbooks/handoff.md#the-marker-and-the-loader."
+     }
+    }
+   },
+   "reply": "PROBE-GOAL: finish the lantern inventory for the night shift.\n\nmain"
+  },
+  "codex": {
+   "tool": "codex-cli 0.169.0",
+   "command": "codex exec --ephemeral --json --dangerously-bypass-hook-trust -s read-only -m gpt-6-luna -c model_reasoning_effort=\"low\" -c 'hooks.SessionStart=[{hooks=[{type=\"command\",timeout=30,command=\"\\\"/scratch/ws/wslib/launch.sh\\\" hook session-start --tool codex || exit 0\"}]}]' \"$PROMPT\"",
+   "note": "Codex reported the project's own configuration as untrusted and did not load it, as in the M2 and C5 records, so the session-start hook was given on the command line: the same launcher call as .codex/hooks.json wires, on the copy's own files. Codex's JSON stream does not carry the hook's output; the reply shows what the agent was given.",
+   "reply": "PROBE-GOAL: finish the lantern inventory for the night shift. main"
+  }
+ }
+}

@@ -32,8 +32,14 @@ readable manifest, is refused when it goes to main.
 A session hook only reminds, and a session start or end never fails: on any error the runner prints
 nothing and exits 0. Before the session hooks run, the runner adds the facts they declare in NEEDS:
 "findings", the findings of the check each names in its config "part", run on the session's own working
-copy; and "pins", for each pinned repository there, how far its checkout is behind its upstream's
-default branch. See docs/decisions/0004-the-hook-contract.md.
+copy; "pins", for each pinned repository there, how far its checkout is behind its upstream's
+default branch; "fast_forward", why the main working copy was not brought up to origin/main; "ci", whether the
+newest CI run on the default branch failed, read with gh under a time limit of its own (wslib/ci.py); and
+"handoffs", the pending handoff markers of the session's working copy (wslib/handoff.py).
+See docs/decisions/0004-the-hook-contract.md.
+
+`ws.py handoff NOTE` writes the marker for the branch checked out, in the working copy's git folder, where an
+agent may not write itself; `--done` clears it, and with neither it lists the markers.
 
 A check may tolerate known findings listed in baselines/<check>.json, read from the same snapshot as the files it
 checks, so the commit and CI decide alike; any other finding still fails. See wslib/baseline.py.
@@ -47,13 +53,16 @@ import os
 import pathlib
 import subprocess
 import sys
+import threading
 
 from . import VERSION
 from . import baseline as baselines
 from . import blocks
+from . import ci as cifacts
 from . import events
 from . import gate as gates
 from . import gitcall
+from . import handoff as handoffs
 from . import lease as leases
 from . import ledger as ledgers
 from . import merge as merges
@@ -483,12 +492,17 @@ def command_baseline(root, args):
 
 
 def session_facts(root, hooks, event):
-    """The facts the session hooks declare in NEEDS, worked out on the working copy the session runs in."""
+    """The facts the session hooks declare in NEEDS, worked out on the working copy the session runs in. The CI fact
+    waits on the network, so it is worked out in a thread of its own, beside the others."""
     found = ledgers.working_copy(pathlib.Path(event["cwd"]).resolve() / "probe",
                                  ledgers.common_dir(ledgers.git_dir(root) or root))
     top = found[0] if found else root
     needs = {need for part in hooks for need in getattr(part.module, "NEEDS", ())}
     facts = {}
+    ci = None
+    if "ci" in needs:
+        config = next((part.config for part in hooks if "ci" in getattr(part.module, "NEEDS", ())), {})
+        ci = CiFact(root, config.get("workflow", "ci.yml"), config.get("branch", handoffs.DEFAULT_BRANCH))
     tree = snapshots.Tree(top) if needs else None
     if "findings" in needs:
         manifest = partlib.load_manifest(root)
@@ -506,7 +520,33 @@ def session_facts(root, hooks, event):
             behind = gitcall.behind(top / path)
             facts["pins"].append({"path": path, "branch": behind[0] if behind else None,
                                   "behind": behind[1] if behind else None})
+    if "handoffs" in needs:      # after the fast-forward, whose fetch may have moved origin/main
+        config = next((part.config for part in hooks if "handoffs" in getattr(part.module, "NEEDS", ())), {})
+        try:
+            facts["handoffs"] = handoffs.pending(found[0], found[1], config.get("branch", handoffs.DEFAULT_BRANCH)) \
+                if found else []
+        except Exception:
+            facts["handoffs"] = []
+    if ci is not None:
+        facts["ci"] = ci.result()
     return facts
+
+
+class CiFact(threading.Thread):
+    """The "ci" fact (wslib/ci.py), worked out while the other session facts are. result() waits for it, never
+    longer than its own time limit and half a second more, and gives None on any error."""
+
+    def __init__(self, root, workflow, branch):
+        super().__init__(daemon=True)
+        self.args, self.value = (root, workflow, branch), None
+        self.start()
+
+    def run(self):
+        self.value = cifacts.fact(*self.args)
+
+    def result(self):
+        self.join(cifacts.BUDGET + 0.5)      # the fact keeps its own deadline; this only bounds a thread that does not
+        return None if self.is_alive() else self.value
 
 
 def command_session(root, args):
@@ -833,6 +873,45 @@ def command_pins(root, _args):
     return 1 if counts.get("failed") else 0
 
 
+def command_handoff(root, args):
+    """Write, clear or list the handoff markers of the working copy at root (wslib/handoff.py)."""
+    try:
+        default = handoff_branch(root)
+        if args.done is not None and args.note:
+            raise handoffs.HandoffError("give a note to write a marker, or --done to clear one, not both")
+        if args.done is not None:
+            branch, was = handoffs.clear(root, args.done or None)
+            print(f"The handoff marker for {branch} is cleared." if was else f"No handoff marker for {branch} was there.")
+            return 0
+        if args.note:
+            branch, marker, outcome = handoffs.write(root, args.note, default)
+            until = "" if branch == default else f"{branch} merges or "
+            print(f"The handoff marker for {branch} is {outcome}: it names {pathlib.Path(args.note).expanduser().resolve()}. "
+                  f"A session that starts in this working copy is shown the note until {until}"
+                  f"python3 ws.py handoff --done {branch} clears it.")
+            return 0
+        top, git_dir = handoffs.place(root)
+        found = handoffs.markers(git_dir)
+        if not found:
+            print("No handoff marker in this working copy.")
+        for marker in found:
+            state = "merged" if handoffs.merged(top, marker, default) else "pending"
+            print(f"{marker['branch']}: {state}, {marker['note']} (written {marker.get('written')})")
+        return 0
+    except handoffs.HandoffError as error:
+        raise partlib.PartError(str(error))
+
+
+def handoff_branch(root):
+    """The default branch the loader judges a merge by: its config's "branch", or main."""
+    try:
+        manifest = partlib.load_manifest(root, hook=True)
+    except partlib.PartError:
+        return handoffs.DEFAULT_BRANCH
+    entry = next((e for e in manifest["parts"] if e.get("use") == "handoff_loader"), {})
+    return entry.get("branch", handoffs.DEFAULT_BRANCH)
+
+
 def command_merge(root, args):
     """Merge one pull request on GitHub once CI passed on its head commit (wslib/merge.py)."""
     if not ROOT.samefile(root):
@@ -878,6 +957,10 @@ def main(argv=None):
     merge = commands.add_parser("merge", help="merge a pull request with a merge commit, once every required check "
                                               "passed on its head commit")
     merge.add_argument("number", type=int, help="the pull request's number; the repository is always origin's")
+    handoff = commands.add_parser("handoff", help="write, clear or list this working copy's handoff markers")
+    handoff.add_argument("note", nargs="?", help="the handoff note to name in the marker for the branch checked out")
+    handoff.add_argument("--done", nargs="?", const="", metavar="BRANCH",
+                         help="clear the marker for BRANCH, or for the branch checked out")
     ledger = commands.add_parser("ledger")
     ledger.add_argument("--add", nargs="+", metavar="PATH", help="record files this session wrote another way")
     ledger.add_argument("--close", action="store_true", help="close the ledger, for a person's own commit")
@@ -890,7 +973,7 @@ def main(argv=None):
     try:
         return {"list": command_list, "selftest": command_selftest, "check": command_check, "baseline": command_baseline,
                 "hook": command_hook, "ledger": command_ledger, "rules": command_rules, "pins": command_pins,
-                "merge": command_merge}[args.command](root, args)
+                "merge": command_merge, "handoff": command_handoff}[args.command](root, args)
     except (partlib.PartError, NotADirectoryError, RuntimeError) as error:
         print(f"ws: {error}", file=sys.stderr)
         return 2

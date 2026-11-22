@@ -1933,5 +1933,47 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "a shell write to a handoff marker in the git folder is refused",
+    "event": {
+      "command": "echo '{\"branch\": \"main\", \"note\": \"/tmp/n.md\"}' > .git/ws-handoff/3f1c0e2a9b8d7c6e.json",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "ws.py handoff, which writes the marker through the engine, passes",
+    "event": {
+      "command": "python3 ws.py handoff ~/handoffs/2026-11-22-ws-loader.md",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
   }
 ]

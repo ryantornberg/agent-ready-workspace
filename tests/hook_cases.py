@@ -16,7 +16,8 @@ The cases are in tests/hooks/<event>.json. A case:
      "env": {NAME: value}, "repeat": n (default 5), "row": "git push" | "gh write" (time it on that row),
      "setup": {"remote": true, "remote_ahead": true, "worktree": true, "files": {path: text},
                "lease": {"session": text, "pid": "live" | "dead" | "self", "age": seconds},
-               "ledger": [{"path": text, "session": text}, ...]},   # entries in the main copy's edit ledger
+               "ledger": [{"path": text, "session": text}, ...],    # entries in the main copy's edit ledger
+               "handoff": {branch: note path}},     # a pending handoff marker in the main copy's git folder
      "lease_after": session id or null (who holds the lease once the call is done)}
 Text in a payload or env value may name {root}, the scratch main working copy; {worktree}, its linked worktree;
 {live_pid}, a process that runs for the whole case; {dead_pid}, one that has exited; and {self_pid}, this runner.
@@ -45,6 +46,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CASES = ROOT / "tests" / "hooks"
 sys.path.insert(0, str(ROOT))
 
+from wslib import handoff as handoffs  # noqa: E402
 from wslib import parts as partlib  # noqa: E402
 
 # Seconds. The before-tool hooks and after-edit run on every tool call, so they get the tightest budget.
@@ -55,7 +57,7 @@ BUDGETS = {
 }
 ROWS = ("git push", "gh write")     # rows of their own, timed apart from the rest of before-shell
 WIRING = {"claude-code": ".claude/settings.json", "codex": ".codex/hooks.json"}
-SETUP_KEYS = {"remote", "remote_ahead", "worktree", "files", "lease", "ledger"}
+SETUP_KEYS = {"remote", "remote_ahead", "worktree", "files", "lease", "ledger", "handoff"}
 CASE_KEYS = {"name", "tool", "payload", "exit", "output", "absent", "env", "repeat", "row", "setup", "lease_after"}
 REPEAT = 5
 CALL_TIMEOUT = 60
@@ -152,6 +154,10 @@ def malformed(event, case):
     if not isinstance(ledger, list) or not all(isinstance(e, dict) and set(e) == {"path", "session"}
                                                and all(isinstance(v, str) and v for v in e.values()) for e in ledger):
         return 'a seeded ledger is a list of {"path", "session"} entries'
+    markers = setup.get("handoff", {})
+    if not isinstance(markers, dict) or not all(isinstance(k, str) and k and isinstance(v, str) and v
+                                                for k, v in markers.items()):
+        return 'a seeded handoff is {"branch": "note path, relative to the scratch copy"}'
     if event == "session-start" and not setup.get("remote"):
         return "a session-start case runs against a local remote: set setup.remote"
     if not isinstance(case.get("repeat", REPEAT), int) or case.get("repeat", REPEAT) < 1:
@@ -235,6 +241,12 @@ class Scratch:
         for path, text in setup.get("files", {}).items():
             (root / path).parent.mkdir(parents=True, exist_ok=True)
             (root / path).write_text(text, encoding="utf-8")
+        for branch, note in setup.get("handoff", {}).items():
+            # Pending: no tip of its own on record, so it has not merged. The note itself comes from "files".
+            marker = handoffs.file_of(root / ".git", branch)
+            marker.parent.mkdir(parents=True, exist_ok=True)
+            marker.write_text(json.dumps({"branch": branch, "note": str(root / note), "written": "2026-11-22T21:00:00Z",
+                                          "head": None, "base": None}), encoding="utf-8")
         return places
 
     def seed(self, places, setup):

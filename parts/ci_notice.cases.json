@@ -1,0 +1,119 @@
+[
+  {
+    "name": "the newest run on main failed, from recorded gh output: the notice is shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "ci": {
+        "failed": 1,
+        "at_least": false,
+        "since": "2026-11-22T20:19:37Z",
+        "title": "Merge pull request #37 from ryantornberg/m3/c5d",
+        "url": "https://github.com/ryantornberg/agent-ready-workspace/actions/runs/45065796541",
+        "steps": [
+          "check (macos-latest, 3.9): Run bash wslib/launch.sh tests/hook_cases.py"
+        ]
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "three failed runs in a row are shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "ci": {
+        "failed": 3,
+        "at_least": false,
+        "since": "2026-11-20T10:00:00Z",
+        "title": "Merge pull request #37 from ryantornberg/m3/c5d",
+        "url": "https://github.com/ryantornberg/agent-ready-workspace/actions/runs/45065796541",
+        "steps": [
+          "check (macos-latest, 3.9): Run bash wslib/launch.sh tests/hook_cases.py"
+        ]
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a streak as long as the runs read is shown as at least that many",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "ci": {
+        "failed": 20,
+        "at_least": true,
+        "since": "2026-11-22T20:19:37Z",
+        "title": "Merge pull request #37 from ryantornberg/m3/c5d",
+        "url": "https://github.com/ryantornberg/agent-ready-workspace/actions/runs/45065796541",
+        "steps": [
+          "check (macos-latest, 3.9): Run bash wslib/launch.sh tests/hook_cases.py"
+        ]
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a failed run with no failing step named is still shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "ci": {
+        "failed": 1,
+        "at_least": false,
+        "since": "2026-11-22T20:19:37Z",
+        "title": "Merge pull request #37 from ryantornberg/m3/c5d",
+        "url": "https://github.com/ryantornberg/agent-ready-workspace/actions/runs/45065796541",
+        "steps": []
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "the newest run passed: nothing is shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "ci": {
+        "failed": 0
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "an error, such as no gh, no network or the time limit, gives no fact: nothing is shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "ci": null
+    },
+    "remind": false
+  },
+  {
+    "name": "no run to judge: nothing is shown",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null
+    },
+    "remind": false
+  },
+  {
+    "name": "a fact that is not the engine's shape is quiet",
+    "event": {
+      "session": "s1",
+      "cwd": "/w",
+      "tool": null,
+      "ci": {
+        "failed": "many"
+      }
+    },
+    "remind": false
+  }
+]
