@@ -24,6 +24,7 @@ The Proof column copies each page's front matter, or the proof line under a sect
 | Decide how much process a change needs | [Size the work](size-the-work.md#the-gate) | Small, easy to reverse, one repository and under a day: all four, or climb the ladder. When you cannot tell, climb. | unproven, M9 |
 | Take a feature from request to a finished, reviewed change, once the gate sends it up the ladder | [The feature ladder](size-the-work.md#the-feature-ladder) | When what you find contradicts the spec, update the spec first, with the person's agreement, then the code. | unproven, M9 |
 | Decide whether work needs a spec, then write it, gate it and keep it true | [The spec process](size-the-work.md#the-spec-process) | Every success criterion names the command that checks it. No plan is written before the person agrees to the spec. | unproven, M9 |
+| Check that your machine runs the workspace's hooks, checks and tools: after setup, after a machine change, or when a guard seems not to run | [Machine self-check](machine-self-check.md) | Paste its prompt. Nothing changes until the report, then each fix only on your yes. | unproven, M5 |
 | Follow a procedure, such as fixing a bug, debugging or a review | [Playbook catalog](playbooks/README.md) | The playbook page is canonical; follow its steps, not a summary of them. | reference; each playbook's state is in its row there |
 
 ## Planning
@@ -57,10 +58,13 @@ The Proof column copies each page's front matter, or the proof line under a sect
 
 | Task | Go to | Remember | Proof |
 |---|---|---|---|
-| Add, move or archive a page | [Layout](layout.md) | Front matter names the kind. The page opens with its title, a purpose sentence of 25 words or fewer, then its **In short** line. | reference |
+| Look up a page's kind, its front matter and the order it opens in; move or archive a page. To add a page, use extend the workspace below. | [Layout](layout.md) | Front matter names the kind. The page opens with its title, a purpose sentence of 25 words or fewer, then its **In short** line. | reference |
 | Add a check or a hook | [Parts](parts.md) | A part is a Python file and its cases. Run `python3 ws.py selftest`, then `python3 ws.py check`. | unproven, M4 |
 | Change scripts, parts, hooks or CI | [Changing the machinery](changing-the-machinery.md) | It goes on its own branch and merges only after CI passes on Linux, macOS and Windows. | unproven, M4 |
 | Change what an agent tool may read or fetch | [Agent settings](agent-settings.md) | The `agent_settings` check fails when a deny entry or a documentation domain goes missing. | reference |
+| Add a playbook, how-to, reference page, decision record or rule page, with its routing rows; or make a small change to pages only, such as fixing a page a review or an audit found wrong | [Extend the workspace](extend-the-workspace.md) | One owner per topic: a procedure that overlaps a page already here goes into it as a section. A check or hook is on [parts](parts.md). | unproven, M5 |
+| Set the workspace up for your own team | [Adopt the workspace](adopt-the-workspace.md) | Start here, not at the README: adopt runs the README's setup steps inside a plan a person approves, and says what transfers and when the adoption is done. | unproven, M5 |
+| Find which upkeep duty an event or a closing milestone sets off, and who owns it | [Maintain the workspace](maintain-the-workspace.md) | The checks catch some drift on their own; the rest is a duty with an owner and a cadence. | unproven, M5 |
 
 ## Ways to follow a playbook
 

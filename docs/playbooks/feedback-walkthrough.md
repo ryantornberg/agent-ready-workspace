@@ -62,7 +62,7 @@ A reply goes out in the author's name, so each post needs the author's yes in st
 | A review thread on a line | `gh api "repos/{owner}/{repo}/pulls/NUMBER/comments/COMMENT_ID/replies" -F body=@FILE`, where COMMENT_ID is the thread's first comment |
 | A comment or review summary on no line | `gh pr comment NUMBER --body-file FILE` |
 
-A push or a post on any repository needs the author's yes, as step 8 asks. On a repository other than this one, such as one pinned under `src/`, it is an outward write: the guard planned in slice C5e of M3 will refuse it when the repository is not in the workspace's list, and until then only the author's yes holds it. When a push or a post is refused, give the author the commits to push or the replies to post. In a team's workspace, a person pushes.
+A push or a post on any repository needs the author's yes, as step 8 asks. A write to a repository other than this one and those pinned under `src/` is never made, even with a yes: give the author the commits to push or the replies to post instead. The guard that refuses it is planned in slice C5e of M3; until it exists, only this rule and the author's yes hold it. When a push or a post is refused, give the author the commits to push or the replies to post. In a team's workspace, a person pushes. When the round needs more than replies, such as updating the pull request's description, retargeting it or reading why its CI failed, follow [git-host operations](git-host-operations.md).
 
 ## Rules
 
@@ -72,6 +72,7 @@ A push or a post on any repository needs the author's yes, as step 8 asks. On a 
 | Commit a fix only on the author's yes, as a new commit; never amend or squash an earlier one. | `prose` |
 | Push only on the author's yes, and never force a push. | `prose` |
 | Post a reply only on the author's yes, and a reply about a fix only after its commit is on the remote. | `prose` |
+| Never push or post to a repository other than this one and those pinned under `src/`; give the author the text instead. | `prose` |
 | Never switch or update the checkout's branch yourself; stop and report. | `prose` |
 | Stage files by name. | `edit_ledger#a path the ledger does not hold fails, whatever staged it` |
 | A change that fails the size gate is not made in the round. | `prose` |

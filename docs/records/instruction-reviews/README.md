@@ -82,3 +82,20 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-c5c-readme.md](2026-11-21-c5c-readme.md) | `README.md` | contradiction, enforcement, step |
 | [2026-11-22-c5c-decision-0004.md](2026-11-22-c5c-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction |
 | [2026-11-22-c5c-layout.md](2026-11-22-c5c-layout.md) | `docs/layout.md` | contradiction, step, trigger |
+| [2026-11-22-b4-extend-the-workspace.md](2026-11-22-b4-extend-the-workspace.md) | `docs/extend-the-workspace.md` | step, trigger, enforcement |
+| [2026-11-22-b4-adopt-the-workspace.md](2026-11-22-b4-adopt-the-workspace.md) | `docs/adopt-the-workspace.md` | contradiction, step, trigger, enforcement |
+| [2026-11-22-b4-readme.md](2026-11-22-b4-readme.md) | `README.md` | trigger |
+| [2026-11-22-b4-maintain-the-workspace.md](2026-11-22-b4-maintain-the-workspace.md) | `docs/maintain-the-workspace.md` | contradiction, step, enforcement, placement |
+| [2026-11-22-b4-docs-audit.md](2026-11-22-b4-docs-audit.md) | `docs/playbooks/docs-audit.md` | contradiction, step |
+| [2026-11-22-b4-prompt-retrospective.md](2026-11-22-b4-prompt-retrospective.md) | `docs/playbooks/prompt-retrospective.md` | contradiction, enforcement |
+| [2026-11-22-b4-tracker-operations.md](2026-11-22-b4-tracker-operations.md) | `docs/playbooks/tracker-operations.md` | contradiction, step, enforcement |
+| [2026-11-22-b4-git-host-operations.md](2026-11-22-b4-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | contradiction, step, enforcement |
+| [2026-11-22-b4-review-orchestrator.md](2026-11-22-b4-review-orchestrator.md) | `docs/playbooks/review-orchestrator.md` | contradiction |
+| [2026-11-22-b4-feedback-walkthrough.md](2026-11-22-b4-feedback-walkthrough.md) | `docs/playbooks/feedback-walkthrough.md` | contradiction |
+| [2026-11-22-b4-search-every-source.md](2026-11-22-b4-search-every-source.md) | `docs/playbooks/search-every-source.md` | contradiction, step |
+| [2026-11-22-b4-machine-self-check.md](2026-11-22-b4-machine-self-check.md) | `docs/machine-self-check.md` | step |
+| [2026-11-22-b4-research-ladder.md](2026-11-22-b4-research-ladder.md) | `docs/research-ladder.md` | contradiction |
+| [2026-11-22-b4-playbook-catalog.md](2026-11-22-b4-playbook-catalog.md) | `docs/playbooks/README.md` | contradiction, trigger |
+| [2026-11-22-b4-how-tos.md](2026-11-22-b4-how-tos.md) | `docs/how-tos.md` | trigger, placement |
+| [2026-11-22-b4-glossary.md](2026-11-22-b4-glossary.md) | `docs/glossary.md` | none |
+| [2026-11-22-b4-parts.md](2026-11-22-b4-parts.md) | `docs/parts.md` | none |

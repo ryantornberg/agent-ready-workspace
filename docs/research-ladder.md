@@ -28,7 +28,7 @@ The rows run from cheapest to dearest. Start at the row that matches what you al
 
 Do not stack lookups. Never run a second lookup to confirm what the first one found, and never run several at once on the same question.
 
-Move to another row only in two cases. The lookup you picked gave you something new, such as a code name from an alias: then you know more, so pick again from the table. Or it came back empty: then take the next row down that still fits what you have. When the last row that fits comes back empty too, stop searching. The workspace does not hold the answer: say so in your report, with the lookups you ran, and ask the person or delegate a wider sweep.
+Move to another row only in two cases. The lookup you picked gave you something new, such as a code name from an alias: then you know more, so pick again from the table. Or it came back empty: then take the next row down that still fits what you have. When the last row that fits comes back empty too, stop searching. The workspace does not hold the answer: say so in your report, with the lookups you ran, and ask the person what to do next. When the answer needs sources outside the workspace, such as a tracker, a wiki, mail or chat, and the person asks for them, follow [search every source](playbooks/search-every-source.md).
 
 ## Offer to write a finding down
 

@@ -20,6 +20,8 @@ How the checks and hooks plug in, and how to add one. It is for anyone extending
 | Part | `parts/<name>.py` | One check or one hook. |
 | Cases | `parts/<name>.cases.json` | The part's own tests, as data. |
 
+When you are adding a page, a playbook, a decision record or a rule page rather than a part, follow [extend the workspace](extend-the-workspace.md) instead.
+
 ## A check
 
 A check gets a snapshot and returns findings.

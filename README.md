@@ -137,8 +137,17 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/playbooks/escape-analysis.md](docs/playbooks/escape-analysis.md) | unproven | M6 |
 | [docs/playbooks/feedback-walkthrough.md](docs/playbooks/feedback-walkthrough.md) | unproven | M6 |
 | [docs/playbooks/handoff.md](docs/playbooks/handoff.md) | unproven | M6 |
+| [docs/extend-the-workspace.md](docs/extend-the-workspace.md) | unproven | M5 |
+| [docs/adopt-the-workspace.md](docs/adopt-the-workspace.md) | unproven | M5 |
+| [docs/maintain-the-workspace.md](docs/maintain-the-workspace.md) | unproven | M5 |
+| [docs/machine-self-check.md](docs/machine-self-check.md) | unproven | M5 |
+| [docs/playbooks/tracker-operations.md](docs/playbooks/tracker-operations.md) | unproven | M8 |
+| [docs/playbooks/git-host-operations.md](docs/playbooks/git-host-operations.md) | unproven | M8 |
+| [docs/playbooks/search-every-source.md](docs/playbooks/search-every-source.md) | unproven | M8 |
+| [docs/playbooks/docs-audit.md](docs/playbooks/docs-audit.md) | unproven | M10 |
+| [docs/playbooks/prompt-retrospective.md](docs/playbooks/prompt-retrospective.md) | unproven | M10 |
 
-Proven: 1. Unproven: 25.
+Proven: 1. Unproven: 34.
 
 ## What stays prose
 
@@ -174,6 +183,8 @@ Save the cases as `parts/no_empty_pages.cases.json`, add `{"use": "no_empty_page
 In the recorded runs, fifteen per arm in each of the three cases on a small model, 40 of 45 guided runs passed every grader (95% interval 77% to 95%), 19 of 45 two-line runs (29% to 57%) and none of the 45 bare runs (0% to 8%). Guided against two-line, one-sided Fisher exact test: p = 2.5e-06. The two lines produced the habits they ask for as reliably as the playbook: on the Export bug two lines passed 15 of 15 and the guidance 14. The difference came from the facts: every two-line and bare run that heard "the nightly job" changed the shelved folder, and 22 of 30 that heard "the big report" changed the wrong report, while 29 of 30 guided runs changed the right code. The guided arm passed 45 of 45 in the recording before this one; four of this recording's five guided failures were habits, not facts. The cases were built so that those facts matter, by the same hand as the guidance, so this shows that the contract and the index reach the agent, not how often real work turns on them. [evals/README.md](evals/README.md#the-recorded-runs) has the table, the transcripts and what changed in the harness for this recording.
 
 ## Use it for your own team
+
+Start at [adopt the workspace](docs/adopt-the-workspace.md): its steps run the ones below inside a plan a person approves, add a machine self-check and a check that the adoption is done, and say what transfers to your copy and what does not.
 
 1. Replace the facts in `AGENTS.md` with the ones a model gets wrong about your code. Leave out anything it gets right from the code alone.
 2. Put your code repositories under `src/` as submodules, and remove the samples. Add `submodules: true` to the checkout step in `.github/workflows/ci.yml`. The checks do not read the pages inside them, so their own links and dates do not fail yours. On a fresh clone, `python3 ws.py pins` checks out each one whose remote answers. It asks for no password, gives each remote ten seconds, skips one it cannot reach with a note, and never touches a folder that already holds a checkout or any files.
