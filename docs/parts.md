@@ -91,17 +91,19 @@ def decide(event, config):
     return None
 ```
 
-There are five events. The event a hook's `decide` gets:
+There are seven events. The event a hook's `decide` gets:
 
 | Event | Fires | The event holds |
 |---|---|---|
 | `before-shell` | Before a shell command | `command`: the command line |
 | `before-edit` | Before an edit tool writes a file | `path`: relative to the working copy of this repository that holds the file, the main one or a linked worktree, else absolute; `working_copy`, `main` and `absolute`. See [decision 0004](decisions/0004-the-hook-contract.md). |
 | `before-handoff` | Before a task is handed to a helper session | `prompt`; and `model` and `effort` when the tool lets a task set them, `None` when left unset |
+| `after-edit` | After an edit tool wrote a file | The same fields as `before-edit` |
 | `session-start` | When an agent session opens | `session`, `cwd`, `tool`; and the facts the hook declares in `NEEDS` |
 | `session-end` | When an agent session closes | The same |
+| `stop` | When the agent tries to finish its turn | `session`, `cwd`, `tool`, and `stop_hook_active`: true on the stop that follows one a stop hook refused |
 
-A hook on a session event must set `MODE = "remind"`, and a session start or end never fails: on any error the runner prints nothing and exits 0. A hook may declare `NEEDS`, and the runner adds those facts to its event:
+A hook on a session event or on `after-edit` must set `MODE = "remind"`. A stop hook may refuse, and the runner lets it refuse only once in a row: on the stop after a refusal, the reason is shown to the person as a report and the session stops. None of these four events ever fails: on any error the runner prints nothing and exits 0. One exception is on purpose: when an edit ledger cannot be read, the stop gate refuses once, as it would for a failing check, since it cannot tell whose edits are waiting. A hook may declare `NEEDS`, and the runner adds those facts to its event:
 
 | Event | Fact | What the runner does |
 |---|---|---|
@@ -110,6 +112,9 @@ A hook on a session event must set `MODE = "remind"`, and a session start or end
 | `session-start` | `"fast_forward"` | Brings the main working copy up to `origin/main` when that is safe, and gives the reason when it held back |
 | `before-edit` | `"rule_pages"` | Reads every page in the rules folder the hook's config names, fresh, from the working copy that holds the edited file |
 | `before-edit` | `"lease"` | Takes or keeps the writing-session lease for an edit to a tracked file in the main working copy; see [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md) |
+| `after-edit` | `"index"` | Reads the index file the hook's config names, fresh, from the working copy that holds the edited file |
+| `stop` | `"own_edits"` | Reads this session's entries from the edit ledger of every working copy of this repository |
+| `stop` | `"gate"` | Runs `python3 ws.py check` and the tests the hook's config names in `"tests"`, in each working copy that holds the session's entries. The runs share one deadline of 18 seconds, so the hook answers within its 20. Worked out only when a hook reads it |
 
 While the manifest uses `lease`, the runner also releases the session's own lease at `session-end`. A part reads nothing else from outside its event, config and snapshot; [decision 0004](decisions/0004-the-hook-contract.md) names the exceptions, and a test holds every part to it.
 
@@ -124,7 +129,7 @@ One call can carry several edits. Codex's patch tool can add, change, delete or 
 
 A hook that sets `MODE = "remind"` never refuses. When its `decide` returns a reason, the call goes ahead and the agent is shown the reason as a reminder: through the agent tool's `additionalContext`, next to the command's result, for Claude Code and Codex, or as plain text on standard output for the workspace's own shape. Use it where the real check comes later, as `no_stage_all` does before the commit. Before a part sees a path, the runner follows symbolic links, and on a case-insensitive file system it treats a differently cased path to the workspace as inside it.
 
-[.claude/settings.json](../.claude/settings.json) wires the five events into Claude Code, and [.codex/hooks.json](../.codex/hooks.json) into Codex CLI, which gives a hook no variable naming the project, so its lines find `wslib/launch.sh` from the top of the git repository. Each line calls `wslib/launch.sh`. A guard's line ends in `|| exit 2`, so a missing launcher, or a Python that crashes, refuses too; a session hook's line ends in `|| exit 0`, so a broken Python never keeps a session from starting or ending. See [the launcher](#the-launcher). An agent tool blocks a call only on exit 2; anything else lets it through. Codex also lets a call through when its hook times out, so its wiring sets a 30-second limit. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
+[.claude/settings.json](../.claude/settings.json) wires the seven events into Claude Code, and [.codex/hooks.json](../.codex/hooks.json) into Codex CLI, which gives a hook no variable naming the project, so its lines find `wslib/launch.sh` from the top of the git repository. Each line calls `wslib/launch.sh`. A guard's line ends in `|| exit 2`, so a missing launcher, or a Python that crashes, refuses too; a line for a session event, `after-edit` or `stop` ends in `|| exit 0`, so a broken Python never keeps a session from starting, stopping or ending. See [the launcher](#the-launcher). An agent tool blocks a call only on exit 2; anything else lets it through. Codex also lets a call through when its hook times out, so its wiring sets a 30-second limit. Another tool needs an adapter and its own few lines of wiring, and the parts stay the same.
 
 A hook call loads only the hooks for its event. It does not run any check, or any hook for the other event. So a check with a broken case cannot refuse a shell command or an edit, including the edit that repairs it. To know a part's kind without running it, the runner reads its `KIND` and `EVENT` lines. Write each as one plain line, such as `KIND = "hook"`. A part whose lines it cannot read refuses every hook call, because it might be a hook for that event. So does a missing part file, and a manifest it cannot read. Repair those from your own terminal, where the agent's hooks do not run. A hook call does not compare those lines with what the file sets when it runs; `check`, `selftest` and CI do, and refuse a part where they differ.
 
@@ -135,20 +140,20 @@ A hook call loads only the hooks for its event. It does not run any check, or an
 - **One start per call.** It starts Python once, in UTF-8 mode, with `wslib/start.py`. That file checks the version and then runs the target in the same process. An older Python can read it, so a too-old one says so instead of failing to parse.
 - **Which Python.** The first of `python3`, `python` and `py` on the path that is 3.9 or later. A Python that is too old is passed over for the next. The Windows Store's stand-in for `python3`, in a `WindowsApps` folder, is tried only after every other.
 - **What it runs.** `wslib/launch.sh ws.py check` runs a script, relative to the workspace. `wslib/launch.sh -m unittest discover -b tests` runs a module. Any other first word is taken as `ws.py`'s arguments, which is the form the hook wiring uses, so a running session keeps working when the launcher changes under it.
-- **When it fails.** With no Python that will do, it prints install advice and exits 2. A guard's wiring and the commit and push hooks then refuse. A reminder's wiring and the post-commit hook pass, so a broken Python never keeps a session from finishing.
+- **When it fails.** With no Python that will do, it prints install advice and exits 2. A guard's wiring and the commit and push hooks then refuse. A reminder's wiring, the stop gate's and the post-commit hook pass, so a broken Python never keeps a session from finishing; the stop gate is then skipped.
 
 It needs a POSIX shell. CI runs every step in bash, which on Windows is the bash that comes with Git.
 
 ## The edit ledger
 
-Each `before-edit` call that every hook allows is recorded: the runner appends the path to the edit ledger of the working copy that holds the file. The ledger is the file `ws-ledger` in that working copy's git folder, so a linked working copy keeps its own. An edit in a code repository under `src/` goes in the workspace's ledger. An edit outside every working copy of this repository is not recorded. If the ledger cannot be written, the edit is refused.
+Each `before-edit` call that every hook allows is recorded: the runner appends the path to the edit ledger of the working copy that holds the file, with the session whose edit tool wrote it. The stop gate reads the sessions; the commit check reads only the paths. The ledger is the file `ws-ledger` in that working copy's git folder, so a linked working copy keeps its own. An edit in a code repository under `src/` goes in the workspace's ledger. An edit outside every working copy of this repository is not recorded. If the ledger cannot be written, the edit is refused.
 
 While a ledger is open, the `edit_ledger` check fails a commit that stages a path no edit tool wrote, whatever command staged it. A `before-shell` reminder opens the ledger too, even empty, in the working copy where the agent tool says its session runs, when that working copy has uncommitted changes. So a session that wrote its files only through the shell is still compared, and a command run in a scratch repository while the session's own working copy is clean opens nothing. The workspace's own event shape names no folder, so trying the hook by hand opens nothing.
 
 | Command | Does |
 |---|---|
 | `python3 ws.py ledger` | Says whether the ledger is open, and lists its paths. |
-| `python3 ws.py ledger --add PATH ...` | Records files this session wrote another way, such as with a shell command or a generator. |
+| `python3 ws.py ledger --add PATH ...` | Records files this session wrote another way, such as with a shell command or a generator. They carry no session, so the stop gate does not see them. |
 | `python3 ws.py ledger --close` | Closes it, for a person's own commit. |
 | `python3 ws.py ledger --committed` | Drops the last commit's paths, and closes the ledger when none are left. The post-commit hook runs it. |
 
@@ -297,6 +302,8 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `links` | check | A link points at a missing file or heading, or a line is too long to read: over 10,000 characters. On the pages its `backticked` setting lists, a backticked path with a slash whose first folder exists, such as `src/orders-api`, points at nothing. An entry in its `exempt` setting, `{"source": page, "target": exact target, "reason": why}`, tolerates one such finding; an entry with no source, target or reason fails, and so does one that tolerates nothing. |
 | `page_kinds` | check | A page under `docs/` names no kind or a kind outside the nine, lacks the front matter its kind needs, or opens out of order: title, a purpose sentence of 25 words or fewer, the **In short** line, and `## Key points` on a plan (see [layout](layout.md)). A proof key in any form but its exact one. And the review-date rule `freshness` held: a commit edits a page past its review date, a required page has no date, or a date is more than a day ahead of today in UTC. It fails when it checks no pages. |
 | `chains` | check | A path in the index's cross-cutting chains does not exist, or the index has no chain table. |
+| `chain_reminder` | hook, after-edit, reminds | Shows the agent each cross-cutting chain of the index that names the edited path, with every path in it. |
+| `stop_gate` | hook, stop | A session with entries of its own in an edit ledger tries to finish while `python3 ws.py check` or the fast tests its `tests` setting names fail, run past their shared 18 seconds or cannot start, or an edit ledger cannot be read. It refuses once in a row; the stop right after the refusal goes ahead with the failure as a report. See [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md). |
 | `pointers` | check | The GitHub Copilot or opencode pointer file is missing, or no longer names `AGENTS.md` and the rule pages. |
 | `rules` | check | A rule in a rules table has no tag, or a tag names a part the manifest does not use, a case that part does not have, or an eval case that does not exist. `python3 ws.py rules` prints the register. |
 | `loaded_size` | check | The contract and the pointer files pass 6,000 bytes, or the wrappers' descriptions 9,000, as the manifest sets. |

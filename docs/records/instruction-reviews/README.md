@@ -71,3 +71,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-b3-how-tos.md](2026-11-21-b3-how-tos.md) | `docs/how-tos.md` | none |
 | [2026-11-21-b3-readme.md](2026-11-21-b3-readme.md) | `README.md` | contradiction |
 | [2026-11-21-b3-glossary.md](2026-11-21-b3-glossary.md) | `docs/glossary.md` | contradiction |
+| [2026-11-21-c5a-decision-0004.md](2026-11-21-c5a-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction, step, enforcement |
+| [2026-11-21-c5a-decision-0005.md](2026-11-21-c5a-decision-0005.md) | `docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md` | contradiction, trigger |
+| [2026-11-21-c5a-parts.md](2026-11-21-c5a-parts.md) | `docs/parts.md` | contradiction, trigger |
+| [2026-11-21-c5a-readme.md](2026-11-21-c5a-readme.md) | `README.md` | contradiction, enforcement, trigger |

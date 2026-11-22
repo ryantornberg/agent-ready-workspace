@@ -184,3 +184,23 @@ def resolve(page, target):
         else:
             parts.append(part)
     return "/".join(parts), fragment
+
+
+def chains(text, heading):
+    """[(line number, change, [paths])] of the chain table under the heading: the index's cross-cutting chains.
+
+    Each row names a kind of change in its first cell and, in backticks in its second, every path that change
+    touches; a path ending in "/" is a folder. The `chains` check holds the paths to the files, and the chain
+    reminder shows a row to an agent that edits one of its paths."""
+    found, inside = [], False
+    for number, line in enumerate(text.replace("\r\n", "\n").split("\n"), 1):
+        if line.startswith("#"):
+            inside = line.lstrip("#").strip() == heading
+            continue
+        if not inside or not line.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 2 or set(cells[0]) <= set("-: ") or cells[0].lower() == "change":
+            continue
+        found.append((number, cells[0], re.findall(r"`([^`]+)`", cells[1])))
+    return found

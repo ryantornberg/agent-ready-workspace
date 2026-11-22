@@ -1,16 +1,14 @@
 """Check: every path the index's cross-cutting chains name exists.
 
 A chain lists, for one kind of change, every path that change touches: a new part touches its file, its
-cases, the manifest and the parts page. An agent that edits one of them is shown the rest (slice C5's
-reminder), so a chain that names a moved or deleted path sends it to nothing. The chains are a table under
-the index's heading "Cross-cutting chains": the first column names the change, the second its paths, each
-in backticks. A path that ends in "/" is a folder that must hold a file. It fails when the index has no such
+cases, the manifest and the parts page. An agent that edits one of them is shown the rest (the chain
+reminder, parts/chain_reminder.py), so a chain that names a moved or deleted path sends it to nothing. The
+chains are a table under the index's heading "Cross-cutting chains": the first column names the change, the
+second its paths, each in backticks. A path that ends in "/" is a folder that must hold a file. It fails when the index has no such
 table, so deleting the heading is not a way out.
 
 Config: "index" (default INDEX.md), "heading" (default "Cross-cutting chains").
 """
-import re
-
 from wslib import markdown
 from wslib.parts import finding
 
@@ -19,19 +17,8 @@ PAGE = "docs/layout.md"
 
 
 def chains(text, heading):
-    """[(line number, change, [paths])] of the chain table under the heading."""
-    found, inside = [], False
-    for number, line in enumerate(text.replace("\r\n", "\n").split("\n"), 1):
-        if line.startswith("#"):
-            inside = line.lstrip("#").strip() == heading
-            continue
-        if not inside or not line.startswith("|"):
-            continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if len(cells) < 2 or set(cells[0]) <= set("-: ") or cells[0].lower() == "change":
-            continue
-        found.append((number, cells[0], re.findall(r"`([^`]+)`", cells[1])))
-    return found
+    """[(line number, change, [paths])] of the chain table under the heading (wslib/markdown.py)."""
+    return markdown.chains(text, heading)
 
 
 def run(snapshot, config):

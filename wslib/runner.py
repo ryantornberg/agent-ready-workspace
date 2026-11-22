@@ -6,9 +6,18 @@ The commit check reads the staged manifest, parts and cases. A part an older man
 used, or be listed under "retired" with a reason: the last commit's manifest decides locally, and the base
 commit's manifest in CI.
 
-The events are before-shell, before-edit, before-handoff, session-start and session-end. A hook reads the workspace's versioned event
-shape, or one agent tool's payload through that tool's adapter (wslib/events.py), and refuses anything else.
-A hook with MODE = "remind" never refuses: the agent is shown its reason and the call goes ahead.
+The events are before-shell, before-edit, before-handoff, after-edit, session-start, session-end and stop. A
+hook reads the workspace's versioned event shape, or one agent tool's payload through that tool's adapter
+(wslib/events.py), and refuses anything else. A hook with MODE = "remind" never refuses: the agent is shown its
+reason and the call goes ahead.
+
+after-edit and stop never fail, like the session events: on any error the runner prints nothing and exits 0.
+An after-edit hook only reminds; the runner adds "index", the index read from the working copy that holds the
+edited file. A stop hook may refuse, once: the runner adds "own_edits", the session's own entries in every edit
+ledger of this repository, and "gate", the check and fast tests run where those entries are (wslib/gate.py),
+worked out only when a hook reads it. A refusal blocks the stop and shows the agent the reason. On the stop
+that follows a refusal, which the tools mark "stop_hook_active", the reason is shown as a report and the
+session stops, so a failure it cannot fix does not trap it.
 
 An allowed edit is recorded in the edit ledger of the working copy that holds it (wslib/ledger.py). A
 before-shell reminder opens the ledger of the folder the agent tool says its session runs in, when that
@@ -43,6 +52,7 @@ from . import VERSION
 from . import baseline as baselines
 from . import blocks
 from . import events
+from . import gate as gates
 from . import gitcall
 from . import lease as leases
 from . import ledger as ledgers
@@ -610,9 +620,104 @@ def shell_event(root, event, hooks, tool, cwd):
     return LazyEvent(facts, makers)
 
 
+def index_fact(event, hooks):
+    """{index path: its text, or None} for the index each after-edit hook's config names, read fresh from the
+    working copy that holds the edited file. Nothing for a file in no working copy of this repository."""
+    top = event.get("working_copy")
+    found = {}
+    for part in hooks:
+        if "index" not in getattr(part.module, "NEEDS", ()):
+            continue
+        name = part.config.get("index", "INDEX.md")
+        if not top:
+            found[name] = None
+            continue
+        try:
+            found[name] = (pathlib.Path(top) / name).read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeDecodeError, ValueError):
+            found[name] = None
+    return found
+
+
+def command_after_edit(root, args):
+    """after-edit: run the after-edit hooks, which only remind, and never fail. The edit is already made."""
+    try:
+        manifest = partlib.load_manifest(root, hook=True)
+        hooks = partlib.load_hooks(root, args.event, manifest)
+        stream = getattr(sys.stdin, "buffer", sys.stdin)
+        found, tool, _ = events.read_call(root, args.event, stream.read(), args.tool)
+        notes = []
+        for event in found:
+            if any("index" in getattr(part.module, "NEEDS", ()) for part in hooks):
+                event = dict(event, index=index_fact(event, hooks))
+            for part in hooks:
+                reason = part.decide(event)
+                if reason:
+                    notes.append(f"{part.name}: {partlib.with_page(reason, getattr(part.module, 'PAGE', None))}")
+        if notes:
+            print(events.remind(tool, " ".join(dict.fromkeys(notes)), args.event))
+    except Exception:      # the edit is made; a broken reminder says nothing rather than an error
+        pass
+    return 0
+
+
+def stop_event(root, event, hooks):
+    """The stop event with "own_edits" read at once, from the ledger files, and "gate" worked out only when a hook
+    reads it: a session with no entries of its own runs nothing (decision 0005)."""
+    needs = {need for part in hooks for need in getattr(part.module, "NEEDS", ())}
+    if not needs:
+        return event
+    try:
+        mine = ledgers.session_entries(root, event.get("session"))
+        edits = [{"working_copy": str(top), "paths": paths} for top, paths in mine]
+    except ledgers.LedgerError:
+        edits, mine = None, []
+    tests = []
+    for part in hooks:
+        listed = part.config.get("tests", [])
+        if "gate" in getattr(part.module, "NEEDS", ()) and isinstance(listed, list):
+            tests += [t for t in listed if isinstance(t, str) and t not in tests]
+    makers = {"gate": lambda: gates.run([top for top, _ in mine], tests)}
+    if edits is None:        # an unreadable ledger: the hook is told the gate could not be worked out
+        edits, makers = [{"working_copy": None, "paths": ["(an edit ledger that cannot be read)"]}], {"gate": lambda: None}
+    return LazyEvent(dict(event, own_edits=edits), makers)
+
+
+def command_stop(root, args):
+    """stop: run the stop hooks. A refusal blocks this stop once; the stop after it goes ahead with the reason as a
+    report. Never fails: on any error the session stops and nothing is printed."""
+    try:
+        manifest = partlib.load_manifest(root, hook=True)
+        hooks = partlib.load_hooks(root, args.event, manifest)
+        stream = getattr(sys.stdin, "buffer", sys.stdin)
+        found, tool, _ = events.read_call(root, args.event, stream.read(), args.tool)
+        refusals, notes = [], []
+        for event in found:
+            event = stop_event(root, event, hooks)
+            for part in hooks:
+                reason = part.decide(event)
+                if reason:
+                    text = f"{part.name}: {partlib.with_page(reason, getattr(part.module, 'PAGE', None))}"
+                    (refusals if part.mode == "refuse" else notes).append(text)
+        again = any(event.get("stop_hook_active") for event in found)
+        if refusals and not again:
+            print(events.block_stop(tool, "\n\n".join(dict.fromkeys(refusals))))
+            return 2 if tool is None else 0      # both tools read the block from the reply, on exit 0
+        notes = refusals + notes
+        if notes:
+            print(events.report_stop(tool, "\n\n".join(dict.fromkeys(notes))))
+    except Exception:      # a stop is never trapped by a broken hook
+        pass
+    return 0
+
+
 def command_hook(root, args):
     if args.event in partlib.SESSION_EVENTS:
         return command_session(root, args)
+    if args.event in partlib.AFTER_EVENTS:
+        return command_after_edit(root, args)
+    if args.event in partlib.STOP_EVENTS:
+        return command_stop(root, args)
     if args.event not in partlib.EVENTS:
         raise partlib.PartError(f"unknown event {args.event!r}; the events are {partlib.EVENTS}")
     try:
@@ -648,7 +753,8 @@ def command_hook(root, args):
     reminders = list(dict.fromkeys(reminders))
     if args.event == "before-edit":
         for event in found:
-            ledgers.record(root, event["absolute"])   # in the ledger of the working copy that holds it
+            # in the ledger of the working copy that holds it, with the session whose edit tool wrote it
+            ledgers.record(root, event["absolute"], event.get("session"))
     if reminders and args.event == "before-shell" and cwd:
         # The command may stage files this session did not write. The commit check compares only while a ledger is
         # open, so open it, even empty, when the working copy has uncommitted changes: an agent that wrote files only
@@ -772,8 +878,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     root = pathlib.Path(args.root).resolve()
-    if args.command == "hook" and args.event in partlib.SESSION_EVENTS:
-        return command_session(root, args)      # never fails, so not under the error handling below
+    if args.command == "hook" and args.event in partlib.QUIET_EVENTS:
+        return command_hook(root, args)         # never fails, so not under the error handling below
     try:
         return {"list": command_list, "selftest": command_selftest, "check": command_check, "baseline": command_baseline,
                 "hook": command_hook, "ledger": command_ledger, "rules": command_rules, "pins": command_pins,

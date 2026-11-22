@@ -1,0 +1,112 @@
+[
+  {
+    "name": "chain: an edit to a path in a chain shows the chain",
+    "tool": "claude-code",
+    "payload": {
+      "hook_event_name": "PostToolUse",
+      "session_id": "me",
+      "cwd": "{root}",
+      "tool_name": "Write",
+      "tool_input": {
+        "file_path": "{root}/parts/lease.py",
+        "content": "x\n"
+      }
+    },
+    "exit": 0,
+    "output": [
+      "chain_reminder",
+      "Add or change a part",
+      "docs/parts.md",
+      "PostToolUse"
+    ]
+  },
+  {
+    "name": "chain: an edit to a path no chain names shows nothing",
+    "tool": "claude-code",
+    "payload": {
+      "hook_event_name": "PostToolUse",
+      "session_id": "me",
+      "cwd": "{root}",
+      "tool_name": "Write",
+      "tool_input": {
+        "file_path": "{root}/src/a.cs",
+        "content": "x\n"
+      }
+    },
+    "exit": 0,
+    "absent": [
+      "chain_reminder"
+    ]
+  },
+  {
+    "name": "chain: an edit in a linked worktree reads that worktree's index",
+    "tool": "claude-code",
+    "payload": {
+      "hook_event_name": "PostToolUse",
+      "session_id": "me",
+      "cwd": "{worktree}",
+      "tool_name": "Edit",
+      "tool_input": {
+        "file_path": "{worktree}/workspace.json"
+      }
+    },
+    "setup": {
+      "worktree": true
+    },
+    "exit": 0,
+    "output": [
+      "chain_reminder",
+      "workspace.json",
+      "Change the engine"
+    ]
+  },
+  {
+    "name": "codex: a patch shows the chain of each path it names",
+    "tool": "codex",
+    "payload": {
+      "hook_event_name": "PostToolUse",
+      "session_id": "codex-me",
+      "cwd": "{root}",
+      "tool_name": "apply_patch",
+      "tool_input": {
+        "command": "*** Begin Patch\n*** Update File: src/a.cs\n+x\n*** Update File: docs/layout.md\n+x\n*** End Patch"
+      }
+    },
+    "exit": 0,
+    "output": [
+      "chain_reminder",
+      "docs/layout.md",
+      "Add a page"
+    ]
+  },
+  {
+    "name": "codex: a patch no chain names shows nothing",
+    "tool": "codex",
+    "payload": {
+      "hook_event_name": "PostToolUse",
+      "session_id": "codex-me",
+      "cwd": "{root}",
+      "tool_name": "apply_patch",
+      "tool_input": {
+        "command": "*** Begin Patch\n*** Update File: src/a.cs\n+x\n*** End Patch"
+      }
+    },
+    "exit": 0,
+    "absent": [
+      "chain_reminder"
+    ]
+  },
+  {
+    "name": "a payload the adapter cannot read lets the edit stand, silently",
+    "tool": "claude-code",
+    "payload": {
+      "hook_event_name": "PostToolUse",
+      "session_id": "me"
+    },
+    "exit": 0,
+    "absent": [
+      "chain_reminder",
+      "Traceback"
+    ]
+  }
+]

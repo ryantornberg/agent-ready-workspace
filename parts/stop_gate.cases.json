@@ -1,0 +1,310 @@
+[
+  {
+    "name": "a session with no entries of its own stops, and nothing runs",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": []
+    },
+    "allow": true
+  },
+  {
+    "name": "no own_edits fact at all stops",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false
+    },
+    "allow": true
+  },
+  {
+    "name": "the session's own entries and a passing check and tests stop",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "passed",
+          "output": ""
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "passed",
+          "output": ""
+        }
+      ]
+    },
+    "allow": true
+  },
+  {
+    "name": "a failing check refuses",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "failed",
+          "output": "error: docs/a.md:1: no kind"
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "passed",
+          "output": ""
+        }
+      ]
+    },
+    "allow": false
+  },
+  {
+    "name": "failing tests refuse",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "passed",
+          "output": ""
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "failed",
+          "output": "FAILED (failures=1)"
+        }
+      ]
+    },
+    "allow": false
+  },
+  {
+    "name": "a run past the 20 seconds refuses",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "timed-out",
+          "output": ""
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "passed",
+          "output": ""
+        }
+      ]
+    },
+    "allow": false
+  },
+  {
+    "name": "a run that could not start refuses",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "passed",
+          "output": ""
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "error",
+          "output": "no such file"
+        }
+      ]
+    },
+    "allow": false
+  },
+  {
+    "name": "a gate that could not be worked out refuses",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": null
+    },
+    "allow": false
+  },
+  {
+    "name": "a failure in a second working copy refuses",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": false,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        },
+        {
+          "working_copy": "/w/.claude/worktrees/x",
+          "paths": [
+            "b.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "passed",
+          "output": ""
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "passed",
+          "output": ""
+        },
+        {
+          "working_copy": "/w/.claude/worktrees/x",
+          "command": "python3 ws.py check",
+          "status": "failed",
+          "output": "error"
+        }
+      ]
+    },
+    "allow": false
+  },
+  {
+    "name": "the stop after a refusal is decided the same; the runner turns the reason into a report",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": true,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "failed",
+          "output": "error: docs/a.md:1: no kind"
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "passed",
+          "output": ""
+        }
+      ]
+    },
+    "allow": false
+  },
+  {
+    "name": "the stop after a refusal, now passing, stops",
+    "event": {
+      "session": "me",
+      "cwd": "/w",
+      "tool": "claude-code",
+      "stop_hook_active": true,
+      "own_edits": [
+        {
+          "working_copy": "/w",
+          "paths": [
+            "docs/a.md"
+          ]
+        }
+      ],
+      "gate": [
+        {
+          "working_copy": "/w",
+          "command": "python3 ws.py check",
+          "status": "passed",
+          "output": ""
+        },
+        {
+          "working_copy": "/w",
+          "command": "python3 -m unittest tests.test_cases_bite",
+          "status": "passed",
+          "output": ""
+        }
+      ]
+    },
+    "allow": true
+  }
+]

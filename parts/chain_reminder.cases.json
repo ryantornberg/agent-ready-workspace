@@ -1,0 +1,198 @@
+[
+  {
+    "name": "an edit to a file a chain names shows the chain's paths",
+    "event": {
+      "path": "docs/layout.md",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/docs/layout.md",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "an edit under a folder a chain names shows the chain",
+    "event": {
+      "path": "parts/new_part.cases.json",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/parts/new_part.cases.json",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a path in two chains shows both",
+    "event": {
+      "path": "workspace.json",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/workspace.json",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "an edit in a linked worktree is read against its own index",
+    "event": {
+      "path": "wslib/runner.py",
+      "working_copy": "/w/.claude/worktrees/x",
+      "main": true,
+      "absolute": "/w/wslib/runner.py",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": true
+  },
+  {
+    "name": "a path no chain names shows nothing",
+    "event": {
+      "path": "docs/other.md",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/docs/other.md",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "a folder's name without its slash is not under it",
+    "event": {
+      "path": "parts",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/parts",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "a path that only starts like a chained file shows nothing",
+    "event": {
+      "path": "docs/layout.md.bak",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/docs/layout.md.bak",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "a table under another heading is not a chain",
+    "event": {
+      "path": "notes/today.md",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/notes/today.md",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "an edit in no working copy of this repository shows nothing",
+    "event": {
+      "path": "/tmp/elsewhere/workspace.json",
+      "working_copy": null,
+      "main": true,
+      "absolute": "/w//tmp/elsewhere/workspace.json",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "# Index\n\n## Cross-cutting chains\n\n| Change | Paths it touches |\n|---|---|\n| Add or change a part | `parts/`, `workspace.json`, `docs/parts.md`, `README.md` |\n| Add a page | `docs/layout.md`, `INDEX.md` |\n| Change the engine | `wslib/`, `workspace.json`, `CHANGELOG.md` |\n\n## Elsewhere\n\n| Change | Paths it touches |\n|---|---|\n| Not a chain | `notes/` |\n"
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "a working copy with no index shows nothing",
+    "event": {
+      "path": "workspace.json",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/workspace.json",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": null
+      }
+    },
+    "remind": false
+  },
+  {
+    "name": "no index fact shows nothing",
+    "event": {
+      "path": "workspace.json",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/workspace.json",
+      "session": "s",
+      "pid": null
+    },
+    "remind": false
+  },
+  {
+    "name": "the index and heading come from the config",
+    "event": {
+      "path": "lib/x.py",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/lib/x.py",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "MAP.md": "## Chains\n\n| Change | Paths |\n|---|---|\n| Change lib | `lib/`, `MAP.md` |\n"
+      }
+    },
+    "config": {
+      "index": "MAP.md",
+      "heading": "Chains"
+    },
+    "remind": true
+  },
+  {
+    "name": "the default heading does not read another heading's table",
+    "event": {
+      "path": "lib/x.py",
+      "working_copy": "/w",
+      "main": true,
+      "absolute": "/w/lib/x.py",
+      "session": "s",
+      "pid": null,
+      "index": {
+        "INDEX.md": "## Chains\n\n| Change | Paths |\n|---|---|\n| Change lib | `lib/`, `MAP.md` |\n"
+      }
+    },
+    "remind": false
+  }
+]

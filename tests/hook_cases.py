@@ -15,7 +15,8 @@ The cases are in tests/hooks/<event>.json. A case:
      "output": [texts the call must print], "absent": [texts it must not print],
      "env": {NAME: value}, "repeat": n (default 5), "row": "git push" | "gh write" (time it on that row),
      "setup": {"remote": true, "remote_ahead": true, "worktree": true, "files": {path: text},
-               "lease": {"session": text, "pid": "live" | "dead" | "self", "age": seconds}},
+               "lease": {"session": text, "pid": "live" | "dead" | "self", "age": seconds},
+               "ledger": [{"path": text, "session": text}, ...]},   # entries in the main copy's edit ledger
      "lease_after": session id or null (who holds the lease once the call is done)}
 Text in a payload or env value may name {root}, the scratch main working copy; {worktree}, its linked worktree;
 {live_pid}, a process that runs for the whole case; {dead_pid}, one that has exited; and {self_pid}, this runner.
@@ -54,7 +55,7 @@ BUDGETS = {
 }
 ROWS = ("git push", "gh write")     # rows of their own, timed apart from the rest of before-shell
 WIRING = {"claude-code": ".claude/settings.json", "codex": ".codex/hooks.json"}
-SETUP_KEYS = {"remote", "remote_ahead", "worktree", "files", "lease"}
+SETUP_KEYS = {"remote", "remote_ahead", "worktree", "files", "lease", "ledger"}
 CASE_KEYS = {"name", "tool", "payload", "exit", "output", "absent", "env", "repeat", "row", "setup", "lease_after"}
 REPEAT = 5
 CALL_TIMEOUT = 60
@@ -147,6 +148,10 @@ def malformed(event, case):
     if lease is not None and (not isinstance(lease, dict) or lease.get("pid") not in ("live", "dead", "self")
                               or not isinstance(lease.get("session"), str)):
         return 'a seeded lease needs a "session" and a "pid" of "live", "dead" or "self"'
+    ledger = setup.get("ledger", [])
+    if not isinstance(ledger, list) or not all(isinstance(e, dict) and set(e) == {"path", "session"}
+                                               and all(isinstance(v, str) and v for v in e.values()) for e in ledger):
+        return 'a seeded ledger is a list of {"path", "session"} entries'
     if event == "session-start" and not setup.get("remote"):
         return "a session-start case runs against a local remote: set setup.remote"
     if not isinstance(case.get("repeat", REPEAT), int) or case.get("repeat", REPEAT) < 1:
@@ -233,12 +238,14 @@ class Scratch:
         return places
 
     def seed(self, places, setup):
-        """The state each repeat starts from: the case's lease, or none, and no edit ledger."""
+        """The state each repeat starts from: the case's lease, or none, and the case's ledger entries, or none."""
         common = places["common"]
         for folder in [common] + sorted((common / "worktrees").glob("*")):
             ledger = folder / LEDGER
             if ledger.exists():
                 ledger.unlink()
+        if setup.get("ledger"):
+            (common / LEDGER).write_text("".join(json.dumps(entry) + "\n" for entry in setup["ledger"]), encoding="utf-8")
         lease_file = common / LEASE
         lease = setup.get("lease")
         if lease is None:

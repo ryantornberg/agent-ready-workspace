@@ -3,10 +3,13 @@
 A part is one Python file. It declares what it is and exposes one function:
 
     KIND = "check"     def run(snapshot, config) -> [finding(...), ...]
-    KIND = "hook"      EVENT = "before-shell", "before-edit" or "before-handoff"
+    KIND = "hook"      EVENT = one of EVENTS below, such as "before-shell"
                        def decide(event, config) -> None to allow, or the reason to refuse
                        MODE = "remind" (optional): the hook never refuses. Its reason is shown
                        to the agent as a reminder and the call goes ahead. The default is "refuse".
+                       A hook on a session event or on after-edit must remind: the edit is already
+                       made, and a session start or end is never refused. A stop hook may refuse,
+                       and the runner lets it refuse a stop once (wslib/runner.py).
     A check may set PHASES, the phases it runs in: "commit", "ci", "nightly" and "push". The default is
     ("commit", "ci"). `ws.py check --phase nightly` runs only the checks whose PHASES hold "nightly".
     A "push" check runs from the pre-push hook, `ws.py check --push REMOTE`, on the commits being pushed.
@@ -62,10 +65,15 @@ from . import snapshot as snapshots
 KINDS = ("check", "hook")
 TOOL_EVENTS = ("before-shell", "before-edit", "before-handoff")
 SESSION_EVENTS = ("session-start", "session-end")
-EVENTS = TOOL_EVENTS + SESSION_EVENTS
+AFTER_EVENTS = ("after-edit",)        # after a tool call has run: it can only remind
+STOP_EVENTS = ("stop",)               # when the agent tries to finish its turn
+EVENTS = TOOL_EVENTS + AFTER_EVENTS + SESSION_EVENTS + STOP_EVENTS
+# The events that never fail: on any error the runner prints nothing and exits 0, and the wiring adds || exit 0.
+QUIET_EVENTS = AFTER_EVENTS + SESSION_EVENTS + STOP_EVENTS
 # Facts a hook may ask the runner for, by event; see wslib/runner.py and decisions 0004 and 0005.
 NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease", "rule_pages"),
-         "before-shell": ("session", "lease", "working_copies", "targets")}
+         "before-shell": ("session", "lease", "working_copies", "targets"), "after-edit": ("index",),
+         "stop": ("own_edits", "gate")}
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")
 PHASES = ("commit", "ci", "nightly", "push")
@@ -336,6 +344,8 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None):
         raise PartError(f"part {name}: a hook's MODE must be one of {MODES}, not {mode!r}")
     if kind == "hook" and event in SESSION_EVENTS and mode != "remind":
         raise PartError(f'part {name}: a hook on {event} must set MODE = "remind": a session start or end is never refused')
+    if kind == "hook" and event in AFTER_EVENTS and mode != "remind":
+        raise PartError(f'part {name}: a hook on {event} must set MODE = "remind": the edit is already made')
     needs = getattr(module, "NEEDS", ())
     if not isinstance(needs, (tuple, list)) or not set(needs) <= set(NEEDS.get(event, ())):
         raise PartError(f"part {name}: on {event}, NEEDS lists some of {NEEDS.get(event, ())}, not {needs!r}")

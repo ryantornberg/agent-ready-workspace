@@ -27,7 +27,11 @@ commit, the post-commit hook removes the paths the commit holds, and deletes
 the file when nothing is left. A person's own commit, with no agent edits
 waiting, finds no ledger and is not compared.
 
-Format: one path per line, JSON-quoted, relative to the working copy's top.
+Format: one entry per line, relative to the working copy's top. An entry an edit tool wrote for a known
+session is a JSON object, {"path": "docs/a.md", "session": "the session id"}, so the stop gate can tell a
+session's own edits (decision 0005). An entry with no session, such as one `ws.py ledger --add` wrote, is the
+JSON-quoted path alone, as every entry was before sessions were recorded; both forms are read. The same path
+edited by two sessions has an entry for each. The commit check reads the paths only.
 """
 import json
 import os
@@ -105,8 +109,9 @@ def where(root, path):
     return (folder / NAME, relative) if relative else None
 
 
-def read(folder):
-    """The set of recorded paths in a git folder's ledger, or None when the ledger is closed. Raises LedgerError."""
+def entries(folder):
+    """The (path, session or None) entries of a git folder's ledger, in order and each once, or None when the
+    ledger is closed. Raises LedgerError."""
     if folder is None:
         return None
     file = pathlib.Path(folder) / NAME
@@ -116,7 +121,7 @@ def read(folder):
         return None
     except (OSError, UnicodeDecodeError) as error:
         raise LedgerError(f"the edit ledger {file} cannot be read: {error}")
-    paths = set()
+    found = {}
     for number, line in enumerate(lines, 1):
         if not line.strip():
             continue
@@ -124,20 +129,39 @@ def read(folder):
             value = json.loads(line)
         except ValueError:
             value = None
-        if not isinstance(value, str):
-            raise LedgerError(f"line {number} of the edit ledger {file} is not a quoted path")
-        paths.add(value)
-    return paths
+        if isinstance(value, dict) and set(value) == {"path", "session"} and isinstance(value["path"], str) \
+                and isinstance(value["session"], str) and value["path"] and value["session"]:
+            value = (value["path"], value["session"])
+        elif isinstance(value, str):
+            value = (value, None)
+        else:
+            raise LedgerError(f"line {number} of the edit ledger {file} is neither a quoted path nor "
+                              '{"path": ..., "session": ...}')
+        found[value] = None
+    return list(found)
 
 
-def add(file, paths):
-    """Append paths not yet recorded. Creates the ledger, and so opens it."""
+def read(folder):
+    """The set of recorded paths in a git folder's ledger, or None when the ledger is closed. Raises LedgerError."""
+    found = entries(folder)
+    return None if found is None else {path for path, _ in found}
+
+
+def _line(path, session):
+    return json.dumps({"path": path, "session": session} if session else path) + "\n"
+
+
+def add(file, paths, session=None):
+    """Append the paths not yet recorded for this session. Creates the ledger, and so opens it.
+
+    session: the agent session whose edit tool wrote them, or None when it is not known."""
     folder = pathlib.Path(file).parent
-    known = read(folder) or set()
-    new = [p for p in dict.fromkeys(paths) if p not in known]
+    session = session if isinstance(session, str) and session else None
+    known = set(entries(folder) or ())
+    new = [p for p in dict.fromkeys(paths) if (p, session) not in known]
     try:
         with open(file, "a", encoding="utf-8", newline="\n") as stream:
-            stream.write("".join(json.dumps(p) + "\n" for p in new))
+            stream.write("".join(_line(p, session) for p in new))
     except OSError as error:
         raise LedgerError(f"the edit ledger {file} cannot be written: {error}")
 
@@ -164,31 +188,73 @@ def open_at(root, folder):
     return file
 
 
-def record(root, path):
-    """Record one edit. Returns the ledger file written, or None when no working copy of this repository holds it."""
+def record(root, path, session=None):
+    """Record one edit, for the session that made it when known. Returns the ledger file written, or None when no
+    working copy of this repository holds it."""
     found = where(root, path)
     if found is None:
         return None
     file, relative = found
-    add(file, [relative])
+    add(file, [relative], session)
     return file
 
 
 def remove(folder, paths):
-    """Drop paths from a git folder's ledger, and delete the ledger when it is empty. Returns what is left."""
-    left = (read(folder) or set()) - set(paths)
+    """Drop paths from a git folder's ledger, every session's entry for each, and delete the ledger when it is
+    empty. Returns the paths left."""
+    gone = set(paths)
+    kept = [(p, s) for p, s in entries(folder) or () if p not in gone]
     file = pathlib.Path(folder) / NAME
     try:
-        if left:
+        if kept:
             temporary = file.with_name(NAME + ".tmp")
             with open(temporary, "w", encoding="utf-8", newline="\n") as stream:   # Python 3.9 has no write_text(newline=)
-                stream.write("".join(json.dumps(p) + "\n" for p in sorted(left)))
+                stream.write("".join(_line(p, s) for p, s in sorted(kept, key=lambda e: (e[0], e[1] or ""))))
             os.replace(temporary, file)
         elif file.exists():
             file.unlink()
     except OSError as error:
         raise LedgerError(f"the edit ledger {file} cannot be written: {error}")
-    return left
+    return {p for p, _ in kept}
+
+
+def ledger_folders(root):
+    """The git folder of every working copy of the repository that holds root: the main one, then each linked one
+    in name order. Empty when root is in no repository."""
+    own = git_dir(pathlib.Path(root).resolve())
+    if own is None:
+        return []
+    common = common_dir(own)
+    linked = common / "worktrees"
+    return [common] + (sorted(f for f in linked.iterdir() if f.is_dir()) if linked.is_dir() else [])
+
+
+def top_of(folder):
+    """The top folder of the working copy whose git folder this is, or None. A linked one's `gitdir` file names
+    its `.git` file; the main one's top holds the folder itself."""
+    folder = pathlib.Path(folder)
+    pointer = folder / "gitdir"
+    if pointer.is_file():
+        try:
+            marker = pathlib.Path(pointer.read_text(encoding="utf-8").strip())
+        except (OSError, UnicodeDecodeError):
+            return None
+        return marker.parent if marker.name == ".git" else None
+    return folder.parent if folder.name == ".git" else None
+
+
+def session_entries(root, session):
+    """[(top folder, [paths])] for each working copy of this repository whose ledger holds an entry this session's
+    edit tools wrote. An unreadable ledger raises LedgerError."""
+    if not isinstance(session, str) or not session:
+        return []
+    found = []
+    for folder in ledger_folders(root):
+        mine = sorted({p for p, s in entries(folder) or () if s == session})
+        top = top_of(folder) if mine else None
+        if mine and top is not None and top.is_dir():
+            found.append((top, mine))
+    return found
 
 
 def committed(top):

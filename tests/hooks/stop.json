@@ -1,0 +1,127 @@
+[
+  {
+    "name": "gate: a session with no entries of its own stops at once",
+    "tool": "claude-code",
+    "payload": {
+      "hook_event_name": "Stop",
+      "session_id": "me",
+      "cwd": "{root}",
+      "stop_hook_active": false
+    },
+    "setup": {
+      "ledger": [
+        {
+          "path": "docs/broken.md",
+          "session": "someone else"
+        }
+      ],
+      "files": {
+        "docs/broken.md": "# Broken\n\nA page with no front matter.\n"
+      }
+    },
+    "exit": 0,
+    "absent": [
+      "decision",
+      "systemMessage"
+    ]
+  },
+  {
+    "name": "gate: the session's own entry and a failing check refuse the first stop",
+    "tool": "claude-code",
+    "payload": {
+      "hook_event_name": "Stop",
+      "session_id": "me",
+      "cwd": "{root}",
+      "stop_hook_active": false
+    },
+    "setup": {
+      "files": {
+        "docs/broken.md": "# Broken\n\nA page with no front matter.\n"
+      },
+      "ledger": [
+        {
+          "path": "docs/broken.md",
+          "session": "me"
+        }
+      ]
+    },
+    "exit": 0,
+    "repeat": 1,
+    "output": [
+      "\"decision\": \"block\"",
+      "stop_gate",
+      "docs/broken.md",
+      "python3 ws.py check"
+    ]
+  },
+  {
+    "name": "gate: the stop after a refusal goes ahead with a report",
+    "tool": "claude-code",
+    "payload": {
+      "hook_event_name": "Stop",
+      "session_id": "me",
+      "cwd": "{root}",
+      "stop_hook_active": true
+    },
+    "setup": {
+      "files": {
+        "docs/broken.md": "# Broken\n\nA page with no front matter.\n"
+      },
+      "ledger": [
+        {
+          "path": "docs/broken.md",
+          "session": "me"
+        }
+      ]
+    },
+    "exit": 0,
+    "repeat": 1,
+    "output": [
+      "systemMessage",
+      "stop_gate"
+    ],
+    "absent": [
+      "\"decision\""
+    ]
+  },
+  {
+    "name": "codex: the session's own entry and a failing check refuse the first stop",
+    "tool": "codex",
+    "payload": {
+      "hook_event_name": "Stop",
+      "session_id": "codex-me",
+      "cwd": "{root}",
+      "stop_hook_active": false
+    },
+    "setup": {
+      "files": {
+        "docs/broken.md": "# Broken\n\nA page with no front matter.\n"
+      },
+      "ledger": [
+        {
+          "path": "docs/broken.md",
+          "session": "codex-me"
+        }
+      ]
+    },
+    "exit": 0,
+    "repeat": 1,
+    "output": [
+      "\"decision\": \"block\"",
+      "stop_gate"
+    ]
+  },
+  {
+    "name": "a payload the adapter cannot read lets the session stop, silently",
+    "tool": "codex",
+    "payload": {
+      "hook_event_name": "Stop",
+      "cwd": "{root}"
+    },
+    "exit": 0,
+    "absent": [
+      "decision",
+      "Traceback"
+    ]
+  }
+]

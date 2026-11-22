@@ -14,6 +14,12 @@
         "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook before-handoff --tool codex || exit 2"}]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook after-edit --tool codex || exit 0"}]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook session-start --tool codex || exit 0"}]
@@ -22,6 +28,11 @@
     "SessionEnd": [
       {
         "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook session-end --tool codex || exit 0"}]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{"type": "command", "timeout": 30, "command": "\"$(git rev-parse --show-toplevel)/wslib/launch.sh\" hook stop --tool codex || exit 0"}]
       }
     ]
   }
