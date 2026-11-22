@@ -205,6 +205,15 @@
       "why": "The index's cross-cutting chains tell an agent every path a kind of change touches; a chain that names a moved path sends it to nothing."
     },
     {
+      "use": "chain_reminder",
+      "why": "A change that touches one path of a cross-cutting chain usually needs the others too; an agent that edits one is shown the rest before it calls the work done."
+    },
+    {
+      "use": "stop_gate",
+      "why": "An agent can call its work done while the checks it broke still fail; a session that edited files is refused its first stop while the check or the fast tests fail.",
+      "tests": ["tests.test_cases_bite", "tests.test_shell", "tests.test_m3_a", "tests.test_settings"]
+    },
+    {
       "use": "pointers",
       "why": "GitHub Copilot and opencode read their own instruction files; if one stops naming the contract and the rule pages, sessions in that tool work without them.",
       "files": [

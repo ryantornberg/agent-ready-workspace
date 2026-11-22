@@ -693,6 +693,8 @@ class FailClosedTests(Folder):
                 self.assertIn(f"hook {event} --tool claude-code", command)
                 self.assertTrue(command.rstrip().endswith("|| exit 0"), "a session start or end never fails")
         for event, tools in events.CLAUDE_CODE_TOOLS.items():
+            if event not in partlib.TOOL_EVENTS:
+                continue        # after-edit's wiring is held by the after-edit and stop wiring test
             matcher, command = wiring[event]
             for tool in tools:
                 with self.subTest(event=event, tool=tool):
@@ -844,8 +846,10 @@ class StagingAtTheCommitTests(Folder):
         pathlib.Path(path).write_text("edited by the agent\n", encoding="utf-8")
 
     def ledger(self, folder=None):
-        file = (folder or self.root / ".git") / "ws-ledger"
-        return file.read_text(encoding="utf-8").split() if file.exists() else None
+        """Each entry's path, JSON-quoted, in order; None when the ledger is closed. An entry carries its session too."""
+        from wslib import ledger as ledgers
+        found = ledgers.entries(folder or self.root / ".git")
+        return None if found is None else [json.dumps(path) for path, _ in found]
 
     # Criterion 12
     def test_each_edit_is_recorded_in_the_ledger_of_the_working_copy_that_holds_it(self):
@@ -1483,8 +1487,8 @@ class SecondToolTests(Folder):
         return self.ws("hook", event, *(["--tool", tool] if tool else []), stdin=payload)
 
     def ledger(self):
-        file = self.root / ".git" / "ws-ledger"
-        return {json.loads(line) for line in file.read_text(encoding="utf-8").splitlines()} if file.exists() else None
+        from wslib import ledger as ledgers
+        return ledgers.read(self.root / ".git")
 
     def test_the_shell_tool_is_read_and_the_reminder_goes_back_the_way_codex_reads_it(self):
         code, output = self.hook("before-shell", codex("Bash", self.root, command="ls"))
@@ -1579,6 +1583,8 @@ class SecondToolTests(Folder):
                 self.assertTrue(hook["command"].rstrip().endswith("|| exit 0"), "a session start or end never fails")
                 self.assertLessEqual(hook.get("timeout", 600), 30)
         for event, tools in events.CODEX_TOOLS.items():
+            if event not in partlib.TOOL_EVENTS:
+                continue        # after-edit's wiring is held by the after-edit and stop wiring test
             matcher, hook = wiring[event]
             for tool in [*tools, *events.CODEX_REFUSED.get(event, ())]:
                 with self.subTest(event=event, tool=tool):
@@ -2752,8 +2758,8 @@ class WorktreePlacementTests(Folder):
         for top, name in ((self.linked, "linked"), (self.nested, "nested")):
             with self.subTest(name):
                 self.assertEqual(self.edit(top / "src/new/b.cs", "claude-code")[0], 0)
-                ledger = self.root / ".git/worktrees" / name / "ws-ledger"
-                self.assertEqual(ledger.read_text(encoding="utf-8").splitlines(), ['"src/new/b.cs"'])
+                from wslib import ledger as ledgers
+                self.assertEqual(ledgers.read(self.root / ".git/worktrees" / name), {"src/new/b.cs"})
         self.assertFalse((self.root / ".git/ws-ledger").exists())
 
 

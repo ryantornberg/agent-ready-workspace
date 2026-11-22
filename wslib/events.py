@@ -6,8 +6,10 @@ Two shapes are read, and nothing else:
       before-shell     {"version": 1, "command": "git add a.md"}
       before-edit      {"version": 1, "path": "docs/a.md"}      relative to the workspace, or absolute
       before-handoff   {"version": 1, "prompt": "Tier: worker ...", "model": "...", "effort": "..."}
+      after-edit       {"version": 1, "path": "docs/a.md"}      as before-edit; "session" may be given too
       session-start    {"version": 1, "session": "an id", "cwd": "/absolute/folder"}
       session-end      the same
+      stop             {"version": 1, "session": "an id", "cwd": "/absolute/folder", "stop_hook_active": false}
   A handoff gives "model" and "effort" only when its tool lets a task set them. No other key is allowed,
   so a misspelt field is refused instead of read as missing.
 - A known agent tool's own payload, read by that tool's adapter: `ws.py hook <event> --tool claude-code`,
@@ -35,19 +37,28 @@ The event a part sees:
                                       working copy on a case-insensitive file system counts as inside it.
                                       See docs/decisions/0004-the-hook-contract.md.
     before-handoff   {"prompt": text} plus "model" and "effort" when the tool exposes them; None when unset.
+    after-edit       as before-edit, for an edit the tool has made. The runner adds the facts it declares in NEEDS.
     session-start    {"session": text, "cwd": absolute text, "tool": "claude-code", "codex" or None}
     session-end      the same. The runner adds the facts a session hook declares it needs (wslib/runner.py).
+    stop             {"session", "cwd", "tool"} as a session event, and "stop_hook_active": true when this stop
+                     follows one a stop hook refused, as both tools say in their payload.
+
+Both tools send after-edit as PostToolUse, for the same edit tools and with the same tool_input as before-edit,
+and stop as Stop, as their recorded runs show (tests/records/after-edit-and-stop.json).
 """
 import json
 import os
 import pathlib
 
 from . import ledger as ledgers
-from .parts import EVENTS, SESSION_EVENTS, PartError
+from .parts import EVENTS, SESSION_EVENTS, STOP_EVENTS, PartError
 
 VERSION = 1
-FIELDS = {"before-shell": "command", "before-edit": "path", "before-handoff": "prompt"}
+FIELDS = {"before-shell": "command", "before-edit": "path", "before-handoff": "prompt", "after-edit": "path"}
 SESSION_NAMES = {"session-start": "SessionStart", "session-end": "SessionEnd"}
+# The name each tool gives a tool-call event in its payload's hook_event_name, and what it answers to.
+CALL_NAMES = {"after-edit": "PostToolUse"}
+STOP_NAME = "Stop"
 OPTIONAL = {"before-handoff": ("model", "effort")}
 
 # Claude Code: which tool reaches which event, and the field that holds what the hook decides on.
@@ -57,6 +68,7 @@ CLAUDE_CODE_TOOLS = {
     "before-edit": {"Edit": "file_path", "Write": "file_path", "MultiEdit": "file_path", "NotebookEdit": "notebook_path"},
     "before-handoff": {"Agent": "prompt", "Task": "prompt"},
 }
+CLAUDE_CODE_TOOLS["after-edit"] = CLAUDE_CODE_TOOLS["before-edit"]
 
 # Codex CLI: the same, read from what codex-cli 0.169.0 sent in a recorded run (tests/records/codex-cli-run.json).
 # Its patch tool sends the whole patch as "command"; the paths are read from the patch's file lines.
@@ -66,6 +78,7 @@ CODEX_TOOLS = {
     "before-edit": {"apply_patch": "command"},
     "before-handoff": {},
 }
+CODEX_TOOLS["after-edit"] = CODEX_TOOLS["before-edit"]
 # Wired, and refused until a recorded run shows where the payload holds what the hook decides on.
 CODEX_REFUSED = {"before-handoff": ("spawn_agent",)}
 PATCH_FILE_LINES = ("*** Add File:", "*** Update File:", "*** Delete File:", "*** Move to:")
@@ -133,8 +146,11 @@ def versioned(root, event, payload):
     if type(payload["version"]) is not int or payload["version"] != VERSION:
         raise PartError(f"event version {payload['version']!r} is not one this runner reads; it reads {VERSION}")
     field = FIELDS.get(event)
-    allowed = {"version", "session", "cwd"} if event in SESSION_EVENTS else {"version", field, *OPTIONAL.get(event, ())}
-    if event == "before-edit":
+    allowed = {"version", "session", "cwd"} if event in SESSION_EVENTS + STOP_EVENTS \
+        else {"version", field, *OPTIONAL.get(event, ())}
+    if event in STOP_EVENTS:
+        allowed.add("stop_hook_active")
+    if event in ("before-edit", "after-edit"):
         allowed |= {"session", "pid"}      # the writing-session lease's identity, for a tool with no adapter
     if event == "before-shell":
         allowed |= {"session", "pid", "cwd"}   # the shell facts' identity and folder (decision 0004, "Shell events")
@@ -143,8 +159,10 @@ def versioned(root, event, payload):
         raise PartError(f"a {event} event has no field {unknown[0]!r}; it takes {sorted(allowed)}")
     if event in SESSION_EVENTS:
         return session_event(payload, "session", None)
+    if event in STOP_EVENTS:
+        return stop_event(payload, "session", None)
     value = _text(payload.get(field), f'a {event} event\'s "{field}"')
-    if event == "before-edit":
+    if event in ("before-edit", "after-edit"):
         found = place(root, value)
         found["session"] = payload.get("session") if isinstance(payload.get("session"), str) else None
         found["pid"] = payload.get("pid") if type(payload.get("pid")) is int else None
@@ -171,6 +189,24 @@ def session_event(payload, key, tool):
     return {"session": _text(payload.get(key), f'a session event\'s "{key}"'), "cwd": cwd, "tool": tool}
 
 
+def stop_event(payload, key, tool):
+    """A session event, plus "stop_hook_active": whether this stop follows one a stop hook refused."""
+    found = session_event(payload, key, tool)
+    active = payload.get("stop_hook_active", False)
+    if not isinstance(active, bool):
+        raise PartError(f'a stop event\'s "stop_hook_active" must be true or false, not {active!r}')
+    found["stop_hook_active"] = active
+    return found
+
+
+def tool_stop(tool, payload):
+    """A Claude Code or Codex Stop payload: {"hook_event_name": "Stop", "session_id", "cwd", "stop_hook_active"}."""
+    if not isinstance(payload, dict) or payload.get("hook_event_name") != STOP_NAME:
+        raise PartError(f'this is not a {tool} {STOP_NAME} payload: it needs "hook_event_name": "{STOP_NAME}", '
+                        'a "session_id" and a "cwd"')
+    return stop_event(payload, "session_id", tool)
+
+
 def tool_session(tool, event, payload):
     """A Claude Code or Codex SessionStart or SessionEnd payload: {"hook_event_name", "session_id", "cwd", ...}."""
     if not isinstance(payload, dict) or payload.get("hook_event_name") != SESSION_NAMES[event]:
@@ -184,16 +220,20 @@ def _session(payload):
     return value if isinstance(value, str) and value else None
 
 
-def is_claude_code(payload):
-    return is_tool_call(payload)
+def is_claude_code(payload, event=None):
+    return is_tool_call(payload, event)
 
 
 def claude_code(root, event, payload):
-    """Claude Code's PreToolUse payload: {"hook_event_name": "PreToolUse", "tool_name", "tool_input", "cwd", ...}."""
+    """Claude Code's PreToolUse payload: {"hook_event_name": "PreToolUse", "tool_name", "tool_input", "cwd", ...}.
+    after-edit reads its PostToolUse payload, which holds the same fields."""
     if event in SESSION_EVENTS:
         return tool_session("claude-code", event, payload)
-    if not is_claude_code(payload):
-        raise PartError('this is not a Claude Code PreToolUse payload: it needs "hook_event_name": "PreToolUse", '
+    if event in STOP_EVENTS:
+        return tool_stop("claude-code", payload)
+    name = CALL_NAMES.get(event, "PreToolUse")
+    if not is_claude_code(payload, event):
+        raise PartError(f'this is not a Claude Code {name} payload: it needs "hook_event_name": "{name}", '
                         'a "tool_name" and a "tool_input" object')
     tool, given = payload["tool_name"], payload["tool_input"]
     fields = CLAUDE_CODE_TOOLS[event]
@@ -203,7 +243,7 @@ def claude_code(root, event, payload):
     value = _text(given.get(fields[tool]), f'the {tool} tool\'s "{fields[tool]}"')
     if event == "before-shell":
         return {"command": value, "session": _session(payload), "pid": None}
-    if event == "before-edit":
+    if event in ("before-edit", "after-edit"):
         base = payload.get("cwd")
         if not pathlib.Path(value).is_absolute() and not (isinstance(base, str) and pathlib.Path(base).is_absolute()):
             raise PartError(f"the {tool} tool gave a relative path and no absolute \"cwd\" to place it from")
@@ -236,20 +276,25 @@ def patch_paths(text):
     return paths
 
 
-def is_tool_call(payload):
-    return (isinstance(payload, dict) and payload.get("hook_event_name") == "PreToolUse"
+def is_tool_call(payload, event=None):
+    """True for a tool call's payload, under the name the tools give the event: PreToolUse, or PostToolUse after."""
+    return (isinstance(payload, dict) and payload.get("hook_event_name") == CALL_NAMES.get(event, "PreToolUse")
             and isinstance(payload.get("tool_name"), str) and isinstance(payload.get("tool_input"), dict))
 
 
 def codex(root, event, payload):
     """Codex CLI's PreToolUse payload: {"hook_event_name": "PreToolUse", "tool_name", "tool_input", "cwd", ...}.
+    after-edit reads its PostToolUse payload, which holds the same fields.
 
     Returns a list of events: one for a shell command, one per path for a patch.
     """
     if event in SESSION_EVENTS:
         return tool_session("codex", event, payload)
-    if not is_tool_call(payload):
-        raise PartError('this is not a Codex PreToolUse payload: it needs "hook_event_name": "PreToolUse", '
+    if event in STOP_EVENTS:
+        return tool_stop("codex", payload)
+    name = CALL_NAMES.get(event, "PreToolUse")
+    if not is_tool_call(payload, event):
+        raise PartError(f'this is not a Codex {name} payload: it needs "hook_event_name": "{name}", '
                         'a "tool_name" and a "tool_input" object')
     tool, given = payload["tool_name"], payload["tool_input"]
     if tool in CODEX_REFUSED.get(event, ()):
@@ -298,7 +343,7 @@ def read_call(root, event, data, tool=None):
         payload = json.loads(data)
     except (json.JSONDecodeError, RecursionError) as error:
         raise PartError(f"hook input is not JSON: {type(error).__name__}")
-    if tool is None and not (isinstance(payload, dict) and "version" in payload) and is_claude_code(payload):
+    if tool is None and not (isinstance(payload, dict) and "version" in payload) and is_claude_code(payload, event):
         tool = "claude-code"
     found = (ADAPTERS[tool] if tool else versioned)(root, event, payload)
     found = found if isinstance(found, list) else [found]
@@ -309,6 +354,23 @@ def read_call(root, event, data, tool=None):
 def remind(tool, text, event="before-shell"):
     """What to print on standard output so the tool shows the agent a reminder and lets the call go ahead."""
     if tool in ("claude-code", "codex"):   # Codex reads the same reply; it ignores plain text from this hook
-        name = SESSION_NAMES.get(event, "PreToolUse")
+        name = {**SESSION_NAMES, **CALL_NAMES}.get(event, "PreToolUse")
         return json.dumps({"hookSpecificOutput": {"hookEventName": name, "additionalContext": text}})
     return f"Reminder: {text}"
+
+
+def block_stop(tool, reason):
+    """What to print so the tool refuses this stop and shows the agent the reason. Both tools read a reply of
+    "decision": "block" with a "reason" on a Stop hook that exits 0 (tests/records/after-edit-and-stop.json).
+    The workspace's own shape gets plain text, and the runner exits 2."""
+    if tool in ("claude-code", "codex"):
+        return json.dumps({"decision": "block", "reason": reason})
+    return f"Refused: {reason}"
+
+
+def report_stop(tool, text):
+    """What to print so the stop goes ahead and the person is shown a report: the "systemMessage" field both tools'
+    hook replies take. The workspace's own shape gets plain text."""
+    if tool in ("claude-code", "codex"):
+        return json.dumps({"systemMessage": text})
+    return f"Report: {text}"

@@ -28,6 +28,7 @@ A hook that reaches for these itself is hard to test and easy to get wrong. The 
   - `"findings"`: the findings of the check the hook's config names in `"part"`, run on the session's own working copy.
   - `"pins"`: for each pinned repository in that working copy, its upstream's default branch and how many commits the checkout is behind.
 - A **before-shell hook** may declare `NEEDS` too. Its facts are in "Shell events" below.
+- An **after-edit hook** and a **stop hook** may declare `NEEDS` too, amended 2026-11-21 by M3 slice C5a. Their facts are in "After-edit and stop events" below.
 - Both read their config.
 - Parts may import only these modules: `re`, `json`, `datetime`, `hashlib`, `math`, `posixpath`, `shlex`, `unicodedata`, and from the engine `wslib.parts`, `wslib.markdown` and `wslib.symbols`.
 - They may not use `open`, `exec`, `eval`, `compile`, `__import__`, `__builtins__`, `globals`, `vars`, `getattr`, `setattr`, `breakpoint` or `input`, or reach a double-underscore attribute other than `__name__`. Amended 2026-11-17, after the M2 red team: a list of what is banned missed `codecs`, `builtins`, `importlib`, `ctypes`, `linecache` and the engine's own git module, so the test now holds parts to a list of what is allowed.
@@ -36,6 +37,7 @@ A hook that reaches for these itself is hard to test and easy to get wrong. The 
 
 - **Git** runs in `wslib/gitcall.py`. Every call strips the variables git sets for a hook, turns off credential prompts, and stops at a time limit enforced in Python. A call that fails or times out returns nothing, and the caller decides what that means.
 - **The snapshot** reads files: the working folder, the staged commit, or a case.
+- **The stop gate's runs** of the check and the tests, amended 2026-11-21 by M3 slice C5a, start in `wslib/gate.py`, with the variables git sets for a hook stripped, nothing on standard input, and one deadline.
 
 **How a path is placed.** A before-edit event carries four fields:
 
@@ -80,6 +82,13 @@ The facts are worked out only for a hook that needs them, only for the git and g
 
 **Session events.** `session-start` and `session-end` carry `session`, `cwd` and `tool`. A hook on them must set `MODE = "remind"`. A session start or end never fails: on any error the runner prints nothing and exits 0, and the wiring adds `|| exit 0`.
 
+**After-edit and stop events.** Amended 2026-11-21, M3 slice C5a. Both agent tools send a hook after an edit tool has written a file, and when the agent tries to finish its turn. A recorded run of each, `tests/records/after-edit-and-stop.json`, shows what they send.
+
+- **`after-edit`** carries the same fields as `before-edit`, placed the same way, read from the tool's `PostToolUse` payload for the same edit tools. A hook on it must set `MODE = "remind"`, since the edit is already made; loading a part refuses any other mode. It may declare one need, `"index"`: the runner reads the index file the hook's config names in `"index"`, `INDEX.md` by default, fresh, from the working copy that holds the edited file. A file it cannot read, or an edit in no working copy of this repository, gives `None`. The reminder goes back as `additionalContext`, which both tools showed the agent in the recorded run.
+- **`stop`** carries `session`, `cwd` and `tool`, as a session event does, and `stop_hook_active`, which both tools set on the stop that follows one a stop hook refused. A stop hook may refuse. The runner then replies `"decision": "block"` with the reason, which both tools took as a refusal and showed the agent in the recorded run. On a stop with `stop_hook_active` set, the runner turns any refusal into a report and the session stops, so a stop is refused at most once in a row. The report goes back as `systemMessage`, the field both tools' hook replies take for a message to the person; the recorded run did not exercise it, so that either tool shows it is inferred.
+- A stop hook may declare two needs. `"own_edits"`: for each working copy of this repository, the paths its edit ledger holds for this session, read from the ledger files. `"gate"`: the result of running `python3 ws.py check` and the fast tests the hook's config names in `"tests"`, in each working copy that holds the session's entries, with one deadline of 18 seconds across every run. Each run is `passed`, `failed`, `timed-out` or `error`, with the end of its output. The runner works out `"gate"` only when a hook reads it, so a session with no entries of its own runs nothing. When an edit ledger cannot be read, `"own_edits"` holds one entry with no working copy and `"gate"` is `None`, so the stop gate refuses once and runs nothing.
+- Neither event ever fails: on any error the runner prints nothing and exits 0, and the wiring adds `|| exit 0`. A broken stop hook lets the session stop.
+
 **How cases supply all of this.** A hook case gives the whole event, the added facts included. A check case gives the snapshot's state: `"files"`, `"staged"`, `"ledger"`, `"pushed"` and `"pins"`. Tests that need real git build throwaway repositories, with local fixture upstreams and never the network.
 
 **The exceptions.** Each part below reaches further, for the reason given. A test reads this table, and fails on any part that reaches outside its event, config and snapshot without a row here.
@@ -103,6 +112,8 @@ Amended 2026-11-21, M3 slice C3: before-shell hooks may declare `NEEDS`, and the
 
 Amended 2026-11-21, M3 slice C4: the table gained `push_lease`, which uses the shared parser as `no_discard` does, and `no_admin_merge`'s row now says it reads a `gh api` call's method and fields from the parser.
 
+Amended 2026-11-21, M3 slice C5a: the `after-edit` and `stop` events, their payloads, their needs, `"index"`, `"own_edits"` and `"gate"`, and the rule that a stop is refused at most once in a row. The gate's runs of the check and the tests are the engine's, in `wslib/gate.py`, like its git calls.
+
 Amended 2026-11-21, M3 slice B1: a check's `pushed` commits carry their whole message, their tree as `files`, read when a part asks, and whether a merge is being made. The commit-msg hook gives a check the commit being made in that shape, and `ws.py check --commits BASE..HEAD` runs the commit-message checks over each commit of a range, for CI. The pre-push hook also runs the runnable blocks of each tutorial a push to main changes, in a fresh clone. An exception to `wslib/gitcall.py`: these reads of commits, like the runner's other reads at the push, call git directly. They read only local objects; the tutorial's clone and checkout have a time limit.
 
 ## What it gave up
@@ -110,6 +121,7 @@ Amended 2026-11-21, M3 slice B1: a check's `pushed` commits carry their whole me
 - **A hook cannot look things up for itself.** A new kind of fact means an engine change, a new name in `NEEDS` and a line in this record. That is the point, and also the cost.
 - **The engine's facts cost time at session start.** The pins need one fetch per pinned repository, ten seconds at most each.
 - **Shell facts cost time on every guarded command.** A git or gh call in a command adds a few git processes before the command runs. A fact cut off by the time limit is unresolved, and the guard refuses, so a slow machine can see a refusal a fast one would not. The refusal says to run the command again.
+- **The stop gate costs time at each stop.** Amended 2026-11-21, M3 slice C5a. A session with edits of its own waits for the check and the fast tests, up to 20 seconds, every time it tries to finish while those entries are in a ledger.
 - **The target is git's and gh's answer at hook time.** A command that changes a remote, a default or a config value earlier in the same line acts on a target the runner did not see. The guards count those as unresolved.
 
 ## Rejected
