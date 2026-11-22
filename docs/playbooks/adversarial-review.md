@@ -15,7 +15,7 @@ How a fresh critic attacks a finished hand-off plan, with the spec it holds, or 
 
 It serves the Red team rung of [the ladder](../size-the-work.md#the-ladder), once the document is finished. For a feature, it runs on the hand-off plan after the [spec](../size-the-work.md#the-spec-process) is agreed, as [the feature ladder](../size-the-work.md#the-feature-ladder) orders it. While a design question that blocks it is still open, the document is not finished: settle it first, in a [decision interview](decision-interview.md).
 
-It fits a finished hand-off plan or requirements document. A spec lives in three sections of a hand-off plan, as [the spec process](../size-the-work.md#the-spec-process) says, so it is reviewed with the plan that holds it, never alone. It does not fit a diff or a diagnosis. A change to a guidance page has its own review: when the work in hand is one, use the [instruction review](instruction-review.md) instead.
+It fits a finished hand-off plan or requirements document. A spec lives in three sections of a hand-off plan, as [the spec process](../size-the-work.md#the-spec-process) says, so it is reviewed with the plan that holds it, never alone. It does not fit a diff or a diagnosis. When the work in hand is a diff of code, a review of the branch or pull request goes to the [review orchestrator](review-orchestrator.md), and a question about its design alone to [architecture review](architecture-review.md). A change to a guidance page has its own review: when the work in hand is one, use the [instruction review](instruction-review.md) instead.
 
 ## Thin by design
 

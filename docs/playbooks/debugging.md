@@ -19,7 +19,7 @@ How an agent finds the cause of a failure before it changes any code. For an age
 4. **Confirm the cause.** A cause is confirmed when one change makes the repro pass and undoing that change makes it fail again. Leave the change undone: it is evidence, not the fix. Output: the cause, and the two runs that show it.
 5. **Keep the repro as the regression test.** Turn the repro into a test in the repository's suite, if it is not one already. It must fail on the code before the fix. Output: the test.
 6. **Remove your instrumentation.** Delete every print, log line, breakpoint, temporary flag and scratch file you added. Check with `git status --short`, which also lists new files, and `git diff`, that none is left. Output: a working copy whose only change is the regression test.
-7. **Fix or hand on.** If you were asked only for the cause, stop here and report. If you were asked to fix it, and the fix passes the gate in [size the work](../size-the-work.md#the-gate), continue with [fix a bug](fix-a-bug.md) from its second step. Otherwise report, with the cause, and let the work be sized.
+7. **Fix or hand on.** If you were asked only for the cause, stop here and report. If you were asked to fix it, and the fix passes the gate in [size the work](../size-the-work.md#the-gate), continue with [fix a bug](fix-a-bug.md) from its second step; once that fix is committed, run [escape analysis](escape-analysis.md), which checks whether a review covered the faulty code and, if one did, why it missed it. Otherwise report, with the cause, and let the work be sized.
 8. **Report.** Say what the cause is, mark each claim verified or inferred, list the causes you ruled out and the run that ruled out each, and name the regression test.
 
 ## Halt and report

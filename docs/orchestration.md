@@ -70,6 +70,7 @@ Delegate when the reading is wide and the answer is short. Keep the work when it
 - **Every handoff names its tier.** A hand-off plan names one per slice. A delegated task starts its prompt with `Tier: driver`, `Tier: worker` or `Tier: mechanical`, and sets the model and effort from the binding.
 - **A delegated task carries** one tight question, the [shape of the answer](#delegating), and what is already ruled out.
 - **A helper returns conclusions**: file, line and finding. It never returns whole files.
+- **A whole session stopping mid-task is not a handoff to a helper.** When a later session will carry on the task, such as when your context runs low, write a note as [handoff](playbooks/handoff.md) says.
 
 ## Fresh context for critics
 

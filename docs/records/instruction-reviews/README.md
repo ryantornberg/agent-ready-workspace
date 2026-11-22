@@ -52,3 +52,22 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-c4-parts.md](2026-11-21-c4-parts.md) | `docs/parts.md` | enforcement |
 | [2026-11-21-c4-decision-0004.md](2026-11-21-c4-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction |
 | [2026-11-21-c4-decision-0005.md](2026-11-21-c4-decision-0005.md) | `docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md` | enforcement, contradiction, trigger |
+| [2026-11-21-b3-review-orchestrator.md](2026-11-21-b3-review-orchestrator.md) | `docs/playbooks/review-orchestrator.md` | contradiction, step |
+| [2026-11-21-b3-code-review.md](2026-11-21-b3-code-review.md) | `docs/code-review.md` | contradiction |
+| [2026-11-21-b3-review-in-a-worktree.md](2026-11-21-b3-review-in-a-worktree.md) | `docs/review-in-a-worktree.md` | step, contradiction, placement |
+| [2026-11-21-b3-architecture-review.md](2026-11-21-b3-architecture-review.md) | `docs/playbooks/architecture-review.md` | contradiction, step |
+| [2026-11-21-b3-reuse-checklist.md](2026-11-21-b3-reuse-checklist.md) | `docs/playbooks/reuse-checklist.md` | contradiction, step |
+| [2026-11-21-b3-impact-analysis.md](2026-11-21-b3-impact-analysis.md) | `docs/playbooks/impact-analysis.md` | contradiction, step |
+| [2026-11-21-b3-escape-analysis.md](2026-11-21-b3-escape-analysis.md) | `docs/playbooks/escape-analysis.md` | contradiction, step, trigger |
+| [2026-11-21-b3-feedback-walkthrough.md](2026-11-21-b3-feedback-walkthrough.md) | `docs/playbooks/feedback-walkthrough.md` | contradiction, trigger, step |
+| [2026-11-21-b3-handoff.md](2026-11-21-b3-handoff.md) | `docs/playbooks/handoff.md` | contradiction, step |
+| [2026-11-21-b3-size-the-work.md](2026-11-21-b3-size-the-work.md) | `docs/size-the-work.md` | step |
+| [2026-11-21-b3-orchestration.md](2026-11-21-b3-orchestration.md) | `docs/orchestration.md` | none |
+| [2026-11-21-b3-changing-the-machinery.md](2026-11-21-b3-changing-the-machinery.md) | `docs/changing-the-machinery.md` | trigger |
+| [2026-11-21-b3-test-first.md](2026-11-21-b3-test-first.md) | `docs/playbooks/test-first.md` | none |
+| [2026-11-21-b3-debugging.md](2026-11-21-b3-debugging.md) | `docs/playbooks/debugging.md` | step, trigger |
+| [2026-11-21-b3-adversarial-review.md](2026-11-21-b3-adversarial-review.md) | `docs/playbooks/adversarial-review.md` | trigger |
+| [2026-11-21-b3-playbook-catalog.md](2026-11-21-b3-playbook-catalog.md) | `docs/playbooks/README.md` | trigger, contradiction |
+| [2026-11-21-b3-how-tos.md](2026-11-21-b3-how-tos.md) | `docs/how-tos.md` | none |
+| [2026-11-21-b3-readme.md](2026-11-21-b3-readme.md) | `README.md` | contradiction |
+| [2026-11-21-b3-glossary.md](2026-11-21-b3-glossary.md) | `docs/glossary.md` | contradiction |

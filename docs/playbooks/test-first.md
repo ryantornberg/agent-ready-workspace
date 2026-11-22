@@ -13,7 +13,7 @@ How an agent adds or changes behavior one failing test at a time, and how it pro
 
 ## Steps
 
-1. **Look for reuse first.** Input: the behavior you were asked for. Search with `python3 tools/symbols.py NAME src` when you have a name, or [INDEX.md](../../INDEX.md) when you have a topic. Output: the code and the test helpers you will build on, or a note that none fit.
+1. **Look for reuse first.** Input: the behavior you were asked for. Search with `python3 tools/symbols.py NAME src` when you have a name, or [INDEX.md](../../INDEX.md) when you have a topic. When the behavior needs new logic, not only a call to code that exists, run the author's steps of the [reuse checklist](reuse-checklist.md) here. Output: the code and the test helpers you will build on, or a note that none fit.
 2. **Find the repository's test command.** Input: the repository you are changing. Read its own build and test files; commands differ per repository, so do not carry one over from another. Output: the command that runs one test and the command that runs the whole suite. If it has no test harness at any level, stop and report.
 3. **Write one failing test.** Input: the next small piece of behavior. Write a single test that calls the code through its public interface, as a caller would. Run it. Output: a test that fails, and fails for the reason you expect. A test that fails for another reason, such as a typo or a missing import, does not count: fix the test and run it again.
 4. **Write the least code that passes it.** Input: the failing test. Change only what that test needs. Run the test. Output: the test passes.

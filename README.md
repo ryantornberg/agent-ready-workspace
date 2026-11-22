@@ -125,8 +125,17 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/playbooks/adversarial-review.md](docs/playbooks/adversarial-review.md) | unproven | M9 |
 | [docs/size-the-work.md#the-feature-ladder](docs/size-the-work.md#the-feature-ladder) | unproven | M9 |
 | [docs/size-the-work.md#the-spec-process](docs/size-the-work.md#the-spec-process) | unproven | M9 |
+| [docs/playbooks/review-orchestrator.md](docs/playbooks/review-orchestrator.md) | unproven | M6 |
+| [docs/review-in-a-worktree.md](docs/review-in-a-worktree.md) | unproven | M6 |
+| [docs/playbooks/architecture-review.md](docs/playbooks/architecture-review.md) | unproven | M6 |
+| [docs/playbooks/architecture-review.md#the-big-picture-pass](docs/playbooks/architecture-review.md#the-big-picture-pass) | unproven | M6 |
+| [docs/playbooks/reuse-checklist.md](docs/playbooks/reuse-checklist.md) | unproven | M6 |
+| [docs/playbooks/impact-analysis.md](docs/playbooks/impact-analysis.md) | unproven | M6 |
+| [docs/playbooks/escape-analysis.md](docs/playbooks/escape-analysis.md) | unproven | M6 |
+| [docs/playbooks/feedback-walkthrough.md](docs/playbooks/feedback-walkthrough.md) | unproven | M6 |
+| [docs/playbooks/handoff.md](docs/playbooks/handoff.md) | unproven | M6 |
 
-Proven: 1. Unproven: 16.
+Proven: 1. Unproven: 25.
 
 ## What stays prose
 

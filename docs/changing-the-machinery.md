@@ -41,7 +41,7 @@ Everything else is a doc. The table is the `machinery` list of the `direct_push`
    ```
 
 4. **Commit on the branch**, staging files by name.
-5. **Push the branch and open a draft pull request.** CI runs on three systems. In this repository an agent may push; in a team's workspace, a person does.
+5. **Push the branch and open a draft pull request.** CI runs on three systems. In this repository an agent may push; in a team's workspace, a person does. When a reviewer leaves comments on it and the author is present to go through them, follow the [feedback walk-through](playbooks/feedback-walkthrough.md). With no author present, list the comments in your report and do not merge in step 6 until the author has answered them.
 6. **Publish and merge once CI is green**, with `gh pr ready NUMBER` and then `python3 ws.py merge NUMBER`. A red run on any one system blocks the merge. In this repository an agent may publish and merge; in a team's workspace, a person does.
 
 `python3 ws.py merge NUMBER` merges on GitHub and uses no working copy, so it works from a worktree while another session holds the main copy. It takes the pull request's number and nothing else: the repository is always this one's `origin`. It refuses a draft, a closed pull request and a branch from another repository. It reads the checks the base branch's rule requires, and refuses unless each one's newest run passed on the pull request's exact head commit. Then it runs `gh pr merge NUMBER --merge --match-head-commit SHA`, so a push after the check stops the merge. It checks that the result is a merge commit, deletes the branch on GitHub, and brings the main working copy up to date when that is safe. When it is not safe, it says why: see [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md). It exits 0 when it merged, 1 when it refused, and 2 when a step failed. A step can fail after the merge, such as the branch's deletion; its message then says that the merge went through.
@@ -66,6 +66,7 @@ A first push that creates main checks the whole history being pushed. To create 
 | A part leaves the manifest only by being listed under `retired`, with a reason. The runner refuses any other removal; it is not a part, so the tag is `prose`. | `prose` |
 | A change the eval covers fails the commit check until the eval has run again and its new records are committed. | `eval_record#an edited playbook fails until its case is run again` |
 | Open no pull request for such a change until the commit with its new records passes every hook. | `prose` |
+| A pull request with review comments nobody has gone through with the author is not merged; the comments go in the report. | `prose` |
 | Before each push of a branch committed with `--no-verify`, every commit message passes the message checks, which `python3 ws.py check --commits origin/main..HEAD` runs on each commit, and every commit's diff passes the deny-list scan. | `prose` |
 
 ## Traps

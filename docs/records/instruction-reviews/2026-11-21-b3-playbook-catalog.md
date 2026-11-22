@@ -1,0 +1,32 @@
+---
+kind: record
+last-reviewed: 2026-11-21
+covers: docs/playbooks/README.md
+reviewed-at: 9f3de36, with the uncommitted change of the B2 builder
+---
+
+# Instruction review: docs/playbooks/README.md
+
+This records the instruction review of batch 3's edits to the playbook catalog, for their author and for agents who choose a procedure from it.
+
+**In short:** 3 findings: 2 trigger, 1 contradiction. Every new row's proof state and link are right. The routing paragraph above the table still sends every request through the size gate, the stage order puts review before the commit it reads, and the review orchestrator's row is narrower than its page.
+
+## Scope
+
+In scope: the six new rows, the new stage-order sentence over the table, and anything else on the page the edit contradicts or leaves stale, which brought in "Before you pick one". Read in full: the page, the nine batch 3 pages (`docs/playbooks/review-orchestrator.md`, `docs/code-review.md`, `docs/review-in-a-worktree.md`, `docs/playbooks/architecture-review.md`, `docs/playbooks/reuse-checklist.md`, `docs/playbooks/impact-analysis.md`, `docs/playbooks/escape-analysis.md`, `docs/playbooks/feedback-walkthrough.md`, `docs/playbooks/handoff.md`), the diffs to `docs/size-the-work.md`, `docs/orchestration.md`, `docs/changing-the-machinery.md`, `docs/playbooks/test-first.md`, `docs/playbooks/debugging.md` and `docs/playbooks/adversarial-review.md`, and beside them `AGENTS.md`, `CLAUDE.md`, `docs/definition-of-done.md`, `docs/glossary.md`, `docs/how-tos.md`, `README.md`'s proof table, and the rewrite brief the builders had. Ran `python3 ws.py check` (one warning, unrelated to this page) and `python3 ws.py check --changed-from HEAD` (one error, on another reviewer's unindexed record), and listed `docs/playbooks/` against the catalog's links and each page's front matter.
+
+## Findings
+
+| # | Class | Where | Finding | Disposition |
+|---|---|---|---|---|
+| 1 | trigger | Before you pick one | The paragraph opens "A request first goes through the size gate" and ends "Anything else climbs the ladder". The gate in `docs/size-the-work.md`, "The gate", sizes a change. Batch 3 adds rows whose requests are not changes: review someone else's pull request, walk through review comments, write a handoff note, explain an escape, list a change's impact. Read literally, "review pull request 42" is not a small change, so the paragraph sends it up the ladder to a goal, non-goals and an approved hand-off plan before any review. Verified: read the paragraph, the gate and the six new rows. That an agent would follow it that way is inferred. Cause: orchestrator-edits-outside-passes — the orchestrating session adds the rows from builders' reports, and no pass in the brief re-reads the catalog's own routing text against the new rows. | fixed: the paragraph now sends only a request to change something through the size gate; a review, a walk-through, a handoff note or an escape trace goes straight to its row. |
+| 2 | contradiction | The catalog, the sentence over the table | The sentence says rows run "in the order a piece of work meets them: before building, while building, review, at the commit, then after the fix". Work meets the commit before the review. The review orchestrator reads a committed tip (its step 3 makes a worktree "so the review reads the commit and not the edits"), the feature ladder commits each slice in step 4 before its step 5 review, and the instruction review runs at each commit. Verified: read the sentence, the orchestrator's steps 1 to 3 and the feature ladder's steps 4 and 5. Cause: orchestrator-edits-outside-passes — the brief's row format has no stage column, so the orchestrating session chose the stage and wrote the order line, and no pass checks it against the pages. | fixed: the order line now reads at the commit, then review, and says a review reads committed work; the Review rows moved below the commit row. |
+| 3 | trigger | The catalog, row The review orchestrator | The row fires on a review "before its pull request, or someone else's pull request, across every dimension at once". Its page's "When it runs, and which page wins" also runs it on your own branch "again before each later push", which no row covers once the pull request is open. The page says a plain request for "a review" of a branch or pull request wins over the single-dimension pages; the row instead requires "every dimension at once", and the catalog gives no tie-break. The Architecture review row (a diff "needs checking against what the system has already decided") and the Reuse checklist row ("reviewing a diff") also fire on a plain review request. Verified: compared the three rows with the page's section. That an agent would pick a single-dimension page is inferred. Cause: one-line-row-narrows-trigger — the brief asks each builder for a one-line "when to use it" row and never asks that it carry every trigger and tie-break of the page's "When it runs". | fixed: the orchestrator's row now covers a branch before its pull request or a later push, and says a plain request for a review lands there; the architecture row fires only when the request names that question alone. |
+
+## Checked with no finding
+
+- step: every playbook file in `docs/playbooks/` has a row, and every new link resolves; the `links` check passed. Each new row's page has a "When it runs" or "When to use it" section to continue from. Verified.
+- enforcement: both rules stay `prose`, and no part in `parts/` reads the catalog, so "No check catches a missing row" holds. The Proof column says `unproven, M6` for all six new rows, which matches each page's `proof: unproven` and `prove-by: M6` and the README's table; the `proof` check passed. Verified.
+- placement: the page stays a reference loaded only when a reader picks a procedure. The new rows restate no steps; tie-breaks between review pages stay on those pages. Verified.
+- eval-case: a reference page that asks no behavior beyond choosing a row; each page it adds is unproven with prove-by M6. Verified.
+- Rows checked against their pages with no finding: Reuse checklist, Impact analysis (its "not inside fix a bug or safe refactor" matches the page's table), Handoff (matches the page and the new bullet in `docs/orchestration.md`), Architecture review, Feedback walk-through (matches the page's table, including its default) and Escape analysis (its "code" matches the page's scope, which excludes guidance pages and plans). Verified.

@@ -18,7 +18,11 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Check | A part that reads a snapshot of files and reports findings. By default it runs at the commit and in CI; a check may name other phases, such as the push or the nightly run. |
 | Contract | `AGENTS.md`: the rules every agent reads first. |
 | Critic | A fresh session that reviews an artifact, such as a plan, without the author's reasoning. See [fresh context for critics](orchestration.md#fresh-context-for-critics) and [adversarial review](playbooks/adversarial-review.md). |
+| Dimension | One side of a change that one fresh reviewer judges, such as security or architecture. The [review orchestrator](playbooks/review-orchestrator.md) dispatches one session per dimension, except the agent-instructions dimension, which the instruction review at each commit already covers. |
+| Escape | A defect that passed a review which covered its code. [Escape analysis](playbooks/escape-analysis.md) finds why. |
+| Handoff note | The note a session writes when it must stop mid-task, so a later session can carry on. See [handoff](playbooks/handoff.md). Not a delegated task, and not a hand-off plan. |
 | Hook | A part that runs on one agent tool event. Before a tool call it refuses or reminds; when a session starts or ends it only reminds. A git hook, such as the commit-msg or pre-push hook, is a different thing: a script in `.githooks/` that runs the checks. |
+| Invariant | A numbered decision the system already rests on, which every [architecture review](playbooks/architecture-review.md) checks a diff against. |
 | Kind | What a page is: playbook, how-to, tutorial, reference, template, record, decision, plan or milestone. See [layout](layout.md). |
 | Lease | The claim a live agent session holds on the main working copy while it edits there. See [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md). |
 | Ledger | The list of files an agent's edit tools wrote, which the commit check compares with what is staged. |

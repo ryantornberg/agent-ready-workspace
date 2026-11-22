@@ -40,12 +40,14 @@ The Proof column copies each page's front matter, or the proof line under a sect
 |---|---|---|---|
 | Change the shape of code without changing what it does | [Safe refactor](safe-refactor.md) | The characterization test's assertions never change. If one would have to, behavior changed: stop and report. | unproven, M4 |
 | Open a browser in an agent session | [Browsers](browsers.md) | Each session gets its own isolated browser, so logins do not survive the session. | unproven, M6 |
+| Review a pull request without touching the main working copy | [Review in a worktree](review-in-a-worktree.md) | Start the session in the main working copy, never inside the worktree; remove it without `--force`. | unproven, M6 |
 
 ## Finishing
 
 | Task | Go to | Remember | Proof |
 |---|---|---|---|
 | Know whether the work is done, and write the report | [Definition of done](definition-of-done.md) | A test failed before the fix, and every claim in the report is marked verified or inferred. | reference |
+| Understand what an agent's code review checks and how to act on its findings | [Code review](code-review.md) | The reviewer sets obvious fix or decision; the author may raise it, never lower it. Nothing posts without your yes. | reference |
 | Commit | [Commits](commits.md) | Stage files by name. A commit that changes a guidance page names its instruction review in a trailer. | reference |
 | Record a question you had to ask a person | [Question log](question-log.md) | Log it before you finish, then fix the page where the next person will look. | record |
 | Find what a past review or run found | [Records](records/README.md) | One folder per record type. Instruction reviews have their own index there. | reference |
