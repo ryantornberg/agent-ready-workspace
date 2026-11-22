@@ -10,6 +10,10 @@ and is refused.
     working_copies   {folder text: {"kind": "main" | "linked" | "other", "top"} or {"unresolved": why}}
     targets          {target_key(call): {"destinations": [...], "no_repository": bool, "unresolved": why or None,
                                          "remote": name or None, "refspecs": [...] or None, "mirror": bool}}
+    aliases          {folder text: {"aliases": {name: expansion}} or {"unresolved": why}}, for the folder of each
+                     git call whose subcommand is not one of git's own (M3 slice C5c)
+    git_config       {"home", "files": [...], "unresolved": why or None}: the git config files a write must not
+                     reach, the global ones and every file an include names (M3 slice C5c); before-edit too
 
 A folder is the parser's folder for a git call, read from the session's folder. Its kind comes from git:
 the folder's git folder and common git folder. A `git worktree remove` operand, joined to the call's folder,
@@ -158,6 +162,87 @@ def _top(own, common, main):
     except (OSError, UnicodeDecodeError):
         return None
     return pathlib.Path(os.path.realpath(pointer)).parent.as_posix()
+
+
+# -- aliases and git config files (M3 slice C5c) ---------------------------------------------------------------
+
+def aliases(root, command, cwd):
+    """{folder: {"aliases": {name: expansion}} or {"unresolved": why}} for the folder of every git call in the
+    command whose subcommand is not one of git's own, read from git config there at hook time. A call whose own
+    words make it unresolved, or whose folder the parser could not place, gets nothing: the guard refuses it."""
+    facts = {}
+    for call in shell.analyze(command):
+        git = call.get("git")
+        if not git or git.get("subcommand") is None or git.get("builtin") or git.get("unresolved"):
+            continue
+        folder = git.get("folder")
+        if folder is None or folder in facts:
+            continue
+        place = _place(cwd, folder)
+        if place is None:
+            facts[folder] = {"unresolved": "the tool did not say which folder the session runs in"}
+            continue
+        where = ["--git-dir", str(place)] if git.get("git_dir") else ["-C", str(place)]
+        done = _run(where, ["config", "-z", "--get-regexp", r"^alias\."])
+        if done is None:
+            facts[folder] = {"unresolved": "git did not answer in time"}
+        elif done[0] not in (0, 1):
+            facts[folder] = {"unresolved": "git could not read the config there"}
+        else:
+            found = {}
+            for entry in done[1].split("\0"):
+                key, _, value = entry.partition("\n")
+                if key.lower().startswith("alias."):
+                    found[key[len("alias."):].lower()] = value
+            facts[folder] = {"aliases": found}
+    return facts
+
+
+def git_config(cwd, environ=None):
+    """{"home", "files", "unresolved"}: the git config files no write may reach. The global ones and the system one,
+    whether they exist or not, and every file an include.path or includeIf.*.path names, read from git config in cwd, existing or not,
+    each also by its real path when it is a symbolic link. A file a person has not created yet still counts, since
+    writing it would bring new config in."""
+    environ = os.environ if environ is None else environ
+    home = environ.get("HOME") or os.path.expanduser("~")
+    xdg = environ.get("XDG_CONFIG_HOME") or os.path.join(home, ".config")
+    files = [os.path.join(home, ".gitconfig"), os.path.join(xdg, "git", "config"),
+             os.path.join(home, ".config", "git", "config")]
+    if environ.get("GIT_CONFIG_GLOBAL"):
+        files.append(environ["GIT_CONFIG_GLOBAL"])
+    system = environ.get("GIT_CONFIG_SYSTEM")
+    if not system:
+        found = _run([], ["var", "GIT_CONFIG_SYSTEM"])      # git 2.42 and later; older gits give nothing
+        system = found[1].strip() if found and found[0] == 0 else None
+    if system:
+        files.append(system)
+    unresolved = None
+    where = ["-C", str(cwd)] if cwd else []
+    done = _run(where, ["config", "-z", "--show-origin", "--get-regexp", r"^include(if\..*)?\.path$"])
+    if done is None:
+        unresolved = "git did not answer in time"
+    elif done[0] not in (0, 1):
+        unresolved = "git could not read the config, so the files its includes name are not known"
+    elif done[0] == 0:
+        fields = done[1].split("\0")
+        for origin, entry in zip(fields[0::2], fields[1::2]):
+            _, _, value = entry.partition("\n")
+            if not origin.startswith("file:") or not value:
+                continue
+            source = origin[len("file:"):]
+            if value.startswith("~/"):
+                value = os.path.join(home, value[2:])
+            elif not os.path.isabs(value):
+                base = source if os.path.isabs(source) else os.path.join(str(cwd or "."), source)
+                value = os.path.join(os.path.dirname(base), value)
+            files.append(value)
+    known = []
+    for name in files:
+        for each in (os.path.normpath(name), os.path.realpath(name)):
+            each = each.replace("\\", "/")
+            if each not in known:
+                known.append(each)
+    return {"home": home.replace("\\", "/"), "files": known, "unresolved": unresolved}
 
 
 # -- targets --------------------------------------------------------------------------------------------------

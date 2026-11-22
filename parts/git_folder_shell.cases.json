@@ -1,0 +1,1419 @@
+[
+  {
+    "name": "a redirect into the repository's config file is refused",
+    "event": {
+      "command": "echo '[alias] p = push -f' >> .git/config",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a redirect into the global config file is refused",
+    "event": {
+      "command": "printf x > ~/.gitconfig",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a redirect into the global config file by its absolute path is refused",
+    "event": {
+      "command": "cat x >> /home/a/.gitconfig",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "tee into the XDG config file is refused",
+    "event": {
+      "command": "echo x | tee -a ~/.config/git/config",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a copy onto a file an include names is refused",
+    "event": {
+      "command": "cp mine /home/a/work.inc",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a copy onto an include file inside the repository, from a subfolder, is refused",
+    "event": {
+      "command": "cd shared && cp ../x team.gitconfig",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "sed -i on a file in the git folder is refused",
+    "event": {
+      "command": "sed -i 's/a/b/' .git/HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an rm of the lease file is refused",
+    "event": {
+      "command": "rm .git/ws-lease.json",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an rm of a stale index.lock is refused",
+    "event": {
+      "command": "rm -f .git/index.lock",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "unlink of the index lock is refused",
+    "event": {
+      "command": "unlink .git/index.lock",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write to a linked worktree's .git file is refused",
+    "event": {
+      "command": "echo 'gitdir: /tmp/x' > .claude/worktrees/b/.git",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write into a code repository's git folder under src is refused",
+    "event": {
+      "command": "cp hook src/orders-api/.git/hooks/pre-push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a move out of the git folder is refused",
+    "event": {
+      "command": "mv .git/hooks/pre-commit /tmp/x",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a move of the git folder itself is refused",
+    "event": {
+      "command": "mv .git .git-old",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a symbolic link made inside the git folder is refused",
+    "event": {
+      "command": "ln -s /tmp/hook .git/hooks/pre-commit",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write after a cd into the git folder in a subshell is refused",
+    "event": {
+      "command": "(cd .git && echo x > config)",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write after a second cd into the git folder is refused",
+    "event": {
+      "command": "cd docs; cd ../.git; echo x > config",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write after a cd to a variable folder passes",
+    "event": {
+      "command": "cd \"$D\" && echo x > out.txt",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a write in a command substitution is refused",
+    "event": {
+      "command": "echo $(echo x > .git/config)",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write through sh -c is refused",
+    "event": {
+      "command": "sh -c 'echo x > .git/config'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write after a leading cd into the git folder is refused",
+    "event": {
+      "command": "cd .git/hooks && touch pre-commit",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the git folder in another case is refused",
+    "event": {
+      "command": "echo x > .GIT/config",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a variable the line set to the git folder is refused",
+    "event": {
+      "command": "f=.git/config; echo x > \"$f\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a variable naming the home config file is refused",
+    "event": {
+      "command": "echo x >> \"$HOME/.gitconfig\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a variable path with a .git segment is refused",
+    "event": {
+      "command": "echo x > \"$D/.git/config\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a variable whose value names HOME's config file is refused",
+    "event": {
+      "command": "D=\"$HOME/.gitconfig\"; echo x > \"$D\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a variable built from another that names the git folder is refused",
+    "event": {
+      "command": "G=.git; R=$G/hooks; echo x > \"$R/pre-commit\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git rev-parse of the git folder in a write target is refused",
+    "event": {
+      "command": "cp hook \"$(git rev-parse --git-dir)/hooks/pre-commit\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "xargs supplying rm's files is refused",
+    "event": {
+      "command": "git ls-files | xargs rm",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "find -exec supplying rm's files is refused",
+    "event": {
+      "command": "find . -name '*.orig' -exec rm {} +",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "find -delete is refused",
+    "event": {
+      "command": "find .git -name index.lock -delete",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting an alias is refused",
+    "event": {
+      "command": "git config alias.p 'push -f origin main'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config --global setting an alias is refused",
+    "event": {
+      "command": "git config --global alias.co 'reset --hard'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting a push URL is refused",
+    "event": {
+      "command": "git config remote.origin.pushurl https://github.com/someone/else",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config in the new syntax setting a url rewrite is refused",
+    "event": {
+      "command": "git config set url.https://evil/.insteadOf https://github.com/",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config adding an include is refused",
+    "event": {
+      "command": "git config --global include.path /tmp/evil",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting core.worktree is refused",
+    "event": {
+      "command": "git config core.worktree /tmp",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting core.sshCommand is refused",
+    "event": {
+      "command": "git config core.sshCommand 'ssh -i key'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting branch merge is refused",
+    "event": {
+      "command": "git config branch.main.merge refs/heads/other",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting push.default is refused",
+    "event": {
+      "command": "git config push.default matching",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting a branch's push remote is refused",
+    "event": {
+      "command": "git config branch.main.pushRemote fork",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config setting remote.pushDefault is refused",
+    "event": {
+      "command": "git config remote.pushDefault fork",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config adding a conditional include is refused",
+    "event": {
+      "command": "git config --global includeIf.gitdir:~/w/.path /tmp/evil",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config unsetting a remote's push URL is refused",
+    "event": {
+      "command": "git config --unset remote.origin.pushurl",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config removing the alias section is refused",
+    "event": {
+      "command": "git config --remove-section alias",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config --edit is refused",
+    "event": {
+      "command": "git config --global --edit",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config with a key that is a variable is refused",
+    "event": {
+      "command": "git config \"$K\" x",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config --file on the repository's config is judged by its key and refused",
+    "event": {
+      "command": "git config --file .git/config alias.x status",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config writing an ordinary key passes",
+    "event": {
+      "command": "git config user.email a@example.com",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git config --global writing an ordinary key passes",
+    "event": {
+      "command": "git config --global user.name A",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git config --file on a file git does not read passes",
+    "event": {
+      "command": "git config --file /tmp/settings.ini alias.x status",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git config reading a key passes",
+    "event": {
+      "command": "git config --get remote.origin.url",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git config listing passes",
+    "event": {
+      "command": "git config --list --show-origin",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "an edit of the CI workflow by the shell passes",
+    "event": {
+      "command": "sed -i 's/a/b/' .github/workflows/ci.yml",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a write to the workspace's git hooks folder passes",
+    "event": {
+      "command": "cp hook .githooks/pre-push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a write to .gitignore passes",
+    "event": {
+      "command": "echo build/ >> .gitignore",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a write to .gitattributes passes",
+    "event": {
+      "command": "echo '*.sh text eol=lf' >> .gitattributes",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a write to /dev/null passes, and asks for no config facts",
+    "event": {
+      "command": "git status 2>/dev/null",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m"
+    },
+    "allow": true
+  },
+  {
+    "name": "an ordinary redirect passes",
+    "event": {
+      "command": "echo x > notes.txt",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a write to a variable path with no git hint passes",
+    "event": {
+      "command": "cat > \"$TMPDIR/msg\" <<'EOF'\nhello\nEOF",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a heredoc commit passes",
+    "event": {
+      "command": "git commit -F - <<'EOF'\nfix: a thing\n\nBody.\nEOF",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a heredoc pull request body passes",
+    "event": {
+      "command": "gh pr create --draft --title 'fix: x' --body \"$(cat <<'EOF'\nA body.\nEOF\n)\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "cd to a variable folder and make passes",
+    "event": {
+      "command": "cd \"$D\" && make",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a git command that writes the git folder itself passes",
+    "event": {
+      "command": "git commit -m 'fix: x' && git push -u origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "setting an upstream with git passes",
+    "event": {
+      "command": "git branch --set-upstream-to=origin/main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git -c with a guarded key is left to the guards that judge the call",
+    "event": {
+      "command": "git -c alias.st=status st",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "find without -delete or -exec passes",
+    "event": {
+      "command": "find . -name '*.md' -newer x",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "xargs with a program that writes nothing passes",
+    "event": {
+      "command": "git ls-files | xargs grep -n TODO",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  }
+]

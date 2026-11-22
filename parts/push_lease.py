@@ -10,21 +10,25 @@ While it is active, it refuses:
 
 - a `git push` whose folder is the main working copy, in any form, except `--dry-run`, which publishes nothing;
 - a `git push` whose folder the parser or the runner could not place;
-- a command it cannot judge: a program or git subcommand that is a variable, a git alias it does not read, or
-  arguments supplied when it runs, any of which may be a push.
+- a command it cannot judge: a program or git subcommand that is a variable, a git subcommand that is neither
+  built in nor an alias at hook time, or arguments supplied when it runs, any of which may be a push;
+- a push with HOME, XDG_CONFIG_HOME or a GIT_CONFIG_* variable set on it, or an include given by -c or
+  GIT_CONFIG_*, from any working copy: each counts as a config write.
 
-A push from a linked worktree, or from another repository, passes: it publishes only that working copy's
-commits. The runner gives the lease and each git folder's kind (decision 0004, "Shell events"); this part reads
-the command with the shared parser, wslib/shell.py, and looks each call's folder up by the parser's own text.
+A git alias is expanded from config at hook time, so a stored alias that pushes is judged as a push, and
+`git -c alias.push=status push` is a push, since git ignores an alias of its own command's name. A push from a
+linked worktree, or from another repository, passes: it publishes only that working copy's commits. The runner
+gives the lease, each git folder's kind and the aliases read in each folder (decision 0004, "Shell events"); this
+part reads the command through wslib/gitrules.py and looks each call's folder up by the parser's own text.
 See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md.
 """
 import datetime
 
-from wslib import shell
+from wslib import gitrules
 
 KIND = "hook"
 EVENT = "before-shell"
-NEEDS = ("session", "lease", "working_copies")
+NEEDS = ("session", "lease", "working_copies", "aliases")
 PAGE = "docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md"
 
 QUIET = ("free", "mine", "other-dead")
@@ -40,30 +44,15 @@ def _holder(lease):
     return f"session {str(holder.get('session', '?'))[:8]}{since}"
 
 
-def _unresolved(call):
-    """Why the guard cannot tell whether this call pushes, or None."""
-    if call.get("unresolved"):
-        return call["unresolved"]
-    git = call.get("git")
-    if not git:
-        return None
-    if git.get("unresolved"):
-        return git["unresolved"]
-    if git.get("subcommand") is not None and not git.get("builtin"):
-        return f"git {git['subcommand']} is not one of git's own commands, and its alias is not read here"
-    if call.get("runtime_args"):
-        return f"{call['runtime_args']} supplies git's arguments when it runs"
-    return None
-
-
 def decide(event, config):
     lease = event.get("lease") or {}
     if lease.get("state") in QUIET:
         return None
     copies = event.get("working_copies") or {}
     who = _holder(lease)
-    for call in shell.analyze(event.get("command") or ""):
-        why = _unresolved(call)
+    calls, why_aliases = gitrules.read(event)
+    for call in calls:
+        why = gitrules.unresolved(call, why_aliases)
         if why:
             return (f"another live agent session ({who}) holds the main working copy, and this command cannot be "
                     f"judged: {why}. A push from there would publish that session's commits. Write it with "
@@ -71,6 +60,10 @@ def decide(event, config):
         git = call.get("git")
         if not git or git.get("subcommand") != "push" or (git.get("push") or {}).get("dry_run"):
             continue
+        changed = gitrules.config_write(call)
+        if changed:
+            return (f"another live agent session ({who}) holds the main working copy, and {changed}, so this guard "
+                    f"cannot judge it. Run it without that setting. See {PAGE}")
         folder = git.get("folder")
         fact = copies.get(folder) if folder is not None else None
         if folder is None or not fact or fact.get("unresolved"):

@@ -582,5 +582,232 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "in the main copy, an alias from config that pushes is refused",
+    "event": {
+      "command": "git pu",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "pu": "push -u origin HEAD"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in a linked worktree, a stored alias that pushes its branch passes",
+    "event": {
+      "command": "git pu",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "pu": "push -u origin HEAD"
+          }
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git -c alias.push=status push is judged as a push, and refused in the main copy",
+    "event": {
+      "command": "git -c alias.push=status push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git -c alias.push=status push is judged as a push, and passes in a linked worktree",
+    "event": {
+      "command": "git -c alias.push=status push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a subcommand that is neither built in nor an alias at hook time is refused",
+    "event": {
+      "command": "git frobnicate",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {}
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "HOME set on a push from a linked worktree counts as a config write and is refused",
+    "event": {
+      "command": "HOME=/tmp/h git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "GIT_CONFIG_GLOBAL set on a push from a linked worktree is refused",
+    "event": {
+      "command": "GIT_CONFIG_GLOBAL=/tmp/g git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "find -exec git push is refused",
+    "event": {
+      "command": "find . -maxdepth 0 -exec git push origin {} \\;",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
   }
 ]

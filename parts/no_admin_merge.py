@@ -13,6 +13,12 @@ path is a variable or a substitution. So is a GraphQL call that
 merges a pull request, or turns on auto-merge, with a method other than `MERGE`, or whose query the hook cannot
 read. A merge without a method flag goes ahead: gh then asks, and refuses to guess when no one can answer.
 
+It refuses a command it cannot judge, as the other shell guards do (M3 slice C5c): a program word that is a variable
+or a substitution, text piped into a shell, `eval` or `sh -c` of text that holds a variable, a gh subcommand that
+is a variable, arguments that `xargs` or `find -exec` give `gh pr merge`, `gh api` or a gh call with no subcommand
+when it runs, and an argument of `gh pr merge` that is a variable or a substitution, which could be `--admin`.
+Message bodies never count.
+
 It reads the command line with the shared parser, wslib/shell.py, so it follows separators, new lines, subshells,
 `sh -c`, `eval` and wrappers, and skips heredoc bodies and quoted text. It cannot see a merge made another way: another
 program such as `curl`, a `gh` alias, a script, an interpreter, or the web page. The repository's settings, which
@@ -96,8 +102,37 @@ def _api_merge(api):
     return None
 
 
+def _dynamic(text):
+    return "$" in text or "`" in text
+
+
+def _unresolved(call):
+    """Why this hook cannot tell whether the call merges past CI or rewrites a branch, or None."""
+    if call.get("unresolved"):
+        return call["unresolved"]
+    gh = call.get("gh")
+    if not gh:
+        return None
+    path = gh.get("path") or []
+    if any(_dynamic(word) for word in path):
+        return "the gh subcommand is a variable or a substitution"
+    merges = path[:2] == ["pr", "merge"]
+    if call.get("runtime_args") and (merges or path[:1] == ["api"] or len(path) < 2 and path[:1] in ([], ["pr"])):
+        return f"{call['runtime_args']} gives gh {' '.join(path) or 'its subcommand'} its arguments when it runs"
+    if merges:
+        args, rest = call.get("args") or [], gh.get("args") or []
+        start = len(args) - len(rest)
+        if any(index >= start for index in call.get("dynamic_args") or ()):
+            return "an argument of gh pr merge is a variable or a substitution, and could be a flag"
+    return None
+
+
 def decide(event, config):
     for call in shell.analyze(event.get("command") or ""):
+        why = _unresolved(call)
+        if why:
+            return (f"this command cannot be judged: {why}, so it may merge past CI or rewrite a branch's commits. "
+                    f"Write it with literal words; to merge, run python3 ws.py merge NUMBER. See {PAGE}")
         gh = call.get("gh")
         if not gh:
             continue
