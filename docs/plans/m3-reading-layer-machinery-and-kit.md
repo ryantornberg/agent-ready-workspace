@@ -650,6 +650,18 @@ Approved by: the maintainer, 2026-11-21
 
 **C4's merge helper merges on GitHub, not from a local worktree.** This amends the entry above that has the helper merge in a throwaway worktree. That design cannot merge a machinery branch: the pre-push check refuses the push of a local merge commit that brings machinery in, as the machinery comparison under "Results" shows. So `ws.py merge` checks that every check the branch rule requires passed on the pull request's exact head commit, then runs `gh pr merge --merge --match-head-commit` with that commit. The merge uses no working copy, so the lease and the calling working copy play no part in it. Afterwards the helper deletes the branch on GitHub and brings the main working copy up to date, as row C4 and criterion 35 still ask. That step follows M2's session-start fast-forward: it moves only a clean main, and it is skipped with a note while another live session holds the lease. No criterion is dropped or weakened.
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+Slice B2 stopped after batch 1 under the stop rule, and its results proposed four fixes to the rewrite brief. The maintainer's answer to the workspace queue settles how B2 resumes. No criterion is dropped or weakened.
+
+**B2's rewrite brief takes all four fixes.** Routing comes first: batch 2 opens with the playbook catalog and the how-to index, and each later batch adds its pages to them in the same commit. The contradiction pass widens to the contract's "How work flows" and "Facts" sections and every page of the same batch. A step pass runs each command on a page once before review. Builders of one batch read each other's drafts before they report.
+
+**The stop rule's count for B2 restarts at batch 2.** It counts only pages written under the fixed brief. Batch 1's findings stay on record and are not counted.
+
+**A missing `INDEX.md` row does not count toward the stop rule.** Only slice Z can add those rows, since the eval hashes the index. Such a finding is queued for slice Z, and the count leaves it out.
+
 ## Results
 
 ### C1, launcher and baselines
