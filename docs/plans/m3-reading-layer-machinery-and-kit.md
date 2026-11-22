@@ -717,6 +717,18 @@ Slice B2 stopped after batch 2 under the stop rule, and its results proposed thr
 
 **The stop rule counts recurring causes, not classes, for B2.** The rule's B2 item fires when one brief-level cause recurs in more than a third of a batch's pages. A cause is what in the brief, or missing from it, let the defect through. The fresh reviewer names each finding's cause in its record, not the builder. The count runs per batch, from batch 3 on, and still leaves out declined findings and missing `INDEX.md` rows.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+Slice B2 stopped after batch 3 under the stop rule, and its results proposed two more fixes. The maintainer's answer to the workspace queue (Q14) settles how B2 resumes at batch 4. No criterion is dropped or weakened.
+
+**The stop rule gates on the fix round, for B2.** From batch 4 on, the rule's B2 item fires only when a finding survives the batch's one fix round, or when a fresh re-check finds that a fix broke something. The re-check is a fresh session over every fixed page, and its result goes in that page's review record. This replaces the count by recurring cause. A declined finding and a missing `INDEX.md` row still do not count.
+
+**A shared-interface sheet comes before drafting.** The orchestrating session writes what the batch's pages share: templates, reply lines, record places and write scopes. Builders conform to it. A builder that needs a change asks for it, and every builder re-reads the sheet before it reports.
+
+**Each batch reports its findings per page** in its entry under "Results".
+
 ## Results
 
 ### C1, launcher and baselines
