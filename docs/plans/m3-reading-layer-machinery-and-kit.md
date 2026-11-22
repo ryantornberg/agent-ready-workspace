@@ -1061,7 +1061,7 @@ Proposed revisions (template rule 7):
 - Criterion 20 says the blocks run green "on three systems". B2's tutorials must then run in Git's bash on Windows. A block that starts Python gets the clone's launcher, so `python3 ws.py check` works there; a block that needs another tool must be one Git for Windows ships.
 - Criterion 62's list leaves out `.github/copilot-instructions.md`, which sub-batch A also added. It has no record. The README and the index now say the required list is the plan's.
 
-### B2, core procedures: stopped after batch 3
+### B2, core procedures: stopped after batch 4
 
 Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33, merged as `5100315` after CI passed on Linux, macOS and Windows. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
 
@@ -1146,6 +1146,54 @@ Decisions made in batch 3:
 - **Posting a review or a reply needs the person's yes,** and only on this repository or one it pins under `src/`, as the outward-write guard planned in C5e will hold.
 - **The handoff note is written by hand until C5b,** which builds the marker and the loader; it goes to a folder outside the repository, and its tracked mode waits for B3's record type.
 
+#### Batch 4, 2026-11-22
+
+Built at the worker tier under the fourth rewrite brief and a shared-interface sheet, as the maintainer's answer to Q14 sets them, recorded under "Changes after approval". Built in a worktree, since another session held the main working copy, and pushed straight to main as `eef2388`. Four worker-tier helper sessions wrote the pages from the sheet, cross-read each other's drafts and asked for six sheet changes; five fresh driver-tier sessions reviewed them; the builders made one fix round; three more fresh driver-tier sessions re-checked every fixed page. No file the eval hashes was edited.
+
+- **Verified, batch 4:** [extend the workspace](../extend-the-workspace.md), [adopt the workspace](../adopt-the-workspace.md), with the open question on where per-repository reference docs live, [maintain the workspace](../maintain-the-workspace.md) and [the machine self-check](../machine-self-check.md) as how-tos, `prove-by: M5`; [tracker operations](../playbooks/tracker-operations.md), with the post-merge security review, [git-host operations](../playbooks/git-host-operations.md) and [search every source](../playbooks/search-every-source.md) as playbooks, `prove-by: M8`; [the docs audit](../playbooks/docs-audit.md) and [the prompt retrospective](../playbooks/prompt-retrospective.md) as playbooks, `prove-by: M10`. All are `proof: unproven`, as the table above sets them. The README's table lists each, and the `proof` check passes.
+- **Verified, routed in and out:** each page has a row in the playbook catalog, which gains an "Upkeep" and an "Any stage" stage, or in the how-to index. Each has a route in from a page a reader is already on: parts, the README, the research ladder, the review orchestrator, the feedback walk-through, or another page of the batch. The glossary gains instance, kit, outside source, spine and work item.
+- **Verified, the review, per page:** 49 findings in 17 records, all fixed in one round, none declined and none queued for slice Z.
+
+| Page | Findings | Fixed | Broke, at the re-check | Missed, at the re-check |
+|---|---|---|---|---|
+| Extend the workspace | 6 | 6 | 1: queues every change to a file the eval covers, while adopt commits contract edits on a branch | 0 |
+| Adopt the workspace | 7 | 7 | 1: the milestone row lets an instance pick M4, which kept pages already name | 0 |
+| README | 1 | 1 | 0 | 0 |
+| Maintain the workspace | 5 | 5 | 1: commits a question-log entry through a step that asks for a review trailer the log does not take | 0 |
+| Docs audit | 3 | 3 | 1: the In short line says it changes nothing it reads, yet it may add to the question log | 0 |
+| Prompt retrospective | 3 | 3 | 0 | 0 |
+| Tracker operations | 4 | 4 | 0 | 2: no commit path for the question-log entry; a comment on another person's review sub-task counts as named |
+| Git-host operations | 5 | 5 | 1: pushes "as the sending page says", and fix a bug says nothing about pushing | 1: no commit path for the question-log entry |
+| Review orchestrator, its tracker row | 1 | 1 | 0 | 0 |
+| Feedback walk-through, its posting rule | 1 | 1 | 1: says the rule and a yes hold a write the sentence before forbids | 1: step 8 has the agent push where a person pushes in a team's workspace |
+| Search every source | 3 | 3 | 1: reading an item through tracker operations lets that page's housekeeping writes fire | 1: no commit path for the question-log entry |
+| Machine self-check | 2 | 2 | 2: the refused-shell branch reports steps as "not run" yet records results; "work in progress" has no place in the report | 1: no commit path for the question-log entry |
+| Research ladder | 1 | 1 | 0 | 0 |
+| Playbook catalog | 3 | 3 | 1: says a git-host write changes no file, though a push and a merge do | 0 |
+| How-to index | 4 | 4 | 0 | 0 |
+| Glossary, parts | 0 | 0 | 0 | 0 |
+
+- **Verified, the stop rule fired a fourth time,** under the rule of Q14: no finding survived the fix round, but the re-check found 10 things the fixes broke, on 9 pages. It also found 6 defects the first review missed. All 16 are written in the records' "Re-check" sections and are not fixed: a second fix round on them is the next decision, not this run's.
+- **Inferred, why:** 10 of the 16 sit on rules several pages share, where a fix changed one page and not the others: how a question-log entry is committed (6), who pushes (2), and how two pages hand work to each other (2). The sheet said the question-log entry binds every session, but not how it is committed, so each builder wrote its own ending.
+- **Verified:** the private ledger's batch 4 rows now map to their pages, the fix path's catalog rows to slice Z, and its check prints 0 unmapped.
+
+Proposed fixes, for the maintainer's decision before batch 5 (queued as Q19 in the workspace queue):
+
+1. **Sweep a shared rule.** A fix that changes a sentence on a rule the sheet lists re-reads every page that holds the rule, and the orchestrator updates the sheet first. The re-check covers every page holding a changed rule, not only the fixed page.
+2. **A complete sheet.** Each shared rule in the sheet carries its path to the end, including how a write is committed.
+3. **Batch 4's items first.** Batch 5 opens with one fix round on batch 4's 16 re-check items, then its own re-check, then builds the two tutorials and the request map.
+
+Not done in B2: batch 5, the two tutorials and the request map; and the 16 re-check items on batch 4's pages.
+
+Decisions made in batch 4:
+
+- **Builders conform to a sheet the orchestrator owns.** Six sheet requests were answered by a new sheet version, read by every builder before its next report.
+- **A small change to pages only follows extend the workspace, not fix a bug,** since a page has no failing test to start from. Extend labels it an exception to the contract's "How work flows", as safe refactor does; the contract's edit is queued for slice Z.
+- **The read-only procedures write no record file,** since no record type exists for an audit, a retrospective, a search or a self-check; record types are B3's. Their output is the report, and a finding is written to a page only through the research ladder's offer.
+- **Outward writes follow one rule on every page:** a write the request names is its yes; another person's item, an unasked item, a reassignment, a rejection, closing a parent and any post on a pull request ask first; nothing is written on a repository outside this one and those pinned under `src/`.
+- **The periodic duties run once per milestone, before its record is signed off,** owned by the maintainer named as approver in the current plan, until M10 schedules the docs audit.
+- **The report rule carries `eval:fix-a-bug`,** the tag the contract gives it, on every page of the batch.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -1182,3 +1230,6 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C5c, `INDEX.md`, Topics: a row "Amend an accepted decision record; what a frozen page may change" linking [layout](../layout.md#the-opening).
 - C5c, `parts/page_kinds.py`, the module docstring: its sentence on frozen pages gains the layout's two exceptions: an amendment may edit a decision record's In short line, and a frozen page's front matter is not frozen.
 - C5c, decisions 0004 and 0005: mark with C5c's date each place C5c's first commit changed in place. In 0005, the bullet "A command it cannot judge is refused", and the sentence on config writes added to C4's dated paragraph on the push guard. In 0004, the `no_discard` and `push_lease` rows of the exceptions table, and the sentence after the `targets` list.
+- B2, `INDEX.md`, Topics: rows "Adding a page, a playbook, a decision record or a rule page; a small fix to a page" linking [extend the workspace](../extend-the-workspace.md); "Adopting the workspace for a team; what transfers; where per-repository docs live" linking [adopt the workspace](../adopt-the-workspace.md); "Upkeep; maintenance duties; who owns them" linking [maintain the workspace](../maintain-the-workspace.md); "Machine check; setup check; hooks not firing" linking [the machine self-check](../machine-self-check.md); "A ticket; a work item; a sub-task; the security review after a merge" linking [tracker operations](../playbooks/tracker-operations.md); "A pull request; a draft; a CI failure; retargeting" linking [git-host operations](../playbooks/git-host-operations.md); "Searching outside the workspace; a tracker, a wiki, mail or chat" linking [search every source](../playbooks/search-every-source.md); "A docs audit; drift between pages" linking [the docs audit](../playbooks/docs-audit.md); "A prompt retrospective; what a session's prompt cost" linking [the prompt retrospective](../playbooks/prompt-retrospective.md).
+- B2, `AGENTS.md`, "How work flows": a small change to pages only passes the same gate and follows [extend the workspace](../extend-the-workspace.md), not fix a bug, since a page has no failing test to start from; extend states it as an exception, as safe refactor does.
+- B2, `docs/playbooks/fix-a-bug.md`: a section "The fix path's gates", with the line `Proof: unproven, prove-by M6.` under its heading, holding the gates that can run now. First, before any fix, a fix brief of one screen, in ten parts in this order: the target and the commit measured at; each claim of the report, marked verified, corrected or could not verify; the mechanism, and whether the report names the defect or one symptom of it; the fix seam and the seams rejected, always weighing the boundary that admits untrusted input; reuse, in one line; what else the change reaches, from [impact analysis](../playbooks/impact-analysis.md); the test plan, naming the test matrix's axes in play; what is blocked on the person, a decision kept apart from a missing input, each saying what it blocks and with a recommended answer; what the report should have carried; and what is left out on purpose. An empty part is one line saying so. A brief that does not fit one screen is itself the finding, and the work climbs the ladder. Nothing blocking means carry on; something blocking is the stop, with the brief as the report. Second, stop and ask before a migration, a data repair, a configuration change or a change to a shared environment. The test step gains the test matrix: every caller, each kind of signed-in identity, each client platform, empty and populated data and a demonstration user against a real one, the routes a smoke suite covers, and at least one error path; an axis not in play is left out of the brief's test plan, and a browser path with console errors is not verified. The review gates wait for M4 and the tracker gates for M8. One conflict for slice Z to settle (inferred): the ported procedure skips the brief for a small, easy-to-reverse fix, and every fix this page takes passes that gate.
