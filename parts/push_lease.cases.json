@@ -401,6 +401,25 @@
           "kind": "linked",
           "top": "/m/.claude/worktrees/b"
         }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
       }
     },
     "allow": true
@@ -645,6 +664,25 @@
             "pu": "push -u origin HEAD"
           }
         }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"pu\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
       }
     },
     "allow": true
@@ -697,6 +735,25 @@
           "taken": 1700000000
         },
         "file": "/m/.git/ws-lease.json"
+      },
+      "targets": {
+        "[\".\", \"git\", [\"-c\", \"alias.push=status\", \"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
       }
     },
     "allow": true
@@ -728,7 +785,8 @@
         ".": {
           "aliases": {}
         }
-      }
+      },
+      "targets": {}
     },
     "allow": false
   },
@@ -754,6 +812,25 @@
           "taken": 1700000000
         },
         "file": "/m/.git/ws-lease.json"
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
       }
     },
     "allow": false
@@ -780,6 +857,25 @@
           "taken": 1700000000
         },
         "file": "/m/.git/ws-lease.json"
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
       }
     },
     "allow": false
@@ -806,6 +902,1131 @@
           "taken": 1700000000
         },
         "file": "/m/.git/ws-lease.json"
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{}\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, while another live session holds the lease, a push of the main copy's branch is refused",
+    "event": {
+      "command": "git push origin main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a push of refs/heads/main onto another name is refused",
+    "event": {
+      "command": "git push origin refs/heads/main:refs/heads/copy",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"refs/heads/main:refs/heads/copy\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a push of a commit of the main copy's branch is refused",
+    "event": {
+      "command": "git push origin main~2:refs/heads/x",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"main~2:refs/heads/x\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, --all is refused",
+    "event": {
+      "command": "git push --all origin",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, --branches is refused",
+    "event": {
+      "command": "git push --branches origin",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--branches\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, --mirror is refused",
+    "event": {
+      "command": "git push --mirror origin",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--mirror\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a remote set as a mirror in config is refused",
+    "event": {
+      "command": "git push backup",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"backup\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "backup",
+          "refspecs": null,
+          "mirror": true,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a glob refspec is refused",
+    "event": {
+      "command": "git push origin 'refs/heads/*:refs/heads/*'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"refs/heads/*:refs/heads/*\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a bare push whose configured refspec sends the main copy's branch is refused",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/main",
+              "dst": "refs/heads/main",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a push of a branch in a variable is refused",
+    "event": {
+      "command": "git push origin \"$B\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"$B\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a push whose target was not worked out is refused",
+    "event": {
+      "command": "git push origin b",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a push of the worktree's own branch by name passes",
+    "event": {
+      "command": "git push origin b",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"b\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, a bare push of the worktree's own branch passes",
+    "event": {
+      "command": "git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, deleting a remote branch passes",
+    "event": {
+      "command": "git push origin --delete old",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"--delete\", \"old\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, a push of HEAD while the main copy is detached passes",
+    "event": {
+      "command": "git push origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": null
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, --all passes while the lease is free",
+    "event": {
+      "command": "git push --all origin",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": null
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--all\", \"origin\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, a push of the main copy's branch passes while the lease is this session's",
+    "event": {
+      "command": "git push origin main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "mine",
+        "holder": {
+          "session": "s-this",
+          "pid": 7,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, a push of the main copy's branch passes while the holder is dead",
+    "event": {
+      "command": "git push origin main",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-dead",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, a switch to the main copy's branch then a bare push is refused",
+    "event": {
+      "command": "git switch --ignore-other-worktrees main && git push",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a checkout then a push of HEAD is refused",
+    "event": {
+      "command": "git checkout --ignore-other-worktrees main && git push origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a reflog form of the main copy's branch is refused",
+    "event": {
+      "command": "git push origin 'main@{0}:refs/heads/x'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"main@{0}:refs/heads/x\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a new branch then a push of it by name passes",
+    "event": {
+      "command": "git checkout -b x && git push -u origin x",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"x\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "from a worktree, a switch then a push of HEAD in reflog form is refused",
+    "event": {
+      "command": "git switch --ignore-other-worktrees main && git push origin 'HEAD@{0}:refs/heads/y'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"HEAD@{0}:refs/heads/y\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "from a worktree, a push of the branch checked out before is refused",
+    "event": {
+      "command": "git push origin '@{-1}:refs/heads/y'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"@{-1}:refs/heads/y\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": [
+            {
+              "src": "refs/heads/b",
+              "dst": "refs/heads/b",
+              "force": false
+            }
+          ],
+          "mirror": false,
+          "branch": "b",
+          "main_branch": "main"
+        }
       }
     },
     "allow": false

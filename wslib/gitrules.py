@@ -15,11 +15,22 @@ runner reads what it needs from git (decision 0004, "Shell events": the `aliases
     path_refusal(path, absolute, files)
                            -> why a write to that path is refused: under a .git segment, or to a git config file.
     shell_refusals(event)  -> every refusal of the command's file and config writes, in order.
+    expand(command, table) -> (calls, why): the same as read, from a command and an `aliases` table; the runner
+                              uses it to work out a push's target as the guards will read the call (M3 slice C5d).
+    earlier_change(calls, index)
+                           -> why a call earlier in the line changes the branch, the upstream, a remote or gh's
+                              default before the push at index runs, or None (M3 slice C5d).
+    push_updates(call, fact)
+                           -> what a push sends, read from its words and its resolved target: each destination
+                              branch it updates or deletes, and whether it forces (M3 slice C5d).
+    touches_branch(update, branch)
+                           -> True when an update may land on that branch.
 
 A git config file is one of the files the runner lists in `git_config`: the global ones (`~/.gitconfig`,
 `$XDG_CONFIG_HOME/git/config`, `~/.config/git/config`, `GIT_CONFIG_GLOBAL`) and every file an `include.path` or
 `includeIf.*.path` names. The repository's own config lives under `.git`, so the segment rule covers it.
 """
+import json
 import posixpath
 import re
 import unicodedata
@@ -168,13 +179,45 @@ def _config_file(absolute, files):
     return absolute in files or (".git" in parts and parts[-1] in ("config", "config.worktree"))
 
 
-def _guarded(write):
+# Keys a persistent `git config` write may not set, beyond A0's list in wslib/shell.py: core.hooksPath points git
+# at another hooks folder, which turns off every commit and push check (M3 slice C5d, the maintainer's answer to
+# Q16). Kept here, outside the eval's hash, until slice Z moves it into `guarded_key`. A -c value lasts one call,
+# like --no-verify, so it is not counted.
+PERSISTENT_ONLY = {"core.hookspath"}
+
+
+def _persistent_only(key):
+    parts = key.split(".")
+    return len(parts) == 2 and key.lower() in PERSISTENT_ONLY
+
+
+def _section_guarded(name):
+    """True when a section of that name holds a key the guards refuse, or may: `core` holds core.hooksPath."""
+    return shell.guarded_key(name + ".x") or shell.guarded_key(name) or name.lower() == "core"
+
+
+def _guarded(write, call=None):
     key = write.get("key")
     if key is None:
         return True
-    if write.get("op") in ("rename-section", "remove-section"):
-        return shell.guarded_key(key + ".x") or shell.guarded_key(key)
-    return shell.guarded_key(key)
+    if write.get("op") == "remove-section":
+        # Removing `core` removes core.hooksPath, which this workspace sets to its own hooks folder.
+        return shell.guarded_key(key + ".x") or shell.guarded_key(key) or key.lower() == "core"
+    if write.get("op") == "rename-section":
+        # The parser reports the old name only; the new one decides as much, since renaming a section to
+        # remote.x or core brings its keys in there. A parser gap handled here until slice Z.
+        new = _renamed_to(call, key)
+        return _section_guarded(key) or new is None or _section_guarded(new)
+    return shell.guarded_key(key) or _persistent_only(key)
+
+
+def _renamed_to(call, old):
+    """The new name a `git config --rename-section OLD NEW` gives, or None when it cannot be read."""
+    args = list(((call or {}).get("git") or {}).get("args") or [])
+    for index, word in enumerate(args):
+        if word in ("--rename-section", "rename-section") and index + 2 < len(args) and args[index + 1] == old:
+            return args[index + 2]
+    return None
 
 
 DEVICES = {"/dev/null", "/dev/stdout", "/dev/stderr", "/dev/tty"}
@@ -205,13 +248,17 @@ def shell_refusals(event):
     """Every refusal of the command's writes to a git folder or a git config file, and of its persistent git config
     writes to the keys the guards read. Each is a reason, in the order the shell would run them."""
     facts, cwd = _Facts(event), event.get("cwd")
-    calls = shell.analyze(event.get("command") or "")
+    calls, why_aliases = read(event)
     # A cd the parser cannot follow (one that is not the leading command, or one in a subshell) leaves a later
     # command's folder unknown. If any cd in the line enters a git folder, a relative write after it may land there.
     enters = next((arg for call in calls if call.get("program") in ("cd", "pushd") for arg in call.get("args") or []
                    if git_segment(arg) or GIT_FOLDER_HINTS.search(arg)), None)
     reasons = []
     for call in calls:
+        alias_why = _alias_config_refusal(call, why_aliases)
+        if alias_why:
+            reasons.append(alias_why)
+            continue
         program = call.get("program")
         sed_in_place = program == "sed" and any(a.startswith("-i") for a in call.get("args") or [])
         if call.get("runtime_args") and (program in WRITERS or call.get("writes") or sed_in_place):
@@ -241,17 +288,43 @@ def shell_refusals(event):
             if why:
                 reasons.append(why)
         for write in call.get("config_writes") or ():
-            if write.get("via") != "git config" or write.get("op") not in PERSISTENT_OPS or not _guarded(write):
+            if write.get("via") != "git config" or write.get("op") not in PERSISTENT_OPS or not _guarded(write, call):
                 continue
             scope = write.get("scope") or ""
             if scope.startswith("--file ") and "$" not in scope and \
                     not _config_file(place(scope[7:], cwd, call.get("cwd"), facts.home), facts.files):
                 continue                  # a file git reads no config from
             key = write.get("key") or "a key it cannot read"
+            if write.get("op") == "rename-section":
+                key = f"{key} to {_renamed_to(call, key) or 'a name it cannot read'}"
             reasons.append(f"git config {write['op']} of {key} rewrites a git config file, and that key decides "
                            f"where a push goes, what a git command runs, or which folder git works on. Every guard "
                            f"reads it, so an agent does not change it; a person does, from their own terminal")
     return reasons
+
+
+def _alias_config_refusal(call, why_aliases):
+    """Why a git call that may be an alias cannot be judged for config writes, or None (M3 slice C5d, the
+    maintainer's answer to Q17). A stored alias is expanded by `read`, so `git cf remote.origin.url URL` with
+    `cf = config` is judged as that `git config`. Two cases are left: the aliases were not read, and the command
+    changes the config git reads its aliases from, with HOME, GIT_CONFIG_GLOBAL and the rest or an include, so the
+    alias git runs is one the runner never saw. A subcommand that is neither built in nor an alias at hook time,
+    with neither, is a program named git-NAME, which this guard does not judge, as it does not judge a script."""
+    git = call.get("git") or {}
+    subcommand = git.get("subcommand")
+    from_config = (git.get("alias") or {}).get("source") == "config"
+    if subcommand is None or (git.get("builtin") and not from_config):
+        return None
+    changed = config_write(call)
+    if changed:
+        name = (git.get("alias") or {}).get("name") or subcommand
+        return (f"git {name} is not one of git's own commands, and {changed}: git may then run an alias from a config "
+                f"file the guards did not read, and that alias may rewrite git config. Run the git command it stands "
+                f"for by its own name, without that setting")
+    if _needs_alias(call) and why_aliases:
+        return (f"git {subcommand} is not one of git's own commands, and {why_aliases}, so this guard cannot tell "
+                f"whether it is an alias that rewrites git config. Run the git command it stands for by its own name")
+    return None
 
 
 # -- aliases and unresolved calls ---------------------------------------------------------------------------------
@@ -265,12 +338,17 @@ def read(event):
     """(calls, why). The command's calls, with each git alias expanded from the aliases the runner read from config
     in that call's folder (the `aliases` fact). When the aliases a call needs were not read, or two folders' aliases
     differ, the calls come back unexpanded and why says so; `unresolved` then refuses each call that needs one."""
-    command = event.get("command") or ""
+    return expand(event.get("command") or "", lambda: event.get("aliases") or {})
+
+
+def expand(command, table):
+    """(calls, why), as `read` gives them. table: the `aliases` fact, or a function that returns it, called only
+    when a call needs an alias, so a command with none starts no git process."""
     found = shell.analyze(command)
     needing = [call for call in found if _needs_alias(call)]
     if not needing:
         return found, None
-    table = event.get("aliases") or {}
+    table = (table() if callable(table) else table) or {}
     chosen = None
     for call in needing:
         folder = call["git"].get("folder")
@@ -338,3 +416,155 @@ def config_write(call, every_guarded=False):
         if every_guarded and shell.guarded_key(key) and not lower.startswith("alias."):
             return f"this git {subcommand} sets {key}, which changes what the guards decide on"
     return None
+
+
+# -- what a push sends (M3 slice C5d) ------------------------------------------------------------------------------
+
+def target_key(call):
+    """The key a gh call's or a git push's target is filed under in the `targets` fact: its folder and its words, as
+    the parser gives them. The runner and a guard compute it from the same parser output."""
+    git = call.get("git")
+    folder = git.get("folder") if git else call.get("cwd")
+    return json.dumps([folder, call.get("program"), call.get("args")])
+
+
+READ_ONLY_REMOTE = {None, "show", "get-url"}
+BRANCH_READS = {"--show-current", "-a", "--all", "-r", "--remotes", "-v", "-vv", "--verbose", "--list", "-l",
+                "--no-color", "--color", "--column", "--no-column", "--merged", "--no-merged", "--contains",
+                "--no-contains", "--points-at", "--sort", "--format", "--ignore-case", "-i", "--omit-empty"}
+
+
+def _positional(args):
+    return [word for word in args if not word.startswith("-")]
+
+
+def earlier_change(calls, index):
+    """Why a call before calls[index] changes what a later push sends or where it goes, or None. The runner works
+    out a push's target before the command runs, so it sees the branch, the upstream and the remotes as they were:
+    a `git checkout` or `switch`, a `git branch` that sets, moves or makes a branch, a `git remote` that changes a
+    remote, a `worktree add` from a remote branch, a `git symbolic-ref` that moves HEAD, a `git push -u` and a
+    `gh repo set-default` earlier in the same line each change that."""
+    for call in calls[:index]:
+        gh = call.get("gh") or {}
+        if (gh.get("path") or [])[:2] == ["repo", "set-default"]:
+            return "gh repo set-default earlier in the line changes the repository gh's commands act on"
+        git = call.get("git") or {}
+        subcommand, args = git.get("subcommand"), list(git.get("args") or [])
+        if subcommand in ("checkout", "switch"):
+            return (f"git {subcommand} earlier in the line can change the current branch and its upstream, which "
+                    f"decide what a push sends")
+        if subcommand == "remote" and git.get("action") not in READ_ONLY_REMOTE:
+            return "git remote earlier in the line changes a remote, which decides where a push goes and what it sends"
+        if subcommand == "branch":
+            flags = {word.split("=", 1)[0] for word in args if word.startswith("-")}
+            lists = bool(flags & {"--list", "-l", "--contains", "--merged", "--no-merged", "--points-at"})
+            makes = bool(_positional(args)) and not lists
+            if git.get("tracking") or makes or flags - BRANCH_READS:
+                return "git branch earlier in the line sets, moves or makes a branch, which decides what a push sends"
+        if subcommand == "worktree" and git.get("action") == "add":
+            operands = _positional(args[1:])
+            if git.get("tracking") or "--track" in args or any("/" in word for word in operands[1:]):
+                return "git worktree add from a remote branch earlier in the line sets a branch's upstream"
+        if subcommand == "symbolic-ref" and len(_positional(args)) >= 2:
+            return "git symbolic-ref earlier in the line moves HEAD, which decides what a push sends"
+        if subcommand == "push" and (git.get("push") or {}).get("set_upstream"):
+            return "git push -u earlier in the line sets a branch's upstream, which decides where a later push goes"
+    return None
+
+
+def branch_name(ref):
+    """The branch a destination names: refs/heads/x and heads/x give x; any other text is kept."""
+    for prefix in ("refs/heads/", "heads/"):
+        if ref.startswith(prefix):
+            return ref[len(prefix):]
+    return ref
+
+
+def _glob_matches(pattern, name):
+    """True when a refspec glob may match the branch: git's one `*` matches any text, slashes included."""
+    for candidate in (f"refs/heads/{name}", f"heads/{name}", name):
+        head, star, tail = pattern.partition("*")
+        if star and candidate.startswith(head) and candidate.endswith(tail) and \
+                len(candidate) >= len(head) + len(tail):
+            return True
+    return False
+
+
+def touches_branch(update, branch):
+    """True when an update may land on that branch: one that names it, a glob that may match it, or one that
+    covers every branch (--all, --branches, --mirror)."""
+    if update.get("every"):
+        return True
+    dst = update.get("dst")
+    if dst is None:
+        return False
+    if update.get("glob"):
+        return _glob_matches(dst, branch)
+    return branch_name(dst) == branch
+
+
+def push_updates(call, fact):
+    """{"updates": [{"src", "dst", "force", "delete", "glob", "every"}], "prune": bool, "mirror": bool,
+    "unresolved": why or None} for a git push, from its words and its resolved target. dst is the destination as
+    git would name it; every is True for --all, --branches and --mirror. An update is forced by --force, a `+`,
+    --mirror or a --force-with-lease that covers it, whether written on the line or set in config."""
+    push = (call.get("git") or {}).get("push") or {}
+    fact = fact or {}
+    leases = push.get("force_with_lease") or []
+    lease_all = "" in leases
+    leased = {branch_name(value.split(":", 1)[0]) for value in leases if value}
+
+    def forced(dst, plus):
+        return bool(plus or push.get("force") or lease_all or (dst is not None and branch_name(dst) in leased))
+
+    found = {"updates": [], "prune": bool(push.get("prune")), "mirror": False, "unresolved": None}
+    if push.get("remote_dynamic") or any(spec.get("dynamic") for spec in push.get("refspecs") or ()):
+        found["unresolved"] = "the remote or a branch it pushes is a variable or a substitution"
+        return found
+    if not fact or fact.get("unresolved"):
+        found["unresolved"] = (fact or {}).get("unresolved") or "its target was not worked out"
+        return found
+    if push.get("mirror") or fact.get("mirror"):
+        found["mirror"] = found["prune"] = True
+        found["updates"].append({"src": None, "dst": None, "force": True, "delete": True, "glob": False,
+                                 "every": True})
+        return found
+    if push.get("all") or push.get("branches"):
+        found["updates"].append({"src": None, "dst": None, "force": forced(None, False), "delete": False,
+                                 "glob": False, "every": True})
+        for name in sorted(leased):           # --force-with-lease=NAME forces that branch alone
+            found["updates"].append({"src": f"refs/heads/{name}", "dst": f"refs/heads/{name}", "force": True,
+                                     "delete": False, "glob": False, "every": False})
+    branch = fact.get("branch")
+    explicit = push.get("refspecs") or []
+    for spec in explicit:
+        src, dst = spec.get("src") or "", spec.get("dst")
+        if push.get("delete"):
+            found["updates"].append({"src": None, "dst": spec.get("text"), "force": True, "delete": True,
+                                     "glob": bool(spec.get("glob")), "every": False})
+            continue
+        if spec.get("delete"):
+            found["updates"].append({"src": None, "dst": dst, "force": True, "delete": True,
+                                     "glob": bool(spec.get("glob")), "every": False})
+            continue
+        if "@{-" in src or ("@{" in src and dst is None):
+            found["unresolved"] = (f"{src} names a branch checked out earlier, or a reflog entry, so the branch it "
+                                   f"sends or updates cannot be read from the line")
+            return found
+        if src in ("HEAD", "@") or src.startswith(("HEAD~", "HEAD^", "@~", "@^")):
+            if dst is None:
+                if not branch:
+                    found["unresolved"] = "HEAD is detached, so git cannot say which branch a push of HEAD updates"
+                    return found
+                dst = f"refs/heads/{branch}"
+            src = f"refs/heads/{branch}" if branch else src
+        elif dst is None:
+            dst = src
+        found["updates"].append({"src": src, "dst": dst, "force": forced(dst, spec.get("force")), "delete": False,
+                                 "glob": bool(spec.get("glob")), "every": False})
+    if not explicit and not (push.get("all") or push.get("branches")):
+        for spec in fact.get("refspecs") or []:
+            dst = spec.get("dst") or spec.get("src")
+            found["updates"].append({"src": spec.get("src"), "dst": dst, "force": forced(dst, spec.get("force")),
+                                     "delete": False, "glob": "*" in (dst or ""), "every": False})
+    return found

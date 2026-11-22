@@ -9,7 +9,8 @@ and is refused.
     lease            {"state": "free" | "mine" | "other-live" | "other-dead" | "unknown", "holder", "file"}
     working_copies   {folder text: {"kind": "main" | "linked" | "other", "top"} or {"unresolved": why}}
     targets          {target_key(call): {"destinations": [...], "no_repository": bool, "unresolved": why or None,
-                                         "remote": name or None, "refspecs": [...] or None, "mirror": bool}}
+                                         "remote": name or None, "refspecs": [...] or None, "mirror": bool,
+                                         "branch": name or None, "main_branch": name or None}}
     aliases          {folder text: {"aliases": {name: expansion}} or {"unresolved": why}}, for the folder of each
                      git call whose subcommand is not one of git's own (M3 slice C5c)
     git_config       {"home", "files": [...], "unresolved": why or None}: the git config files a write must not
@@ -25,9 +26,11 @@ repository, with {owner} and {repo} filled from GH_REPO, then gh's set-default v
 for any other gh call, -R or --repo, then GH_REPO, then the set-default value, then the only remote. For a push:
 every URL git would push to, from `git remote get-url --push --all` with the command's own config values, or,
 for a URL on the command line, the URL with the longest `insteadOf` applied. With no refspec, the branch push.default
-and the upstream send, in "refspecs". Anything not modelled is unresolved.
+and the upstream send, in "refspecs". Anything not modelled is unresolved. A push also gives "branch", the branch
+checked out in its folder, and "main_branch", the one checked out in the main working copy of that repository
+(M3 slice C5d). A git alias is expanded first, from the aliases read in the call's folder, so a stored alias that
+pushes has its target worked out as the guards read it (wslib/gitrules.py, `expand`).
 """
-import json
 import os
 import re
 import pathlib
@@ -35,6 +38,7 @@ import posixpath
 import subprocess
 
 from . import gitcall
+from . import gitrules
 from . import lease as leases
 from . import ledger as ledgers
 from . import shell
@@ -252,19 +256,16 @@ NO_REPOSITORY = {"gist", "auth", "config", "extension", "alias", "search", "stat
                  "gpg-key", "completion", "help", "version", "copilot", "agent-task", "attestation", "preview"}
 
 
-def target_key(call):
-    """The key a gh call's or a git push's target is filed under: its folder and its words, as the parser gives
-    them. A guard computes the same key from the same parser output."""
-    git = call.get("git")
-    folder = git.get("folder") if git else call.get("cwd")
-    return json.dumps([folder, call.get("program"), call.get("args")])
+target_key = gitrules.target_key
 
 
 def targets(root, command, cwd, environ=None):
-    """{target_key: fact} for every gh call and every git push in the command."""
+    """{target_key: fact} for every gh call and every git push in the command, a push through a git alias
+    included."""
     environ = os.environ if environ is None else environ
     facts = {}
-    for call in shell.analyze(command):
+    calls, _ = gitrules.expand(command, lambda: aliases(root, command, cwd))
+    for call in calls:
         if call.get("gh"):
             facts[target_key(call)] = _gh_target(call, cwd, environ)
         elif call.get("git") and call["git"].get("push") is not None and call["git"].get("subcommand") == "push":
@@ -272,9 +273,10 @@ def targets(root, command, cwd, environ=None):
     return facts
 
 
-def _fact(destinations=(), unresolved=None, no_repository=False, remote=None, refspecs=None, mirror=False):
+def _fact(destinations=(), unresolved=None, no_repository=False, remote=None, refspecs=None, mirror=False,
+          branch=None, main_branch=None):
     return {"destinations": list(destinations), "unresolved": unresolved, "no_repository": no_repository,
-            "remote": remote, "refspecs": refspecs, "mirror": mirror}
+            "remote": remote, "refspecs": refspecs, "mirror": mirror, "branch": branch, "main_branch": main_branch}
 
 
 def _place(cwd, folder):
@@ -444,13 +446,6 @@ def _config_args(git):
     return args
 
 
-def _get(where, config_args, key):
-    found = _run(where, [*config_args, "config", "--get", key])
-    if found is None:
-        raise TimeoutError
-    return found[1].strip() if found[0] == 0 else None
-
-
 def _push_target(call, cwd):
     git, push = call["git"], call["git"]["push"]
     if call.get("unresolved") or git.get("unresolved"):
@@ -475,18 +470,15 @@ def _push_target(call, cwd):
 
 
 def _push_resolved(where, config_args, push):
-    branch_text = _run(where, ["symbolic-ref", "-q", "--short", "HEAD"])
-    if branch_text is None:
-        raise TimeoutError
-    branch = branch_text[1].strip() if branch_text[0] == 0 else None
+    """The push's target from three git calls at most, since a push is timed on a row of its own: the folder's
+    git folders, its whole config with the command's own values, and, for a named remote, the URLs git pushes to."""
+    branch, main_branch = _branches(where)
+    config = _Config(where, config_args)
     remote = push.get("remote")
     if remote is None:
-        remote = (branch and _get(where, config_args, f"branch.{branch}.pushRemote")) \
-            or _get(where, config_args, "remote.pushDefault") \
-            or (branch and _get(where, config_args, f"branch.{branch}.remote")) or "origin"
-    remotes = _remotes(where, config_args)
-    if remotes is None:
-        raise TimeoutError
+        remote = (branch and config.get(f"branch.{branch}.pushRemote")) or config.get("remote.pushDefault") \
+            or (branch and config.get(f"branch.{branch}.remote")) or "origin"
+    remotes = config.remotes()
     if remote in remotes:
         found = _run(where, [*config_args, "remote", "get-url", "--push", "--all", remote])
         if found is None:
@@ -494,38 +486,104 @@ def _push_resolved(where, config_args, push):
         if found[0] != 0:
             return _fact(unresolved=f"git cannot say where the remote {remote} pushes")
         urls = [line for line in found[1].splitlines() if line.strip()]
-        mirror = (_get(where, config_args, f"remote.{remote}.mirror") or "").lower() in ("true", "yes", "on", "1")
-        configured = _run(where, [*config_args, "config", "--get-all", f"remote.{remote}.push"])
-        if configured is None:
-            raise TimeoutError
-        configured = [line for line in configured[1].splitlines() if line.strip()] if configured[0] == 0 else []
+        mirror = (config.get(f"remote.{remote}.mirror") or "").lower() in ("true", "yes", "on", "1")
+        configured = [line for line in config.get_all(f"remote.{remote}.push") if line.strip()]
     else:
-        urls, mirror, configured = [_insteadof(where, config_args, remote)], False, []
+        urls, mirror, configured = [_insteadof(config, remote)], False, []
     refspecs = None
     if not push.get("refspecs") and not (push.get("all") or push.get("branches") or push.get("mirror")
                                           or push.get("tags") or mirror):
         if configured:
             refspecs = [_refspec(text) for text in configured]
         else:
-            refspecs = _push_default(where, config_args, branch, remote)
+            refspecs = _push_default(config, branch, remote)
             if isinstance(refspecs, str):
-                return _fact([parse_url(url) for url in urls], unresolved=refspecs, remote=remote)
+                return _fact([parse_url(url) for url in urls], unresolved=refspecs, remote=remote, branch=branch,
+                             main_branch=main_branch)
     return _fact([parse_url(url) for url in urls], remote=remote if remote in remotes else None, refspecs=refspecs,
-                 mirror=mirror)
+                 mirror=mirror, branch=branch, main_branch=main_branch)
 
 
-def _insteadof(where, config_args, url):
-    """A URL typed on the command line, with the longest matching insteadOf prefix applied. git applies no
-    pushInsteadOf to it."""
-    found = _run(where, [*config_args, "config", "--get-regexp", r"^url\..*\.insteadof$"])
+def _config_key(key):
+    """A config key as `git config --list` prints it: the section and the variable in lower case, a subsection
+    as written."""
+    first, dot, rest = key.partition(".")
+    if not dot:
+        return key.lower()
+    middle, dot, last = rest.rpartition(".")
+    return f"{first.lower()}.{middle}.{last.lower()}" if dot else f"{first.lower()}.{rest.lower()}"
+
+
+class _Config:
+    """The folder's git config, with the command's own -c values, read once with `git config --list`."""
+
+    def __init__(self, where, config_args):
+        found = _run(where, [*config_args, "config", "-z", "--list"])
+        if found is None:
+            raise TimeoutError
+        self.values = {}
+        for entry in found[1].split("\0") if found[0] == 0 else ():
+            if not entry:
+                continue
+            key, newline, value = entry.partition("\n")
+            self.values.setdefault(key, []).append(value if newline else "true")
+
+    def get(self, key):
+        found = self.values.get(_config_key(key))
+        return found[-1] if found else None
+
+    def get_all(self, key):
+        return list(self.values.get(_config_key(key)) or ())
+
+    def remotes(self):
+        names = set()
+        for key in self.values:
+            match = re.match(r"^remote\.(.+)\.([^.]+)$", key)
+            if match:
+                names.add(match.group(1))
+        return names
+
+
+def _branches(where):
+    """(the branch checked out in the folder, the branch checked out in its repository's main working copy), each
+    None when HEAD is detached. One git call finds the git folders; each HEAD file is read from there."""
+    found = _run(where, ["rev-parse", "--path-format=absolute", "--git-dir", "--git-common-dir"])
     if found is None:
         raise TimeoutError
+    lines = found[1].splitlines() if found[0] == 0 else []
+    if len(lines) < 2:
+        return None, None
+    return _head(where, pathlib.Path(lines[0])), _head(where, pathlib.Path(lines[1]))
+
+
+def _head(where, git_dir):
+    """The branch a git folder's HEAD names, read from its HEAD file, or None when it is detached."""
+    try:
+        text = (git_dir / "HEAD").read_text(encoding="utf-8", errors="surrogateescape").strip()
+    except OSError:
+        text = ""
+    if text.startswith("ref: refs/heads/") and text != "ref: refs/heads/.invalid":
+        return text[len("ref: refs/heads/"):]
+    if text and not text.startswith("ref:"):
+        return None                           # a commit id: detached
+    # Not a plain file to read, such as the reftable format's placeholder: ask git.
+    found = _run(["--git-dir", str(git_dir)], ["symbolic-ref", "-q", "--short", "HEAD"])
+    if found is None:
+        raise TimeoutError
+    return found[1].strip() if found[0] == 0 and found[1].strip() else None
+
+
+def _insteadof(config, url):
+    """A URL typed on the command line, with the longest matching insteadOf prefix applied. git applies no
+    pushInsteadOf to it."""
     best = ("", url)
-    for line in found[1].splitlines() if found[0] == 0 else ():
-        key, _, prefix = line.partition(" ")
+    for key, values in config.values.items():
+        if not (key.startswith("url.") and key.endswith(".insteadof")):
+            continue
         base = key[len("url."):-len(".insteadof")]
-        if prefix and url.startswith(prefix) and len(prefix) > len(best[0]):
-            best = (prefix, base + url[len(prefix):])
+        for prefix in values:
+            if prefix and url.startswith(prefix) and len(prefix) > len(best[0]):
+                best = (prefix, base + url[len(prefix):])
     return best[1]
 
 
@@ -536,9 +594,9 @@ def _refspec(text):
     return {"src": src, "dst": dst or src, "force": force}
 
 
-def _push_default(where, config_args, branch, remote):
+def _push_default(config, branch, remote):
     """[refspec] for a push with no refspec, by push.default and the upstream; or why it is unresolved."""
-    mode = (_get(where, config_args, "push.default") or "simple").lower()
+    mode = (config.get("push.default") or "simple").lower()
     if mode == "nothing":
         return []
     if mode == "matching":
@@ -548,8 +606,8 @@ def _push_default(where, config_args, branch, remote):
     source = f"refs/heads/{branch}"
     if mode == "current":
         return [{"src": source, "dst": source, "force": False}]
-    upstream_remote = _get(where, config_args, f"branch.{branch}.remote")
-    merge = _get(where, config_args, f"branch.{branch}.merge")
+    upstream_remote = config.get(f"branch.{branch}.remote")
+    merge = config.get(f"branch.{branch}.merge")
     if mode in ("upstream", "tracking"):
         if not merge:
             return "push.default is upstream and the branch has no upstream"

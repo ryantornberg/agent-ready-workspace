@@ -1415,5 +1415,523 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "git config core.hooksPath is refused, since it turns off every commit and push check",
+    "event": {
+      "command": "git config core.hooksPath /tmp/nohooks",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config --global core.hooksPath is refused",
+    "event": {
+      "command": "git config --global core.hooksPath /tmp/nohooks",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config set core.hookspath, in the new syntax and another case, is refused",
+    "event": {
+      "command": "git config set core.hookspath /tmp/nohooks",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "unsetting core.hooksPath is refused like any guarded key",
+    "event": {
+      "command": "git config --unset core.hooksPath",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a section renamed to core is refused, since it can bring core.hooksPath in",
+    "event": {
+      "command": "git config --rename-section hooks core",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a section renamed to remote.origin is refused",
+    "event": {
+      "command": "git config --rename-section staged remote.origin",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a section renamed between names that hold no guarded key passes",
+    "event": {
+      "command": "git config --rename-section old new",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "core.hooksPath given by -c for one call passes, like --no-verify",
+    "event": {
+      "command": "git -c core.hooksPath=/tmp/nohooks status",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git config core.editor passes",
+    "event": {
+      "command": "git config core.editor vim",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a stored alias to git config that sets remote.origin.url is refused",
+    "event": {
+      "command": "git cf remote.origin.url git@example.com:x/y.git",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a stored alias to git config that sets core.hooksPath is refused",
+    "event": {
+      "command": "git cf core.hooksPath /tmp/nohooks",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a stored alias to git config that sets user.email passes",
+    "event": {
+      "command": "git cf user.email a@example.com",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a stored alias to git config with GIT_CONFIG_GLOBAL set is refused",
+    "event": {
+      "command": "GIT_CONFIG_GLOBAL=/tmp/a.cfg git cf remote.origin.url URL",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias stored in a file GIT_CONFIG_GLOBAL names, unknown at hook time, is refused",
+    "event": {
+      "command": "GIT_CONFIG_GLOBAL=/tmp/a.cfg git cf2 remote.origin.url URL",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias stored under another HOME, unknown at hook time, is refused",
+    "event": {
+      "command": "HOME=/tmp/h git cf2 remote.origin.url URL",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an exported GIT_CONFIG_GLOBAL before an alias call is refused",
+    "event": {
+      "command": "export GIT_CONFIG_GLOBAL=/tmp/a.cfg; git cf2 remote.origin.url URL",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an include given by -c on an alias call is refused",
+    "event": {
+      "command": "git -c include.path=/tmp/a.cfg cf2 remote.origin.url URL",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias call whose aliases could not be read is refused",
+    "event": {
+      "command": "git cf remote.origin.url URL",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "unresolved": "git did not answer in time"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a stored alias for status passes",
+    "event": {
+      "command": "git st",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a git-NAME program, neither built in nor an alias, passes",
+    "event": {
+      "command": "git lfs pull",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a shell alias a person stored passes",
+    "event": {
+      "command": "git sync",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "cf": "config",
+            "st": "status",
+            "sync": "!./scripts/sync.sh"
+          }
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "GIT_CONFIG_GLOBAL on one of git's own commands that writes no config passes",
+    "event": {
+      "command": "GIT_CONFIG_GLOBAL=/tmp/a.cfg git status",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "removing the whole core section is refused, since it drops core.hooksPath",
+    "event": {
+      "command": "git config --remove-section core",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
   }
 ]

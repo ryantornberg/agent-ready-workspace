@@ -164,6 +164,10 @@
       "why": "While another live session holds the main working copy, a push from it by this one publishes that session's unfinished commits."
     },
     {
+      "use": "no_force_push",
+      "why": "A force push or a deletion of main rewrites the history every clone and proof anchor builds on, and a host's branch rule does not bind every instance or the repository's owner."
+    },
+    {
       "use": "browser_isolation",
       "why": "Two sessions that share one browser profile collide, and the second cannot open a browser; each session gets its own, and the agent tool's own plugin stays off.",
       "settings": ".claude/settings.json",
