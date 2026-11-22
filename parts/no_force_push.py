@@ -17,7 +17,9 @@ It refuses a push that would force or delete the branch named in "branch" (defau
 - `--delete` or `-d` of the branch, and a refspec `:main`;
 - a configured `remote.*.push` refspec that forces it.
 
-`--force-with-lease` or `+` to another branch passes, and so does a push of the branch that only adds to it.
+`--force-with-lease` or `+` to another branch passes, and so does a push of the branch that only adds to it. A push
+that names literal refspecs and asks for no force, deletion, prune or mirror passes without its target being worked
+out, since no config can force it.
 
 It also refuses a push it cannot judge, as the discard guard does: a remote or a refspec that is a variable or a
 substitution, with a message pointing to `git push -u origin HEAD`; a target the runner could not work out; a
@@ -74,6 +76,19 @@ def _may_push(call, why_aliases):
     return None
 
 
+def _cannot_force(push):
+    """True for a push that names literal refspecs and asks for no force, deletion, prune or mirror: config can
+    force only a push with no refspec (`remote.*.push`), and a configured mirror refuses refspecs, so its target
+    cannot change the answer and the runner need not work it out. A push is timed on a row of its own."""
+    specs = push.get("refspecs") or []
+    if not specs or push.get("remote_dynamic") or any(spec.get("dynamic") for spec in specs):
+        return False
+    if any(spec.get("force") or spec.get("delete") for spec in specs):
+        return False
+    return not (push.get("force") or push.get("force_with_lease") or push.get("delete") or push.get("prune")
+                or push.get("mirror") or push.get("all") or push.get("branches"))
+
+
 def _refusal(updates, branch):
     """Why these updates force or delete the branch, or None."""
     if updates["mirror"]:
@@ -110,6 +125,8 @@ def decide(event, config):
         if changed:
             return (f"{changed}. This guard cannot tell where the push goes or what it sends. Run it without that "
                     f"setting. See {PAGE}")
+        if _cannot_force(push):
+            continue
         if targets is None:
             targets = event.get("targets") or {}
         fact = targets.get(gitrules.target_key(call))

@@ -2344,5 +2344,14 @@
       "targets": {}
     },
     "allow": true
+  },
+  {
+    "name": "a push of literal refspecs with no force passes, its target unneeded, even after a cd it cannot follow",
+    "event": {
+      "command": "cd \"$D\" && git push -u origin HEAD",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
   }
 ]
