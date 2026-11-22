@@ -14,24 +14,28 @@ While it is active:
 - From any working copy: `stash drop`, `pop` and `clear`, which reach the stash every worktree shares,
   `worktree prune`, and `worktree remove --force` of a worktree the session is not in.
 - In a linked worktree, every other form passes.
-- A command the guard cannot resolve is refused: a program or subcommand that is a variable, an unknown git
-  alias, arguments supplied at run time, or a folder the parser or the runner could not place.
+- A command the guard cannot resolve is refused: a program or subcommand that is a variable, a git subcommand
+  that is neither built in nor an alias at hook time, an alias that runs a shell command, arguments supplied at
+  run time by xargs or find -exec, or a folder the parser or the runner could not place.
+- On a form it decides on, HOME, XDG_CONFIG_HOME or a GIT_CONFIG_* variable set on the command, and an include
+  given by -c or GIT_CONFIG_*, count as config writes and are refused, from any working copy.
 
-The runner gives the lease, the session's own working copy and each git folder's kind (decision 0004,
-"Shell events"). This part reads the command with the shared parser, wslib/shell.py, and looks each call's
-folder up by the parser's own text. Parser gaps it handles here, until slice Z moves them into the parser: a
-whole-tree checkout or restore, a stash write, and the rebase and cherry-pick commands, none of which the
-parser lists among the forms that drop work.
+A git alias is expanded from config at hook time, as git would run it, so an alias that resets hard is judged as a
+hard reset and one that runs git status passes. The runner gives the lease, the session's own working copy, each
+git folder's kind and the aliases read in each folder (decision 0004, "Shell events"). This part reads the command
+through wslib/gitrules.py, which the shell guards share, and looks each call's folder up by the parser's own text.
+Parser gaps it handles here, until slice Z moves them into the parser: a whole-tree checkout or restore, a stash
+write, and the rebase and cherry-pick commands, none of which the parser lists among the forms that drop work.
 See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md.
 """
 import datetime
 import posixpath
 
-from wslib import shell
+from wslib import gitrules
 
 KIND = "hook"
 EVENT = "before-shell"
-NEEDS = ("session", "lease", "working_copies")
+NEEDS = ("session", "lease", "working_copies", "aliases")
 PAGE = "docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md"
 
 QUIET = ("free", "mine", "other-dead")
@@ -104,22 +108,6 @@ def _holder(lease):
     return f"session {str(holder.get('session', '?'))[:8]}{since}"
 
 
-def _unresolved(call):
-    """Why the guard cannot know what this call does, or None."""
-    if call.get("unresolved"):
-        return call["unresolved"]
-    git = call.get("git")
-    if not git:
-        return None
-    if git.get("unresolved"):
-        return git["unresolved"]
-    if git.get("subcommand") is not None and not git.get("builtin"):
-        return f"git {git['subcommand']} is not one of git's own commands, and its alias is not read here"
-    if call.get("runtime_args"):
-        return f"{call['runtime_args']} supplies git's arguments when it runs"
-    return None
-
-
 def decide(event, config):
     lease = event.get("lease") or {}
     if lease.get("state") in QUIET:
@@ -127,8 +115,9 @@ def decide(event, config):
     copies = event.get("working_copies") or {}
     own = event.get("own_working_copy")
     who = _holder(lease)
-    for call in shell.analyze(event.get("command") or ""):
-        why = _unresolved(call)
+    calls, why_aliases = gitrules.read(event)
+    for call in calls:
+        why = gitrules.unresolved(call, why_aliases)
         if why:
             return (f"another live agent session ({who}) holds the main working copy, and this command cannot be "
                     f"judged: {why}. Write it with literal words, or run it in a worktree of your own. See {PAGE}")
@@ -138,6 +127,10 @@ def decide(event, config):
         found = forms(git)
         if not found:
             continue
+        changed = gitrules.config_write(call)
+        if changed:
+            return (f"another live agent session ({who}) holds the main working copy, and {changed}, so this guard "
+                    f"cannot judge it. Run it without that setting. See {PAGE}")
         folder = git.get("folder")
         fact = copies.get(folder) if folder is not None else None
         if folder is None or not fact or fact.get("unresolved"):

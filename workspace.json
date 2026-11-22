@@ -94,6 +94,14 @@
       ]
     },
     {
+      "use": "git_folder",
+      "why": "Git keeps the history, hooks, lease and edit ledger under .git, and a git config file sets the aliases, remotes and includes every guard reads; an agent that writes one can turn a guard off or change what a command does."
+    },
+    {
+      "use": "git_folder_shell",
+      "why": "A shell write into a git folder or a git config file, or a git config write to a key the guards read, changes what every later git command and guard does, for every session."
+    },
+    {
       "use": "deny_list",
       "why": "Nothing private reaches this public repository, in a file, a file name, a commit message or an identity."
     },

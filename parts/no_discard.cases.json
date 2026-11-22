@@ -2213,5 +2213,529 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "in the main copy, an alias from config that runs a hard reset is refused",
+    "event": {
+      "command": "git rh",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "rh": "reset --hard"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "in the main copy, an alias from config that runs git status passes",
+    "event": {
+      "command": "git st",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "st": "status --short"
+          }
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "in a linked worktree, an alias from config that runs a hard reset passes",
+    "event": {
+      "command": "git rh",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "rh": "reset --hard"
+          }
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "an alias of an alias that ends in a stash drop is refused",
+    "event": {
+      "command": "git a",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "a": "b",
+            "b": "stash drop"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias that runs a shell command is refused",
+    "event": {
+      "command": "git wipe",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "wipe": "!git reset --hard"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a subcommand that is neither built in nor an alias at hook time is refused",
+    "event": {
+      "command": "git frobnicate",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "st": "status"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias whose folder's aliases could not be read is refused",
+    "event": {
+      "command": "git st",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "unresolved": "git did not answer in time"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias with no aliases fact is refused",
+    "event": {
+      "command": "git st",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an alias read from config, with HOME set on the command, is refused",
+    "event": {
+      "command": "HOME=/tmp/h git st",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "aliases": {
+        ".": {
+          "aliases": {
+            "st": "status"
+          }
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git -c defining an alias that runs a hard reset in the main copy is refused",
+    "event": {
+      "command": "git -c alias.x='reset --hard' x",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git -c alias of a built-in name is ignored, as git does, and status passes",
+    "event": {
+      "command": "git -c alias.status='reset --hard' status",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "HOME set on a hard reset in a linked worktree counts as a config write and is refused",
+    "event": {
+      "command": "HOME=/tmp/h git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "GIT_CONFIG_GLOBAL set on a hard reset in a linked worktree is refused",
+    "event": {
+      "command": "GIT_CONFIG_GLOBAL=/tmp/g git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an include given by -c on a hard reset in a linked worktree is refused",
+    "event": {
+      "command": "git -c include.path=/tmp/x reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an include given through GIT_CONFIG_* on a hard reset in a linked worktree is refused",
+    "event": {
+      "command": "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=include.path GIT_CONFIG_VALUE_0=/tmp/x git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "HOME set on git status, which the guard does not decide on, passes",
+    "event": {
+      "command": "HOME=/tmp/h git status",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "find -exec git reset --hard is refused",
+    "event": {
+      "command": "find . -name x -exec git reset --hard {} \\;",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m/.claude/worktrees/b",
+      "own_working_copy": "/m/.claude/worktrees/b",
+      "working_copies": {
+        ".": {
+          "kind": "linked",
+          "top": "/m/.claude/worktrees/b"
+        }
+      },
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "with the lease free, an unknown subcommand passes",
+    "event": {
+      "command": "git frobnicate",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      },
+      "lease": {
+        "state": "free",
+        "holder": null,
+        "file": null
+      },
+      "aliases": {
+        ".": {
+          "aliases": {}
+        }
+      }
+    },
+    "allow": true
   }
 ]

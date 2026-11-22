@@ -1,0 +1,526 @@
+[
+  {
+    "name": "an edit of the repository's config file is refused",
+    "event": {
+      "path": ".git/config",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/config",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit of a hook in the git folder is refused",
+    "event": {
+      "path": ".git/hooks/pre-commit",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/hooks/pre-commit",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit of a linked worktree's .git file is refused",
+    "event": {
+      "path": ".git",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.claude/worktrees/b/.git",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit inside a code repository's git folder under src is refused",
+    "event": {
+      "path": "src/orders-api/.git/HEAD",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/src/orders-api/.git/HEAD",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the git folder in another case is refused",
+    "event": {
+      "path": ".GIT/config",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.GIT/config",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a Windows-style path into the git folder is refused",
+    "event": {
+      "path": ".git\\info\\exclude",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/info/exclude",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a path that climbs out and back into the git folder is refused",
+    "event": {
+      "path": "docs/../.git/config",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/docs/../.git/config",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a trailing dot, which Windows drops, is refused",
+    "event": {
+      "path": ".git./config",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git./config",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the lease file is refused",
+    "event": {
+      "path": ".git/ws-lease.json",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/ws-lease.json",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a stale index.lock is refused",
+    "event": {
+      "path": ".git/index.lock",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/index.lock",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a worktree's own git folder inside the common one is refused",
+    "event": {
+      "path": ".git/worktrees/b/HEAD",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/worktrees/b/HEAD",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the global git config file is refused",
+    "event": {
+      "path": "/home/a/.gitconfig",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/home/a/.gitconfig",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the XDG git config file is refused",
+    "event": {
+      "path": "/home/a/.config/git/config",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/home/a/.config/git/config",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the real file a symbolic link to the global config points at is refused",
+    "event": {
+      "path": "/home/a/dotfiles/git/.gitconfig",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/home/a/dotfiles/git/.gitconfig",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a file an include names, outside the repository, is refused",
+    "event": {
+      "path": "/home/a/work.inc",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/home/a/work.inc",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a file an include names, inside the repository, is refused",
+    "event": {
+      "path": "shared/team.gitconfig",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/shared/team.gitconfig",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the CI workflows stay editable",
+    "event": {
+      "path": ".github/workflows/ci.yml",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.github/workflows/ci.yml",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "the git hooks folder of the workspace stays editable",
+    "event": {
+      "path": ".githooks/pre-commit",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.githooks/pre-commit",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": ".gitignore stays editable",
+    "event": {
+      "path": ".gitignore",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.gitignore",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": ".gitattributes stays editable",
+    "event": {
+      "path": ".gitattributes",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.gitattributes",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a folder whose name only starts with .git passes",
+    "event": {
+      "path": ".git-backup/notes.md",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git-backup/notes.md",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a bare repository's folder name passes",
+    "event": {
+      "path": "fixtures/repo.git/README.md",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/fixtures/repo.git/README.md",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a page about git config passes",
+    "event": {
+      "path": "docs/git/config.md",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/docs/git/config.md",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git's global ignore file is not a config file and passes",
+    "event": {
+      "path": "/home/a/.config/git/ignore",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/home/a/.config/git/ignore",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "an ordinary edit with no config facts passes",
+    "event": {
+      "path": "src/orders-api/OrdersController.cs",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/src/orders-api/OrdersController.cs"
+    },
+    "allow": true
+  },
+  {
+    "name": "an edit of the git folder with no config facts is still refused",
+    "event": {
+      "path": ".git/config",
+      "working_copy": "/m",
+      "main": true,
+      "absolute": "/m/.git/config"
+    },
+    "allow": false
+  }
+]

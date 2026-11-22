@@ -71,8 +71,9 @@ EVENTS = TOOL_EVENTS + AFTER_EVENTS + SESSION_EVENTS + STOP_EVENTS
 # The events that never fail: on any error the runner prints nothing and exits 0, and the wiring adds || exit 0.
 QUIET_EVENTS = AFTER_EVENTS + SESSION_EVENTS + STOP_EVENTS
 # Facts a hook may ask the runner for, by event; see wslib/runner.py and decisions 0004 and 0005.
-NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease", "rule_pages"),
-         "before-shell": ("session", "lease", "working_copies", "targets"), "after-edit": ("index",),
+NEEDS = {"session-start": ("findings", "pins", "fast_forward"), "before-edit": ("lease", "rule_pages", "git_config"),
+         "before-shell": ("session", "lease", "working_copies", "targets", "aliases", "git_config"),
+         "after-edit": ("index",),
          "stop": ("own_edits", "gate")}
 LEVELS = ("error", "warning")
 MODES = ("refuse", "remind")

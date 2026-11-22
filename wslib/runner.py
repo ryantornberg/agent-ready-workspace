@@ -617,6 +617,10 @@ def shell_event(root, event, hooks, tool, cwd):
         makers["working_copies"] = lambda: shellfacts.working_copies(root, event["command"], cwd)
     if "targets" in needs:
         makers["targets"] = lambda: shellfacts.targets(root, event["command"], cwd)
+    if "aliases" in needs:
+        makers["aliases"] = lambda: shellfacts.aliases(root, event["command"], cwd)
+    if "git_config" in needs:
+        makers["git_config"] = lambda: shellfacts.git_config(cwd or root)
     return LazyEvent(facts, makers)
 
 
@@ -730,6 +734,9 @@ def command_hook(root, args):
     found, tool, cwd = events.read_call(root, args.event, stream.read(), args.tool)
     if any("rule_pages" in getattr(part.module, "NEEDS", ()) for part in hooks):
         found = [dict(event, rule_pages=rule_pages(root, event, hooks)) for event in found]
+    if args.event == "before-edit" and any("git_config" in getattr(part.module, "NEEDS", ()) for part in hooks):
+        config = shellfacts.git_config(root)        # one git call for the whole tool call
+        found = [dict(event, git_config=config) for event in found]
     if args.event == "before-shell":
         found = [shell_event(root, event, hooks, tool, cwd) for event in found]
     # The lease is taken only for an edit every other hook allows, so a refused edit takes no lease.
