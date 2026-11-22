@@ -705,6 +705,16 @@ Two criterion changes go with the split, since the approved additions above have
 
 Criterion 36 gains: "While another live session holds the lease, a push from a linked worktree of the main copy's branch, of every branch, of a mirror or of a glob refspec is refused, and a push of the worktree's own branch passes, with a case each."
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+Slice B2 stopped after batch 2 under the stop rule, and its results proposed three more fixes to the rewrite brief. The maintainer's answer to the workspace queue (Q13) settles how B2 resumes at batch 3. No criterion is dropped or weakened.
+
+**B2's rewrite brief takes the three fixes.** Each builder runs the instruction review's six checks on its own page before it reports, and lists each must or never against its rules table. Each builder names the page that sends a reader to the new page, and adds that link in the same change when the page is not hashed. Each failure path of a step ends in a commit and a report, as the main path does.
+
+**The stop rule counts recurring causes, not classes, for B2.** The rule's B2 item fires when one brief-level cause recurs in more than a third of a batch's pages. A cause is what in the brief, or missing from it, let the defect through. The fresh reviewer names each finding's cause in its record, not the builder. The count runs per batch, from batch 3 on, and still leaves out declined findings and missing `INDEX.md` rows.
+
 ## Results
 
 ### C1, launcher and baselines
