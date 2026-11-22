@@ -890,7 +890,7 @@ Stopped after its recorded tool runs, on branch `m3/c5` from main at `e1d978a`, 
 
 - **Verified, both tools offer both new events.** `tests/records/after-edit-and-stop.json`, on `m3/c5`, holds one recorded run each of Claude Code 2.1.330 and codex-cli 0.169.0, in a scratch clone of main. Each sent `PostToolUse` after its edit tool and showed the hook's additional context to the agent, which quoted it. Each sent `Stop`, took a block with a reason as a refusal, showed the reason, and sent `Stop` again with `stop_hook_active` true. So the row's inference about Codex holds, and criteria 37 and 41 need no revision.
 - **Verified:** Codex's `PostToolUse` carries the whole patch under `tool_input.command`, as its before-edit call does, so the after-edit adapter can read paths the way the before-edit adapter does. Neither tool's `Stop` payload names the files the session edited, so the stop gate needs the ledger's session field, as the row says.
-- **Inferred:** the slice is too large for one reviewable pull request; the estimate is about 6,000 lines. A six-way split is proposed under "Changes after approval", with criterion 69 for the CI notice and an amended criterion 36 for the push guard's extension, waiting for the maintainer's yes. It is queued as Q12 in the workspace queue.
+- **Inferred:** the slice is too large for one reviewable pull request; the estimate is about 6,000 lines. A six-way split is proposed under "Changes after approval", with criterion 69 for the CI notice and an amended criterion 36 for the push guard's extension, waiting for the maintainer's yes. It is queued as Q13 in the workspace queue.
 - **Not done:** criteria 37 to 41, 55's guard refusals, 59, 65 and the two approved additions. The private ledger's C5 rows stay at slice C5, since nothing is built.
 
 Decisions made in the slice:
@@ -966,7 +966,7 @@ Proposed revisions (template rule 7):
 - Criterion 20 says the blocks run green "on three systems". B2's tutorials must then run in Git's bash on Windows. A block that starts Python gets the clone's launcher, so `python3 ws.py check` works there; a block that needs another tool must be one Git for Windows ships.
 - Criterion 62's list leaves out `.github/copilot-instructions.md`, which sub-batch A also added. It has no record. The README and the index now say the required list is the plan's.
 
-### B2, core procedures: stopped after batch 1
+### B2, core procedures: stopped after batch 2
 
 Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33, merged as `5100315` after CI passed on Linux, macOS and Windows. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
 
@@ -995,6 +995,35 @@ Decisions made in the slice:
 
 Not done in B2: batches 2 to 5. That is the decision interview, adversarial document review, the feature ladder and the spec process in `size-the-work.md`; impact analysis, the reuse checklist, the review orchestrator's page and its explainer, architecture-invariant review with its big-picture pass, reviewing a pull request in a worktree, escape analysis, the feedback walk-through and handoff; extending, maintaining and adopting the workspace and the machine self-check; the tracker and git-host spines, the docs audit, the prompt retrospective and searching every source; the two tutorials, the playbook catalog, the how-to index and the request map; and the fix path's section, queued for slice Z.
 
+#### Batch 2, 2026-11-21
+
+Built at the worker tier under the second rewrite brief, which carries the four fixes of the maintainer's answer recorded under "Changes after approval". Docs straight to main as `ecd7fa0`. Four worker-tier helper sessions wrote the pages, read each other's drafts and fixed what they found; seven fresh driver-tier sessions reviewed them. No file the eval hashes was edited.
+
+- **Verified, batch 2:** [the playbook catalog](../playbooks/README.md) and [the how-to index](../how-tos.md) as reference pages, listing every playbook, how-to and reference page here, batch 1's included; [the decision interview](../playbooks/decision-interview.md) and [adversarial review](../playbooks/adversarial-review.md) as playbooks; [the feature ladder](../size-the-work.md#the-feature-ladder) and [the spec process](../size-the-work.md#the-spec-process) merged into `size-the-work.md` as sections, each with its own proof line. All are `proof: unproven`, `prove-by: M9`, as the table above sets them. The README's table lists each, and the `proof` check passes.
+- **Verified, also changed:** the glossary gains critic, spec and wrapper; the hand-off plan template's red-team step links adversarial review and stops on a failed verdict; the records folder's README names the adversarial review records.
+- **Verified, the review:** 22 findings in 9 records: 5 for the ported pages, and one each for the README, the glossary and the plan template, which are not ported pages. 21 were fixed in one fix round; 1 was declined, the feature ladder's placement on a how-to page, which this slice's row sets. None was queued for slice Z.
+- **Verified, the stop rule fired again,** counted over batch 2's 5 pages alone, as the restarted count asks, leaving out declined findings and missing `INDEX.md` rows: contradiction in 4, trigger in 3, step in 2 and enforcement in 2. Placement was in 1.
+- **Inferred, why:** the wider pass and the cross-reading caught 12 defects before review, by the builders' reports, and the review still found what they missed. Most of what it found lies between pages: a routing page's tie-breaks between two playbooks, a playbook the plan template did not route to, a summary written into a section the template keeps for settled decisions. Each was fixed in minutes. Over six classes, a review that finds three or four defects per page passes a third in most classes, so the rule fires on nearly any batch.
+- **Verified:** the private ledger's batch 2 rows now map to their pages, and its check prints 0 unmapped.
+
+Proposed fixes, for the maintainer's decision before batch 3 (queued as Q13 in the workspace queue):
+
+1. **A self-review before the report.** Each builder runs the instruction review's six checks on its own page, and lists each must or never against its rules table.
+2. **Route in, not only out.** Each builder names the page that sends a reader to the new page, and adds that link in the same change when the page is not hashed.
+3. **Every branch ends.** Each failure path of a step, such as a failed verdict, ends in a commit and a report, as the main path does.
+
+The question with the fixes: whether the rule counts classes, or recurring causes. Counted by class, it will likely fire after batch 3 under any brief (inferred).
+
+Not done in B2: batches 3 to 5. That is impact analysis, the reuse checklist, the review orchestrator's page and its explainer, architecture-invariant review with its big-picture pass, reviewing a pull request in a worktree, escape analysis, the feedback walk-through and handoff; extending, maintaining and adopting the workspace and the machine self-check; the tracker and git-host spines, the docs audit, the prompt retrospective and searching every source; the two tutorials and the request map; and the fix path's section, queued for slice Z.
+
+Decisions made in batch 2:
+
+- **Where the routing pages sit:** the playbook catalog is `docs/playbooks/README.md`, the one reference page that folder takes; the how-to index is `docs/how-tos.md`. Each later batch adds its rows in its own commit.
+- **Where an interview's results go:** its decisions under the plan's "Settled decisions", its open questions in a section of their own after it.
+- **The spec is three sections of the hand-off plan:** the goal, the non-goals and the success criteria, agreed by the person before the rest is written. No spec template exists until B3.
+- **Adversarial review records** go in `docs/records/adversarial-reviews/`, one dated file per review; a plan's triage stays in its own red-team table, under a link to the record.
+- **The glossary rows were written here,** not queued, since the glossary is not hashed.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -1017,5 +1046,6 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - B2, `AGENTS.md`, "Finding things": link [the research ladder](../research-ladder.md). "How work flows": a small refactor passes the same gate and follows [safe refactor](../safe-refactor.md), not fix a bug.
 - B2, `docs/playbooks/fix-a-bug.md`: link [test first](../playbooks/test-first.md) for the red-green proof and [debugging](../playbooks/debugging.md) for an unknown cause.
 - B2, `docs/definition-of-done.md`, the test-first row: for a change that fixes nothing, such as a refactor, the test that came first is a characterization test that passed before the change and still passes after it.
+- B2, `INDEX.md`, Topics: rows "Which playbook to follow; every playbook and its proof state" linking [the playbook catalog](../playbooks/README.md); "Where to go for a task; how-tos and reference pages by task" linking [the how-to index](../how-tos.md); "Interview me on this; settling design questions before a plan" linking [the decision interview](../playbooks/decision-interview.md); "Red team; adversarial review; a critic attacks a plan" linking [adversarial review](../playbooks/adversarial-review.md); "Building a feature; writing a spec; spec approval; when a spec changes" linking [the feature ladder](../size-the-work.md#the-feature-ladder).
 - C4, `INDEX.md`, Topics: a row "Merge a pull request; a squash or rebase merge refused; a push refused while another session holds the main copy" linking [changing the machinery](../changing-the-machinery.md#the-path-for-a-machinery-change) and [decision 0005](../decisions/0005-concurrent-sessions-and-the-edit-ledger.md); and the existing decision 0005 row names a refused push as well as a refused edit.
 - C4, `AGENTS.md`, rules table: the rule on opening a pull request as a draft says an agent merges with `python3 ws.py merge NUMBER`.
