@@ -113,18 +113,24 @@ def path_refusal(path, absolute, files):
 
 
 def _substitute(text, call, home):
-    """The text with each $NAME or ${NAME} whose literal value the line set replaced, and HOME from the facts."""
-    env, dynamic = call.get("env") or {}, set(call.get("env_dynamic") or ())
+    """The text with each $NAME or ${NAME} the line set replaced by the value it set, and HOME from the facts. A
+    value that itself names a variable is filled in turn, a few times over, so D="$HOME/.gitconfig" is seen."""
+    env = call.get("env") or {}
 
     def value(match):
         name = match.group(1) or match.group(2)
-        if name in env and env[name] is not None and name not in dynamic:
+        if name in env and env[name] is not None:
             return env[name]
-        if name == "HOME" and home and name not in env:
+        if name == "HOME" and home:
             return home
         return match.group(0)
 
-    return VARIABLE.sub(value, text)
+    for _ in range(5):
+        filled = VARIABLE.sub(value, text)
+        if filled == text:
+            break
+        text = filled
+    return text
 
 
 def _dynamic_refusal(path, call, home, files, cwd):
@@ -300,7 +306,8 @@ def unresolved(call, why_aliases=None):
     if subcommand is not None and not git.get("builtin"):
         if why_aliases:
             return f"git {subcommand} is not one of git's own commands, and {why_aliases}"
-        return f"git {subcommand} is neither one of git's own commands nor an alias"
+        return (f"git {subcommand} is neither one of git's own commands nor an alias. If it is a program named "
+                f"git-{subcommand}, run it by that name; otherwise ask the person")
     alias = git.get("alias") or {}
     if alias.get("source") == "config" and (call.get("config_env") or _includes(git)):
         changed = (call.get("config_env") or ["an include"])[0]

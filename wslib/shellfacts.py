@@ -199,8 +199,8 @@ def aliases(root, command, cwd):
 
 
 def git_config(cwd, environ=None):
-    """{"home", "files", "unresolved"}: the git config files no write may reach. The global ones, whether they exist
-    or not, and every file an include.path or includeIf.*.path names, read from git config in cwd, existing or not,
+    """{"home", "files", "unresolved"}: the git config files no write may reach. The global ones and the system one,
+    whether they exist or not, and every file an include.path or includeIf.*.path names, read from git config in cwd, existing or not,
     each also by its real path when it is a symbolic link. A file a person has not created yet still counts, since
     writing it would bring new config in."""
     environ = os.environ if environ is None else environ
@@ -210,11 +210,19 @@ def git_config(cwd, environ=None):
              os.path.join(home, ".config", "git", "config")]
     if environ.get("GIT_CONFIG_GLOBAL"):
         files.append(environ["GIT_CONFIG_GLOBAL"])
+    system = environ.get("GIT_CONFIG_SYSTEM")
+    if not system:
+        found = _run([], ["var", "GIT_CONFIG_SYSTEM"])      # git 2.42 and later; older gits give nothing
+        system = found[1].strip() if found and found[0] == 0 else None
+    if system:
+        files.append(system)
     unresolved = None
     where = ["-C", str(cwd)] if cwd else []
     done = _run(where, ["config", "-z", "--show-origin", "--get-regexp", r"^include(if\..*)?\.path$"])
     if done is None:
         unresolved = "git did not answer in time"
+    elif done[0] not in (0, 1):
+        unresolved = "git could not read the config, so the files its includes name are not known"
     elif done[0] == 0:
         fields = done[1].split("\0")
         for origin, entry in zip(fields[0::2], fields[1::2]):

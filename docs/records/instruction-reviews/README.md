@@ -75,3 +75,8 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-21-c5a-decision-0005.md](2026-11-21-c5a-decision-0005.md) | `docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md` | contradiction, trigger |
 | [2026-11-21-c5a-parts.md](2026-11-21-c5a-parts.md) | `docs/parts.md` | contradiction, trigger |
 | [2026-11-21-c5a-readme.md](2026-11-21-c5a-readme.md) | `README.md` | contradiction, enforcement, trigger |
+| [2026-11-21-c5c-changing-the-machinery.md](2026-11-21-c5c-changing-the-machinery.md) | `docs/changing-the-machinery.md` | trigger |
+| [2026-11-21-c5c-decision-0004.md](2026-11-21-c5c-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction, step, trigger |
+| [2026-11-21-c5c-decision-0005.md](2026-11-21-c5c-decision-0005.md) | `docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md` | contradiction |
+| [2026-11-21-c5c-parts.md](2026-11-21-c5c-parts.md) | `docs/parts.md` | contradiction, enforcement |
+| [2026-11-21-c5c-readme.md](2026-11-21-c5c-readme.md) | `README.md` | contradiction, enforcement, step |

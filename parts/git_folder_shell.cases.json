@@ -525,6 +525,48 @@
     "allow": false
   },
   {
+    "name": "a variable whose value names HOME's config file is refused",
+    "event": {
+      "command": "D=\"$HOME/.gitconfig\"; echo x > \"$D\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a variable built from another that names the git folder is refused",
+    "event": {
+      "command": "G=.git; R=$G/hooks; echo x > \"$R/pre-commit\"",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
     "name": "git rev-parse of the git folder in a write target is refused",
     "event": {
       "command": "cp hook \"$(git rev-parse --git-dir)/hooks/pre-commit\"",

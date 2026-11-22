@@ -100,6 +100,11 @@ class ConfigFileFactTests(Repository):
         self.assertIsNone(facts["unresolved"])
         self.assertEqual(facts["home"], home)
 
+    def test_the_system_file_counts(self):
+        system = self.base / "etc" / "gitconfig"
+        facts = shellfacts.git_config(self.main, {"HOME": str(self.home), "GIT_CONFIG_SYSTEM": str(system)})
+        self.assertIn(system.as_posix(), facts["files"])
+
     def test_xdg_and_git_config_global_are_read_from_the_environment(self):
         xdg, global_file = self.base / "xdg", self.base / "g.cfg"
         facts = shellfacts.git_config(self.main, {"HOME": str(self.home), "XDG_CONFIG_HOME": str(xdg),
@@ -108,16 +113,23 @@ class ConfigFileFactTests(Repository):
         self.assertIn(global_file.as_posix(), facts["files"])
 
     def test_every_include_counts_relative_home_and_conditional_existing_or_not(self):
+        later = (self.base / "not-yet.inc").as_posix()
         (self.home / ".gitconfig").write_text(
-            "[include]\n\tpath = ~/work.inc\n[includeIf \"gitdir:/nowhere/\"]\n\tpath = /tmp/not-yet.inc\n",
+            f"[include]\n\tpath = ~/work.inc\n[includeIf \"gitdir:/nowhere/\"]\n\tpath = {later}\n",
             encoding="utf-8")
         git(self.main, "config", "include.path", "../shared/team.gitconfig")
         facts = shellfacts.git_config(self.main, {"HOME": str(self.home)})
         files = [gitrules.fold(name) for name in facts["files"]]
         self.assertIn(gitrules.fold((self.home / "work.inc").as_posix()), files)
-        self.assertIn(gitrules.fold("/tmp/not-yet.inc"), files)
+        self.assertIn(gitrules.fold(later), files)
         self.assertIn(gitrules.fold((self.main / ".git" / ".." / "shared" / "team.gitconfig").resolve().as_posix()),
                       files)
+
+    def test_a_config_git_cannot_read_leaves_the_includes_unresolved(self):
+        (self.main / ".git" / "config").write_text("[broken\n", encoding="utf-8")
+        facts = shellfacts.git_config(self.main, {"HOME": str(self.home)})
+        self.assertIn("could not read", facts["unresolved"])
+        self.assertIn((self.home / ".gitconfig").as_posix(), facts["files"])
 
     @unittest.skipIf(os.name == "nt", "symbolic links need a privilege on Windows")
     def test_a_symbolic_link_counts_by_its_real_path_too(self):
