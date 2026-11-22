@@ -53,16 +53,13 @@ import os
 import pathlib
 import subprocess
 import sys
-import threading
 
 from . import VERSION
 from . import baseline as baselines
 from . import blocks
-from . import ci as cifacts
 from . import events
 from . import gate as gates
 from . import gitcall
-from . import handoff as handoffs
 from . import lease as leases
 from . import ledger as ledgers
 from . import merge as merges
@@ -502,7 +499,7 @@ def session_facts(root, hooks, event):
     ci = None
     if "ci" in needs:
         config = next((part.config for part in hooks if "ci" in getattr(part.module, "NEEDS", ())), {})
-        ci = CiFact(root, config.get("workflow", "ci.yml"), config.get("branch", handoffs.DEFAULT_BRANCH))
+        ci = ci_fact(root, config.get("workflow", "ci.yml"), config.get("branch", "main"))
     tree = snapshots.Tree(top) if needs else None
     if "findings" in needs:
         manifest = partlib.load_manifest(root)
@@ -521,6 +518,7 @@ def session_facts(root, hooks, event):
             facts["pins"].append({"path": path, "branch": behind[0] if behind else None,
                                   "behind": behind[1] if behind else None})
     if "handoffs" in needs:      # after the fast-forward, whose fetch may have moved origin/main
+        from . import handoff as handoffs
         config = next((part.config for part in hooks if "handoffs" in getattr(part.module, "NEEDS", ())), {})
         try:
             facts["handoffs"] = handoffs.pending(found[0], found[1], config.get("branch", handoffs.DEFAULT_BRANCH)) \
@@ -532,21 +530,26 @@ def session_facts(root, hooks, event):
     return facts
 
 
-class CiFact(threading.Thread):
-    """The "ci" fact (wslib/ci.py), worked out while the other session facts are. result() waits for it, never
-    longer than its own time limit and half a second more, and gives None on any error."""
+def ci_fact(root, workflow, branch):
+    """The "ci" fact (wslib/ci.py), started in a thread of its own so it is worked out while the other session facts
+    are. Returns an object whose result() waits for it, never longer than its own time limit and half a second more,
+    and gives None on any error. Imported here, not at the top, so the hooks before each tool call do not pay for it."""
+    import threading
+    from . import ci as cifacts
 
-    def __init__(self, root, workflow, branch):
-        super().__init__(daemon=True)
-        self.args, self.value = (root, workflow, branch), None
-        self.start()
+    class Fact(threading.Thread):
+        def __init__(self):
+            super().__init__(daemon=True)
+            self.value = None
+            self.start()
 
-    def run(self):
-        self.value = cifacts.fact(*self.args)
+        def run(self):
+            self.value = cifacts.fact(root, workflow, branch)
 
-    def result(self):
-        self.join(cifacts.BUDGET + 0.5)      # the fact keeps its own deadline; this only bounds a thread that does not
-        return None if self.is_alive() else self.value
+        def result(self):
+            self.join(cifacts.BUDGET + 0.5)  # the fact keeps its own deadline; this only bounds a thread that does not
+            return None if self.is_alive() else self.value
+    return Fact()
 
 
 def command_session(root, args):
@@ -875,6 +878,7 @@ def command_pins(root, _args):
 
 def command_handoff(root, args):
     """Write, clear or list the handoff markers of the working copy at root (wslib/handoff.py)."""
+    from . import handoff as handoffs
     try:
         default = handoff_branch(root)
         if args.done is not None and args.note:
@@ -907,9 +911,9 @@ def handoff_branch(root):
     try:
         manifest = partlib.load_manifest(root, hook=True)
     except partlib.PartError:
-        return handoffs.DEFAULT_BRANCH
+        return "main"
     entry = next((e for e in manifest["parts"] if e.get("use") == "handoff_loader"), {})
-    return entry.get("branch", handoffs.DEFAULT_BRANCH)
+    return entry.get("branch", "main")
 
 
 def command_merge(root, args):

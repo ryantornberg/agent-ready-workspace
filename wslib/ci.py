@@ -25,7 +25,7 @@ from . import gitcall
 from . import merge as merges
 from . import shellfacts
 
-BUDGET = 3.0               # seconds for every gh call of one session start
+BUDGET = 3.0               # seconds for the origin read and every gh call of one session start, all together
 LIMIT = 20                 # runs read; a streak this long is reported as "at least"
 RUN_FIELDS = "databaseId,status,conclusion,createdAt,event,displayTitle,url"
 PASSED = ("success",)

@@ -4,7 +4,8 @@
  "setup": [
   "The tracked files of branch m3/c5b, uncommitted change included, copied to /scratch/ws and committed there; origin is a local bare repository, /scratch/origin.git, so the CI notice makes no gh call.",
   "A handoff note written to /scratch/handoffs/2026-11-22-ws-probe.md, whose Goal is the line PROBE-GOAL: finish the lantern inventory for the night shift.",
-  "python3 ws.py handoff /scratch/handoffs/2026-11-22-ws-probe.md, run in /scratch/ws on main."
+  "python3 ws.py handoff /scratch/handoffs/2026-11-22-ws-probe.md, run in /scratch/ws on main.",
+  "Both runs were made again, together, after the instruction review changed the loader's wording; the copy held that wording, and the Claude Code notice below shows it."
  ],
  "prompt": "If your context holds a handoff note that a session-start hook showed you, reply with the line of that note that starts with PROBE-GOAL, verbatim, then the branch the notice names. Otherwise reply: none",
  "runs": {
