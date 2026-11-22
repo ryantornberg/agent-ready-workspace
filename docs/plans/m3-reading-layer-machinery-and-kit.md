@@ -761,6 +761,14 @@ Slice B2 stopped after batch 4 under the stop rule. The maintainer's answer to t
 
 **The re-check rules on declined findings.** The fresh re-check also rules on every finding the builder declined. A decline the re-check rejects counts as a finding that survived the fix round.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+A new slice, TFIX, the hook timing fix. It has no row in the slice tables; this entry is its scope. The maintainer's answer to Q21 in the workspace queue settles it, and the maintainer confirmed it after round 6. No criterion is dropped or weakened.
+
+**The timing fix runs before C5e (Q21).** The macOS jobs in CI keep failing the hook case runner's 200-millisecond budget, most often with Python 3.9. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, and fixes the hooks so they meet the budget that criterion 28 sets. It may run alongside C5b. C5e waits for it, since C5e adds work to every push. TFIX is done when criterion 28 holds on every CI job, and its report is under "Results".
+
 ## Results
 
 ### C1, launcher and baselines
