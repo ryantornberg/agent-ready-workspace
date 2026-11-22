@@ -737,6 +737,18 @@ The maintainer's answer to Q15 in the workspace queue settles the one item slice
 
 **An amendment may edit a decision record's In short line.** `docs/layout.md` says so, beside its rule that a decision record changes only by a dated "Amended" paragraph. The In short lines that slices C4 and C5a edited stand. C5c's builder updates decision 0004's In short line to name the writes to a git folder and git config files that its amendment added, and changes the layout rule.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+Three items for slice C5d, from the maintainer's answers to Q16, Q17 and Q18 in the workspace queue. Each adds to C5d's scope; no criterion is dropped or weakened.
+
+**Decision 0004's In short line takes hedged wording, first (Q18).** C5c's follow-up left two overstatements in the line. Before building, C5d's builder changes it to say that writes are refused in the cases the record's shared rules list, and that the README names the known misses. The README's list of those misses gains `git push -u` and `git remote rename`. The change gets one instruction review.
+
+**`git_folder_shell` refuses a persistent write to `core.hooksPath` (Q16).** One command could otherwise turn off the commit and push hooks. It gets a case.
+
+**`git_folder_shell` expands git aliases (Q17).** It reads the command through `gitrules.read`, as the discard and push guards do, so a stored alias that runs `git config` is judged as that `git config`. Cases cover a stored alias to config, including one set through `GIT_CONFIG_GLOBAL` or `HOME`.
+
 ## Results
 
 ### C1, launcher and baselines

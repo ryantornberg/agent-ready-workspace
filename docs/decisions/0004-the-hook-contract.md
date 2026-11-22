@@ -6,7 +6,7 @@ last-reviewed: 2026-11-21
 
 # 0004: The hook contract
 
-**In short:** a part reads only its event, its config and a snapshot. Whatever it needs from files, git, the environment or another process, the engine works out and hands it in. A path in an event is placed by the working copy that holds it. The table below names each part that reaches further, and a test fails on any other. An agent's write into a git folder or to a git config file is refused when an edit tool makes it or the shell parser reports it. A `git config` command is judged by its key instead, and refused for the keys "The rules the shell guards share" lists. Other git commands that change config, such as `git remote set-url`, are not seen; the README lists them. The discard and push guards judge a git alias as what it runs.
+**In short:** a part reads only its event, its config and a snapshot. Whatever it needs from files, git, the environment or another process, the engine works out and hands it in. A path in an event is placed by the working copy that holds it. The table below names each part that reaches further, and a test fails on any other. An agent's write into a git folder or to a git config file, by an edit tool or the shell, is refused in the cases "The rules the shell guards share" lists; a `git config` command is judged by its key there. The README names the known misses, such as `git remote set-url` and a write through a symbolic link. The discard and push guards judge a git alias as what it runs.
 
 ## Context
 
@@ -132,6 +132,8 @@ Amended 2026-11-21, M3 slice B1: a check's `pushed` commits carry their whole me
 Amended 2026-11-21, M3 slice C5c: two before-shell needs, `aliases` and `git_config`, and `git_config` on before-edit too; `wslib/gitrules.py`, the rules the shell guards share, which `no_discard`, `push_lease`, `git_folder` and `git_folder_shell` import, as their rows say. A parser gap found here is handled in `wslib/gitrules.py`, outside the eval's hash, until slice Z: `unlink`, `rmdir` and `shred` as writes, and `find -delete`.
 
 Amended 2026-11-22, M3 slice C5c: the In short line names the writes to a git folder and to git config files that the guards refuse, as [the layout](../layout.md#the-opening) allows an amendment to do. A limit its review found: `git_folder_shell` does not read the `aliases` fact, so a call through an alias that runs `git config`, such as `cf = config`, passes it, and `git cf remote.origin.url URL` changes a key it refuses by name. An agent can store such an alias in a file no guard watches, with `git config --file`, and point git at it with `GIT_CONFIG_GLOBAL` or `HOME`. `no_discard` and `push_lease` refuse that call only while another live session holds the lease. Whether `git_folder_shell` reads aliases is queued for the maintainer as Q17.
+
+Amended 2026-11-22, M3 slice C5d, on the maintainer's answer to Q18: the In short line no longer says every write the shell parser reports is refused, or that the README lists every git command that changes config. Some writes the parser reports pass, such as a write to a variable the line does not set and a write through a symbolic link, and the README's list lacked `git push -u` and `git remote rename`. The line now points to the shared rules for what is refused and to the README for the known misses, and the README's list gains those two commands and others the reviews found. The README's list names known misses; it is not complete.
 
 ## What it gave up
 
