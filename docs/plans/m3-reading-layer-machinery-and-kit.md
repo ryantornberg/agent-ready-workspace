@@ -729,6 +729,14 @@ Slice B2 stopped after batch 3 under the stop rule, and its results proposed two
 
 **Each batch reports its findings per page** in its entry under "Results".
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+The maintainer's answer to Q15 in the workspace queue settles the one item slice C5c left open. No criterion is dropped or weakened.
+
+**An amendment may edit a decision record's In short line.** `docs/layout.md` says so, beside its rule that a decision record changes only by a dated "Amended" paragraph. The In short lines that slices C4 and C5a edited stand. C5c's builder updates decision 0004's In short line to name the writes to a git folder and git config files that its amendment added, and changes the layout rule.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -977,6 +985,15 @@ Decisions made in the slice:
 - **`core.hooksPath` and `core.fsmonitor` pass,** since A0's list does not name them, and the README says one command can turn off the hooks. Whether to add them is queued for the maintainer as Q16.
 - **No CHANGELOG entry,** as slices C1 to C5a.
 
+**Follow-up, 2026-11-22: Q15, decision 0004's In short line.** Docs only, committed straight to main from the main working copy, at the driver tier. The maintainer's answer to Q15 is recorded under "Changes after approval", dated 2026-11-22. No file the eval hashes was edited. It stopped under the stop rule after two fix rounds on the In short line; the line is committed, with two known overstatements queued as Q18.
+
+- **Verified, the layout rule:** `docs/layout.md`, "The opening", says an amendment to a decision record may also edit its In short line, and does so when it changes what the line sums up. The same paragraph now says a frozen page's front matter is not frozen, and states rule 6 of the template whole.
+- **Verified, decision 0004:** its In short line names the writes to a git folder and to git config files that the guards refuse, and a new dated Amended paragraph says so and labels a limit the review found. The question log has a row for Q15.
+- **Verified, a guard gap the review found:** `git_folder_shell` does not read the `aliases` fact, so `git cf remote.origin.url URL` passes it when `cf = config` is stored. An agent can store that alias in a file of its own with `git config --file` and point git at it with `GIT_CONFIG_GLOBAL`; `no_discard` and `push_lease` refuse the call only while another live session holds the lease. Checked by calling each guard's `decide` on built events. Queued for the maintainer as Q17, with C5d, which edits the same guard for Q16, recommended.
+- **Verified, the instruction review:** two fresh driver-tier helpers found 9 defects in 2 records: 7 contradictions, 1 step, 1 trigger. Eight were fixed in full or in part. One, a part's docstring, went to slice Z's queue below, with the rest of two others: an index row, and dating the in-place edits of decisions 0004 and 0005. One part was declined, with its reason. A fresh re-check found every layout fix held, and two new contradictions in 0004's new text, both fixed. A second re-check found both fixes held and two more overstatements in the In short line: the README does not list every git command that changes config unseen, and two writes the parser reports pass. Those are queued as Q18.
+- **Two fix rounds,** both on decision 0004's In short line. The stop rule bars a third, so this follow-up stops there.
+- **Verified:** `python3 ws.py check`, `python3 ws.py selftest` and `python3 -m unittest discover -b tests` pass, and the port ledger check maps every item. No ledger row named slice C5c, so none moved.
+
 ### Sub-batch A, 2026-11-18
 
 Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
@@ -1162,3 +1179,6 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C5c, `wslib/shell.py`: report `unlink`, `rmdir` and `shred` operands and `find -delete` as writes, and the folder of a relative write after a `cd` the parser cannot follow; remove their handling from `wslib/gitrules.py`.
 - C5c, `INDEX.md`, Topics: a row "A write to a git folder or a git config file refused; a git config key an agent may not set; a git alias judged as what it runs" linking [decision 0004](../decisions/0004-the-hook-contract.md), and the row that routes to decision 0004 names writes to a git folder or a git config file.
 - C5c, `INDEX.md`, Topics: a row "A command refused because it cannot be judged, such as a program word that is a variable" linking [changing the machinery](../changing-the-machinery.md#the-path-for-a-machinery-change).
+- C5c, `INDEX.md`, Topics: a row "Amend an accepted decision record; what a frozen page may change" linking [layout](../layout.md#the-opening).
+- C5c, `parts/page_kinds.py`, the module docstring: its sentence on frozen pages gains the layout's two exceptions: an amendment may edit a decision record's In short line, and a frozen page's front matter is not frozen.
+- C5c, decisions 0004 and 0005: mark with C5c's date each place C5c's first commit changed in place. In 0005, the bullet "A command it cannot judge is refused", and the sentence on config writes added to C4's dated paragraph on the push guard. In 0004, the `no_discard` and `push_lease` rows of the exceptions table, and the sentence after the `targets` list.

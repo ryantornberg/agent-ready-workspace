@@ -5,7 +5,7 @@ last-reviewed: 2026-11-21
 
 # Layout: folders and page kinds
 
-Where each kind of page lives, the front matter it carries, and the order it opens in. For anyone adding or moving a page.
+Where each kind of page lives, the front matter it carries, and the order it opens in. For anyone adding, moving or amending a page.
 
 **In short:** every page under `docs/` names its kind in its front matter. Nine kinds, each with its own folder or place. Every page opens with its title, a purpose sentence of 25 words or fewer, then its **In short** line, except where its kind's row says otherwise. The `page_kinds` check enforces the kinds, their front matter and the opening, at the commit and in CI.
 
@@ -65,7 +65,7 @@ A page in a kind's own folder must be of that kind. A README in one of those fol
 3. The **In short** line: the verdict or the gist, before any background. A playbook and a record may leave it out.
 4. On a plan, `## Key points` as the first section.
 
-The 25-word limit does not apply to an approved or done plan, an accepted or superseded decision record, or a signed-off milestone record. Those are frozen. An approved plan changes only by a dated entry under "Changes after approval", as rule 6 of the [hand-off plan template](templates/hand-off-plan.md) says. A decision or milestone record changes only by a dated "Amended" paragraph. No check holds the frozen pages to this.
+The 25-word limit does not apply to an approved or done plan, an accepted or superseded decision record, or a signed-off milestone record. Those are frozen. An approved plan changes only as rule 6 of the [hand-off plan template](templates/hand-off-plan.md) says: by a dated entry under "Changes after approval", and by each slice's report appended under "Results". A decision or milestone record changes only by a dated "Amended" paragraph. An amendment to a decision record may also edit its **In short** line, and does so when it changes what that line sums up, so the line stays true for a reader who reads only it. The front matter of a frozen page is not frozen: its review date, its status and a new key may change. No check holds the frozen pages to this.
 
 ## Where the existing pages sit
 
