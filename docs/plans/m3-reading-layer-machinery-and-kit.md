@@ -662,6 +662,49 @@ Slice B2 stopped after batch 1 under the stop rule, and its results proposed fou
 
 **A missing `INDEX.md` row does not count toward the stop rule.** Only slice Z can add those rows, since the eval hashes the index. Such a finding is queued for slice Z, and the count leaves it out.
 
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+**C5 gains a session-start notice when main's CI failed.** The machinery comparison under "Results" proposed it as a new reminder part for C5, and the maintainer approved it before the unattended run. At session start, the notice reads the newest CI run on main. When that run failed, it says how many runs in a row have failed, since when, which steps failed, and the link to the run. It prints nothing when the run passed, and nothing on any error. This settles the third item of the machinery comparison. No criterion is dropped or weakened.
+
+### 2026-11-21
+
+Approved by: the maintainer, 2026-11-21
+
+Three items from the maintainer's answers to the workspace queue on slice C4's results. No criterion is dropped or weakened.
+
+**C5 extends the push guard to a worktree's push (Q11).** `push_lease` judges only pushes from the main working copy. C5 extends it: while another live session holds the lease, it also refuses a push from a linked worktree that would send the main copy's branch, every branch, a mirror or a glob refspec. It reads what a push sends from C3b's resolved refspecs.
+
+**The kit's merge setting moves to C8.** Row C4 says the kit tells the person to allow merge commits only, and the kit does not exist until C8. So C8's done-when holds it: the kit's setup carries the README's merge-settings step from "Use it for your own team".
+
+**Criterion 35's last sentence is reworded (Q10).** The merge helper finds `gh` on `PATH`, and the maintainer kept that. A fixed list of install folders would add breakage and no protection, since an agent that can set `PATH` can run `gh` itself. The sentence now reads: "No environment variable that names a repository or host, and no argument but the number, changes which `gh` call it makes. The helper finds `gh` on `PATH`, and the README states that limit."
+
+### 2026-11-21
+
+Approved by: pending, proposed by slice C5
+
+Slice C5 is too large for one reviewable pull request, as C3 was. Its row holds at least eight separate pieces of machinery: the after-edit event with the chain reminder, the stop gate, the handoff loader, the guard on `.git` and git config writes, the force-push guard, the outward-write guard with its repository list, the secrets guard with `ws.py with-secrets`, and the two approved additions above. C3's four pull requests added 4,884 lines in all, the largest 2,899, and C4's added 2,183 (verified, `git diff --shortstat` of each merge). C5's row is longer than C3's, so one pull request would run to about 6,000 lines (inferred, an estimate from the row's parts). Slice C5 stopped after its recorded tool runs, which the row puts before building.
+
+The change splits C5 into six slices, each its own branch and pull request at the driver tier. Nothing in the row or its criteria is dropped or weakened.
+
+| Slice | Work, from C5's row | Done when |
+|---|---|---|
+| C5a, after-edit and stop | The 0004 amendment for both events. `after-edit` in both adapters, with the chain reminder. The `stop` event and the stop gate; the ledger records each entry's session; the 0005 amendment. | Criteria 37 and 41; criterion 57 for the stop gate |
+| C5b, session-start notices | The CI notice. `ws.py handoff`, its marker and the loader, with the 0004 amendment for the loader. | Criteria 59 and 69 |
+| C5c, the git folder and git config | Writes under a `.git` segment and to git config files refused, by edit tool and by a shell write the parser reports. Config writes to A0's keys, alias expansion, unresolved subcommands, and `xargs` or `find -exec` arguments. `no_admin_merge` adopts the rule. The README's limits. | Criterion 55, except the parts below |
+| C5d, the force-push guard | The force-push guard, the branch-name push message, and the earlier-in-the-line forms. The push guard's worktree extension. | Criterion 38; criterion 65 for this guard; criterion 55's alias that force-pushes main; criterion 36 as amended below |
+| C5e, the outward-write guard | `outward-repos.json` and its refusals, the gh read list, the `gh api` rules, and pushes and remotes to an unlisted repository. | Criterion 39; criterion 65 for this guard; criterion 55's list redirect, alias to an unlisted repository, and `git remote add` or `set-url` |
+| C5f, secrets | Environment dumps and secrets-file reads refused, and `ws.py with-secrets`. | Criterion 40 |
+
+C5a goes first, since its amendment opens the slice; it starts from branch `m3/c5`, which holds the recorded runs. C5c follows, since C5b, C5d and C5e reuse its rules on config writes and aliases. C5b, C5d and C5e each start from main once C5c merges, and may run in parallel. C5f starts from main once C5a merges.
+
+Two criterion changes go with the split, since the approved additions above have no criterion:
+
+69. At session start, when the newest CI run on main failed, a notice gives the number of failed runs in a row, when the first of them ran, the failing steps and the link. When the run passed, nothing is shown. On any error, such as no `gh`, no network or the time limit, nothing is shown and the session starts. Each has a case, on recorded `gh` output. (V1)
+
+Criterion 36 gains: "While another live session holds the lease, a push from a linked worktree of the main copy's branch, of every branch, of a mirror or of a glob refspec is refused, and a push of the worktree's own branch passes, with a case each."
+
 ## Results
 
 ### C1, launcher and baselines
@@ -840,6 +883,21 @@ Proposed revisions (template rule 7):
 
 - Row C4 says the kit tells the person to allow merge commits only. The kit does not exist until slice C8. C8's criteria should hold it: the kit's setup carries the README's step 6 of "Use it for your own team".
 - Criterion 35's last sentence should read "No environment variable that names a repository or host, and no argument but the number, changes which `gh` call it makes", unless the maintainer chooses fixed install folders for `gh`.
+
+### C5, reminders and guards: stopped before building
+
+Stopped after its recorded tool runs, on branch `m3/c5` from main at `e1d978a`, at the driver tier. The maintainer's two approvals for C5 are recorded under "Changes after approval" first. No file the eval hashes was edited.
+
+- **Verified, both tools offer both new events.** `tests/records/after-edit-and-stop.json`, on `m3/c5`, holds one recorded run each of Claude Code 2.1.330 and codex-cli 0.169.0, in a scratch clone of main. Each sent `PostToolUse` after its edit tool and showed the hook's additional context to the agent, which quoted it. Each sent `Stop`, took a block with a reason as a refusal, showed the reason, and sent `Stop` again with `stop_hook_active` true. So the row's inference about Codex holds, and criteria 37 and 41 need no revision.
+- **Verified:** Codex's `PostToolUse` carries the whole patch under `tool_input.command`, as its before-edit call does, so the after-edit adapter can read paths the way the before-edit adapter does. Neither tool's `Stop` payload names the files the session edited, so the stop gate needs the ledger's session field, as the row says.
+- **Inferred:** the slice is too large for one reviewable pull request; the estimate is about 6,000 lines. A six-way split is proposed under "Changes after approval", with criterion 69 for the CI notice and an amended criterion 36 for the push guard's extension, waiting for the maintainer's yes. It is queued as Q12 in the workspace queue.
+- **Not done:** criteria 37 to 41, 55's guard refusals, 59, 65 and the two approved additions. The private ledger's C5 rows stay at slice C5, since nothing is built.
+
+Decisions made in the slice:
+
+- **The recorded runs went first,** because the row makes them a condition for building and they decide whether the slice needs a revision for Codex. They cost one short run of each tool.
+- **The 0004 amendment was not written here,** unlike C3's opening step. Since B1, a change to a decision record needs an instruction-review record, and C5a's pull request will review the amendment with the code it describes.
+- **C5c comes before the guards that use it,** because the force-push and outward-write guards both need its rules on config writes and aliases. Building them first would put the same rules in two parts.
 
 ### Sub-batch A, 2026-11-18
 
