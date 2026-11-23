@@ -1836,9 +1836,39 @@ Decisions made in the slice:
 
 Queued for slice Z once the pages merge, not yet in the list below: an `INDEX.md` row "New here; a tutorial; a first task with an agent" linking both tutorials; the queued rows for search every source and escape analysis name the new titles, with the old names as search aliases; the queued debugging row also names a failing CI run.
 
-Not done: the four blocking items and the re-check's non-blocking items; criterion 20 on Linux and Windows, and the tutorials reaching main; the slice Z lines above, and the ledger's moves for the tutorials, which follow the merge.
-Parked: Q42
-Next: the maintainer — answer Q42 in the workspace queue on how B2t resumes, then a B2t session resumes from branch `m3/b2t` in `.claude/worktrees/m3-b2t`.
+Resumed and finished unattended on 2026-11-23, under the maintainer's answer to Q42, in the same worktree on branch `m3/b2t`, at the worker tier with the reviews at the driver tier. Q42's plan change was recorded under "Changes after approval" as `07570e7` before any page changed. This was the pages' second fix round. Pull request #46 merged as `ccde349`.
+
+- **Verified, the off-main rule:** procedure endings has an "Off main" section. Any branch checked out other than `main` is off main, unless it is a worktree's branch made for pages alone; there, a procedure commits its pages on the branch, pushes nothing, and names each commit in the report. A worktree made for pages checks with `git log origin/main..HEAD` that it holds nothing else. The off-main row is the push table's first, and the page says it narrows changing the machinery's rule that a page change goes straight to main.
+- **Verified, linked:** federated search, tracker operations and defect escape analysis link the rule; escape analysis's covers step 7's commits too. Architecture review and the review orchestrator link it in place of their labelled exception. Git-host operations keeps its own stricter rule, leaving the row uncommitted; that is a known defect in its record, for M8.
+- **Verified, debugging:** step 1 takes RUN from the number right after `/runs/` in a link. The re-check ran `gh run view` with that number, which printed the log, and with a job's number, which returned HTTP 404.
+- **Verified, procedure endings' review:** a fresh driver-tier review found 8 findings, 1 blocking: in the main working copy on another branch, the first wording's commit test could send a page to `git push origin main`. One fix round fixed all 8. A fresh re-check upheld 7 and found 1 fixed in part, and 4 non-blocking items; nothing blocking.
+- **Verified, the narrow re-check:** a fresh driver-tier session upheld all 16 dispositions in the six pages' "Second fix round" tables and found no blocking item, so the stop rule did not fire. Its 7 non-blocking items, two of them the same unswept page, and the procedure endings re-check's 5 are in the records' "Known defects".
+
+| Page | Second round | Blocking, at the second re-check | Left as known defects |
+|---|---|---|---|
+| Procedure endings | 8 findings, 1 blocking; 8 fixed | 0 | 5, for the docs audit or M6 |
+| Defect escape analysis | 1 blocking fixed | 0 | 4, for M4 and M6 |
+| Tracker operations | 1 blocking fixed | 0 | 4, for M8 |
+| Federated search | 1 blocking fixed | 0 | 2, for M8 |
+| Debugging | 1 blocking fixed | 0 | 4, for M4 |
+| Architecture review | label changed; 1 item fixed in part | 0 | 3, for M6 |
+| Review orchestrator | label changed; 1 item fixed in part | 0 | 2, for M6 |
+| Git-host operations | not swept | 0 | 1, for M8 |
+
+- **Verified, criterion 20:** CI on #46 passed every job on Linux, macOS and Windows, with Python 3.9 and 3.13, and both cold-clone jobs. The test step there runs `unittest discover`, which includes `tests/test_tutorials.py`. Inferred: that the tutorials ran and were not skipped, since that test skips only outside a git checkout.
+- **Verified, kept to the rules:** on the branch, `python3 ws.py check` passes with only the known warning on fix a bug's eval record, and `python3 -m unittest discover -b tests` ran 735 tests, 3 skipped, OK.
+- **Verified, the ledger:** its two tutorial rows moved from slice B2t to their pages, and two rows that named adversarial review's old path now name red team review's. The ledger check prints 0 unmapped of 223.
+
+Decisions made in the resumed slice:
+
+- **Off main is decided by the branch, and a commit test only confirms a pages worktree.** The first wording decided by the test alone and misfired at the edges, as procedure endings' review found; the linking pages already named the branch.
+- **No push of the branch itself.** Off main, the report says a page commit reaches main only if the branch is pushed again before its pull request merges. Q42 says a procedure pushes nothing there.
+- **Git-host operations was not swept.** Its stricter exception carries no code to main, and Q42 named only the three pages, so it is a known defect, not a third round.
+- **B2t merged through a pull request,** though it holds pages only, so CI ran the tutorials on all three systems before they reached main.
+
+Not done: nothing.
+Parked: none
+Next: the coordinator — start slice B4 in lane B; B7 may start now that B2t has merged. Slice Z adds the queued `INDEX.md` lines above. The docs audit takes procedure endings' first known defect first: its "first row applies and no other" can be read to bar a machinery branch's own push.
 
 ### Queued for slice Z
 
