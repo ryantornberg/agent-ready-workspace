@@ -186,7 +186,11 @@ class Home:
         default.write_text(TERM + "\n", encoding="utf-8")
         self.named = self.folder / "named-list.txt"
         self.named.write_text(TERM + "\n", encoding="utf-8")
-        (self.folder / "gitconfig").write_text("", encoding="utf-8")
+        # An identity, as a person's own global config holds one; the message check reads it. It is in both the
+        # file GIT_CONFIG_GLOBAL names and the one git reads from HOME without it, so removing either keeps it.
+        identity = "[user]\n\tname = Not Inherited\n\temail = not-inherited@example.invalid\n"
+        (self.folder / "gitconfig").write_text(identity, encoding="utf-8")
+        (self.folder / ".gitconfig").write_text(identity, encoding="utf-8")
         (self.folder / "gitconfig-system").write_text("", encoding="utf-8")
         (self.folder / "gh").mkdir()
 
