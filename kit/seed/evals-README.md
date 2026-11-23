@@ -18,6 +18,18 @@ A synced page the kit marks proven is the exception. Its records stay in the kit
 
 So the kit left one rule out of this workspace's contract: that a change to it, or to the index, needs a new eval run. With no case of your own, no run could be made. When this workspace proves a page of its own, add that rule back to the contract's rules table, tagged `eval_record#an edited playbook fails until its case is run again`, so a change to what its cases cover fails until they run again.
 
+## The wrappers' selection cases
+
+Each [wrapper](../docs/playbooks/README.md#three-ways-to-follow-a-playbook) has two or more selection cases: a request that should fire it, and a nearby request, one a wrapper next to it owns, that should leave it quiet. They test only whether the right wrapper loads. They sit with the plugin, one folder per case in `plugin/evals/`, in the format `claude plugin eval` reads. The kit gave you its own cases; rewrite each request in your team's words. To add a pair, copy an existing one and change the request and the wrapper's name. The `wrappers` check fails a wrapper that lacks either kind, and a case in any other form.
+
+A run costs real agent time, so a person starts it, or an agent on that person's yes for that run. Run them from the top of the workspace, on the small model you hand work to, without the run that leaves the plugin out:
+
+```
+claude plugin eval plugin --model haiku --ablation none --no-publish --output-dir evals/selection/YYYY-MM-DD
+```
+
+Commit `evals/selection/YYYY-MM-DD/aggregate-result.json` and nothing else from the run, after searching it for your user name, home folder and git identity and replacing each with a placeholder. A wrapper that fails its case that fires in most of its runs is rewritten once, and the result is recorded either way.
+
 ## Rules that make this worth doing
 
 These are advice; no check holds them.

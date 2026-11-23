@@ -1,0 +1,49 @@
+---
+kind: record
+last-reviewed: 2026-11-23
+covers: evals/README.md
+reviewed-at: a2d6a59, with the staged change of slice B6
+---
+
+# Instruction review: evals/README.md
+
+This records the review of B6's new section on the wrappers' selection cases, for its author and whoever runs or writes those cases.
+
+**In short:** 3 findings: 1 contradiction, 1 step, 1 placement, none blocking. The format the section gives for a quiet case lacks `arm: both`, which the check requires. The section gates only the first run on the maintainer's yes. It does not say whether the results are committed or screened, or whether the command needs `--trust-plugin`. An instance gets this page's seed instead, which has no such section.
+
+## Scope
+
+In scope: the new section "The wrappers' selection cases", read against "The recorded runs", "Run it yourself" and "Rules that make this worth doing". The whole page was read, with `git diff --cached -- evals/README.md` for the change. Read beside it: `AGENTS.md`, `INDEX.md`, `parts/wrappers.py` and its cases, the 58 selection cases under `plugin/evals/`, the wrappers under `plugin/skills/`, `plugin/.claude-plugin/plugin.json`, `evals/one-time.json`, `evals/run.py` (`agent_command`, `run_once` and `plan_runs`), the staged diffs of `tests/test_m3_a.py` and `kit/kit.json`, `kit/seed/evals-README.md`, `docs/playbooks/README.md`, and `docs/plans/m3-reading-layer-machinery-and-kit.md` (criterion 22, V6 and what M4 adopts).
+
+Run, on macOS: `claude --version` prints 2.1.330 (verified). `claude plugin eval --help` lists every flag the command uses: `--model`, `--ablation none`, `--no-publish` and `--output-dir`. It says the eval folder is `evals/` under the plugin unless the manifest names another (verified). `claude plugin eval plugin --case no-such-case-zzz --model haiku --ablation none --no-publish` with an output folder outside the workspace exits 1. It prints "No eval cases found matching --case" under the worktree's `plugin`, so it found the eval folder and started no agent (verified). Every `prompt.md` sets `runs: 3` and `max_turns: 3`, and there are 58 case folders, so 174 runs (verified). No full `claude plugin eval` run was started.
+
+## Findings
+
+| # | Class | Where | Finding | Disposition |
+|---|---|---|---|---|
+| 1 | contradiction | "The wrappers' selection cases", first paragraph, "`min: 1` for a case that fires, `min: 0` and `max: 0` for a quiet one" | Not blocking. The check is stricter than the page. A quiet case also needs `arm: both`, and a case that fires must set no `max` (verified, reading `_cases` in `parts/wrappers.py`, and the case "a stray or malformed selection case fails"). A case written from this sentence alone, with no `arm`, fails the `wrappers` check as "neither a case that fires ... nor one that leaves it quiet". `input_match` must also take the one exact form `match_for` builds, which the page does not give. Every case here has `arm: both` (verified, reading), and the check's message names the fix. Give the full form, or say to copy an existing pair, as extend the workspace's step 5 does. | fixed: the section gives the exact `input_match` form, `arm: both` on a quiet case and no `max` on one that fires, and says to copy an existing pair. |
+| 2 | step | "The wrappers' selection cases", the command and the paragraph after it | Not blocking. Three things are undefined. First, only the first run waits for the maintainer's yes. The next paragraph asks for a rewrite and a second run of a failing wrapper, and the page gives no default for whether that run needs a yes. Second, "where they are kept" does not say whether `evals/selection/` is committed. `run.py` refuses to write a transcript that holds the operator's user name, home folder or git identity, as "Run it yourself" says. Nothing says `claude plugin eval`'s results get the same screening; that they can hold such text is inferred. Third, the command's help says the first run in an untrusted plugin folder asks for a confirmation, which `--trust-plugin` answers for CI (verified, `claude plugin eval --help`). The line omits it, so a run from an agent's shell may stop at that question (inferred). Not blocking: the page gates the first run on a person's yes, so an agent following it does not start the run alone. Say who may start a run, whether its folder is committed and how it is screened, and whether `--trust-plugin` belongs on the line. | fixed: a person starts each run, or an agent on that person's yes for that run, a rerun included. Only `aggregate-result.json` is committed, after a search for the user name, home folder and git identity. The trust question is answered at the terminal. |
+| 3 | placement | "The wrappers' selection cases", the whole section | Not blocking. The kit seeds an instance's `evals/README.md` from `kit/seed/evals-README.md` (verified, `kit/kit.json`). That page has no section on selection cases (verified, its headings). An instance still gets the cases, seeded under `plugin/evals/`, the wrappers and the `wrappers` check, so its eval page never says how to run or write the cases. The catalog's rules link this section, and in an instance the link breaks; that blocking finding is recorded once, against the catalog (2026-11-23-b6-playbook-catalog.md, finding 6). Give the seed page this section, in the instance's words. | fixed: the seed eval page gains the section, in an instance's words. |
+
+## Checked with no finding
+
+- enforcement: "The `wrappers` check fails a wrapper that lacks either kind" is true (verified, the case "a wrapper missing a selection case fails"). The rule that a wrapper failing most of its case that fires is rewritten once comes from the plan's criterion 22, which a person approved (verified, reading the plan). This page has no rules table to tag it in, like the rest of its rules.
+- trigger: the page has no purpose or **In short** line. The new section sits under its own heading, which the catalog and the glossary's route reach.
+- eval-case: the section asks a person or an agent to run the selection cases, and those cases are its eval. "Claude Code 2.1.330 loads all 58 cases with no error" was not checked by a full load here. The probe above shows the folder is found, not that each case parses (inferred). "This is the format M4's eval system adopts" matches the plan's M4 line, "adopting B6's selection-case format" (verified, reading).
+
+## Re-check
+
+A fresh session re-read the page on 2026-11-23, after the fix round, at a2d6a59 with the staged change of slice B6, using `git diff --cached`. On macOS, `python3 ws.py check` exits 0, with only `eval_record`'s usual no-base warning; `python3 ws.py selftest` exits 0, with `wrappers: 18 of 18 cases`; and `python3 -m unittest tests.test_kit tests.test_instruction_review -b` runs 48 tests, OK (verified). A scratch copy of the staged tree, with `CLAUDE_CONFIG_DIR` set to a scratch folder, was used for one probe of `claude plugin eval` whose `--case` matched no case, so no agent started.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed | The section gives `input_match` as `'"skill"\s*:\s*"workspace:<name>"'`. That is `match_for` in `parts/wrappers.py` for the plugin `workspace`, and the form `plugin/evals/debugging-fires/graders/selected.md` and `debugging-quiet` use. A case that fires sets `min: 1` and no `max`; a quiet one `min: 0`, `max: 0` and `arm: both`; and the section says to copy a pair (verified, reading). |
+| 2 | fixed in part | Who starts a run, a rerun included, is now said, and so is what is committed and how it is screened. `--output-dir` is the folder for `aggregate-result.json` (verified, `claude plugin eval --help`). `deny_list` and `secret_scan` run at the commit and in CI (verified, `python3 ws.py list`). The third part, the trust question, does not hold for the agent the same fix lets start a run: see R1. |
+| 3 | fixed | `kit/seed/evals-README.md` gains the section, in an instance's words, and the catalog's link resolves in an instance (verified, `tests.test_kit` passes). The seed text has no record of its own: recorded once, against the catalog (2026-11-23-b6-playbook-catalog.md, Re-check R1). |
+
+| # | Kind | Finding | Disposition |
+|---|---|---|---|
+| R1 | broke | Blocking. step. The fix lets "an agent on that person's yes for that run" start a run, and answers the trust question with "answer it at the terminal". An agent's shell has no terminal. In the scratch copy, the section's command, given a `--case` that matched nothing, exited 1 from a shell with no terminal: "is not a trusted plugin directory, and this run cannot stop to ask you about it (no interactive terminal, or --json / CI). ... pass --trust-plugin" (verified). The prompt is per folder, so a new clone or worktree asks again (inferred, from the help's "untrusted plugin directory"). So an agent that follows the page with a person's yes runs a command that fails. Say that a person makes the first run in a folder at a terminal, or that an agent with the yes adds `--trust-plugin`. The seed's section has the same agent sentence and no trust note. | open |
+| R2 | broke | Not blocking. enforcement. The section ends "The `wrappers` check fails a wrapper that lacks either kind, and a case in any other form." The second half is false. `_cases` in `parts/wrappers.py` reads only graders of `type: tool_used` on the Skill tool and skips every other grader, so a case folder whose grader is of another type, or that has no grader, passes the check (verified, reading). It fails only a Skill grader whose `input_match` is not the one form, or whose `min`, `max` and `arm` are neither kind, and a Skill grader with no `prompt.md` beside it. The clause sits in the sentence finding 1's fix extended; the first reading quoted only its first half (inferred, that the fix added it). Say "and a Skill grader in any other form". | open |
+
+What the first reading missed: nothing.

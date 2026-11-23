@@ -118,9 +118,17 @@ class ArmFilesTests(unittest.TestCase):
         self.assertIn("docs/layout.md", files)
         self.assertEqual(plugins, ["plugin"])
         args = argparse.Namespace(one_time="routed", baseline=False, rerecord=None, attempt=None, runs=15)
-        with self.assertRaises(ValueError) as caught:      # the wrappers' plugin arrives in slice B6
-            harness.plan_runs(args, case, *harness.covered("nightly-job"))
-        self.assertIn("plugin folder plugin", str(caught.exception))
+        plan = harness.plan_runs(args, case, *harness.covered("nightly-job"))[1]    # the wrappers came in slice B6
+        self.assertEqual(plan["routed"][1], ["plugin"])
+        self.assertTrue((ROOT / "plugin/skills").is_dir())
+        with tempfile.TemporaryDirectory() as scratch:     # a one-time arm whose plugin folder is missing is refused
+            root = pathlib.Path(scratch)
+            for path in ("evals/one-time.json", "evals/arms.json", "INDEX.md"):
+                (root / path).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(ROOT / path, root / path)
+            with self.assertRaises(ValueError) as caught:
+                harness.plan_runs(args, case, [], "h", root)
+            self.assertIn("plugin folder plugin", str(caught.exception))
         plugin = pathlib.Path("/tmp/plugin-0")
         command = harness.agent_command("go", "haiku", [plugin])
         self.assertEqual(command[-2:], ["--plugin-dir", str(plugin)])

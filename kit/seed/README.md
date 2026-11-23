@@ -25,6 +25,13 @@ To run the checks before every commit, and on every commit message, a person run
 git config core.hooksPath .githooks
 ```
 
+To load the [wrappers](docs/playbooks/README.md#three-ways-to-follow-a-playbook) in Claude Code, a person runs these once on each machine, from the top of the workspace. The first makes the folder a plugin marketplace on this machine; the second installs the plugin for this folder only, in the ignored local settings, so the shared settings file stays as committed. The nightly job does not run them, since it has no Claude Code.
+
+```
+claude plugin marketplace add ./
+claude plugin install workspace@agent-ready-workspace --scope local
+```
+
 Then a person commits what the kit wrote, before changing anything. That commit brings pages the kit's own instruction reviews read, so its message carries the line `Instructions-review: skipped: as the kit wrote it`; the commit check accepts it only while every page is as `kit.lock.json` holds it. The first push creates main, so push it once with `--no-verify`, as [changing the machinery](docs/changing-the-machinery.md#the-path-for-a-machinery-change) says.
 
 ## What is checked, and by what

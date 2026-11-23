@@ -26,6 +26,7 @@ Where each kind of page lives, the front matter it carries, and the order it ope
 | `docs/milestones/` | Milestone records. |
 | `archive/` | Retired pages. An ignore file hides it from search, and the link and page checks skip it. |
 | `evals/` | The eval harness, its cases and its recorded runs. See [evals](../evals/README.md). |
+| `plugin/` | The wrappers, in `plugin/skills/`, and their selection cases, in `plugin/evals/`: the plugin `workspace`, which `.claude-plugin/marketplace.json` declares to Claude Code. See the [playbook catalog](playbooks/README.md#three-ways-to-follow-a-playbook). |
 | `parts/`, `wslib/`, `tools/`, `tests/` | The machinery. See [changing the machinery](changing-the-machinery.md). |
 | `kit/` | The kit's classes, and the seed files a new instance gets in place of this workspace's own; also machinery. In an instance, `kit.lock.json` takes its place. See [decision 0007](decisions/0007-the-kit.md). |
 
@@ -101,4 +102,4 @@ A tutorial marks each command block a reader runs with a line `<!-- runnable -->
 
 ## Archiving a page
 
-Move it under `archive/`, keeping its path below the folder. At the old path, leave a tombstone: a short reference page that names where the page went and why. A kind's own folder, such as `docs/playbooks/`, takes no reference page but its README, so a page archived from one leaves no tombstone. Then fix every link to it. [Decision 0015](decisions/0015-retired-pages-move-to-an-archive.md) says why the archive stays in this repository, and what search still finds.
+Move it under `archive/`, keeping its path below the folder. At the old path, leave a tombstone: a short reference page that names where the page went and why. A kind's own folder, such as `docs/playbooks/`, takes no reference page but its README, so a page archived from one leaves no tombstone. Then fix every link to it. When the page has a wrapper, remove the wrapper, its selection cases and each description that names it; the `wrappers` check names each one left. [Decision 0015](decisions/0015-retired-pages-move-to-an-archive.md) says why the archive stays in this repository, and what search still finds.

@@ -27,7 +27,8 @@
     ]
   },
   "enabledPlugins": {
-    "playwright@claude-plugins-official": false
+    "playwright@claude-plugins-official": false,
+    "workspace@agent-ready-workspace": true
   },
   "hooks": {
     "PreToolUse": [

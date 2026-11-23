@@ -13,7 +13,7 @@ How a change to a guidance page is reviewed as a program, recorded, and named in
 
 ## When it runs
 
-On every commit that adds, changes or deletes a guidance page. A guidance page is any path the `review_trailer` entry in [workspace.json](../../workspace.json) lists under `guidance` and not under `except`. Today that is `AGENTS.md`, `CLAUDE.md`, the Copilot and opencode pointer files, `INDEX.md`, the README, `evals/README.md`, and every page under `docs/` except plans, milestone records, records and the question log. The list also names `plugin/`, for the wrappers slice B6 of M3 adds there. In the kit's own repository it names the two seed pages under `kit/seed/` as well, which become an instance's README and eval page.
+On every commit that adds, changes or deletes a guidance page. A guidance page is any path the `review_trailer` entry in [workspace.json](../../workspace.json) lists under `guidance` and not under `except`. Today that is `AGENTS.md`, `CLAUDE.md`, the Copilot and opencode pointer files, `INDEX.md`, the README, `evals/README.md`, and every page under `docs/` except plans, milestone records, records and the question log. The list also names `plugin/skills/`, the wrappers. Their selection cases in `plugin/evals/` are test inputs, as eval cases are, and are not guidance. In the kit's own repository it names the two seed pages under `kit/seed/` as well, which become an instance's README and eval page.
 
 Skip the review only for one of these reasons, named in the trailer:
 
@@ -64,7 +64,7 @@ The mark is the reviewer's. The author may fix, queue, defer or decline a findin
 
 ## The record
 
-One file per page, in [docs/records/instruction-reviews/](../records/instruction-reviews/README.md). Name it for the date and the page, such as `2026-11-21-layout.md`, adding a word when that name is taken, such as `2026-11-21-b1-layout.md`. The `covers:` line, not the name, ties a record to its page. Its front matter is `kind: record`, `last-reviewed`, `covers:` with the path of the one page it reviewed, and `reviewed-at:`. That names the commit the reviewer read; for a change not yet committed, the commit it sits on, followed by `, with the uncommitted change of <whose>`.
+One file per page, in [docs/records/instruction-reviews/](../records/instruction-reviews/README.md). Name it for the date and the page, such as `2026-11-21-layout.md`, adding a word when that name is taken, such as `2026-11-21-b1-layout.md`. A wrapper's record is named for its folder, such as `2026-11-23-wrapper-debugging.md`. The `covers:` line, not the name, ties a record to its page. Its front matter is `kind: record`, `last-reviewed`, `covers:` with the path of the one page it reviewed, and `reviewed-at:`. That names the commit the reviewer read; for a change not yet committed, the commit it sits on, followed by `, with the uncommitted change of <whose>`.
 
 It opens with its title, `# Instruction review: <page>`, a purpose sentence, and an **In short** line with the count of findings per class. Then three sections:
 

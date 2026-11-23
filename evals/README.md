@@ -146,6 +146,20 @@ The gate trusts the record file. It shows that someone ran the cases on this wor
 
 The graders for M3's proof attempts read more of the folder: `run.py` writes a state line for each of a case's `checks`, a file that must exist, a file that must hold a table, or a pattern no added line may match (debug output left behind), and the transcript records a task handed to a fresh session as a `dispatch`. A `report_brief` grader passes a final reply that gives only a path and a verdict.
 
+## The wrappers' selection cases
+
+Each [wrapper](../docs/playbooks/README.md#three-ways-to-follow-a-playbook) has two or more selection cases: a request that should fire it, and a nearby request, one a wrapper next to it owns, that should leave it quiet. They test only whether the right wrapper loads, not what the agent then does. They sit with the plugin, one folder per case in `plugin/evals/`, in the format `claude plugin eval` reads. `prompt.md` holds the request and its settings: three runs of at most three turns each. `graders/selected.md` is a `tool_used` grader on the Skill tool, whose `input_match` names the plugin and the one wrapper, as `'"skill"\s*:\s*"workspace:<name>"'`. A case that fires sets `min: 1` and no `max`; a quiet one sets `min: 0`, `max: 0` and `arm: both`. To add a pair, copy an existing one and change the request and the name. The `wrappers` check fails a wrapper that lacks either kind, and a case in any other form.
+
+This is the format M4's eval system adopts for selection cases, so M4 builds on these cases rather than replacing them.
+
+A run costs real agent time, so a person starts it, or an agent on that person's yes for that run. That holds for a rerun after a rewrite too. Run them from the top of the workspace, on the small model the recordings use. Leave out the run without the plugin, since a case that fires cannot pass there. The first run in a folder asks you to confirm that you trust the plugin; answer it at the terminal.
+
+```
+claude plugin eval plugin --model haiku --ablation none --no-publish --output-dir evals/selection/YYYY-MM-DD
+```
+
+Its results go to `evals/selection/YYYY-MM-DD/aggregate-result.json`. Commit that file and nothing else from the run. Before you commit it, search it for your user name, your home folder and your git identity, as `run.py` does for its transcripts, and replace each with a placeholder; the commit check's secret and deny-list scans read it as they read any file. Claude Code 2.1.330 loads all 58 cases with no error. They have not run yet: the first run, 174 runs, waits for the maintainer's yes to its budget. A wrapper that fails its case that fires in most of its runs is rewritten once, and the result is recorded either way.
+
 ## Rules that make this worth doing
 
 - When an agent goes wrong in real work, turn the failure into a case before you fix the guidance. A guidance fix with no case to replay the failure has nothing to catch the failure's return. Until procedures have an eval system, planned for M4, [escape analysis](../docs/playbooks/escape-analysis.md) describes such a case in its report instead.

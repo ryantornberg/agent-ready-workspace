@@ -86,7 +86,7 @@ How-tos and reference pages that serve one lane of work, named in each page's `l
 
 ## Ways to follow a playbook
 
-The [playbook catalog](playbooks/README.md#three-ways-to-follow-a-playbook) lists the three ways: read the page, ask the agent in one line, or a wrapper once they exist.
+The [playbook catalog](playbooks/README.md#three-ways-to-follow-a-playbook) lists the three ways: read the page, ask the agent in one line, or use a wrapper. Each core playbook and how-to that can run today has a wrapper; a lane draft has none.
 
 ## Rules
 

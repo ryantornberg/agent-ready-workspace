@@ -28,6 +28,7 @@ These need no duty: a check finds them on its own. `python3 ws.py list` shows ev
 | A change to what the eval covers, with no new run on record | `eval_record` | At the commit and in CI |
 | A pinned repository behind its upstream, or pinned to a commit the upstream never merged | `stale_pins`, `pin_on_default` | A notice when a session starts; at the commit and in CI |
 | The always-loaded layer past its size limit | `loaded_size` | At the commit and in CI |
+| A core playbook or how-to with no wrapper, a wrapper whose page moved or went away, or one with no selection case of either kind | `wrappers` | At the commit and in CI |
 
 The checks prove that nothing is dangling. They cannot prove a page is true: a page that contradicts last week's decision passes every one. That is what the duties below are for.
 
@@ -38,7 +39,7 @@ The session whose change sets off the event does the duty, in the same piece of 
 | When this happens | Do this |
 |---|---|
 | A page is added | Adding it is on [extend the workspace](extend-the-workspace.md). Once it lands, its upkeep is the rest of this page. |
-| A page is moved, renamed or archived | Move it as [layout](layout.md#archiving-a-page) says, and fix every link to it; the `links` check names each one left. Change its row in the [playbook catalog](playbooks/README.md) or the [how-to index](how-tos.md). When it carries a proof mark, change its row in the README's proof table too; the `proof` check fails a row that disagrees. A link to it from `INDEX.md` or `AGENTS.md` is a change to a file the eval covers: step 4 says how it is committed. |
+| A page is moved, renamed or archived | Move it as [layout](layout.md#archiving-a-page) says, and fix every link to it; the `links` check names each one left. Change its row in the [playbook catalog](playbooks/README.md) or the [how-to index](how-tos.md). When it carries a proof mark, change its row in the README's proof table too; the `proof` check fails a row that disagrees. When it has a wrapper, move or rename the wrapper's folder, its `name` and its body's path, its selection cases' `input_match`, and each description that names it; for an archived page, remove the wrapper and its cases. The `wrappers` check names each one left. A link to it from `INDEX.md` or `AGENTS.md` is a change to a file the eval covers: step 4 says how it is committed. |
 | A name in the code changes | Change its row in [INDEX.md's search aliases](../INDEX.md#search-aliases); the `aliases` check fails until you do. `INDEX.md` is a file the eval covers, so step 4 says how the change is committed. Then `git grep -n "OLD_NAME"` and fix every page that still uses the old name. |
 | A word in the [glossary](glossary.md) changes meaning | `git grep -n -i "WORD" -- docs AGENTS.md INDEX.md README.md`, and fix each page that uses the old meaning. |
 | A claim stops being true, such as a superseded decision, a retired part or a renamed command | `git grep -n "PHRASE"` for every restatement of it, and fix each in the same change. The checks cannot find a restatement that is merely false. |
@@ -60,7 +61,7 @@ The owner of each periodic duty is the workspace's maintainer: the person named 
 | The docs audit | Until M10 schedules the docs audit, a person runs it by hand once per milestone, before the milestone's record is signed off, and whenever this page's event list says so. | Run the [docs audit](playbooks/docs-audit.md) when its cadence or an event above calls for it. It reads the whole `docs/` tree for drift between pages, and reports a ranked cleanup list. |
 | A prompt retrospective | Once per milestone, before the milestone's record is signed off, and whenever this page's event list says so. | Run a [prompt retrospective](playbooks/prompt-retrospective.md) when its cadence or an event above calls for it. Its first step says which transcript it reads. |
 | Pages due for proof | Before the milestone's record is signed off. | List the pages it is to prove with `git grep -l "^prove-by: M<n>" -- docs`, and the merged sections with `git grep -n "prove-by M<n>\." -- docs`. Each one is proven by then, or its `prove-by` is moved later on a failed attempt on record, as [decision 0006](decisions/0006-what-proven-means.md) says. Otherwise the `proof` check fails once the record is signed off. |
-| Pruning unused wrappers | Waits for slice B6 of M3, which adds the wrappers. | Nothing to prune until then. |
+| Pruning unused wrappers | Not set yet: nothing here records which wrappers fire in real sessions. | Until a milestone sets it, a wrapper leaves only with its page, as a strike does; the `wrappers` check fails one left behind. |
 | The routing eval | Waits for M4, which builds the eval system for procedures and routing evals. | Nothing to run until then. |
 
 ## When a duty falls due
