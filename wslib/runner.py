@@ -38,6 +38,9 @@ newest CI run on the default branch failed, read with gh under a time limit of i
 "handoffs", the pending handoff markers of the session's working copy (wslib/handoff.py).
 See docs/decisions/0004-the-hook-contract.md.
 
+`ws.py with-secrets NAME ... -- PROGRAM ...` starts one program with the named values from the secrets file in its
+environment, and refuses a shell, env, printenv or a program that runs another as that program (wslib/secrets.py).
+
 `ws.py handoff NOTE` writes the marker for the branch checked out, in the working copy's git folder, where an
 agent may not write itself; `--done` clears it, and with neither it lists the markers.
 
@@ -943,6 +946,20 @@ def command_merge(root, args):
         raise partlib.PartError(str(error))
 
 
+def command_with_secrets(root, args):
+    """Run one program with named values from the secrets file in its environment only (wslib/secrets.py)."""
+    from . import secrets
+    try:
+        manifest = partlib.load_manifest(root, hook=True)
+        entry = next((e for e in manifest["parts"] if e.get("use") == "secrets_shell"), {})
+    except partlib.PartError:
+        entry = {}
+    try:
+        return secrets.run(root, args.rest, entry)
+    except secrets.SecretsError as error:
+        raise partlib.PartError(f"with-secrets: {error}")
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):  # a finding may quote text the console cannot encode
         if hasattr(stream, "reconfigure"):
@@ -981,6 +998,9 @@ def main(argv=None):
     handoff.add_argument("note", nargs="?", help="the handoff note to name in the marker for the branch checked out")
     handoff.add_argument("--done", nargs="?", const="", metavar="BRANCH",
                          help="clear the marker for BRANCH, or for the branch checked out")
+    secrets = commands.add_parser("with-secrets", help="run one program with named values from the secrets file "
+                                                       "in its environment only: NAME [NAME ...] -- PROGRAM ...")
+    secrets.add_argument("rest", nargs=argparse.REMAINDER, metavar="NAME ... -- PROGRAM ...")
     ledger = commands.add_parser("ledger")
     ledger.add_argument("--add", nargs="+", metavar="PATH", help="record files this session wrote another way")
     ledger.add_argument("--close", action="store_true", help="close the ledger, for a person's own commit")
@@ -993,7 +1013,8 @@ def main(argv=None):
     try:
         return {"list": command_list, "selftest": command_selftest, "check": command_check, "baseline": command_baseline,
                 "hook": command_hook, "ledger": command_ledger, "rules": command_rules, "pins": command_pins,
-                "merge": command_merge, "handoff": command_handoff}[args.command](root, args)
+                "merge": command_merge, "handoff": command_handoff,
+                "with-secrets": command_with_secrets}[args.command](root, args)
     except (partlib.PartError, NotADirectoryError, RuntimeError) as error:
         print(f"ws: {error}", file=sys.stderr)
         return 2
