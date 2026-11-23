@@ -82,5 +82,15 @@
    "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n"
   },
   "expect": []
+ },
+ {
+  "name": "a byte-order mark alone is not an edit, as ws.py drift reads it too",
+  "files": {
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {\n    \".githooks/pre-commit\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:31580adb4b8614db78b855d930451a30ebe79c0cab418727bd8f87d5ef318ae9\"\n    },\n    \"docs/a.md\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:77ed4017ddc8635238493701f64f3549daecbd68e77610bdb746b1fedd94eb9b\"\n    },\n    \"AGENTS.md\": {\n      \"class\": \"seeded\",\n      \"hash\": \"sha256:0a757a54b49956de48ff31b4f0cf897818a3e789b6ccc6677d7646b20509b27e\"\n    },\n    \"docs/plans/m1.md\": {\n      \"class\": \"never\",\n      \"hash\": \"sha256:0000000000000000000000000000000000000000000000000000000000000000\"\n    }\n  },\n  \"proof\": {},\n  \"cases\": []\n}\n",
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n",
+   "docs/a.md": "\ufeff---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n"
+  },
+  "expect": []
  }
 ]

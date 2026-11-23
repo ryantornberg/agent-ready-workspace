@@ -203,6 +203,37 @@ class DriftTests(unittest.TestCase):
         self.assertEqual(lock["files"]["docs/parts.md"]["class"], "kept")
         self.assertEqual(ws(self.instance, "check").returncode, 0)
 
+    def test_a_page_the_kit_proved_cannot_be_kept(self):
+        result = ws(self.instance, "drift", "--keep", "docs/playbooks/fix-a-bug.md")
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("marks proven", result.stderr)
+        lock = json.loads((self.instance / kitlock.LOCK).read_text(encoding="utf-8"))
+        self.assertEqual(lock["files"]["docs/playbooks/fix-a-bug.md"]["class"], "synced")
+
+    def test_the_first_commit_passes_the_hooks_as_the_kit_wrote_it(self):
+        git(self.instance, "add", "--all")
+        hooks = ("-c", "core.hooksPath=.githooks")
+        refused = git(self.instance, *hooks, "commit", "--quiet", "-m", "chore: make the workspace from the kit")
+        self.assertNotEqual(refused.returncode, 0, "a commit of the kit's pages with no trailer is refused")
+        self.assertIn("with no instruction review", refused.stdout + refused.stderr)
+        made = git(self.instance, *hooks, "commit", "--quiet", "-m",
+                   "chore: make the workspace from the kit\n\nInstructions-review: skipped: as the kit wrote it")
+        self.assertEqual(made.returncode, 0, made.stdout + made.stderr)
+        with open(self.instance / "AGENTS.md", "a", encoding="utf-8") as handle:
+            handle.write("\nA trap the team found.\n")
+        git(self.instance, "add", "AGENTS.md")
+        edited = git(self.instance, *hooks, "commit", "--quiet", "-m",
+                     "docs: a trap\n\nInstructions-review: skipped: as the kit wrote it")
+        self.assertNotEqual(edited.returncode, 0, "a page the instance changed is not the kit's text")
+        self.assertIn("AGENTS.md is not as kit.lock.json holds it", edited.stdout + edited.stderr)
+
+    def test_the_contract_loses_only_the_rule_on_eval_runs(self):
+        mine = (self.instance / "AGENTS.md").read_text(encoding="utf-8")
+        kit_contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertNotIn("eval_record#an edited playbook fails until its case is run again", mine)
+        self.assertIn("eval_record#an edited playbook fails until its case is run again", kit_contract)
+        self.assertEqual(len(kit_contract.splitlines()) - 1, len(mine.splitlines()))
+
     def test_a_deleted_synced_file_fails(self):
         (self.instance / "docs/templates/epic-folder.md").unlink()
         result = ws(self.instance, "drift")
@@ -243,6 +274,18 @@ class UpgradeTests(unittest.TestCase):
                          kitlock.digest((self.new / "docs/browsers.md").read_bytes()))
         self.assertEqual(kit.drift(self.instance)[0], 0)
 
+    def test_it_deletes_a_file_the_kit_now_never_syncs_and_names_a_new_part(self):
+        rules = json.loads((self.new / "kit/kit.json").read_text(encoding="utf-8"))
+        rules["classes"].insert(0, {"path": "docs/browsers.md", "class": "never", "why": "a test"})
+        (self.new / "kit/kit.json").write_text(json.dumps(rules), encoding="utf-8")
+        (self.new / "parts/kit_test_part.py").write_text("KIND = 'check'\n", encoding="utf-8")
+        git(self.new, "add", "--all")
+        git(self.new, "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "--no-verify", "-m", "chore: newer still")
+        report = kit.upgrade(self.new, self.instance)
+        self.assertFalse((self.instance / "docs/browsers.md").exists())
+        self.assertIn("  removed docs/browsers.md", report)
+        self.assertIn("  new parts, which run only once workspace.json uses them: kit_test_part", report)
+
     def test_it_refuses_on_drift_and_changes_nothing(self):
         with open(self.instance / "docs/parts.md", "a", encoding="utf-8") as handle:
             handle.write("\nA hand edit.\n")
@@ -271,7 +314,8 @@ class UpgradeTests(unittest.TestCase):
         manifest.write_text(manifest.read_text(encoding="utf-8").replace(f'"version": "{VERSION}"',
                                                                          '"version": "0.0.1"', 1), encoding="utf-8")
         report = kit.upgrade(self.new, self.instance)
-        self.assertIn(f'  workspace.json: "version" set to {VERSION}', report)
+        self.assertTrue(any(line.startswith(f'  workspace.json: "version" set to {VERSION}.') for line in report),
+                        report)
         self.assertEqual(json.loads(manifest.read_text(encoding="utf-8"))["version"], VERSION)
 
 

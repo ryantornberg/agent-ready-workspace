@@ -29,7 +29,7 @@
     {"path": "evals/two-line.md", "class": "seeded", "why": "the two-line arm's text, which the instance's arms file names"},
     {"path": "evals/", "class": "never", "why": "this workspace's eval cases, arms and recordings"},
 
-    {"path": "AGENTS.md", "class": "seeded", "why": "the contract; the instance replaces its facts"},
+    {"path": "AGENTS.md", "class": "seeded", "drop_rows": ["`eval_record#an edited playbook fails until its case is run again`"], "why": "the contract; the instance replaces its facts. The rule that an edit to it needs an eval run is dropped: an instance has no eval case until it writes one, and adds the rule back when it proves a page of its own"},
     {"path": "CLAUDE.md", "class": "seeded", "why": "the instance may add to it"},
     {"path": "src/", "class": "seeded", "why": "the sample code; the instance replaces it with its own pins"},
     {"path": "LICENSE", "class": "seeded", "why": "the kit's licence notice travels with its code"},

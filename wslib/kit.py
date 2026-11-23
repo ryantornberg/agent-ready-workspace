@@ -2,7 +2,7 @@
 
     python3 ws.py adopt PATH      # from the kit: make an instance in PATH, an empty folder
     python3 ws.py drift           # in an instance: name each synced file edited or deleted since its lock
-    python3 ws.py drift --keep F  # in an instance: keep its own copy of synced file F; upgrades leave it alone
+    python3 ws.py drift --keep F  # in an instance: keep its own copy of synced file F, unless the kit proved it
     python3 ws.py upgrade PATH    # from a newer kit: replace the instance's unedited synced files
 
 kit/kit.json describes the kit as data: an ordered list of rules, the first whose path matches a tracked file
@@ -11,7 +11,7 @@ giving that file's class (decision record 0007):
   synced    the kit owns it. Adopt copies it, an upgrade replaces it, and `drift` fails on a hand edit to it.
   seeded    adopt writes it once, and the instance owns it from then on. A rule may give it a seed file to write
             instead ("from"), empty every table's rows ("empty"), drop each table row that names a path the
-            instance does not get ("prune"), fill in the proof table ("proof_table"), or, for the manifest, set
+            instance does not get ("prune") or holds a given text ("drop_rows"), fill in the proof table ("proof_table"), or, for the manifest, set
             top-level keys and part settings ("set", "parts").
   never     this workspace's own: its plans, records, eval runs, tests and CI. Adopt does not copy it.
 
@@ -137,6 +137,12 @@ def empty_tables(text):
     return "\n".join(line for index, line in enumerate(_rows(text)) if index not in drop)
 
 
+def drop_rows(text, needles):
+    """Drop each table row that holds one of the given texts, such as a rule an instance cannot keep yet."""
+    drop = {index for index, line in table_rows(text) if any(needle in line for needle in needles)}
+    return "\n".join(line for index, line in enumerate(_rows(text)) if index not in drop)
+
+
 def _named_paths(line, where):
     """Every repository path a table row names: link targets, read from the page's folder, and backticked paths."""
     named = []
@@ -249,7 +255,7 @@ def build(source):
         raise KitError(f"cannot read the synced pages' proof marks through {PROOF_KEYS}: {error}")
 
     head = _git(source, "rev-parse", "HEAD", check=False).stdout.decode().strip()
-    changed = bool(_git(source, "status", "--porcelain", "--untracked-files=no", check=False).stdout.strip())
+    changed = bool(_git(source, "status", "--porcelain", check=False).stdout.strip())
     kit = {"version": VERSION, "commit": head or None, "changed": changed}
 
     replaced = {path for path, rule in classes.items() if rule["class"] == "seeded" and rule.get("from")}
@@ -295,9 +301,11 @@ def seed(path, data, rule, states, source_paths, instance_paths, replaced=()):
                 entry["exempt"] = [e for e in entry["exempt"]
                                    if not (isinstance(e, dict) and e.get("source") in replaced)]
         return (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
-    if not any(rule.get(key) for key in ("empty", "prune", "proof_table")):
+    if not any(rule.get(key) for key in ("empty", "prune", "proof_table", "drop_rows")):
         return data
     text = data.decode("utf-8")
+    if rule.get("drop_rows"):
+        text = drop_rows(text, rule["drop_rows"])
     if rule.get("empty"):
         text = empty_tables(text)
     if rule.get("prune"):
@@ -339,7 +347,11 @@ def adopt(source, target):
     if not (target / ".git").exists():
         _git(target, "init", "--quiet")
     counts = {name: sum(1 for e in manifest["files"].values() if e["class"] == name) for name in CLASSES}
-    return [f"adopt: made an instance of kit {VERSION} in {target}",
+    warning = []
+    if manifest["kit"]["changed"]:
+        warning = [f"  note: the kit's working copy has changes not committed at {manifest['kit']['commit']}; the "
+                   f"instance holds tracked files as the working copy has them, and no file git does not track"]
+    return warning + [f"adopt: made an instance of kit {VERSION} in {target}",
             f"  {counts['synced']} synced, {counts['seeded']} seeded, {counts['never']} never synced; "
             f"{LIST} lists no repository, so agents write to none until a person adds the instance's own",
             f"  the lock is {kitlock.LOCK}; next, in {target}, follow the README's setup steps and commit"]
@@ -382,6 +394,10 @@ def drift(target, keep=()):
         entry = lock["files"].get(path)
         if not isinstance(entry, dict) or entry.get("class") != "synced":
             raise KitError(f"{path} is not a synced file in {kitlock.LOCK}, so there is nothing to keep")
+        if kitlock.proven(lock, path):
+            raise KitError(f"{path} is a page the kit marks proven, and its proof rests on the kit's text and records, "
+                           f"which the instance does not hold; it cannot be kept. Put the kit's copy back with "
+                           f"`git checkout -- {path}`, and write the instance's own steps on a page of its own")
         entry["class"] = "kept"
         lines.append(f"drift: kept {path}: the instance owns its copy now, and upgrades leave it alone")
     if keep:
@@ -432,7 +448,8 @@ def upgrade(source, target):
         _write(target, path, data, executable)
         (replaced if was else added).append(path)
     for path in sorted(p for p, e in old_files.items() if isinstance(e, dict) and e.get("class") == "synced"):
-        if path not in manifest["files"] and (target / path).is_file():
+        gone = path not in manifest["files"] or manifest["files"][path]["class"] == "never"
+        if gone and (target / path).is_file():
             (target / path).unlink()
             removed.append(path)
     seeded_new = []
@@ -452,7 +469,12 @@ def upgrade(source, target):
     for label, paths in (("replaced", replaced), ("added", added), ("removed", removed), ("seeded", seeded_new)):
         lines += [f"  {label} {p}" for p in paths]
     if bumped:
-        lines.append(f'  workspace.json: "version" set to {VERSION}')
+        lines.append(f'  workspace.json: "version" set to {VERSION}. Read the kit\'s change log for settings whose '
+                     f'meaning changed, and correct them before you commit')
+    parts = [p for p in added if p.startswith("parts/") and p.endswith(".py")]
+    if parts:
+        lines.append("  new parts, which run only once workspace.json uses them: " +
+                     ", ".join(posixpath.basename(p)[:-3] for p in parts))
     lines.append("  the README's proof table is the instance's own: run python3 ws.py check, and correct each row "
                  "it names")
     return lines

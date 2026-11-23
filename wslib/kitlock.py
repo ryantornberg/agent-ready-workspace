@@ -17,12 +17,15 @@ LOCK = "kit.lock.json"
 
 
 def digest(data):
-    """The hash a kit manifest and lock record: "sha256:" and the hex digest of the bytes, with CRLF read as LF
-    unless the file is binary, so a checkout's line endings do not count as an edit."""
+    """The hash a kit manifest and lock record: "sha256:" and the hex digest of the bytes. Unless the file is binary,
+    CRLF is read as LF and a leading UTF-8 byte-order mark is left out, as a check's snapshot reads text, so the
+    `kit_drift` check and `ws.py drift` agree and a checkout's line endings do not count as an edit."""
     if isinstance(data, str):
         data = data.encode("utf-8")
     if b"\0" not in data:
         data = data.replace(b"\r\n", b"\n")
+        if data.startswith(b"\xef\xbb\xbf"):
+            data = data[3:]
     return "sha256:" + hashlib.sha256(data).hexdigest()
 
 
@@ -63,6 +66,11 @@ def proof_states(lock, page):
         if (name == page or name.startswith(page + "#")) and isinstance(entry, dict):
             states[name] = (entry.get("proof"), entry.get("prove-by"), list(entry.get("proven-by", [])))
     return states
+
+
+def proven(lock, page):
+    """True when the lock marks the page, or a section of it, proven by the kit."""
+    return any(state == "proven" for state, _, _ in proof_states(lock, page).values())
 
 
 def cases(lock):

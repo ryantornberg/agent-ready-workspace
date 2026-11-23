@@ -1,567 +1,706 @@
 [
-  {
-    "name": "a commit that changes no guidance page passes",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "subject": "fix: code",
-        "message": "fix: code\n",
-        "paths": [
-          "src/x.py",
-          "docs/plans/p.md",
-          "docs/records/r.md"
-        ],
-        "files": {
-          "src/x.py": ""
-        }
-      }
-    ],
-    "expect": []
+ {
+  "name": "a commit that changes no guidance page passes",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a guidance page changed with no trailer fails",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "subject": "docs: a page",
-        "message": "docs: a page\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "subject": "fix: code",
+    "message": "fix: code\n",
+    "paths": [
+     "src/x.py",
+     "docs/plans/p.md",
+     "docs/records/r.md"
     ],
-    "expect": [
-      "commit bbbbbbb \"docs: a page\" changes the guidance page docs/a.md with no instruction review"
-    ]
+    "files": {
+     "src/x.py": ""
+    }
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "a guidance page changed with no trailer fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a record the commit adds and that covers every page passes",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "cccccccccccccccccccccccccccccccccccccccc",
-        "subject": "docs: a page",
-        "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\n",
-        "paths": [
-          "docs/a.md",
-          "AGENTS.md",
-          "docs/records/instruction-reviews/2026-11-21-a.md"
-        ],
-        "files": {
-          "docs/a.md": "x",
-          "AGENTS.md": "x",
-          "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "subject": "docs: a page",
+    "message": "docs: a page\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": []
+    "files": {
+     "docs/a.md": "x"
+    }
+   }
+  ],
+  "expect": [
+   "commit bbbbbbb \"docs: a page\" changes the guidance page docs/a.md with no instruction review"
+  ]
+ },
+ {
+  "name": "a record the commit adds and that covers every page passes",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a named record that does not exist fails",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "dddddddddddddddddddddddddddddddddddddddd",
-        "subject": "docs: a page",
-        "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/nope.md\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "subject": "docs: a page",
+    "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\n",
+    "paths": [
+     "docs/a.md",
+     "AGENTS.md",
+     "docs/records/instruction-reviews/2026-11-21-a.md"
     ],
-    "expect": [
-      "names the review record docs/records/instruction-reviews/nope.md, which does not exist in the commit"
-    ]
+    "files": {
+     "docs/a.md": "x",
+     "AGENTS.md": "x",
+     "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
+    }
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "a named record that does not exist fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "an old record the commit does not add or change fails",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "subject": "docs: a page",
-        "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x",
-          "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "dddddddddddddddddddddddddddddddddddddddd",
+    "subject": "docs: a page",
+    "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/nope.md\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": [
-      "which it does not add or change"
-    ]
+    "files": {
+     "docs/a.md": "x"
+    }
+   }
+  ],
+  "expect": [
+   "names the review record docs/records/instruction-reviews/nope.md, which does not exist in the commit"
+  ]
+ },
+ {
+  "name": "an old record the commit does not add or change fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a record that does not cover a changed page fails",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "ffffffffffffffffffffffffffffffffffffffff",
-        "subject": "docs: two pages",
-        "message": "docs: two pages\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\n",
-        "paths": [
-          "docs/a.md",
-          "docs/b.md",
-          "docs/records/instruction-reviews/2026-11-21-a.md"
-        ],
-        "files": {
-          "docs/a.md": "x",
-          "docs/b.md": "x",
-          "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "subject": "docs: a page",
+    "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": [
-      "changes the guidance page docs/b.md, which no review record it names covers"
-    ]
+    "files": {
+     "docs/a.md": "x",
+     "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
+    }
+   }
+  ],
+  "expect": [
+   "which it does not add or change"
+  ]
+ },
+ {
+  "name": "a record that does not cover a changed page fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a listed skip reason passes",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "gggggggggggggggggggggggggggggggggggggggg",
-        "subject": "docs: fix a link",
-        "message": "docs: fix a link\n\nInstructions-review: skipped: link or typo only\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "ffffffffffffffffffffffffffffffffffffffff",
+    "subject": "docs: two pages",
+    "message": "docs: two pages\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\n",
+    "paths": [
+     "docs/a.md",
+     "docs/b.md",
+     "docs/records/instruction-reviews/2026-11-21-a.md"
     ],
-    "expect": []
+    "files": {
+     "docs/a.md": "x",
+     "docs/b.md": "x",
+     "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
+    }
+   }
+  ],
+  "expect": [
+   "changes the guidance page docs/b.md, which no review record it names covers"
+  ]
+ },
+ {
+  "name": "a listed skip reason passes",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a strike passes as a skip reason, and a deleted page needs no record",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "1111111111111111111111111111111111111111",
-        "subject": "docs: strike a page",
-        "message": "docs: strike a page\n\nInstructions-review: skipped: strike\n",
-        "paths": [
-          "docs/gone.md",
-          "AGENTS.md"
-        ],
-        "files": {
-          "AGENTS.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "gggggggggggggggggggggggggggggggggggggggg",
+    "subject": "docs: fix a link",
+    "message": "docs: fix a link\n\nInstructions-review: skipped: link or typo only\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": []
+    "files": {
+     "docs/a.md": "x"
+    }
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "a strike passes as a skip reason, and a deleted page needs no record",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a deleted page with no trailer fails",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "2222222222222222222222222222222222222222",
-        "subject": "docs: drop a page",
-        "message": "docs: drop a page\n",
-        "paths": [
-          "docs/gone.md"
-        ],
-        "files": {}
-      }
+  "pushed": [
+   {
+    "commit": "1111111111111111111111111111111111111111",
+    "subject": "docs: strike a page",
+    "message": "docs: strike a page\n\nInstructions-review: skipped: strike\n",
+    "paths": [
+     "docs/gone.md",
+     "AGENTS.md"
     ],
-    "expect": [
-      "changes the guidance page docs/gone.md with no instruction review"
-    ]
+    "files": {
+     "AGENTS.md": "x"
+    }
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "a deleted page with no trailer fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a skip reason outside the listed set fails",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
-        "subject": "docs: a page",
-        "message": "docs: a page\n\nInstructions-review: skipped: small change\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "2222222222222222222222222222222222222222",
+    "subject": "docs: drop a page",
+    "message": "docs: drop a page\n",
+    "paths": [
+     "docs/gone.md"
     ],
-    "expect": [
-      "skips the instruction review for 'small change', which is not a listed reason"
-    ]
+    "files": {}
+   }
+  ],
+  "expect": [
+   "changes the guidance page docs/gone.md with no instruction review"
+  ]
+ },
+ {
+  "name": "a skip reason outside the listed set fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a trailer that names no record path fails",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
-        "subject": "docs: a page",
-        "message": "docs: a page\n\nInstructions-review: looked at it\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "subject": "docs: a page",
+    "message": "docs: a page\n\nInstructions-review: skipped: small change\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": [
-      "names 'looked at it', which is not a review record in docs/records/instruction-reviews/"
-    ]
+    "files": {
+     "docs/a.md": "x"
+    }
+   }
+  ],
+  "expect": [
+   "skips the instruction review for 'small change', which is not a listed reason"
+  ]
+ },
+ {
+  "name": "a trailer that names no record path fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "the folder's README is not a record",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "3333333333333333333333333333333333333333",
-        "subject": "docs: a page",
-        "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/README.md\n",
-        "paths": [
-          "docs/a.md",
-          "docs/records/instruction-reviews/README.md"
-        ],
-        "files": {
-          "docs/a.md": "x",
-          "docs/records/instruction-reviews/README.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+    "subject": "docs: a page",
+    "message": "docs: a page\n\nInstructions-review: looked at it\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": [
-      "which is not a review record in docs/records/instruction-reviews/"
-    ]
+    "files": {
+     "docs/a.md": "x"
+    }
+   }
+  ],
+  "expect": [
+   "names 'looked at it', which is not a review record in docs/records/instruction-reviews/"
+  ]
+ },
+ {
+  "name": "the folder's README is not a record",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a trailer in a comment line does not count",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",
-        "subject": "docs: a page",
-        "message": "docs: a page\n# Instructions-review: skipped: strike\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "3333333333333333333333333333333333333333",
+    "subject": "docs: a page",
+    "message": "docs: a page\n\nInstructions-review: docs/records/instruction-reviews/README.md\n",
+    "paths": [
+     "docs/a.md",
+     "docs/records/instruction-reviews/README.md"
     ],
-    "expect": [
-      "changes the guidance page docs/a.md with no instruction review"
-    ]
+    "files": {
+     "docs/a.md": "x",
+     "docs/records/instruction-reviews/README.md": "x"
+    }
+   }
+  ],
+  "expect": [
+   "which is not a review record in docs/records/instruction-reviews/"
+  ]
+ },
+ {
+  "name": "a trailer in a comment line does not count",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a commit whose own manifest does not use the part is not judged",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
-        "subject": "docs: a page",
-        "message": "docs: a page\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x",
-          "workspace.json": "{\"parts\": [{\"use\": \"links\"}]}"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",
+    "subject": "docs: a page",
+    "message": "docs: a page\n# Instructions-review: skipped: strike\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": []
+    "files": {
+     "docs/a.md": "x"
+    }
+   }
+  ],
+  "expect": [
+   "changes the guidance page docs/a.md with no instruction review"
+  ]
+ },
+ {
+  "name": "a commit whose own manifest does not use the part is not judged",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a commit whose own manifest uses the part is judged",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "llllllllllllllllllllllllllllllllllllllll",
-        "subject": "docs: a page",
-        "message": "docs: a page\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x",
-          "workspace.json": "{\"parts\": [{\"use\": \"review_trailer\"}]}"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "subject": "docs: a page",
+    "message": "docs: a page\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": [
-      "commit lllllll \"docs: a page\" changes the guidance page docs/a.md with no instruction review"
-    ]
+    "files": {
+     "docs/a.md": "x",
+     "workspace.json": "{\"parts\": [{\"use\": \"links\"}]}"
+    }
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "a commit whose own manifest uses the part is judged",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a merge being made at the commit-msg hook is not judged",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "",
-        "subject": "Merge branch 'main' into topic",
-        "message": "Merge branch 'main' into topic\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        },
-        "merge": true
-      }
+  "pushed": [
+   {
+    "commit": "llllllllllllllllllllllllllllllllllllllll",
+    "subject": "docs: a page",
+    "message": "docs: a page\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": []
+    "files": {
+     "docs/a.md": "x",
+     "workspace.json": "{\"parts\": [{\"use\": \"review_trailer\"}]}"
+    }
+   }
+  ],
+  "expect": [
+   "commit lllllll \"docs: a page\" changes the guidance page docs/a.md with no instruction review"
+  ]
+ },
+ {
+  "name": "a merge being made at the commit-msg hook is not judged",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "of several commits, only the one without a trailer is named",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
-    },
-    "pushed": [
-      {
-        "commit": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
-        "subject": "docs: fine",
-        "message": "docs: fine\n\nInstructions-review: skipped: front matter only\n",
-        "paths": [
-          "docs/a.md"
-        ],
-        "files": {
-          "docs/a.md": "x"
-        }
-      },
-      {
-        "commit": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
-        "subject": "docs: not fine",
-        "message": "docs: not fine\n",
-        "paths": [
-          "AGENTS.md"
-        ],
-        "files": {
-          "AGENTS.md": "x"
-        }
-      }
+  "pushed": [
+   {
+    "commit": "",
+    "subject": "Merge branch 'main' into topic",
+    "message": "Merge branch 'main' into topic\n",
+    "paths": [
+     "docs/a.md"
     ],
-    "expect": [
-      "commit nnnnnnn \"docs: not fine\" changes the guidance page AGENTS.md with no instruction review"
-    ]
-  },
-  {
-    "name": "a skip reason and a record together excuse what the record does not cover",
-    "files": {},
-    "config": {
-      "guidance": [
-        "AGENTS.md",
-        "docs/"
-      ],
-      "except": [
-        "docs/records/",
-        "docs/plans/"
-      ]
+    "files": {
+     "docs/a.md": "x"
     },
-    "pushed": [
-      {
-        "commit": "oooooooooooooooooooooooooooooooooooooooo",
-        "subject": "docs: two pages",
-        "message": "docs: two pages\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\nInstructions-review: skipped: front matter only\n",
-        "paths": [
-          "docs/a.md",
-          "docs/c.md",
-          "docs/records/instruction-reviews/2026-11-21-a.md"
-        ],
-        "files": {
-          "docs/a.md": "x",
-          "docs/c.md": "x",
-          "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
-        }
-      }
-    ],
-    "expect": []
+    "merge": true
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "of several commits, only the one without a trailer is named",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
   },
-  {
-    "name": "a manifest without the guidance list fails",
-    "files": {},
-    "config": {},
-    "pushed": [],
-    "expect": [
-      "review_trailer needs \"guidance\", a list of paths"
-    ]
-  }
+  "pushed": [
+   {
+    "commit": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+    "subject": "docs: fine",
+    "message": "docs: fine\n\nInstructions-review: skipped: front matter only\n",
+    "paths": [
+     "docs/a.md"
+    ],
+    "files": {
+     "docs/a.md": "x"
+    }
+   },
+   {
+    "commit": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+    "subject": "docs: not fine",
+    "message": "docs: not fine\n",
+    "paths": [
+     "AGENTS.md"
+    ],
+    "files": {
+     "AGENTS.md": "x"
+    }
+   }
+  ],
+  "expect": [
+   "commit nnnnnnn \"docs: not fine\" changes the guidance page AGENTS.md with no instruction review"
+  ]
+ },
+ {
+  "name": "a skip reason and a record together excuse what the record does not cover",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
+  },
+  "pushed": [
+   {
+    "commit": "oooooooooooooooooooooooooooooooooooooooo",
+    "subject": "docs: two pages",
+    "message": "docs: two pages\n\nInstructions-review: docs/records/instruction-reviews/2026-11-21-a.md\nInstructions-review: skipped: front matter only\n",
+    "paths": [
+     "docs/a.md",
+     "docs/c.md",
+     "docs/records/instruction-reviews/2026-11-21-a.md"
+    ],
+    "files": {
+     "docs/a.md": "x",
+     "docs/c.md": "x",
+     "docs/records/instruction-reviews/2026-11-21-a.md": "---\nkind: record\nlast-reviewed: 2026-11-21\ncovers: docs/a.md, AGENTS.md\n---\n\n# Instruction review: docs/a.md\n"
+    }
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "a manifest without the guidance list fails",
+  "files": {},
+  "config": {},
+  "pushed": [],
+  "expect": [
+   "review_trailer needs \"guidance\", a list of paths"
+  ]
+ },
+ {
+  "name": "an instance's first commit, every page as the kit wrote it, passes",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
+  },
+  "pushed": [
+   {
+    "commit": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "subject": "chore: make the workspace from the kit",
+    "message": "chore: make the workspace from the kit\n\nInstructions-review: skipped: as the kit wrote it\n",
+    "paths": [
+     "AGENTS.md",
+     "docs/a.md",
+     "kit.lock.json"
+    ],
+    "files": {
+     "AGENTS.md": "# Contract\n\nThe sample's facts.\n",
+     "docs/a.md": "# A\n\nThe kit's page.\n",
+     "kit.lock.json": "{\"kit\": {\"version\": \"0.3.0\", \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"changed\": false}, \"files\": {\"docs/a.md\": {\"class\": \"synced\", \"hash\": \"sha256:407c463d43be4a90e6d62e6a2c840159cd3fa4a1dfdaf39daff230105af935d5\"}, \"AGENTS.md\": {\"class\": \"seeded\", \"hash\": \"sha256:2115af8450edc251c3c8cc503b92bdb383f13223f7f6ea8dd2340eabad586be8\"}}, \"proof\": {}, \"cases\": []}"
+    }
+   }
+  ],
+  "expect": []
+ },
+ {
+  "name": "as the kit wrote it fails a page that differs from the lock",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
+  },
+  "pushed": [
+   {
+    "commit": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "subject": "chore: make the workspace from the kit",
+    "message": "chore: make the workspace from the kit\n\nInstructions-review: skipped: as the kit wrote it\n",
+    "paths": [
+     "AGENTS.md",
+     "docs/a.md",
+     "kit.lock.json"
+    ],
+    "files": {
+     "AGENTS.md": "# Contract\n\nThe sample's facts.\n\nThe team's own fact.\n",
+     "docs/a.md": "# A\n\nThe kit's page.\n",
+     "kit.lock.json": "{\"kit\": {\"version\": \"0.3.0\", \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"changed\": false}, \"files\": {\"docs/a.md\": {\"class\": \"synced\", \"hash\": \"sha256:407c463d43be4a90e6d62e6a2c840159cd3fa4a1dfdaf39daff230105af935d5\"}, \"AGENTS.md\": {\"class\": \"seeded\", \"hash\": \"sha256:2115af8450edc251c3c8cc503b92bdb383f13223f7f6ea8dd2340eabad586be8\"}}, \"proof\": {}, \"cases\": []}"
+    }
+   }
+  ],
+  "expect": [
+   "skips the instruction review as the kit wrote it, but AGENTS.md is not as kit.lock.json holds it"
+  ]
+ },
+ {
+  "name": "as the kit wrote it fails with no lock in the commit",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
+  },
+  "pushed": [
+   {
+    "commit": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "subject": "chore: make the workspace from the kit",
+    "message": "chore: make the workspace from the kit\n\nInstructions-review: skipped: as the kit wrote it\n",
+    "paths": [
+     "docs/a.md"
+    ],
+    "files": {
+     "docs/a.md": "# A\n\nThe kit's page.\n"
+    }
+   }
+  ],
+  "expect": [
+   "holds no readable kit.lock.json"
+  ]
+ },
+ {
+  "name": "an upgrade that deletes a page the lock no longer holds passes, and one it still holds fails",
+  "files": {},
+  "config": {
+   "guidance": [
+    "AGENTS.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
+  },
+  "pushed": [
+   {
+    "commit": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "subject": "chore: make the workspace from the kit",
+    "message": "chore: make the workspace from the kit\n\nInstructions-review: skipped: as the kit wrote it\n",
+    "paths": [
+     "docs/gone.md",
+     "kit.lock.json"
+    ],
+    "files": {
+     "kit.lock.json": "{\"kit\": {\"version\": \"0.3.0\", \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"changed\": false}, \"files\": {\"docs/a.md\": {\"class\": \"synced\", \"hash\": \"sha256:407c463d43be4a90e6d62e6a2c840159cd3fa4a1dfdaf39daff230105af935d5\"}}, \"proof\": {}, \"cases\": []}"
+    }
+   },
+   {
+    "commit": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "subject": "chore: make the workspace from the kit",
+    "message": "chore: make the workspace from the kit\n\nInstructions-review: skipped: as the kit wrote it\n",
+    "paths": [
+     "docs/a.md",
+     "kit.lock.json"
+    ],
+    "files": {
+     "kit.lock.json": "{\"kit\": {\"version\": \"0.3.0\", \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"changed\": false}, \"files\": {\"docs/a.md\": {\"class\": \"synced\", \"hash\": \"sha256:407c463d43be4a90e6d62e6a2c840159cd3fa4a1dfdaf39daff230105af935d5\"}}, \"proof\": {}, \"cases\": []}"
+    }
+   }
+  ],
+  "expect": [
+   "deletes docs/a.md, which kit.lock.json still holds"
+  ]
+ }
 ]
