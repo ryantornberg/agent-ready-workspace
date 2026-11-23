@@ -24,7 +24,7 @@ The kit makes it. From the kit's repository, `python3 ws.py adopt PATH` writes a
 | The engine (`ws.py`, `wslib/`) and `tools/` | Yes, as they are | Change them only as [changing the machinery](changing-the-machinery.md) says. |
 | The parts and their cases, and the shape of `workspace.json` | Yes | Set your own values where a part reads them, such as the commit subject formats in [commits](commits.md). A check that fails on old findings you cannot fix yet can tolerate them through a [baseline](parts.md#baselines). |
 | The hook wiring: `.githooks/`, `.claude/settings.json`, `.codex/hooks.json` | Yes | The README's setup turns the git hooks on. |
-| The page kinds, [layout](layout.md), the templates, the playbooks and how-tos | Yes, as procedures, synced | To change one, keep your own copy, as decision 0007 says. A page the kit marks proven cannot be kept: write your own steps on a page of your own. Their proof marks are the kit's; see the next table. |
+| The page kinds, [layout](layout.md), the templates, the playbooks and how-tos | Yes, as procedures, synced, except the feature layer walk, which is seeded | Rewrite the feature layer walk's lists for your code; it is yours. To change any other, keep your own copy, as decision 0007 says. A page the kit marks proven cannot be kept: write your own steps on a page of your own. Their proof marks are the kit's; see the next table. |
 | The decision records in `docs/decisions/` | Yes, as background | They say why the machinery works as it does. Your own decisions take the next free number, as [extend the workspace](extend-the-workspace.md) says. A later kit record may take the same number; the upgrade then refuses until you renumber yours. |
 
 ## What does not transfer

@@ -56,3 +56,7 @@ A fresh session re-read the page on 2026-11-23, after the fix round, at 8162e8e 
 |---|---|---|---|
 | R1 | broke | Not blocking. The fix round added the skip reason `as the kit wrote it` and its rules row to `docs/playbooks/instruction-review.md`, a guidance page, and none of the eleven C8 records covers it. In the scratch clone, the slice's change committed with one trailer per C8 record fails `python3 ws.py check --commits HEAD~1..HEAD`: "changes the guidance page docs/playbooks/instruction-review.md, which no review record it names covers" (verified). That page needs its own review before the slice commits. | fixed: the playbook's change has its own review, `2026-11-23-c8-instruction-review.md`. |
 | R2 | missed | Not blocking. Step 6 links "the instance's eval page" as `../evals/README.md`. In the kit's repository that link opens the kit's own eval page, which says nothing about adding the rule back (verified, reading `evals/README.md`). Only in an instance does it reach the seed page's text. | fixed: step 6 names the `evals/README.md` an instance gets from the kit, with no link to this repository's own. |
+
+## Later change
+
+After this review, the first row of "What transfers" names the feature layer walk as seeded, not synced, and says the instance rewrites its lists. The fix comes from finding 1 of [the review of decision 0007's seeded-page change](2026-11-23-c8-decision-0007-seeded.md).

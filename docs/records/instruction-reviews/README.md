@@ -215,3 +215,4 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-c8-seed-evals-readme.md](2026-11-23-c8-seed-evals-readme.md) | `kit/seed/evals-README.md` | contradiction, step, enforcement |
 | [2026-11-23-c8-instruction-review.md](2026-11-23-c8-instruction-review.md) | `docs/playbooks/instruction-review.md` | enforcement, placement |
 | [2026-11-23-c8-seed-readme-checks.md](2026-11-23-c8-seed-readme-checks.md) | `kit/seed/README.md` | contradiction |
+| [2026-11-23-c8-decision-0007-seeded.md](2026-11-23-c8-decision-0007-seeded.md) | `docs/decisions/0007-the-kit.md` | contradiction |

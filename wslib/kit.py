@@ -209,8 +209,9 @@ def proof_states(source, pages):
     return states
 
 
-def proof_table(states, kit_version):
-    """The README's table of proven and unproven pages, filled from the kit's proof states."""
+def proof_table(states, kit_version, own=None):
+    """The README's table of proven and unproven pages: the synced pages' states from the kit, then those of the
+    seeded pages, which are the instance's own from the start."""
     rows = ["| Page | State | Evidence or milestone |", "|---|---|---|"]
     for name, entry in states.items():
         if entry["proof"] == "proven":
@@ -218,6 +219,9 @@ def proof_table(states, kit_version):
         else:
             evidence = f"{entry.get('prove-by', '?')}, a milestone of the kit's plan"
         rows.append(f"| [{name}]({name}) | {entry['proof']} | {evidence} |")
+    for name, entry in (own or {}).items():
+        evidence = entry.get("prove-by", "?") if entry["proof"] == "unproven" else ", ".join(entry.get("proven-by", []))
+        rows.append(f"| [{name}]({name}) | {entry['proof']} | {evidence}; this workspace's own page, seeded by the kit |")
     return "\n".join(rows)
 
 
@@ -249,8 +253,11 @@ def build(source):
     source_paths = {path for path, _ in files}
     instance_paths = {path for path, rule in classes.items() if rule["class"] != "never"} | {LIST, kitlock.LOCK}
     synced_pages = [p for p, rule in classes.items() if rule["class"] == "synced" and p.endswith(".md")]
+    seeded_pages = [p for p, rule in classes.items() if rule["class"] == "seeded" and p.endswith(".md")
+                    and p.startswith("docs/")]
     try:
         states = proof_states(source, synced_pages)
+        own_states = proof_states(source, seeded_pages)
     except (OSError, KeyError, SyntaxError, ValueError, IndexError) as error:
         raise KitError(f"cannot read the synced pages' proof marks through {PROOF_KEYS}: {error}")
 
@@ -270,7 +277,7 @@ def build(source):
         except OSError as error:
             raise KitError(f"cannot read {rule.get('from') or path}: {error}")
         if rule["class"] == "seeded":
-            data = seed(path, data, rule, states, source_paths, instance_paths, replaced)
+            data = seed(path, data, rule, states, source_paths, instance_paths, replaced, own_states)
         entry = {"class": rule["class"], "hash": digest(data)}
         if rule["class"] == "seeded" and rule.get("from"):
             entry["from"] = rule["from"]
@@ -290,7 +297,7 @@ def build(source):
     return manifest, contents
 
 
-def seed(path, data, rule, states, source_paths, instance_paths, replaced=()):
+def seed(path, data, rule, states, source_paths, instance_paths, replaced=(), own_states=None):
     """What adopt writes for a seeded file, after the rule's changes."""
     if path.endswith(".json") and ("set" in rule or "parts" in rule):
         manifest = json.loads(data.decode("utf-8"))
@@ -313,7 +320,7 @@ def seed(path, data, rule, states, source_paths, instance_paths, replaced=()):
     if rule.get("proof_table"):
         if PROOF_TABLE not in text:
             raise KitError(f"{rule.get('from') or path} has no line {PROOF_TABLE!r} for the proof table")
-        text = text.replace(PROOF_TABLE, proof_table(states, VERSION))
+        text = text.replace(PROOF_TABLE, proof_table(states, VERSION, own_states))
     return text.encode("utf-8")
 
 

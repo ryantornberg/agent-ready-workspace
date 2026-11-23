@@ -107,7 +107,12 @@ class ManifestTests(unittest.TestCase):
         sys.path.insert(0, str(ROOT / "parts"))
         import proof
         table = proof._readme_table((ROOT / "README.md").read_text(encoding="utf-8"), "Proven and unproven pages")
-        self.assertEqual({name: entry["proof"] for name, entry in self.manifest["proof"].items()}, table)
+        seeded = [p for p, e in self.manifest["files"].items() if e["class"] == "seeded" and p.startswith("docs/")
+                  and p.endswith(".md")]
+        own = kit.proof_states(ROOT, seeded)
+        self.assertIn("docs/playbooks/feature-layer-walk.md", own, "a seeded page with a proof mark, as its rule says")
+        both = {name: entry["proof"] for name, entry in list(self.manifest["proof"].items()) + list(own.items())}
+        self.assertEqual(both, table)
 
 
 class AdoptTests(unittest.TestCase):

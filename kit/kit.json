@@ -19,6 +19,7 @@
     {"path": "docs/milestones/", "class": "never", "why": "this workspace's milestone records"},
     {"path": "docs/rules/", "class": "seeded", "why": "rule pages describe the sample code; the instance rewrites them"},
     {"path": "docs/glossary.md", "class": "seeded", "why": "the instance adds its own words"},
+    {"path": "docs/playbooks/feature-layer-walk.md", "class": "seeded", "why": "its lists of layers are rewritten for each instance's code"},
     {"path": "docs/", "class": "synced", "why": "procedures, how-tos, references, templates and the kit's decision records"},
 
     {"path": "evals/run.py", "class": "synced", "why": "the eval harness"},
