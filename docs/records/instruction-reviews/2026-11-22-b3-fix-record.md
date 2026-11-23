@@ -76,3 +76,42 @@ It read the page whole, `git show 65a6f5c`, procedure endings, the contract, the
 Broke: none.
 
 Missed: none.
+
+## Revert (Q41)
+
+The builder's revert, on 2026-11-23, under the maintainer's answer to Q41 in the workspace queue, recorded in the M3 plan. No third fix round was made. The page is new in B3, so main holds no copy: the revert removed the skeleton's "Escape analysis" section, its filling bullet, and the sentence in "Committing it" that pointed at the review orchestrator's step 2 clause. Where a review commits on a branch stays unsettled, for M4.
+
+| Item | Disposition |
+|---|---|
+| Second fix round, the commit after the push moves the tip past the reviewed one: "Committing it" pointed at the review orchestrator's new step 2 clause | withdrawn by the revert: the clause is removed from the review orchestrator, so its sentence in "Committing it" is removed too. |
+| The skeleton's "Escape analysis" section and its filling bullet | removed under Q41: escape analysis's step 9 is main's text again and writes no section here. |
+| Second re-check, re-check item 5, not blocking: the slice Z lines are not in the plan's queue | queued for slice Z: the lines join "Queued for slice Z" in the commit that records B3's results, once these pages merge. |
+
+## Re-check after the revert
+
+A fresh session re-read the page on 2026-11-23, after the revert under Q41. It read the contract, the instruction review, procedure endings, the Q41 entry under "Changes after approval" in the M3 plan on `origin/main` (the branch does not hold that entry yet), `git diff HEAD` of the page, the review orchestrator, escape analysis, architecture review, git-host operations, the spec template, the templates index, the records README, the pull request template and the lessons log template. It searched `docs/`, `parts/` and `tests/` for the removed section, and ran `python3 ws.py check`, which exits 0 with only the known warning on fix a bug's eval record. Verified.
+
+The page is new in B3, so `origin/main` holds no copy to compare. The revert's diff removes three things: the skeleton's "Escape analysis" section, its filling bullet, and the sentence in "Committing it" that pointed at the review orchestrator's step 2 clause. Nothing else changed. "Committing it" keeps B3's own rule that the record is committed on the fix's branch, which is not one of the three pages Q41 returns to main's wording. Verified: `git diff HEAD` and `git cat-file` on `origin/main`.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Second fix round, the commit after the push moves the tip past the reviewed one: "Committing it" pointed at the step 2 clause | upheld | The sentence is gone, and the review orchestrator's step 2 is main's text. Verified: both diffs. The tip still moves, under "Broke". |
+| The skeleton's "Escape analysis" section and its filling bullet | upheld | The skeleton goes from "Where it stands" to "Report", no bullet names the section, and no page, part or test names it. Escape analysis's step 9 writes nothing here, and the spec template says only that each playbook says what it writes down. Verified: the page and the search. |
+| Second re-check, re-check item 5, not blocking: the slice Z lines are not in the plan's queue | upheld | B3's results on `origin/main` carry "the queued slice Z lines, which join the queue when the pages merge" under "Not done", so the queue is promised on record. Verified: the plan. |
+
+Broke:
+
+- Not blocking. "Committing it" still makes a second commit on the fix's branch after the push, and nothing now says whether that tip needs a review. A later run of the review orchestrator finds the reviewed commit an ancestor and runs a delta round over the record alone. Git-host operations checks the tip only when the pull request is created, and that comes before this commit, so nothing is refused; it costs a round. Verified: the texts. Inferred: the order, from "Committing it".
+
+Missed:
+
+- Not blocking. Architecture review's step 9 still says "The fix record that will hold them for a bug fix is planned in slice B3 of M3". Once B3 merges, the fix record exists and holds no review, as "Committing it" says. Main's text was true on main; B3 makes it stale. Verified: a search of `docs/`.
+- Not blocking. This record's "Revert (Q41)" paragraph says the page's commit wording "went back to main's text". The template is new in B3 and main holds no copy; the revert removed the section and the sentence above. The fault is in this record, not the page. Verified: `git cat-file` on `origin/main`.
+
+## Known defects
+
+The plan allows the page no further fix round, so the non-blocking items the re-check after the revert found stay here. The template has no `prove-by`, so each is for the docs audit unless another place is named.
+
+- "Committing it" makes a second commit on the fix's branch after the push, and nothing says whether that tip needs a review. For M4, which settles where and when a review commits, as Q41 leaves it.
+- Architecture review's step 9 still says the fix record that will hold its findings "is planned in slice B3 of M3". Once B3 merges, the fix record exists and holds no review. For M6, architecture review's `prove-by`, or the docs audit, whichever comes first.
+- This record's "Revert (Q41)" paragraph first said the page went back to main's text; the page is new in B3. Corrected in the paragraph above.

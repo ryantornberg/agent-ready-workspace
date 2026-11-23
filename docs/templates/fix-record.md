@@ -47,10 +47,6 @@ last-reviewed: YYYY-MM-DD
 - Pull request: <link, and draft or published>, or "none: the repository has no remote"
 - Tracker item: <key and link>, or "none"
 
-## Escape analysis
-
-<The analysis, when escape analysis runs on this fix. Delete this section when it did not.>
-
 ## Report
 
 Fixed: <what was wrong, in one sentence>
@@ -67,9 +63,8 @@ Not done: <anything left, and why, or "nothing">
 - **Where it stands.** Write a line only once you have run what it claims. A line you have not reached yet says "not yet". A claim written down because it looked plausible, and never checked, is how a wrong fix gets merged.
 - **The layer.** The red-green line names the layer the failing test exercised. A check that passes at one layer proves nothing about another: a screen that now looks right says nothing about the server behind it. When the bug lives at a layer your test did not reach, say so under "Not done".
 - **The running app.** Name the commit each check ran on. A check on an earlier commit does not count for a later one.
-- **An escape analysis**, when one runs on this fix, goes in its section, before the report. Step 9 of [escape analysis](../playbooks/escape-analysis.md#steps) says what it holds.
 - **The report.** Always write it, even when the work stopped early. Keep it the last section. The session's report repeats its lines. "Not done" names the same things a report in the session names, as [procedure endings](../procedure-endings.md#the-report) says.
-- **Committing it.** Commit the record with the fix, on the fix's branch, with "Where it stands" filled so far. After the push, fill in the commits, the pull request and the report, then commit and push the record once more on that branch. This follows the order of [procedure endings](../procedure-endings.md#the-order): commit, push, then report. Staging and messages follow [its commit section](../procedure-endings.md#the-commit). When the fix is code in a pinned repository, its branch is not in this repository: the record is then a change of pages only here, committed and pushed as procedure endings' rows for pages say. A review is not needed again for that commit: the [review orchestrator](../playbooks/review-orchestrator.md#steps)'s step 2 counts a tip whose only change since the reviewed commit is this record as reviewed. A review round's record goes in the pull request's description, as that page's step 10 says, not here.
+- **Committing it.** Commit the record with the fix, on the fix's branch, with "Where it stands" filled so far. After the push, fill in the commits, the pull request and the report, then commit and push the record once more on that branch. This follows the order of [procedure endings](../procedure-endings.md#the-order): commit, push, then report. Staging and messages follow [its commit section](../procedure-endings.md#the-commit). When the fix is code in a pinned repository, its branch is not in this repository: the record is then a change of pages only here, committed and pushed as procedure endings' rows for pages say. A review round's record goes in the pull request's description, as that page's step 10 says, not here.
 
 ## What the check reads
 

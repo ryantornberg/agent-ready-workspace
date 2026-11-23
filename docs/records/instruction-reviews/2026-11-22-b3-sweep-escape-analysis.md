@@ -58,3 +58,33 @@ Broke:
 - Not blocking. When the fix came from a hand-off plan, step 9 commits the plan "as procedure endings says". Handoff and the review orchestrator, in the same round, moved this kind of commit to the branch checked out. They did so because a switch to main fails from a branch with uncommitted changes. This page was not swept. The risk is low here, since the page starts only once the fix is committed. Verified: the three texts. Inferred: the likelihood.
 
 Missed: none.
+
+## Revert (Q41)
+
+The builder's revert, on 2026-11-23, under the maintainer's answer to Q41 in the workspace queue, recorded in the M3 plan. No third fix round was made. The page's wording for where and how it commits and pushes went back to main's text; only its pointers to B3's new pages stay changed. Where a review commits on a branch stays unsettled, for M4.
+
+| Item | Disposition |
+|---|---|
+| Second re-check, broke, blocking: the analysis committed on an unmerged fix's branch is pushed by procedure endings' row for pages to main | withdrawn by the revert: step 9 is main's text again, with its pointer to the fix record removed, since the fix record no longer has an escape analysis section. With a hand-off plan, the analysis goes under its "Results"; otherwise the report is the only copy. |
+| Second re-check, broke, not blocking: step 9's default is wrong for a fix in a pinned repository | withdrawn by the revert: step 9 no longer names the fix record or its branch. |
+| Second re-check, broke, not blocking: step 9's plan commit was not swept to the branch checked out | withdrawn by the revert: handoff and the review orchestrator went back to main's wording too, so the three pages agree again. |
+| Second fix round, item 3, not blocking: step 9 restates the report rule and names no push | deferred to M4, with where a review commits: step 9's commit wording is main's text under Q41. |
+| Steps 7 and 8, the lessons-log rows, and the table's defect register row and step 3's pointer | kept as pointer changes: they point at B3's lessons log and defect register in place of "planned in slice B3 of M3". |
+
+## Re-check after the revert
+
+A fresh session re-read the page on 2026-11-23, after the revert under Q41. It read the contract, the instruction review, procedure endings, the Q41 entry under "Changes after approval" in the M3 plan on `origin/main` (the branch does not hold that entry yet), `git diff HEAD` and `git diff origin/main` of the page, the fix record template, the defect register and its template, the lessons log and its template, the spec template's "Which spec", the review orchestrator and handoff. It searched `docs/` outside plans and these records for the fix record's escape analysis section, and ran `python3 ws.py check`, which exits 0 with only the known warning on fix a bug's eval record. Verified.
+
+Against `origin/main`, the page differs in five places: the "Deferred then lost" owner and step 3 link the defect register; steps 7 and 8 add the lessons-log row; and step 9 drops main's "The fix record, planned in slice B3 of M3, will hold this analysis as a section. Until it exists:". From "When the fix came from a hand-off plan" on, step 9 matches main word for word, so no commit or push wording of B3's survives. Steps 7 and 8 say more than a link, but they carry out main's own "gets a row once it exists" and place no commit, so they stay within Q41. Verified: `git diff origin/main`.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Second re-check, broke, blocking: the analysis committed on an unmerged fix's branch is pushed to main by procedure endings' row for pages | upheld | Step 9 no longer names the fix record, its branch or procedure endings, and the fix record template has no "Escape analysis" section. Verified: the diff, the template, and a search of `docs/` that finds no other page sending the analysis to a fix record. |
+| Second re-check, broke, not blocking: step 9's default is wrong for a fix in a pinned repository | upheld | Step 9 names no branch. Verified: the text. |
+| Second re-check, broke, not blocking: step 9's plan commit was not swept to the branch checked out | upheld | Handoff's step 2, the review orchestrator's step 10 and this step 9 all hold main's wording again, none naming a branch. Verified: the three diffs against `origin/main`. |
+| Second fix round, item 3, not blocking: step 9 restates the report rule and names no push | upheld | Step 9 is main's text, and Q41 leaves where a review commits for M4. Verified: the diff and the Q41 entry. |
+| Steps 7 and 8, the lessons-log rows, and the table's defect register row and step 3's pointer | upheld | Each replaces a "planned in slice B3 of M3" line. The anchors resolve, the register holds the two tables step 3 names, and the lessons log template names this page as one of its two sources. Verified: `python3 ws.py check`, the register and the template. |
+
+Broke: none.
+
+Missed: none.

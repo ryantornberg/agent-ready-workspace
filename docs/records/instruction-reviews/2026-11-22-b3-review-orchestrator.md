@@ -96,3 +96,52 @@ Missed:
 
 - Blocking. When you review your own branch in a worktree, step 10 commits the plan on that branch, "as procedure endings' commit says for pages". The closing paragraph then pushes "as procedure endings says". That page's push table, for "Pages only, in a worktree", gives `git push origin HEAD:main`. HEAD is the reviewed branch, so this push publishes its unmerged code to main, with no pull request and no CI. The contract says to open a pull request as a draft and merge only after CI passes. Procedure endings says code under `src/` never goes on main. No guard stops it for code under `src/`. The pre-push checks are `direct_push`, which judges only the machinery paths in `workspace.json`, where `src/` is not listed, and `review_trailer`, which judges guidance pages. Verified in the scratch repository: from a worktree on a branch with a code commit and then a pages commit, `git push origin HEAD:main` exited 0 and moved the remote's main to include the code commit. Verified by reading: both parts' configuration. Inferred: that an agent picks that row because what it committed was pages only. The first re-check saw only that this commit moves the tip, not the push. The bullet should say to push the branch, not main, as the fix record template says for its own record.
 - Not blocking. Step 11 and the table "What exists today and what is planned" still say the outward-write guard "is planned in slice C5e of M3, so today only the person's yes holds it". The milestone record says C5e is merged, and the bug report template now names the guard as live. Verified: `docs/milestones/m3.md` and both pages.
+
+## Revert (Q41)
+
+The builder's revert, on 2026-11-23, under the maintainer's answer to Q41 in the workspace queue, recorded in the M3 plan. No third fix round was made. The page's wording for where and how it commits and pushes went back to main's text; only its pointers to B3's new pages stay changed. Where a review commits on a branch stays unsettled, for M4.
+
+| Item | Disposition |
+|---|---|
+| Second re-check, missed, blocking: in a worktree the plan commit on the reviewed branch is pushed to main by procedure endings' row for pages | withdrawn by the revert: step 10's plan bullet is main's again, "append it to the plan's 'Results', and commit the plan, staged by name", and the closing paragraph names no push. |
+| Second re-check, broke, blocking: the step 2 clause stops on a tip git-host operations will not open a pull request for | withdrawn by the revert: the clause is removed, and step 2's first case is main's again. |
+| Second re-check, broke, not blocking: in the main copy on a task branch, the plan commit lands on that branch and the push table has no row for it | withdrawn by the revert: the bullet no longer places the commit. Where it goes is as unsettled as before B3, for M4. |
+| Second re-check, broke, not blocking: the step 2 clause counts a changed spec in the plan as no change | withdrawn by the revert: the clause is removed. |
+| Second re-check, missed, not blocking: step 11 and the table still call the outward-write guard planned in C5e | deferred to B2t: it is not a B3 change, and B2t's fix round updates the B2 pages that still call the guard planned (Q31). |
+| Second fix round, not blocking: "M4 plans a script for it" has no source | known defect, for M6, the page's `prove-by`: see "Known defects". |
+| First-round finding 5, not blocking: step 10 restates procedure endings' commit and report rules | reverted under Q41: the plan bullet and the closing paragraph are main's text again, so they restate the rule as main does. Deferred to M4, with where a review commits. |
+| Without a plan, the bullet's pointer "until slice B3's fix record exists" | changed as a stale pointer: the fix record holds no review round, so the bullet now ends at the report and the pull request's description, as main's does. |
+
+## Known defects
+
+The plan allows the page no third fix round, so its non-blocking items still open stay here, for M6, the page's `prove-by` milestone, unless another is named.
+
+- The table row "Reconciling the change against the defect register in step 5" says "M4 plans a script for it", and no plan in `docs/plans/` names that script yet.
+- Added after the re-check after the revert: on planned work, step 10's plan commit moves the tip past the reviewed commit, so git-host operations asks for a record naming the new tip and step 2 runs a delta round over a range that changes only the plan. Main has the same three texts; the removed step 2 clause had tried to close this. For M4, which settles where a review commits, as Q41 leaves it.
+
+Not a known defect: step 11's text calling the outward-write guard planned in C5e. The maintainer's answer to Q31 in the workspace queue gives it to B2t's fix round, and B2t's builder records that answer in the plan.
+
+## Re-check after the revert
+
+A fresh session re-read the page on 2026-11-23, after the revert under Q41. It read the contract, the instruction review, procedure endings, the Q41 entry under "Changes after approval" in the M3 plan on `origin/main` (the branch does not hold that entry yet), `git diff HEAD` and `git diff origin/main` of the page, git-host operations, the defect register and its template, the templates index, the records README, the pull request template and the lessons log template. It searched `docs/` outside plans and these records for the removed clause and for review commit wording, and ran `python3 ws.py check`, which exits 0 with only the known warning on fix a bug's eval record. Verified.
+
+Against `origin/main`, the page differs in four places, all pointers to B3's defect register or the removal of a stale one: the table row on reconciling, step 5's reconcile by hand, the stop paragraph's "such as the defect register", and step 10's no-plan bullet losing "until slice B3's fix record exists". Step 2, step 10's plan bullet and step 10's closing paragraph match main word for word, so no commit or push wording of B3's survives. Step 5 and the table row say more than a link, how the reconcile runs today, but neither places a commit, so both stay within Q41. Verified: `git diff origin/main`.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Second re-check, missed, blocking: the plan commit on the reviewed branch is pushed to main by procedure endings' row for pages | upheld | Step 10's plan bullet is main's text, the closing paragraph names no push, and the page no longer links procedure endings at all. Verified: the diff and a search of the page. Where the plan commit lands is main's open question, under "Broke". |
+| Second re-check, broke, blocking: the step 2 clause stops on a tip git-host operations will not open a pull request for | upheld | The diff against `origin/main` has no change in step 2, and no page outside plans and these records describes the clause. Verified: the diff, and a search for "as reviewed", "counts a tip" and "only the hand-off plan". |
+| Second re-check, broke, not blocking: in the main copy on a task branch, the plan commit lands there and the push table has no row | upheld | The bullet places no commit and names no push, as on main. Verified: the text. |
+| Second re-check, broke, not blocking: the step 2 clause counts a changed spec in the plan as no change | upheld | The clause is gone. Verified: the diff. |
+| Second re-check, missed, not blocking: step 11 and the table still call the outward-write guard planned in C5e | upheld | Both texts are main's: the diff has no change there, so this is not B3's change, and Q41 allows B3 only its pointers. Verified. The reason given, that B2t updates them under Q31, is not on record where this session could read it, under "Missed". |
+| Second fix round, not blocking: "M4 plans a script for it" has no source | upheld | "Known defects" holds it for M6, the page's `prove-by`, as the instruction review's step 4 asks when no fix round is left. Verified: the section and the front matter. |
+| First-round finding 5, not blocking: step 10 restates procedure endings' commit and report rules | upheld | The plan bullet and the closing paragraph are main's text. The closing paragraph's old B3 sentence held the push, which Q41 reverts, so its report half goes with it. Q41 leaves where a review commits for M4. Verified: the diff and the Q41 entry. |
+| The no-plan bullet's pointer "until slice B3's fix record exists" | upheld | The bullet now ends as main's does after that clause, and the fix record template says a review round's record goes in the pull request's description, not in the record. Verified: both texts. |
+
+Broke:
+
+- Not blocking. With the step 2 clause gone, the gap it tried to close is back as main has it. On planned work, step 10 commits the plan after the review, which moves the branch tip past the reviewed commit. Git-host operations' "Create a pull request" row then asks for a record that names the tip about to open, and step 2 runs a delta round over a range that changes only the plan, whose own plan commit moves the tip again. Main holds the same three texts, so the revert does not make this worse, and Q41 leaves where a review commits for M4. Verified: the texts on the branch and on `origin/main`. Inferred: the loop.
+
+Missed:
+
+- Not blocking. The revert table defers step 11's stale C5e text to B2t "(Q31)". B2t's row in the M3 plan lists the tutorials and B2's 18 open items, not this text, and the question log on `origin/main` still shows Q31 as not answered. The answer may sit in the workspace queue, which this session did not read. Verified: both texts. Inferred: that the item has no home on record yet.
