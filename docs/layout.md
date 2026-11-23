@@ -27,6 +27,7 @@ Where each kind of page lives, the front matter it carries, and the order it ope
 | `archive/` | Retired pages. An ignore file hides it from search, and the link and page checks skip it. |
 | `evals/` | The eval harness, its cases and its recorded runs. See [evals](../evals/README.md). |
 | `parts/`, `wslib/`, `tools/`, `tests/` | The machinery. See [changing the machinery](changing-the-machinery.md). |
+| `kit/` | The kit's classes, and the seed files a new instance gets in place of this workspace's own; also machinery. In an instance, `kit.lock.json` takes its place. See [decision 0007](decisions/0007-the-kit.md). |
 
 One record sits outside `docs/records/`: the [question log](question-log.md), at the top of `docs/`, where the contract links it.
 

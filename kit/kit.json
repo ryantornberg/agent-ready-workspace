@@ -1,0 +1,60 @@
+{
+  "about": "The kit's classes (decision record 0007). The first rule whose path is a tracked file, or a folder (ending in /) that holds it, gives its class. Every tracked file must match a rule. wslib/kit.py reads this file.",
+  "classes": [
+    {"path": "kit/", "class": "never", "why": "the kit's own rules and seeds; an instance holds its lock instead"},
+
+    {"path": "README.md", "class": "seeded", "from": "kit/seed/README.md", "proof_table": true, "why": "an instance's front page, with its own setup steps and the kit's proof states"},
+    {"path": "evals/README.md", "class": "seeded", "from": "kit/seed/evals-README.md", "why": "this one describes this workspace's cases and recordings, which stay here"},
+    {"path": ".github/workflows/ci.yml", "class": "seeded", "from": "kit/seed/ci.yml", "why": "this one runs the kit's tests, which stay here"},
+    {"path": "INDEX.md", "class": "seeded", "prune": true, "why": "the instance rewrites its topics and aliases; rows that name this workspace's history are dropped"},
+    {"path": "docs/question-log.md", "class": "seeded", "empty": true, "why": "the instance starts its own log"},
+    {"path": "docs/records/instruction-reviews/README.md", "class": "seeded", "empty": true, "why": "the index starts with no records"},
+    {"path": "docs/records/README.md", "class": "seeded", "why": "the records folder's map"},
+    {"path": "docs/records/defects.md", "class": "seeded", "why": "an empty register"},
+    {"path": "docs/records/lessons.md", "class": "seeded", "why": "an empty log"},
+    {"path": "workspace.json", "class": "seeded", "set": {"building": []}, "parts": {"review_index": {"required": []}}, "why": "the instance's own manifest; it builds no milestone yet, and its review index requires no record"},
+
+    {"path": "docs/records/", "class": "never", "why": "this workspace's records"},
+    {"path": "docs/plans/", "class": "never", "why": "this workspace's plans"},
+    {"path": "docs/milestones/", "class": "never", "why": "this workspace's milestone records"},
+    {"path": "docs/rules/", "class": "seeded", "why": "rule pages describe the sample code; the instance rewrites them"},
+    {"path": "docs/glossary.md", "class": "seeded", "why": "the instance adds its own words"},
+    {"path": "docs/playbooks/feature-layer-walk.md", "class": "seeded", "why": "its lists of layers are rewritten for each instance's code"},
+    {"path": "docs/", "class": "synced", "why": "procedures, how-tos, references, templates and the kit's decision records"},
+
+    {"path": "evals/run.py", "class": "synced", "why": "the eval harness"},
+    {"path": "evals/grade.py", "class": "synced", "why": "the eval harness"},
+    {"path": "evals/pool.py", "class": "synced", "why": "the eval harness"},
+    {"path": "evals/proofkeys.py", "class": "synced", "why": "the eval harness, which the proof checks read"},
+    {"path": "evals/arms.json", "class": "seeded", "why": "the arm files a first case of the instance's own starts from"},
+    {"path": "evals/two-line.md", "class": "seeded", "why": "the two-line arm's text, which the instance's arms file names"},
+    {"path": "evals/", "class": "never", "why": "this workspace's eval cases, arms and recordings"},
+
+    {"path": "AGENTS.md", "class": "seeded", "drop_rows": ["`eval_record#an edited playbook fails until its case is run again`"], "why": "the contract; the instance replaces its facts. The rule that an edit to it needs an eval run is dropped: an instance has no eval case until it writes one, and adds the rule back when it proves a page of its own"},
+    {"path": "CLAUDE.md", "class": "seeded", "why": "the instance may add to it"},
+    {"path": "src/", "class": "seeded", "why": "the sample code; the instance replaces it with its own pins"},
+    {"path": "LICENSE", "class": "seeded", "why": "the kit's licence notice travels with its code"},
+    {"path": ".gitignore", "class": "seeded", "why": "the instance adds its own lines"},
+    {"path": ".gitattributes", "class": "seeded", "why": "the instance adds its own lines"},
+    {"path": ".ignore", "class": "seeded", "why": "the instance adds its own lines"},
+
+    {"path": "ws.py", "class": "synced", "why": "the engine's entry point"},
+    {"path": "wslib/", "class": "synced", "why": "the engine"},
+    {"path": "parts/", "class": "synced", "why": "the kit's parts; an instance's own parts sit beside them, outside the lock"},
+    {"path": "tools/", "class": "synced", "why": "the lookup and the setup-step reader"},
+    {"path": ".githooks/", "class": "synced", "why": "the git hooks"},
+    {"path": ".claude/settings.json", "class": "synced", "why": "Claude Code's hook wiring and permissions"},
+    {"path": ".codex/", "class": "synced", "why": "Codex CLI's hook wiring and permissions"},
+    {"path": ".mcp.json", "class": "synced", "why": "the browser server's settings"},
+    {"path": "opencode.json", "class": "synced", "why": "opencode's pointer to the contract"},
+    {"path": ".github/copilot-instructions.md", "class": "synced", "why": "Copilot's pointer to the contract"},
+
+    {"path": ".github/workflows/", "class": "never", "why": "this workspace's CI, which runs its tests and recordings"},
+    {"path": "tests/", "class": "never", "why": "the kit's own tests, which CI runs here on three systems for each kit version"},
+    {"path": "outward-repos.json", "class": "never", "why": "the instance owns its list; adopt writes it empty"},
+    {"path": "CHANGELOG.md", "class": "never", "why": "this workspace's history"},
+    {"path": "EVIDENCE.md", "class": "never", "why": "this workspace's history"},
+    {"path": "archive/", "class": "never", "why": "this workspace's retired pages"},
+    {"path": "assets/", "class": "never", "why": "this README's images"}
+  ]
+}

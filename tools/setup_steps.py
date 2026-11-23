@@ -14,8 +14,9 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from wslib import blocks  # noqa: E402
 
-# The pages whose marked steps set up a fresh clone. A change to one runs the cold-clone job.
-SETUP_PAGES = ("README.md",)
+# The pages whose marked steps set up a fresh clone: this repository's README, and the README the kit writes into
+# a new instance (decision record 0007). A change to one runs the cold-clone job.
+SETUP_PAGES = ("README.md", "kit/seed/README.md")
 MARKER = "setup"
 
 

@@ -13,7 +13,7 @@ How a change to a guidance page is reviewed as a program, recorded, and named in
 
 ## When it runs
 
-On every commit that adds, changes or deletes a guidance page. A guidance page is any path the `review_trailer` entry in [workspace.json](../../workspace.json) lists under `guidance` and not under `except`. Today that is `AGENTS.md`, `CLAUDE.md`, the Copilot and opencode pointer files, `INDEX.md`, the README, `evals/README.md`, and every page under `docs/` except plans, milestone records, records and the question log. The list also names `plugin/`, for the wrappers slice B6 of M3 adds there.
+On every commit that adds, changes or deletes a guidance page. A guidance page is any path the `review_trailer` entry in [workspace.json](../../workspace.json) lists under `guidance` and not under `except`. Today that is `AGENTS.md`, `CLAUDE.md`, the Copilot and opencode pointer files, `INDEX.md`, the README, `evals/README.md`, and every page under `docs/` except plans, milestone records, records and the question log. The list also names `plugin/`, for the wrappers slice B6 of M3 adds there. In the kit's own repository it names the two seed pages under `kit/seed/` as well, which become an instance's README and eval page.
 
 Skip the review only for one of these reasons, named in the trailer:
 
@@ -22,8 +22,9 @@ Skip the review only for one of these reasons, named in the trailer:
 | `link or typo only` | The change fixes a link target or a spelling, and no sentence means something new. |
 | `front matter only` | The change touches front matter and nothing below it, such as a review date. |
 | `strike` | The maintainer struck the page: the commit removes it and its index rows, wrapper and table row. |
+| `as the kit wrote it` | In an instance made from the kit, the first commit, or the commit of an upgrade, brings pages the kit's own reviews read. The check compares each guidance page the commit leaves in place with the hash in the commit's `kit.lock.json`, and refuses the deletion of a page that lock still holds. A page a record the commit names covers is judged by the record instead. The check trusts the lock in the same commit; the lock is machinery, so a change to it reaches main through a pull request, where its diff shows. See [decision 0007](../decisions/0007-the-kit.md). |
 
-Anything else needs a review. When in doubt, review. The check reads the reason, not the change, so a reason that does not apply passes it; using one is the author's word that it applies.
+Anything else needs a review. When in doubt, review. For the first three reasons the check reads the reason, not the change, so a reason that does not apply passes it; using one is the author's word that it applies.
 
 ## Steps
 
@@ -107,7 +108,8 @@ A plan may instead stop on blocking findings: one that survives the fix round, a
 | A push to main holding such a commit is refused before it lands. | `review_trailer#of several commits, only the one without a trailer is named` |
 | The index lists every record as it is, and each required page has one. | `review_index#a record with no row fails`, `review_index#a row whose classes differ from the record's findings fails`, `review_index#a required page with no record fails` |
 | A record covers exactly one page. | `review_index#a record that covers two pages fails` |
-| A skip reason is used only when it applies; the check reads the reason, not the change. | `prose` |
+| A skip reason is used only when it applies; for the first three, the check reads the reason, not the change. | `prose` |
+| The reason `as the kit wrote it` passes only when every guidance page the commit leaves in place, other than those a named record covers, is as the commit's lock holds it. | `review_trailer#as the kit wrote it fails a page that differs from the lock`, `review_trailer#an upgrade's commit may name a record for the README row it corrects beside the kit's reason` |
 | A fresh session at the driver tier runs the review, without the author's reasoning. | `prose` |
 | The author settles every finding before the commit. | `prose` |
 | The reviewer marks each finding blocking or not, and the author never lowers the mark. | `prose` |

@@ -4,7 +4,8 @@ A rule lives on the page it belongs to, in a table whose header is "| Rule | Enf
 holds one or more tags in backticks, separated by commas:
 
   `part#case`     the part, in the manifest, enforces it, and the named case of that part shows it doing so
-  `eval:case`     an eval case grades it: evals/cases/<case>.json exists
+  `eval:case`     an eval case grades it: evals/cases/<case>.json exists, or, in an instance made from the
+                  kit, the kit's lock (kit.lock.json) names it among the kit's cases, which stay in the kit
   `prose`         nothing checks it; the page says it and a reader keeps it
 
 A tag that names a part not in the manifest, a case the part does not have, or an eval case that does not
@@ -16,6 +17,7 @@ Config: "skip": folders not read (default evals/scaffold and archive).
 import json
 import re
 
+from wslib import kitlock
 from wslib.parts import finding
 
 KIND = "check"
@@ -58,6 +60,10 @@ def run(snapshot, config):
         used = {entry.get("use") for entry in manifest.get("parts", []) if isinstance(entry, dict)}
     except (ValueError, AttributeError):
         used = set()
+    try:
+        kit_cases = kitlock.cases(kitlock.read(snapshot))
+    except kitlock.LockError:
+        kit_cases = set()       # the proof check names the unreadable lock
     found, cases = [], {}
     for page, line, rule, tags in register(snapshot, skip):
         if not tags:
@@ -67,7 +73,7 @@ def run(snapshot, config):
             kind = kind_of(tag)
             if kind is None:
                 found.append(finding(page, line, f"{tag!r} is not a tag; write `part#case`, `eval:case` or `prose`"))
-            elif kind == "eval" and not snapshot.is_file(f"evals/cases/{tag[5:]}.json"):
+            elif kind == "eval" and not snapshot.is_file(f"evals/cases/{tag[5:]}.json") and tag[5:] not in kit_cases:
                 found.append(finding(page, line, f"the tag {tag} names an eval case that does not exist"))
             elif kind == "part":
                 part, _, case = tag.partition("#")

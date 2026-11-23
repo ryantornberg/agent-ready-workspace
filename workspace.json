@@ -23,7 +23,8 @@
       "why": "A page that points at a moved or deleted page sends an agent to nothing, and a renamed heading breaks every link to its anchor, which a check of file names alone once missed.",
       "skip": [
         "evals/scaffold",
-        "archive"
+        "archive",
+        "kit/seed"
       ],
       "backticked": [
         "AGENTS.md",
@@ -137,7 +138,9 @@
         "baselines/",
         "evals/one-time.json",
         "opencode.json",
-        "outward-repos.json"
+        "outward-repos.json",
+        "kit/",
+        "kit.lock.json"
       ]
     },
     {
@@ -304,7 +307,9 @@
         "opencode.json",
         "docs/",
         "evals/README.md",
-        "plugin/"
+        "plugin/",
+        "kit/seed/README.md",
+        "kit/seed/evals-README.md"
       ],
       "except": [
         "docs/plans/",
@@ -335,6 +340,10 @@
     {
       "use": "plan_budgets",
       "why": "A plan nobody can read in one sitting is approved unread: a Key points block over 200 words, or a table cell over 60, buries what the approver must know. Only draft plans are read, since approved ones are frozen."
+    },
+    {
+      "use": "kit_drift",
+      "why": "In an instance made from the kit, a hand edit to a file the kit owns is lost at the next upgrade, or blocks it; it fails here until the kit's copy is back or the instance keeps its own on record."
     },
     {
       "use": "proof",

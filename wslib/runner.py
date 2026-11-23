@@ -960,6 +960,27 @@ def command_with_secrets(root, args):
         raise partlib.PartError(f"with-secrets: {error}")
 
 
+def command_kit(root, args):
+    """The kit: print its manifest, make an instance, report drift, or upgrade an instance (wslib/kit.py)."""
+    from . import kit
+    try:
+        if args.command == "kit":
+            manifest, _ = kit.build(root)
+            print(json.dumps(manifest, indent=2))
+            return 0
+        if args.command == "adopt":
+            lines, code = kit.adopt(root, args.path), 0
+        elif args.command == "upgrade":
+            lines, code = kit.upgrade(root, args.path), 0
+        else:
+            code, lines = kit.drift(root, args.keep or ())
+    except kit.KitError as error:
+        raise partlib.PartError(f"{args.command}: {error}")
+    for line in lines:
+        print(line)
+    return code
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):  # a finding may quote text the console cannot encode
         if hasattr(stream, "reconfigure"):
@@ -1001,6 +1022,13 @@ def main(argv=None):
     secrets = commands.add_parser("with-secrets", help="run one program with named values from the secrets file "
                                                        "in its environment only: NAME [NAME ...] -- PROGRAM ...")
     secrets.add_argument("rest", nargs=argparse.REMAINDER, metavar="NAME ... -- PROGRAM ...")
+    commands.add_parser("kit", help="print the kit manifest: each file with its class and hash, and the proof states")
+    adopt = commands.add_parser("adopt", help="make an instance of this kit in PATH, an empty folder")
+    adopt.add_argument("path")
+    upgrade = commands.add_parser("upgrade", help="take this kit into the instance in PATH; refuses on drift")
+    upgrade.add_argument("path")
+    drift = commands.add_parser("drift", help="in an instance: name each synced file edited or deleted since the lock")
+    drift.add_argument("--keep", nargs="+", metavar="PATH", help="keep the instance's own copy of a synced file")
     ledger = commands.add_parser("ledger")
     ledger.add_argument("--add", nargs="+", metavar="PATH", help="record files this session wrote another way")
     ledger.add_argument("--close", action="store_true", help="close the ledger, for a person's own commit")
@@ -1014,7 +1042,8 @@ def main(argv=None):
         return {"list": command_list, "selftest": command_selftest, "check": command_check, "baseline": command_baseline,
                 "hook": command_hook, "ledger": command_ledger, "rules": command_rules, "pins": command_pins,
                 "merge": command_merge, "handoff": command_handoff,
-                "with-secrets": command_with_secrets}[args.command](root, args)
+                "with-secrets": command_with_secrets, "kit": command_kit, "adopt": command_kit,
+                "upgrade": command_kit, "drift": command_kit}[args.command](root, args)
     except (partlib.PartError, NotADirectoryError, RuntimeError) as error:
         print(f"ws: {error}", file=sys.stderr)
         return 2

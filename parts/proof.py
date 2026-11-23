@@ -16,6 +16,11 @@ a section merged into another page says so in a line under its heading. This che
     "Anchor: <page> <old item> -> <new item>" or "Demote: <page>";
   - the README's table of proven and unproven pages matches the pages.
 
+In an instance made from the kit (one that holds kit.lock.json, wslib/kitlock.py), a page the lock holds as synced
+takes its proof marks from the kit: when its marks equal the lock's, none of the rules above is applied to it, since
+the milestone records, eval records and anchor commits behind them are never synced; when they differ, it fails.
+A page the instance owns, a kept one included, is held to every rule above.
+
 "Being built" is the manifest's "building" list. With no base commit, as in a plain `check`, the comparisons
 with the base are skipped. Config: "folders" (default ["docs"]), "milestones" (docs/milestones), "plans"
 (docs/plans), "readme" (README.md), "heading" (the README's heading over the table), "runs" (evals/runs),
@@ -25,11 +30,13 @@ import json
 import re
 import types
 
+from wslib import kitlock
 from wslib import markdown
 from wslib.parts import finding
 
 KIND = "check"
 PAGE = "docs/decisions/0006-what-proven-means.md"
+KIT_PAGE = "docs/decisions/0007-the-kit.md"
 ENTRY = re.compile(r"^### \d{4}-\d{2}-\d{2}\b")
 APPROVED = re.compile(r"^Approved by: \S.*, \d{4}-\d{2}-\d{2}\s*$")
 
@@ -122,6 +129,11 @@ def run(snapshot, config):
         building = json.loads(snapshot.read("workspace.json") or "").get("building", [])
     except (ValueError, AttributeError):
         building = []
+    try:
+        lock = kitlock.read(snapshot)
+    except kitlock.LockError as error:
+        return [finding(kitlock.LOCK, 1, f"{error}; the proof marks of the kit's pages cannot be read; see {KIT_PAGE}")]
+    kit_pages = kitlock.synced(lock)
     folders = config.get("folders", ["docs"])
     milestones, plans = config.get("milestones", "docs/milestones"), config.get("plans", "docs/plans")
     runs = config.get("runs", "evals/runs")
@@ -131,6 +143,8 @@ def run(snapshot, config):
              if any(page.startswith(f.rstrip("/") + "/") for f in folders)]
     anchors = []
     for page in pages:
+        if page in kit_pages:
+            continue
         for _, _, items in marks(keys, snapshot.read(page)).values():
             anchors += [(sha, path) for sha, path in items if sha]
     if snapshot.has_base():
@@ -140,6 +154,9 @@ def run(snapshot, config):
 
     for page in pages:
         current = marks(keys, snapshot.read(page))
+        if page in kit_pages:
+            found += _kit_marks(page, current, lock, all_marks)
+            continue
         for key, (state, prove_by, items) in current.items():
             name = page + key
             all_marks[name] = state
@@ -233,6 +250,20 @@ def run(snapshot, config):
             for name in sorted(set(table) - set(all_marks)):
                 found.append(finding(readme, 1, f"its table lists {name}, which carries no proof mark"))
     return found
+
+
+def _kit_marks(page, current, lock, all_marks):
+    """A synced page in an instance: its marks must be the kit's, whose evidence stays in the kit."""
+    mine = {}
+    for key, (state, prove_by, items) in current.items():
+        mine[page + key] = (state, prove_by, [_item(sha, path) for sha, path in items])
+        all_marks[page + key] = state
+    if mine == kitlock.proof_states(lock, page):
+        return []
+    return [finding(page, 1, f"{page}: its proof marks differ from the kit's, as of kit {kitlock.version(lock)} in "
+                             f"{kitlock.LOCK}. A synced page's marks change only by an upgrade: put the page back "
+                             f"with git checkout, or keep your own copy with python3 ws.py drift --keep {page} and "
+                             f"prove it here; see {KIT_PAGE}")]
 
 
 def _readme_table(text, heading):

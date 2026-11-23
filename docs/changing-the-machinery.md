@@ -26,6 +26,7 @@ Docs go straight to main, a guidance page after its instruction review. The scri
 | `outward-repos.json` | The repositories agents may write to; see [decision 0004](decisions/0004-the-hook-contract.md). The guards refuse an agent's edit in the cases decision 0004 names, and the README's limits name what gets past them; a person edits it on a branch and opens the pull request. It holds data, not code, so step 2's failing case does not apply to it. |
 | `tests/` | The tests of all of the above |
 | `baselines/` | The findings each check tolerates; see [baselines](parts.md#baselines) |
+| `kit/`, `kit.lock.json` | What the kit gives an instance, and an instance's record of it; see [decision 0007](decisions/0007-the-kit.md). The lock holds data that `ws.py upgrade` and `ws.py drift --keep` write, so step 2's failing case does not apply to it; an upgrade changes the engine and the lock together. A change to a seed page, `kit/seed/README.md` or `kit/seed/evals-README.md`, is also a guidance change and takes the instruction review too. |
 
 Everything else is a doc. The table is the `machinery` list of the `direct_push` part in [workspace.json](../workspace.json), and a test fails when the two differ.
 
@@ -40,6 +41,8 @@ Everything else is a doc. The table is the `machinery` list of the `direct_push`
    python3 ws.py check
    python3 -m unittest discover -b tests
    ```
+
+   An instance made from the kit has no `tests/`, since the kit's tests stay in the kit. There, run `python3 ws.py drift` as the third command instead.
 
 4. **Commit on the branch**, staging files by name.
 5. **Push the branch and open a draft pull request.** CI runs on three systems. In this repository an agent may push; in a team's workspace, a person does. When a reviewer leaves comments on it and the author is present to go through them, follow the [feedback walk-through](playbooks/feedback-walkthrough.md). With no author present, list the comments in your report and do not merge in step 6 until the author has answered them.

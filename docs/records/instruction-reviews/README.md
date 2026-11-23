@@ -202,3 +202,17 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b4b2-reading-paths.md](2026-11-23-b4b2-reading-paths.md) | `docs/reading-paths.md` | none |
 | [2026-11-23-b4b2-epic-folder.md](2026-11-23-b4b2-epic-folder.md) | `docs/templates/epic-folder.md` | contradiction, trigger |
 | [2026-11-23-b4b2-qa-test-plan.md](2026-11-23-b4b2-qa-test-plan.md) | `docs/templates/qa-test-plan.md` | contradiction |
+| [2026-11-23-c8-adopt-the-workspace.md](2026-11-23-c8-adopt-the-workspace.md) | `docs/adopt-the-workspace.md` | step, contradiction, enforcement, trigger |
+| [2026-11-23-c8-browsers.md](2026-11-23-c8-browsers.md) | `docs/browsers.md` | none |
+| [2026-11-23-c8-changing-the-machinery.md](2026-11-23-c8-changing-the-machinery.md) | `docs/changing-the-machinery.md` | step |
+| [2026-11-23-c8-decision-0004.md](2026-11-23-c8-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement |
+| [2026-11-23-c8-decision-0007.md](2026-11-23-c8-decision-0007.md) | `docs/decisions/0007-the-kit.md` | contradiction, step, enforcement, placement, trigger |
+| [2026-11-23-c8-epic-folder.md](2026-11-23-c8-epic-folder.md) | `docs/templates/epic-folder.md` | none |
+| [2026-11-23-c8-layout.md](2026-11-23-c8-layout.md) | `docs/layout.md` | none |
+| [2026-11-23-c8-parts.md](2026-11-23-c8-parts.md) | `docs/parts.md` | contradiction, step, placement, trigger |
+| [2026-11-23-c8-readme.md](2026-11-23-c8-readme.md) | `README.md` | contradiction |
+| [2026-11-23-c8-seed-readme.md](2026-11-23-c8-seed-readme.md) | `kit/seed/README.md` | step, contradiction |
+| [2026-11-23-c8-seed-evals-readme.md](2026-11-23-c8-seed-evals-readme.md) | `kit/seed/evals-README.md` | contradiction, step, enforcement |
+| [2026-11-23-c8-instruction-review.md](2026-11-23-c8-instruction-review.md) | `docs/playbooks/instruction-review.md` | enforcement, placement |
+| [2026-11-23-c8-seed-readme-checks.md](2026-11-23-c8-seed-readme-checks.md) | `kit/seed/README.md` | contradiction |
+| [2026-11-23-c8-decision-0007-seeded.md](2026-11-23-c8-decision-0007-seeded.md) | `docs/decisions/0007-the-kit.md` | contradiction |
