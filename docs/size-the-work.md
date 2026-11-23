@@ -80,7 +80,7 @@ The spec is three sections of the hand-off plan: "Goal", "Non-goals" and "Succes
 |---|---|---|---|
 | Specify | What will be true at the end | The plan's goal and non-goals, then the decision interview, then the success criteria | The person agrees to the spec. Record it under the plan's "Settled decisions" as `Spec agreed by <name>, <date>.` |
 | Plan | How the work will be checked and recovered | The plan's verification, recovery, stop rule and limits | None of its own: the next phase ends at the plan's gate. |
-| Slice | Pieces an agent can run | The plan's slices table, each slice with its tier and its "Done when"; then the adversarial review of the finished plan, triaged in its red team table | The person approves the plan: `status: approved` and its approval line. |
+| Slice | Pieces an agent can run | The plan's slices table, each slice with its tier and its "Done when"; then the red team review of the finished plan, triaged in its red team table | The person approves the plan: `status: approved` and its approval line. |
 | Build | The change | [Test first](playbooks/test-first.md) per slice; each slice's report under "Results" | The [definition of done](definition-of-done.md). |
 
 A person holds two gates: between the spec and the plan, and between the plan and the build. Without an answer, wait. No plan is written on a spec the person has not agreed to, and no slice runs on a plan the person has not approved.

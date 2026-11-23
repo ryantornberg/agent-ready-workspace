@@ -2,10 +2,10 @@
 kind: playbook
 proof: unproven
 prove-by: M6
-last-reviewed: 2026-11-21
+last-reviewed: 2026-11-23
 ---
 
-# Escape analysis
+# Defect escape analysis
 
 How an agent finds why a review missed a defect, and proposes a change to the review rather than the code. For the agent that fixed the defect.
 
@@ -62,7 +62,7 @@ A change targets the kind of defect, never this one instance. So it never adds t
 6. **Ask the person about templates, gates and scripts.** Input: the proposals. A proposal needs the person's yes when it changes a template: a page under `docs/templates/`, or a reviewer's dispatch template on a review page, such as the [review orchestrator](review-orchestrator.md)'s. It needs one too when it changes a machinery path that [changing the machinery](../changing-the-machinery.md#what-counts-as-machinery) lists, or a file the eval covers, such as AGENTS.md or INDEX.md. Send those to the person, one line each, with your recommendation. Default with no answer: apply none of them, and list each as waiting in the report. Output: each such proposal approved, declined or waiting.
 7. **Apply the changes.** Input: the proposals that need no yes, and those the person approved. Apply each by the route the [size gate](../size-the-work.md#the-gate) gives it. A machinery change follows [changing the machinery](../changing-the-machinery.md), and a change to a guidance page gets its [instruction review](instruction-review.md) at the commit. The commit that applies a change also adds its row to the [lessons log](../records/lessons.md), as the [lessons log template](../templates/lessons-log.md#when-to-add-a-row) says. Output: each change committed with its lesson, or stopped where its route stopped it. A change whose route stops follows that route's own stop and report, and is listed in this report as not applied, with the reason.
 8. **Record the replay case and the waiting lessons.** Input: the defect, its classes and the changes. An eval case that replays the miss waits for the eval system for procedures, planned for M4. Until then, describe the case in the report: the code at the defect commit, the review's request, and what the review must find. A change not applied adds no lessons-log row now. When it waits on the person's yes or is queued, its line in the report or the queue carries the lesson in one line. The commit that later makes it adds the row. Output: the case description and each waiting lesson.
-9. **Write it down and report.** Input: the outputs of steps 1 to 8. When the fix came from a hand-off plan, append the analysis under that plan's "Results", stage the plan by name and commit it. Otherwise the report is the only copy, and you say so in it. Report the defect commit, the covering reviews, the sightings, each miss with its class, and each proposal as applied, waiting or declined. Mark each claim verified or inferred.
+9. **Write it down and report.** Input: the outputs of steps 1 to 8. When the fix came from a hand-off plan, append the analysis under that plan's "Results", stage the plan by name and commit it. Otherwise the report is the only copy, and you say so in it. Report the defect commit, the covering reviews, the sightings, each miss with its class, and each proposal as applied, waiting or declined. Mark each claim verified or inferred, as [procedure endings](../procedure-endings.md#the-report) says. When the branch checked out is not `main`, push nothing: the plan commit stays on that branch and reaches main with its pull request, and the report names it.
 
 Stop when the report is written. Stop early, and report, when the fix is not committed (step 1) or no review covered the defect (step 2).
 
@@ -77,3 +77,4 @@ Stop when the report is written. Stop early, and report, when the fix is not com
 | A proposal that changes a template, including a reviewer's dispatch template, a machinery path or a file the eval covers is applied only on the person's yes. | `prose` |
 | Never post a comment or a reply on a pull request during this procedure. | `prose` |
 | Mark every claim in the report verified or inferred. | `eval:fix-a-bug` |
+| Off `main`, push nothing; the plan commit reaches main with the branch's pull request. | `prose` |

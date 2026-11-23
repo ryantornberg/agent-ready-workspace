@@ -18,7 +18,7 @@ A person runs it by hand once per milestone, before the milestone's record is si
 | The situation | Go to |
 |---|---|
 | You want to know how a past session's prompt shaped its work: what it assumed, guessed or skipped | This page. |
-| A review covered code that held a defect, and you want to know why the review missed it | [Escape analysis](escape-analysis.md). |
+| A review covered code that held a defect, and you want to know why the review missed it | [Defect escape analysis](escape-analysis.md). |
 | Something fails in the code and you want its cause | [Debugging](debugging.md). |
 
 The retrospective writes nothing on the transcript, pages or code it reads, helpers included: it edits no page and writes no record of its own. The report is its output. If you had to ask a person something this workspace should have answered, add it to the [question log](../question-log.md) before you finish, committed as that page says.

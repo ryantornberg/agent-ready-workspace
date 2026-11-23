@@ -2,7 +2,7 @@
 kind: playbook
 proof: unproven
 prove-by: M10
-last-reviewed: 2026-11-22
+last-reviewed: 2026-11-23
 ---
 
 # Docs audit
@@ -21,7 +21,7 @@ Until M10 schedules the docs audit, a person runs it by hand once per milestone,
 | The whole `docs/` tree needs reading for drift between pages, on the cadence above or on request | This page. |
 | A page is known to be wrong and the fix is clear | No audit. Size the fix at the [size gate](../size-the-work.md#the-gate). |
 
-The audit, helpers included, edits no page or code, fixes no finding and writes no record of its own. The report is its output. The one thing it may add is a question-log entry: if you had to ask a person something this workspace should have answered, add it to the [question log](../question-log.md) before you finish, committed as that page says.
+The audit, helpers included, edits no page or code, fixes no finding and writes no record of its own. The report is its output. The one thing it may add is a question-log entry: if you had to ask a person something this workspace should have answered, log it before the report, as [procedure endings](../procedure-endings.md#the-question-log-entry) says.
 
 ## Steps
 
@@ -29,7 +29,7 @@ The audit, helpers included, edits no page or code, fixes no finding and writes 
 2. **Run the checks.** Input: the scope. Run `python3 ws.py check` and `python3 ws.py check --phase ci`. Each prints its findings, and the first also lists every page past its review date as a warning. Then run `python3 ws.py rules`, which lists every rule with its page and tag, and ends with a count per kind of tag. You may hand these three commands to a helper at the mechanical tier, as [orchestration](../orchestration.md#handing-work-off) says, asking for the output unchanged. A failing check is a finding, not a stop. If a command cannot run at all, such as a manifest the runner refuses, go to step 5 and report that, with its message. Output: the check findings, the stale pages and the rules list.
 3. **Do the judgment pass.** Input: the scope and the rules list. The checks prove that nothing is dangling, not that pages agree. Do this pass yourself; never hand it off. Work through the five items of [the judgment pass](#the-judgment-pass) below, and write down each finding with its pages and evidence. Output: the judgment findings. Default: when an item finds nothing, record what you checked.
 4. **Rank the findings.** Input: the findings of steps 2 and 3. Put each in one category from [the categories](#the-categories), and order the categories as that table does. Within a category, put first the pages more sessions load: the contract and the index, then the catalog and the how-to index, then the rest. Output: the ranked cleanup list.
-5. **Report.** Input: the ranked list, or the reason the audit stopped. Before you report: if you had to ask a person something this workspace should have answered, add it to the [question log](../question-log.md), and commit it as that page says. Report to the person in the session's reply, with each claim marked verified or inferred, as [the definition of done](../definition-of-done.md#the-report) says. Give the commit you audited, then the list: category, page, finding, evidence and a proposed fix. Then offer the fixes, and wait for the person to choose. A fix the person says yes to is new work, and starts at the [size gate](../size-the-work.md#the-gate). A small fix that changes pages only follows [extend the workspace](../extend-the-workspace.md). A change to scripts, parts, hooks or CI follows [changing the machinery](../changing-the-machinery.md). A finding worth keeping on a page goes through the research ladder's [offer to write a finding down](../research-ladder.md#offer-to-write-a-finding-down). Apart from a question-log entry, the audit wrote nothing, so nothing else is left uncommitted. Stop here.
+5. **Report.** Input: the ranked list, or the reason the audit stopped. Before you report: if you had to ask a person something this workspace should have answered, log it, commit it and push it as [procedure endings](../procedure-endings.md#the-question-log-entry) says. Report to the person in the session's reply, with each claim marked verified or inferred, as [the definition of done](../definition-of-done.md#the-report) says. Give the commit you audited, then the list: category, page, finding, evidence and a proposed fix. Then offer the fixes, and wait for the person to choose. A fix the person says yes to is new work, and starts at the [size gate](../size-the-work.md#the-gate). A small fix that changes pages only follows [extend the workspace](../extend-the-workspace.md). A change to scripts, parts, hooks or CI follows [changing the machinery](../changing-the-machinery.md). A finding worth keeping on a page goes through the research ladder's [offer to write a finding down](../research-ladder.md#offer-to-write-a-finding-down). Apart from a question-log entry, the audit wrote nothing, so nothing else is left uncommitted. Stop here.
 
 ## The judgment pass
 
@@ -72,9 +72,9 @@ Five items. For each, the command lists candidates; reading the pages decides wh
 
 | Rule | Enforced by |
 |---|---|
-| The audit changes no line of the pages, code or records it reads, helpers included; the report is its output. | `prose` |
+| The audit changes no line of the pages, code or records it reads, helpers included, except new question-log rows; the report is its output. | `prose` |
 | The session running the audit does the judgment pass itself; only the check output may be handed to a helper. | `prose` |
 | The audit runs once per milestone, before its record is signed off, and on the maintain page's events; the maintainer owns it. | `prose` |
 | A defect the audit finds is reported, and fixed only on the person's yes, as new work that starts at the size gate. | `prose` |
 | Mark every claim in the report verified or inferred. | `eval:fix-a-bug` |
-| If you had to ask a person something this workspace should have answered, add it to the question log before you finish, and commit it staged by name. | `prose` |
+| If you had to ask a person something this workspace should have answered, log it before the report, as procedure endings says. | `prose` |

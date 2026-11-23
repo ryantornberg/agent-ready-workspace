@@ -26,9 +26,9 @@ Before you write a standalone spec, check whether a playbook covers the task. If
 
 - A failure whose cause is not known: [debugging](../playbooks/debugging.md).
 - Drift between the pages of `docs/`: [docs audit](../playbooks/docs-audit.md).
-- Why a review missed a defect: [escape analysis](../playbooks/escape-analysis.md).
+- Why a review missed a defect: [defect escape analysis](../playbooks/escape-analysis.md).
 - How a prompt shaped a past session: [prompt retrospective](../playbooks/prompt-retrospective.md).
-- A question for sources outside this workspace: [search every source](../playbooks/search-every-source.md).
+- A question for sources outside this workspace: [federated search](../playbooks/search-every-source.md).
 
 Write a standalone spec only for a task no playbook covers. Even then, write one only when the person asks for a record to keep, or a plan will cite it. Otherwise, answer in the session's report.
 
@@ -185,7 +185,7 @@ Where its findings go:
 
 - An action is a change, and goes to [the gate](../size-the-work.md#the-gate).
 - A lesson goes to the [lessons log](lessons-log.md) in the same commit as the change that prevents it, as that template says. When that change is queued instead of made, the queue line carries the lesson in one line.
-- A defect that a review missed goes to [escape analysis](../playbooks/escape-analysis.md).
+- A defect that a review missed goes to [defect escape analysis](../playbooks/escape-analysis.md).
 
 ### Baseline
 

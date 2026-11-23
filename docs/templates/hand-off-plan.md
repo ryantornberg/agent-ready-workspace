@@ -130,7 +130,7 @@ milestone: M<n>
 
 ## Red team
 
-Record: <link to the adversarial review record>.
+Record: <link to the red team review record>.
 
 | # | Finding | Disposition | Action |
 |---|---|---|---|

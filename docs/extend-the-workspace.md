@@ -2,7 +2,7 @@
 kind: how-to
 proof: unproven
 prove-by: M5
-last-reviewed: 2026-11-22
+last-reviewed: 2026-11-23
 ---
 
 # Extend the workspace
@@ -59,9 +59,9 @@ Name a file for its task or topic, in lower-case words joined by hyphens, such a
    - A route in: one sentence on the page a reader is on when they need yours, naming the condition and linking your page. Where your page and another could both fire on one request, say on your page which one wins, and when.
 
    Some files are covered by the eval, so a change to them needs a new eval run, as the contract's rules say. They are the files [evals/arms.json](../evals/arms.json) gives the guided arm (`AGENTS.md`, `CLAUDE.md`, `INDEX.md`, [fix a bug](playbooks/fix-a-bug.md) and [the definition of done](definition-of-done.md)), and any page a case in `evals/cases/` adds, such as [the live order service's rule page](rules/orders-api.md). Default: make no change to them now, whether a new row or a fix in place; name it in the report as queued, for the next batch of eval-covered edits. When a check refuses the commit without the change, or an approved plan makes it, such as an adoption's, follow [maintain the workspace](maintain-the-workspace.md#when-a-duty-falls-due)'s step 4: the change goes on a branch, which is not merged until the eval run is on record. Output: the rows and the sentence.
-6. **Run the checks.** Input: the changed files. Run `python3 ws.py check`. Fix each finding that names a file you wrote, and run it again. Output: no finding on your files. If a finding on your files will not clear, leave the files uncommitted and go to step 8: report the finding and what you tried.
-7. **Review and commit.** Input: the checked files. Follow [the instruction review](playbooks/instruction-review.md): a fresh session reviews the page, you settle each finding, and the commit names the record in its trailer. Stage the files by name and commit, as [commits](commits.md) says. Output: the commit. If a finding needs a person's decision and they have not answered, leave the files uncommitted and go to step 8 with the open findings. If the commit check refuses, fix the cause and commit again; if it refuses a file you did not write, leave that file out.
-8. **Report.** Input: the outputs above. Report to the person in the session's reply, each claim marked verified or inferred, as [the definition of done](definition-of-done.md#the-report) says. Name the page, its rows, its route in, and every row queued for the next eval run. If you had to ask the person something this workspace should have answered, log it in the [question log](question-log.md) first, and commit it as that page says.
+6. **Run the checks.** Input: the changed files. Run `python3 ws.py check`. Fix each finding that names a file you wrote, and run it again. Output: no finding on your files. On a branch that step 5 sent through maintain's step 4, an `eval_record` finding naming a playbook, such as [fix a bug](playbooks/fix-a-bug.md), is expected until the eval run is on record. Unless your change is to that playbook, it is not a finding on your files: leave it and carry on as that step says. If a finding on your files will not clear, leave the files uncommitted and go to step 8: report the finding and what you tried.
+7. **Review and commit.** Input: the checked files. Follow [the instruction review](playbooks/instruction-review.md): a fresh session reviews the page, you settle each finding, and the commit names the record in its trailer. Commit them as [procedure endings](procedure-endings.md#the-commit) says. By exception to that page's place for a page commit, a change step 5 sent to a branch is committed on that branch. Output: the commit. If a finding needs a person's decision and they have not answered, leave the files uncommitted and go to step 8 with the open findings. If the commit check refuses, fix the cause and commit again; if it refuses a file you did not write, leave that file out. On step 5's branch, an `eval_record` refusal is the expected one of step 6: commit as maintain's step 4 and [the trap it links](changing-the-machinery.md#traps) say, rather than fixing it or leaving a file out.
+8. **Finish.** Input: the outputs above. End as [procedure endings](procedure-endings.md) says: the question-log entry and its commit, the push, and the report. By exception to its push table's rows for pages, a branch from step 5 is pushed as a branch, as [the trap](changing-the-machinery.md#traps) says, never to main; who pushes it follows that table's row for machinery. The report names the page, its rows, its route in, every row queued for the next eval run, and a branch waiting for its eval run.
 
 Stop when the report is given. Every stop in steps 3, 6 and 7 ends in that report, with what was left uncommitted and why.
 
@@ -90,5 +90,5 @@ Once the page is committed, its upkeep, such as its review date and the rows tha
 | A rule page holds only facts that hold for every edit its pattern matches. | `prose` |
 | A finding the workspace should have told you is written only on the person's yes to the research ladder's offer. | `prose` |
 | The commit that adds the page names its instruction review. | `review_trailer#a guidance page changed with no trailer fails` |
-| Stage files by name. | `edit_ledger#a path the ledger does not hold fails, whatever staged it` |
-| Mark every claim in the report verified or inferred. | `eval:fix-a-bug` |
+| The procedure ends as [procedure endings](procedure-endings.md) says, which holds the staging and report rules. | `edit_ledger#a path the ledger does not hold fails, whatever staged it`, `eval:fix-a-bug` |
+| A branch from step 5 is pushed as a branch, never to main, until its eval run is on record. | `prose` |

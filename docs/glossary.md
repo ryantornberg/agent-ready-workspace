@@ -1,6 +1,6 @@
 ---
 kind: reference
-last-reviewed: 2026-11-21
+last-reviewed: 2026-11-23
 ---
 
 # Glossary
@@ -19,7 +19,7 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Contract | `AGENTS.md`: the rules every agent reads first. |
 | Critic | A fresh session that reviews an artifact, such as a plan, without the author's reasoning. See [fresh context for critics](orchestration.md#fresh-context-for-critics) and [red team review](playbooks/red-team-review.md). |
 | Dimension | One side of a change that one fresh reviewer judges, such as security or architecture. The [review orchestrator](playbooks/review-orchestrator.md) dispatches one session per dimension, except the agent-instructions dimension, which the instruction review at each commit already covers. |
-| Escape | A defect that passed a review which covered its code. [Escape analysis](playbooks/escape-analysis.md) finds why. |
+| Escape | A defect that passed a review which covered its code. [Defect escape analysis](playbooks/escape-analysis.md) finds why. |
 | Handoff note | The note a session writes when it must stop mid-task, so a later session can carry on. See [handoff](playbooks/handoff.md). Not a delegated task, and not a hand-off plan. |
 | Hook | A part that runs on one agent tool event. Before a tool call it refuses or reminds; when a session starts or ends it only reminds. A git hook, such as the commit-msg or pre-push hook, is a different thing: a script in `.githooks/` that runs the checks. |
 | Instance | A copy of this workspace that a team adopts and runs on its own code. See [adopt the workspace](adopt-the-workspace.md). |
@@ -30,9 +30,10 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Ledger | The list of files an agent's edit tools wrote, which the commit check compares with what is staged. |
 | Machinery | Scripts, parts, hooks and CI. They change on a branch that passes CI on three systems. See [changing the machinery](changing-the-machinery.md). |
 | Manifest | `workspace.json`: the parts in use, the tier binding and the milestones being built. |
-| Outside source | Anywhere an answer may sit that is not this repository: a tracker, a wiki, mail, chat or a code host's discussions. See [search every source](playbooks/search-every-source.md). |
+| Outside source | Anywhere an answer may sit that is not this repository: a tracker, a wiki, mail, chat or a code host's discussions. See [federated search](playbooks/search-every-source.md). |
 | Part | One check or hook: a Python file and its cases. See [parts](parts.md). |
 | Proven | A playbook or how-to with a real run on record and an eval that beats both the bare model and two lines. See [decision 0006](decisions/0006-what-proven-means.md). |
+| Red team | The critic that attacks a finished hand-off plan or requirements document before anyone builds from it. See [red team review](playbooks/red-team-review.md). |
 | Rule page | A page under `docs/rules/` shown to the agent when it edits a file its `applies-to` matches. |
 | Spec | What a piece of work will make true: the goal, non-goals and success criteria of its hand-off plan, which a person agrees to before the rest of the plan is written. See [the spec process](size-the-work.md#the-spec-process). |
 | Spine | The steps of a tracker or git-host procedure that hold on any tracker or host. Each team writes its own trap table beside it, planned for M8. See [tracker operations](playbooks/tracker-operations.md) and [git-host operations](playbooks/git-host-operations.md). |
