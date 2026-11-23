@@ -761,6 +761,33 @@ Slice B2 stopped after batch 4 under the stop rule. The maintainer's answer to t
 
 **The re-check rules on declined findings.** The fresh re-check also rules on every finding the builder declined. A decline the re-check rejects counts as a finding that survived the fix round.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+The maintainer ended slice B2's porting in the answer to Q29 in the workspace queue, and asked for the plan to be revisited. The revisit proposed three revisions for B2's remainder and for B3 to B5, and the maintainer approved all three. No criterion is dropped or weakened. Criterion 20 moves from B2 to B2t.
+
+**B3 opens with two changes, before any other page.** Both are guidance pages and get an instruction review each.
+
+1. The instruction review gains a severity mark, on its page and in its record format. The reviewer marks each finding blocking or not; the builder cannot lower it. A finding is blocking when an agent following the page would write where it may not, skip a person's yes, run a command that fails, or follow a step that contradicts the contract or a rule page.
+2. A reference page, `docs/procedure-endings.md`, states once each rule a procedure ends with, carried to its end: staging by name and the review trailer; who commits and pushes, and when; the question-log entry and how it is committed; the report with each claim marked verified or inferred; and asking before an outward write. The question log's paragraph on adding an entry moves there, since a record takes no review. Pages written from B3 on link the page instead of restating it, and the review counts a restated rule as a finding. A batch's shared-interface sheet keeps only what is local to that batch. B2's pages switch to the link when a slice next edits them.
+
+These come from B3's row, which already holds the authoring conventions and the pull request standard; they move to the front.
+
+**The stop rule's instruction-review item changes for lane B.** For B2t, B3, B4 and B5 it replaces the class count, and B2's rules of Q14 and Q19 end with B2. Each batch gets one fix round, and a fix to a shared rule sweeps every page holding it. A fresh re-check reads every blocking fix and every page holding a changed shared rule, and rules on every blocking finding the builder declined. The rule fires only when a blocking finding survives the fix round, a decline of a blocking finding is rejected, or a fix creates a blocking finding. A non-blocking finding is fixed once in the round. What remains goes to a "Known defects" section of the page's review record, for the page's `prove-by` milestone or the docs audit. A missing `INDEX.md` row still does not count. The plan's other stop items, the limit of two fix rounds on the same failure among them, are unchanged. The routed arm in slice Z (criterion 54) still measures whether the unproven pages harm the proven one.
+
+**B2's remainder moves to slices with a gate of their own.**
+
+| Slice | Work | Tier | Done when |
+|---|---|---|---|
+| B2t, the tutorials and B2's open items | The two tutorials, under B2's brief and the change of 2026-11-21 on Git's bash. One fix round on the 18 items left open under B2's results, linking `docs/procedure-endings.md` on each page it edits. A fresh re-check, under the stop rule above. | worker; driver for the reviews | Criterion 20; each of the 18 items fixed, or in its page's "Known defects" |
+
+B2t starts once B3's two opening changes merge. B3's other pages may be built beside it.
+
+Slice Z writes the one-line request map, then links it from the contract as its row says. The map gets an instruction review, as Z's other edits do.
+
+The private ledger maps the two tutorials to B2t and the request map to slice Z.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -1311,6 +1338,16 @@ Decisions made in batch 5's opening:
 Not done: batch 5, the two tutorials and the request map; the 6 breaks, the 4 older defects and the decision interview's 2 findings in the table; the question log's four defects; and the handoff and review orchestrator lines.
 Parked: Q29.
 Next: the maintainer — answer Q29 in the workspace queue, then a B2 session resumes batch 5.
+
+#### Ended, 2026-11-22
+
+The maintainer ended B2's porting in the answer to Q29, and approved a revision of the plan the same day, recorded under "Changes after approval". Batches 1 to 4 and batch 5's opening fix round stand as built. No page was edited when B2 ended.
+
+- **Verified, unmet:** criterion 20. The tutorial runner passes with no tutorial to run. The two tutorials move to slice B2t.
+- **Verified, moved:** the request map to slice Z; the 18 open items to B2t; the private ledger's rows for the tutorials and the map to B2t and slice Z.
+- **Inferred, why the fix rounds kept breaking shared rules:** each page restated rules several pages share, so a fix changed one copy and left the others. The sheet named those rules but not how each ends. The sweep closed the restated rules, and the breaks moved to the places where one step or page hands off to the next. Breaks fell from 10 to 6, but open items rose from 16 to 18, so further rounds were not converging.
+
+Next: a B3 session builds B3's two opening changes; B2t follows once they merge.
 
 ### Queued for slice Z
 
