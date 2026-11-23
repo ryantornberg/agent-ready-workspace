@@ -17,7 +17,7 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Case | Test data a part runs when it loads, except a hook's cases in a hook call when they passed before on the same files; or an eval case, a request an agent is given in each arm. |
 | Check | A part that reads a snapshot of files and reports findings. By default it runs at the commit and in CI; a check may name other phases, such as the push or the nightly run. |
 | Contract | `AGENTS.md`: the rules every agent reads first. |
-| Critic | A fresh session that reviews an artifact, such as a plan, without the author's reasoning. See [fresh context for critics](orchestration.md#fresh-context-for-critics) and [adversarial review](playbooks/adversarial-review.md). |
+| Critic | A fresh session that reviews an artifact, such as a plan, without the author's reasoning. See [fresh context for critics](orchestration.md#fresh-context-for-critics) and [red team review](playbooks/red-team-review.md). |
 | Dimension | One side of a change that one fresh reviewer judges, such as security or architecture. The [review orchestrator](playbooks/review-orchestrator.md) dispatches one session per dimension, except the agent-instructions dimension, which the instruction review at each commit already covers. |
 | Escape | A defect that passed a review which covered its code. [Escape analysis](playbooks/escape-analysis.md) finds why. |
 | Handoff note | The note a session writes when it must stop mid-task, so a later session can carry on. See [handoff](playbooks/handoff.md). Not a delegated task, and not a hand-off plan. |

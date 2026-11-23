@@ -15,7 +15,7 @@ What this folder holds: records of work that happened, kept as evidence. For any
 | Investigation, audit, retrospective or baseline | `specs/` | `<YYYY-MM-DD>-<variant>-<topic>.md` | [Spec template](../templates/spec.md) |
 | Defect register | [defects.md](defects.md) | one file | [Defect register template](../templates/defect-register.md) |
 | Lessons log | [lessons.md](lessons.md) | one file | [Lessons log template](../templates/lessons-log.md) |
-| Red team review record | `adversarial-reviews/` | as its playbook says | [Adversarial review, "The record"](../playbooks/adversarial-review.md#the-record) |
+| Red team review record | `adversarial-reviews/` | as its playbook says | [Red team review, "The record"](../playbooks/red-team-review.md#the-record) |
 | Instruction review record | [instruction-reviews/](instruction-reviews/README.md), with its index | as its playbook says | [Instruction review, "The record"](../playbooks/instruction-review.md#the-record) |
 
 Four records live elsewhere. The [question log](../question-log.md) sits at the top of `docs/`, where the contract links it. A design spec and an interview summary sit inside their hand-off plan in `docs/plans/`. A code review's record sits in its hand-off plan's "Results" or its pull request's description, as step 10 of the [review orchestrator](../playbooks/review-orchestrator.md#steps) says. Every template and record shape is indexed in [templates](../templates/README.md).

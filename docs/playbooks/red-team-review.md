@@ -45,7 +45,7 @@ Tier: driver
 Review this document as an adversary: <document path>
 It rests on: <sources>
 Check against the repository each claim the document's decisions rest on.
-Write ranked findings, an explicit verdict and what survives to <record path>, in the shape under "The record" in docs/playbooks/adversarial-review.md. Use <date> as the record's date.
+Write ranked findings, an explicit verdict and what survives to <record path>, in the shape under "The record" in docs/playbooks/red-team-review.md. Use <date> as the record's date.
 Edit nothing else.
 Reply with the record's path, the verdict, and at most five lines on the top findings.
 ```

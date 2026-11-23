@@ -17,7 +17,7 @@ It fits a diff of code: a branch or a pull request that changes files under `src
 
 - It runs as one dimension of a full review, which the [review orchestrator](review-orchestrator.md) runs, by hand until its machinery lands in M4. There the dispatched reviewer does step 4 only, and replies in the table that page's template gives, with the "Traces to" value at the start of each Finding cell, then the two closing lines below, then the `Dimension complete: <dimension>` line that template ends with. The orchestrator and the author do the rest, as that page says.
 - The steps below, in full, are for a request for an architecture review alone, of a branch or pull request.
-- When the change is a hand-off plan or a requirements document, not a diff, use [adversarial review](adversarial-review.md) instead.
+- When the change is a hand-off plan or a requirements document, not a diff, use [red team review](red-team-review.md) instead.
 - When the diff changes guidance pages, those pages go to the [instruction review](instruction-review.md); this review takes the code in the same diff.
 - When a finding is about how the code is written, not about what the system has decided, it is not this review's. Leave it to the code dimension of the review, which [code review](../code-review.md) explains.
 - When a finding is about code that already exists for the job, it belongs to the [reuse checklist](reuse-checklist.md).

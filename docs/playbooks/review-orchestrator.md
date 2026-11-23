@@ -26,7 +26,7 @@ Another page wins in these cases:
 | The request | Go to |
 |---|---|
 | A change made only of guidance pages, such as `docs/` pages or `AGENTS.md` | [The instruction review](instruction-review.md), at each commit. This playbook does not run. |
-| A hand-off plan or a requirements document, not a diff | [Adversarial review](adversarial-review.md). |
+| A hand-off plan or a requirements document, not a diff | [Red team review](red-team-review.md). |
 | You are the pull request's author, and you want to work through the comments on it | [Feedback walk-through](feedback-walkthrough.md). |
 | A defect turned up later in code a review covered | [Escape analysis](escape-analysis.md). |
 | The request names one dimension only, such as "check this for reuse" | That dimension's page alone: [architecture review](architecture-review.md), [reuse checklist](reuse-checklist.md) or [impact analysis](impact-analysis.md). When the request asks for "a review" of a branch or pull request, this playbook wins and runs them as dimensions. |

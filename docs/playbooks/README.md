@@ -21,7 +21,7 @@ Rows run roughly in the order a piece of work meets them: before building, while
 |---|---|---|---|
 | Before building | [Decision interview](decision-interview.md) | Design questions are still open on work that failed the size gate, after its goal and non-goals are written; or a person asks to be interviewed on a topic. | unproven, M9 |
 | Before building | [Throwaway prototype](throwaway-prototype.md) | A question has to be seen running to be answered, such as how state changes step by step or how a screen should look. | unproven, M4 |
-| Before building | [Adversarial review](adversarial-review.md) | A finished hand-off plan or requirements document needs a fresh critic to attack it before anyone builds from it; not for diffs or diagnoses. | unproven, M9 |
+| Before building | [Red team review](red-team-review.md) | A finished hand-off plan or requirements document needs a fresh critic to attack it before anyone builds from it; not for diffs or diagnoses. | unproven, M9 |
 | While building | [Debugging](debugging.md) | Something fails and you cannot yet say why, so you cannot write a test that fails for the reason in the report. It finds the cause, then hands a small fix on to fix a bug. | unproven, M4 |
 | While building | [Fix a bug](fix-a-bug.md) | A change that passes the size gate: small, easy to reverse, in one repository and under a day of work. It is written for a bug whose cause you can pin in a failing test. | proven |
 | While building | [Test first](test-first.md) | You are writing code that adds or changes behavior on a route already chosen, such as a slice of a hand-off plan, one failing test at a time. | unproven, M4 |

@@ -134,7 +134,7 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/safe-refactor.md](docs/safe-refactor.md) | unproven | M4 |
 | [docs/research-ladder.md](docs/research-ladder.md) | unproven | M4 |
 | [docs/playbooks/decision-interview.md](docs/playbooks/decision-interview.md) | unproven | M9 |
-| [docs/playbooks/adversarial-review.md](docs/playbooks/adversarial-review.md) | unproven | M9 |
+| [docs/playbooks/red-team-review.md](docs/playbooks/red-team-review.md) | unproven | M9 |
 | [docs/size-the-work.md#the-feature-ladder](docs/size-the-work.md#the-feature-ladder) | unproven | M9 |
 | [docs/size-the-work.md#the-spec-process](docs/size-the-work.md#the-spec-process) | unproven | M9 |
 | [docs/playbooks/review-orchestrator.md](docs/playbooks/review-orchestrator.md) | unproven | M6 |
