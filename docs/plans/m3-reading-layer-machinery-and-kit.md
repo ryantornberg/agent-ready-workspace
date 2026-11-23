@@ -877,6 +877,14 @@ C6's proposed revision, approved as proposed. It aligns the C6 row and criterion
 
 ### 2026-11-23
 
+Approved by: the maintainer, 2026-11-22
+
+One item for slice B2t, from the maintainer's answer to Q31 in the workspace queue. It adds to B2t's scope; no criterion is dropped or weakened.
+
+**B2t updates the guard lines C5e left stale (Q31).** Three B2 pages still say the outward-write guard is planned in slice C5e, which has since built it: the review orchestrator's step 11, and the guard rows of tracker operations and git-host operations. B2t corrects the three in its fix round, under the instruction review it already runs.
+
+### 2026-11-23
+
 Approved by: the maintainer, 2026-11-23
 
 A new slice, KILLFIX, from main's red CI after B3's second resume: C6's kill test failed once on macOS with Python 3.9, and the maintainer had the failed job rerun. KILLFIX has no row in the slice tables; this entry is its scope. No criterion is dropped or weakened.
