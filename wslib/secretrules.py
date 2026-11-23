@@ -7,7 +7,8 @@ import re
 SHELLS = frozenset({"sh", "bash", "zsh", "dash", "ksh", "ash", "mksh", "fish", "csh", "tcsh", "pwsh", "powershell",
                     "cmd", "busybox"})
 RUNNERS = frozenset({"sudo", "doas", "su", "command", "exec", "time", "nohup", "timeout", "nice", "xargs", "builtin",
-                     "stdbuf", "setsid", "script", "watch", "chroot", "unbuffer", "runuser", "start"})
+                     "stdbuf", "setsid", "script", "watch", "chroot", "unbuffer", "runuser", "start", "find",
+                     "parallel"})
 REFUSED = SHELLS | RUNNERS | {"env", "printenv"}
 SUFFIXES = (".exe", ".cmd", ".bat", ".com")
 # Characters cmd.exe reads in a batch file's arguments, whatever Python passes (Python's subprocess documentation,

@@ -2,8 +2,12 @@
 
     python3 ws.py with-secrets NAME [NAME ...] -- PROGRAM [ARGUMENT ...]
 
-The values come from the file that the `secrets_shell` entry of the manifest names in "file", `.env` by default. A
+The values come from the file the WS_SECRETS_FILE environment variable names, when a person sets it in their own
+shell, or else from the file that the `secrets_shell` entry of the manifest names in "file", `.env` by default. A
 relative name is read from the top of the main working copy, so every linked worktree reads the same file. The
+variable is for a person whose sandbox denies the shared file to every process, as Codex CLI's agent-ready profile
+does, so the manifest everyone shares stays as it is; the `secrets_shell` hook refuses an agent's command that sets
+it. The
 agent tools deny reading that file, and the `secrets_shell` hook refuses a shell command that names it, so the
 values reach the child without passing through the agent's context or its shell.
 
@@ -33,6 +37,7 @@ import subprocess
 from .secretrules import REFUSED, batch_refusal, program_name, refusal  # noqa: F401  REFUSED is read by tests
 
 DEFAULT_FILE = ".env"
+VARIABLE = "WS_SECRETS_FILE"
 NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -82,9 +87,10 @@ def read(text):
 
 
 def file_of(root, entry):
-    """The secrets file's path: the entry's "file", or .env, relative to the main working copy's top."""
+    """The secrets file's path: WS_SECRETS_FILE, else the entry's "file", else .env, relative to the main working
+    copy's top."""
     from . import lease as leases
-    name = (entry or {}).get("file", DEFAULT_FILE)
+    name = os.environ.get(VARIABLE) or (entry or {}).get("file", DEFAULT_FILE)
     if not isinstance(name, str) or not name:
         raise SecretsError('the "file" of the secrets_shell entry in workspace.json must be a file name')
     path = pathlib.Path(name).expanduser()
@@ -113,8 +119,8 @@ def run(root, rest, entry=None):
         raise SecretsError(f"no secrets file at {path}; a person writes it, with one NAME=value per line")
     except PermissionError:
         raise SecretsError(f"cannot read the secrets file {path}: permission denied. Codex CLI's agent-ready profile "
-                           f"denies it to every process; with that profile, a person sets the \"file\" of "
-                           f"secrets_shell in workspace.json to a path outside the workspace")
+                           f"denies it to every process; with that profile, a person keeps the file outside the workspace "
+                           f"and sets {VARIABLE} to its path in their own shell")
     except (OSError, UnicodeDecodeError) as error:
         raise SecretsError(f"cannot read the secrets file {path}: {type(error).__name__}")
     missing = [name for name in names if name not in values]

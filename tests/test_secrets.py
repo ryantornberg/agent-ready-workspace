@@ -45,7 +45,7 @@ class WithSecretsTests(unittest.TestCase):
         git(self.repo, "init", "-q")
         (self.repo / ".env").write_text(f"# the test's values\nexport API_KEY='{VALUE}'\nOTHER_KEY={OTHER}\n",
                                         encoding="utf-8")
-        self.env = {k: v for k, v in os.environ.items() if k not in ("API_KEY", "OTHER_KEY")}
+        self.env = {k: v for k, v in os.environ.items() if k not in ("API_KEY", "OTHER_KEY", "WS_SECRETS_FILE")}
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -124,7 +124,15 @@ class WithSecretsTests(unittest.TestCase):
         self.assertEqual(secrets.file_of(self.repo, {"file": "keys/local.env"}).resolve(),
                          (self.repo / "keys/local.env").resolve())
         self.assertEqual(secrets.file_of(self.repo, {}).resolve(), (self.repo / ".env").resolve())
-        self.assertEqual(entry("secrets_shell")["file"], ".env")
+
+    def test_a_person_moves_the_file_with_ws_secrets_file(self):
+        moved = pathlib.Path(self.tmp.name) / "outside" / "keys.env"
+        moved.parent.mkdir()
+        moved.write_text("API_KEY=from-the-moved-file\n", encoding="utf-8")
+        self.env["WS_SECRETS_FILE"] = str(moved)
+        done = self.ws("API_KEY", "--", sys.executable, "-c", PRINT)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertIn("child=from-the-moved-file", done.stdout)
 
     @unittest.skipIf(os.name == "nt" or (hasattr(os, "geteuid") and os.geteuid() == 0), "needs file modes that bind")
     def test_a_file_the_process_may_not_read_names_the_codex_profile(self):

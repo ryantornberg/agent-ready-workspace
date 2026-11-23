@@ -80,7 +80,7 @@ def _patterns(config):
     found = []
     extra = [config["file"]] if isinstance(config.get("file"), str) and config["file"] else []
     for pattern in list(config.get("secrets", ())) + list(config.get("home", ())) + extra + [ENVIRON]:
-        text = re.sub(r"^(?:~/|\./)", "", pattern.replace("\\", "/"))
+        text = re.sub(r"^(?:~/|\./|[A-Za-z]:/|/+)", "", pattern.replace("\\", "/"))
         while text.startswith("**/"):
             text = text[3:]
         sample = re.sub(r"\*\*|\*|\?", "x", text)
@@ -170,7 +170,7 @@ def _ps_environment(args):
         if word.startswith("-"):
             if not word.startswith("--") and "E" in word:
                 return True
-        elif re.match(r"^[A-Za-z]+$", word) and "e" in word and (i == 0 or args[i - 1] not in PS_VALUES):
+        elif re.match(r"^[A-Za-z]+$", word) and re.search("[eE]", word) and (i == 0 or args[i - 1] not in PS_VALUES):
             return True
     return False
 
@@ -210,6 +210,9 @@ def _child_refusal(child):
     if reason:
         return f"`ws.py with-secrets` refuses this program itself: {reason}"
     for inner in shell.analyze(shlex.join(child)):
+        reason = secretrules.refusal(inner["program"] or "") or _dump(inner["program"], inner["args"])
+        if reason or inner["wrappers"] or inner["unresolved"]:
+            return f"`ws.py with-secrets` may not run a program that runs another or prints the environment: {child[0]}"
         if _with_secrets_child(inner) is not None:
             return "`ws.py with-secrets` inside another is refused: its program would go unjudged"
         if inner["git"] or inner["gh"] or inner["writes"]:
@@ -249,9 +252,22 @@ def _inner_text(words, out):
         _input_redirections(shell.parse(" ".join(texts[1:])), out)
     elif name in shell.SHELL_PROGRAMS:
         at = next((i for i, text in enumerate(texts[1:], 1) if re.match(r"^-[A-Za-z]*c[A-Za-z]*$", text)), None)
-        body = next((text for text in texts[at + 1:] if not text.startswith(("-", "+"))), None) if at else None
-        if body is not None:                  # -c, -lc, -ec, and -c -e: the first word that is no option
+        body = _shell_text(texts[at + 1:]) if at else None
+        if body is not None:                  # -c, -lc, -ec, -c -e and -c -o pipefail: the first word no option takes
             _input_redirections(shell.parse(body), out)
+
+
+def _shell_text(words):
+    """The text a shell's -c runs: the first word after it that is neither an option nor the value of -o or -O."""
+    skip = False
+    for word in words:
+        if skip:
+            skip = False
+        elif word in ("-o", "+o", "-O", "+O"):
+            skip = True
+        elif not word.startswith(("-", "+")):
+            return word
+    return None
 
 
 def decide(event, config):
@@ -266,6 +282,10 @@ def decide(event, config):
                          if isinstance(value, str) and name not in call["env_dynamic"]})
     for call in calls:
         program = call["program"]
+        if "WS_SECRETS_FILE" in call["env"] or (program == "export" and any(
+                word.split("=")[0] == "WS_SECRETS_FILE" for word in call["args"])):
+            return ("WS_SECRETS_FILE names the file ws.py with-secrets reads; a person sets it in their own shell, "
+                    "never an agent's command. Leave it out, or ask the person.")
         reason = _dump(program, call["args"])
         if reason:
             return (f"{reason}, secrets included. To see a variable that holds no secret, such as PATH, echo it "
