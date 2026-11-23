@@ -1736,6 +1736,59 @@ Not done: nothing
 Parked: none
 Next: the coordinator — start slice B2t, which lane B runs after B3, with Q31's answer on the three B2 pages that still call the outward-write guard planned.
 
+### B2t, the tutorials and B2's open items
+
+Built unattended on 2026-11-23, at the worker tier, with every review at the driver tier, in the worktree `.claude/worktrees/m3-b2t`, since another session held the main working copy. The maintainer's answer to Q31 was recorded under "Changes after approval" as `fad9f23` before any page changed. The slice's own session made the pages and the fix round; six fresh driver-tier sessions reviewed and three re-checked. No file the eval hashes was edited. The slice stopped under lane B's stop rule: its re-check found four blocking items. The pages and records are on branch `m3/b2t`, pushed as `ee36e60`, and are not on main.
+
+- **Verified, built:** get oriented, `docs/tutorials/get-oriented.md`, and your first agent task, `docs/tutorials/first-agent-task.md`, on branch `m3/b2t`. Each block a reader runs is marked runnable, and uses only `python3` through the clone's launcher, git, and tools Git for Windows ships. The first walks through setup, three lookups, the checks, a guard's reminder and refusal, and a broken link the check catches. The second runs a research question and a one-row change with an agent on a practice branch it then deletes. The how-to index routes to both.
+- **Verified, criterion 20 on macOS only:** on the branch, `tests/test_tutorials.py` ran both tutorials' blocks in a fresh clone and passed, inside `python3 -m unittest discover -b tests`: 733 tests, 3 skipped, OK. Linux and Windows have not run them, since no pull request is open; the push check runs them only on a push to main.
+- **Verified, the names pass:** every page B2 wrote and the instruction review was read for its title and purpose line. Adversarial review moved to red team review, `docs/playbooks/red-team-review.md`, in a link-only commit, `18eccc5`, and every link followed. Escape analysis is titled defect escape analysis, and search every source federated search, the standard terms; their paths stay. Debugging's purpose line covers a bug report, a failing test or CI run, and a flaky test, and its steps gained a loop for a flaky failure. The other titles and purpose lines stand, since each is already the standard term or states its real scope.
+- **Verified, the review path:** on the `fix` path, architecture review's alternative is a follow-up note for the person, never a finding, and its symptom rule stays a finding on every path. The review orchestrator names the path in step 5, sends it to each dimension and keeps the alternative out of its findings table.
+- **Verified, References:** red team review credits the UK Ministry of Defence's Red Teaming Handbook, and debugging credits the chapter "Introduction to Debugging" of Andreas Zeller's *The Debugging Book*. The builder read both, and the reviewers opened both.
+- **Verified, Q31:** the guard rows of tracker operations and git-host operations, and the review orchestrator's step 11, now say the outward-write guard is built and what it refuses.
+- **Verified, the 18 open items:** 13 were fixed in this round, on adopt, extend, git-host operations (2), tracker operations, federated search (2), the machine self-check (2), the docs audit and the decision interview (2), and the review orchestrator's committing lines. Five were already fixed by B3's procedure endings, verified by reading: the question log's four defects and handoff's step 2. Each edited page links [procedure endings](../procedure-endings.md).
+- **Verified, the review, per page:** 65 findings in 18 records, 11 of them blocking. One fix round fixed 60, including all 11 blocking; 2 were declined, 2 are known defects and 1 is queued for slice Z.
+
+| Page | Findings | Blocking | Fixed | Not fixed | Blocking, at the re-check |
+|---|---|---|---|---|---|
+| Red team review | 4 | 0 | 4 | 0 | 0 |
+| Glossary | 2 | 0 | 2 | 0 | 0 |
+| Playbook catalog | 2 | 0 | 2 | 0 | 0 |
+| Architecture review | 3 | 1 | 2 | 1 declined | 0 |
+| Review orchestrator | 5 | 1 | 4 | 1 declined | 0 |
+| Defect escape analysis | 2 | 1 | 1 | 1 known defect, for M4 | 1, missed: step 7's page change pushes as procedure endings says, on the fix's branch |
+| Git-host operations | 5 | 1 | 5 | 0 | 0 |
+| Tracker operations | 3 | 0 | 3 | 0 | 1, missed: step 7 commits the question-log row on any branch, and procedure endings then pushes it to main |
+| Federated search | 3 | 0 | 3 | 0 | 1, missed: the same commit of the question-log row |
+| Debugging | 6 | 1 | 6 | 0 | 1, broke: step 1 takes the run number from the last part of a link, which is the job's number in a job link |
+| Docs audit | 2 | 0 | 2 | 0 | 0 |
+| Decision interview | 2 | 0 | 2 | 0 | 0 |
+| Machine self-check | 4 | 1 | 4 | 0 | 0 |
+| Extend the workspace | 7 | 1 | 7 | 0 | 0 |
+| Adopt the workspace | 2 | 0 | 2 | 0 | 0 |
+| How-to index | 2 | 0 | 1 | 1 known defect, for the docs audit | 0 |
+| Get oriented | 5 | 2 | 4 | 1 queued for slice Z | 0 |
+| Your first agent task | 6 | 2 | 6 | 0 | 0 |
+
+- **Verified, the stop rule fired:** no first-round blocking finding survived and no decline was rejected, but the re-check found one blocking break and three blocking misses. They are in each record's "Re-check" section and are not fixed. The re-check's non-blocking items are left open there, for the decision on how the slice resumes.
+- **Inferred, why:** three of the four sit on one rule. A page commits its own work, such as a question-log row, on whatever branch is checked out, and procedure endings then pushes a worktree's pages with `git push origin HEAD:main`, which carries a code branch's commits to main. The fix round gave four pages an exception off main, in two wordings, and missed three. This is the cause of B3's three stops too, and only procedure endings can state the rule once; the slice's row does not cover that page.
+- **Verified, kept off main:** on branch `m3/b2t`, `python3 ws.py check` passes with only the known warning on fix a bug's eval record, and `python3 ws.py check --commits origin/main..HEAD` passes on both commits.
+- **Verified:** the private ledger's two tutorial rows stay on slice B2t, since neither page reached main.
+
+Decisions made in the slice:
+
+- **A review run off main pushes nothing.** Architecture review, the review orchestrator and defect escape analysis commit on the branch checked out and push only from main, so no push of pages carries a branch's code to main. Git-host operations instead leaves its question-log row uncommitted off main. Both are labelled exceptions to procedure endings, since this slice does not edit that page.
+- **Titles change, paths stay,** except red team review's, which the plan's entry named. A moved path breaks links in frozen pages and records; a title does not.
+- **Aliases wait for slice Z.** "Adversarial review", "escape analysis" and "search every source" are not repeated on the pages or in the glossary, as the reader standard says of a coined term; they go in the queued `INDEX.md` rows.
+- **The tutorials' practice stays on a branch the reader deletes,** and the broken link goes in a page of its own, so no run touches main or a page someone else is editing.
+- **The second tutorial's agent steps are prompts, not runnable blocks.** CI cannot run an agent, so it runs every command the reader types, each green whether or not the agent ran.
+
+Queued for slice Z once the pages merge, not yet in the list below: an `INDEX.md` row "New here; a tutorial; a first task with an agent" linking both tutorials; the queued rows for search every source and escape analysis name the new titles, with the old names as search aliases; the queued debugging row also names a failing CI run.
+
+Not done: the four blocking items and the re-check's non-blocking items; criterion 20 on Linux and Windows, and the tutorials reaching main; the slice Z lines above, and the ledger's moves for the tutorials, which follow the merge.
+Parked: Q42
+Next: the maintainer — answer Q42 in the workspace queue on how B2t resumes, then a B2t session resumes from branch `m3/b2t` in `.claude/worktrees/m3-b2t`.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
