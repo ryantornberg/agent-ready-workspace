@@ -41,7 +41,7 @@ One record sits outside `docs/records/`: the [question log](question-log.md), at
 | `reference` | Facts to look up, not steps. | `kind`, `last-reviewed` | Title, purpose, **In short**. |
 | `template` | A shape to copy. | `kind`, `last-reviewed` | Title, purpose, **In short**. |
 | `record` | A log or a record of something that happened. | `kind`, `last-reviewed` | Title, purpose. **In short** optional. |
-| `decision` | A decision record. | `kind`, `last-reviewed`, `status` | Title, then **In short**; a purpose sentence is optional. |
+| `decision` | A decision record. | `kind`, `last-reviewed`, `status`; also `date` and `deciders`, which the `decisions` check holds | Title, then **In short**; a purpose sentence is optional. The [decision record template](templates/decision-record.md) sets the rest. |
 | `plan` | A hand-off plan. | `kind`, `last-reviewed`, `status`; `milestone` optional | Title, purpose, **In short**, then `## Key points`. |
 | `milestone` | A milestone record. | `kind`, `last-reviewed`, `status` | Title, purpose, **In short**. |
 
@@ -67,7 +67,7 @@ A page in a kind's own folder must be of that kind. A README in one of those fol
 3. The **In short** line: the verdict or the gist, before any background. A playbook and a record may leave it out.
 4. On a plan, `## Key points` as the first section.
 
-The 25-word limit does not apply to an approved or done plan, an accepted or superseded decision record, or a signed-off milestone record. Those are frozen. An approved plan changes only as rule 6 of the [hand-off plan template](templates/hand-off-plan.md) says: by a dated entry under "Changes after approval", and by each slice's report appended under "Results". A decision or milestone record changes only by a dated "Amended" paragraph. An amendment to a decision record may also edit its **In short** line, and does so when it changes what that line sums up, so the line stays true for a reader who reads only it. The front matter of a frozen page is not frozen: its review date, its status and a new key may change. No check holds the frozen pages to this.
+The 25-word limit does not apply to an approved or done plan, an accepted or superseded decision record, or a signed-off milestone record. Those are frozen. An approved plan changes only as rule 6 of the [hand-off plan template](templates/hand-off-plan.md) says: by a dated entry under "Changes after approval", and by each slice's report appended under "Results". A decision or milestone record changes only by a dated "Amended" paragraph, in the form the [decision record template](templates/decision-record.md#how-a-record-changes) gives. An amendment to a decision record may also edit its **In short** line, and does so when it changes what that line sums up, so the line stays true for a reader who reads only it. The front matter of a frozen page is not frozen: its review date, its status and a new key may change. No check holds the frozen pages to this.
 
 ## Where the existing pages sit
 
@@ -97,8 +97,8 @@ Whether each playbook and how-to is proven is in its front matter, and in the [R
 
 ## Tutorials
 
-A tutorial marks each command block a reader runs with a line `<!-- runnable -->` right before the block's opening fence. CI runs every tutorial's marked blocks, in order, in a fresh clone on Linux, macOS and Windows; the pre-push hook runs them for each tutorial a push to main changes. A block runs in bash from the top of the clone, and the run stops at the first command that fails. `python3` in a block starts the clone's launcher, so give it a script or `-m` and a module. A block that is not marked is an example and never runs. A tutorial with no marked block fails, so a run cannot pass by running nothing.
+A tutorial marks each command block a reader runs with a line `<!-- runnable -->` right before the block's opening fence. CI runs every tutorial's marked blocks, in order, in a fresh clone on Linux, macOS and Windows; the pre-push hook runs them for each tutorial a push to main changes. A block runs in bash from the top of the clone, and the run stops at the first command that fails. `python3` in a block starts the clone's launcher, so give it a script or `-m` and a module. A block that is not marked is an example and never runs. A tutorial with no marked block fails, so a run cannot pass by running nothing. A step nobody runs can go false at the head of main unnoticed until a newcomer follows it; a step CI runs cannot.
 
 ## Archiving a page
 
-Move it under `archive/`, keeping its path below the folder. At the old path, leave a tombstone: a short reference page that names where the page went and why. A kind's own folder, such as `docs/playbooks/`, takes no reference page but its README, so a page archived from one leaves no tombstone. Then fix every link to it.
+Move it under `archive/`, keeping its path below the folder. At the old path, leave a tombstone: a short reference page that names where the page went and why. A kind's own folder, such as `docs/playbooks/`, takes no reference page but its README, so a page archived from one leaves no tombstone. Then fix every link to it. [Decision 0015](decisions/0015-retired-pages-move-to-an-archive.md) says why the archive stays in this repository, and what search still finds.

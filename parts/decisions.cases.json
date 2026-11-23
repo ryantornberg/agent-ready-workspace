@@ -1,0 +1,228 @@
+[
+  {
+    "name": "a record in the template's shape passes",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "the earlier heading Rejected, and other sections, pass",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## Rules\n\nText.\n\n## What it gave up\n\nText.\n\n## Rejected\n\nText.\n\n## Credit\n\nText.\n\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a README and pages outside the folder are not read",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n",
+      "docs/decisions/README.md": "# Decisions\n",
+      "docs/decisions/old/x.md": "# x\n",
+      "docs/plans/p.md": "# P\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a folder with no record fails",
+    "files": {
+      "docs/guide.md": "# Guide\n"
+    },
+    "expect": [
+      "holds no decision record, so nothing was checked"
+    ]
+  },
+  {
+    "name": "a record with no date fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "has no date in its front matter"
+    ]
+  },
+  {
+    "name": "a date that is not a calendar date fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-31\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "is not a calendar date"
+    ]
+  },
+  {
+    "name": "a record with no deciders fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "has no deciders in its front matter"
+    ]
+  },
+  {
+    "name": "a missing section fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "has no '## What it gave up' section"
+    ]
+  },
+  {
+    "name": "sections out of order fail",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Decision\n\nText.\n\n## Context\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "'## Decision' is out of order"
+    ]
+  },
+  {
+    "name": "a heading inside a code block does not count",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n```\n## Decision\n```\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n"
+    },
+    "expect": [
+      "has no '## Decision' section"
+    ]
+  },
+  {
+    "name": "a title whose number differs from the file name fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0013: One lookup\n\n**In short:** x.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "title must read '# 0012: <the decision>'"
+    ]
+  },
+  {
+    "name": "a title with no number fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# One lookup\n\n**In short:** x.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "title must read '# 0012: <the decision>'"
+    ]
+  },
+  {
+    "name": "a file name without a four-digit number fails",
+    "files": {
+      "docs/decisions/12-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n",
+      "docs/decisions/0013-x.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0013: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "file name must be a four-digit number"
+    ]
+  },
+  {
+    "name": "two records with one number fail",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n",
+      "docs/decisions/0012-other.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "has number 0012, which docs/decisions/0012-other.md also has",
+      "has number 0012, which docs/decisions/0012-one-lookup.md also has"
+    ]
+  },
+  {
+    "name": "an amendment with its date passes, in both forms",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\n- A rule, amended 2026-11-22 by slice C5b: more.\n\n**A heading.** Amended 2026-11-21, slice C5c. Text.\n\nAmended 2026-11-23, slice B5: a reason.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "an amendment without a date fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nAmended by slice B5: a reason.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n"
+    },
+    "expect": [
+      "says 'Amended' with no date after it"
+    ]
+  },
+  {
+    "name": "an amendment dated before the record fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nAmended 2026-11-01, slice A0: early.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n"
+    },
+    "expect": [
+      "has an amendment dated 2026-11-01, before the record's own date 2026-11-20"
+    ]
+  },
+  {
+    "name": "the word in double quotes or in code is a mention, not an amendment",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nA change is a dated \"Amended\" paragraph, written `Amended <date>`.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a superseded record with its successor and banner passes",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: superseded\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\nsuperseded-by: 0013\n---\n\n# 0012: One lookup\n\n**In short:** x.\n\nSuperseded by [0013](0013-two.md). Nothing in it still binds.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n",
+      "docs/decisions/0013-two.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\nsupersedes: 0012\n---\n\n# 0013: Two\n\n**In short:** y.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a superseded record without superseded-by fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: superseded\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0012: One lookup\n\n**In short:** x.\n\nSuperseded by 0013.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "is superseded but names no 'superseded-by: NNNN'"
+    ]
+  },
+  {
+    "name": "a superseded-by that names no record fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: superseded\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\nsuperseded-by: 0099\n---\n\n# 0012: One lookup\n\n**In short:** x.\n\nSuperseded by 0099.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "superseded-by '0099' names no other record in the folder"
+    ]
+  },
+  {
+    "name": "a superseded record without its banner fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: superseded\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\nsuperseded-by: 0013\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n",
+      "docs/decisions/0013-two.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0013: Two\n\n**In short:** y.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "is superseded but has no line starting 'Superseded by'"
+    ]
+  },
+  {
+    "name": "superseded-by on an accepted record fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\nsuperseded-by: 0013\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n",
+      "docs/decisions/0013-two.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\n---\n\n# 0013: Two\n\n**In short:** y.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "names superseded-by '0013' but its status is 'accepted'"
+    ]
+  },
+  {
+    "name": "a supersedes that names no record fails",
+    "files": {
+      "docs/decisions/0012-one-lookup.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\ndeciders: the maintainer\nlast-reviewed: 2026-11-23\nsupersedes: 0003\n---\n\n# 0012: One lookup by task shape\n\n**In short:** pick one lookup.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n"
+    },
+    "expect": [
+      "supersedes '0003', which names no other record"
+    ]
+  },
+  {
+    "name": "the folder setting moves where records are read",
+    "config": {
+      "folder": "records/adr"
+    },
+    "files": {
+      "records/adr/0001-x.md": "---\nkind: decision\nstatus: accepted\ndate: 2026-11-20\nlast-reviewed: 2026-11-23\n---\n\n# 0001: X\n\n**In short:** x.\n\n## Context\n\nText.\n\n## Decision\n\nText.\n\n## What it gave up\n\nText.\n\n## Options rejected\n\nText.\n\n",
+      "docs/decisions/0012-y.md": "# nothing\n"
+    },
+    "expect": [
+      "has no deciders in its front matter"
+    ]
+  }
+]

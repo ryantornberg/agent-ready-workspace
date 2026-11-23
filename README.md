@@ -79,6 +79,7 @@ git config core.hooksPath .githooks
 | The index of review records matches the records, each record covers one page, and each page on the check's `required` list has one: the guidance M3's plan names from before the review existed. | `review_index` check | Commit, CI |
 | A fix record's report marks every claim verified or inferred, so a reader knows which claims were checked. See [the fix record template](docs/templates/fix-record.md). | `claim_marks` check | Commit, CI |
 | A draft plan's Key points block stays within 200 words and each table cell within 60, so a person can read it before approving. See [the hand-off plan template](docs/templates/hand-off-plan.md). | `plan_budgets` check | Commit, CI |
+| Every decision record names its date and who decided, starts its title with its own number, holds Context, Decision, What it gave up and Options rejected in that order, and dates each amendment. See [the decision record template](docs/templates/decision-record.md). | `decisions` check | Commit, CI |
 | Every command block a tutorial marks runnable passes in a fresh clone. See [layout](docs/layout.md#tutorials). | `tests/test_tutorials.py`; the pre-push hook, for a tutorial a push to main changes | CI, on Linux, macOS and Windows; before a push to main |
 | A commit holds only files the agent session wrote. | `edit_ledger` check, against the paths the edit tools wrote | Commit, while an agent session has edits waiting |
 | Files are staged by name, never all at once. | `no_stage_all` hook, a reminder that never refuses | Before a shell command |

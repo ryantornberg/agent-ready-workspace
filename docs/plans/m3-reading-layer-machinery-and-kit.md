@@ -1955,6 +1955,61 @@ Not done: nothing.
 Parked: none
 Next: the coordinator — start slice B5 in lane B. Slice Z adds the queued `INDEX.md` lines above. M9 and M11 take the known defects in batch 2's records.
 
+### B5, decisions and lessons
+
+Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b5`, on branch `m3/b5`, since the slice adds a check. The slice's session wrote the pages and the check and ran the fix round itself; four fresh driver-tier sessions reviewed and two re-checked. No approval in the maintainer's list names B5, so no plan entry was recorded first. No file the eval hashes was edited. The branch merged main once, to take C8's decision 0007.
+
+- **Verified, the format and the check:** the [decision record template](../templates/decision-record.md) sets the catalog's record format: a four-digit file name, `status`, `date` and `deciders`, a title that states the decision, the In short line, then Context, Decision, What it gave up and Options rejected. An accepted record changes by a dated "Amended" paragraph, the form 0004 already used. The new `decisions` check holds every record to it, with 25 cases, among them an amendment with its date passing in both forms and one without a date failing. Records 0001 to 0007 gained `date` and `deciders` in front-matter-only commits.
+- **Verified, criterion 23:** `python3 ws.py check` passes with all twenty records in `docs/decisions/`. [Decision 0020](../decisions/0020-where-the-sources-disagreed.md) settles the catalog's ten disagreements and the eleventh, specs that change with the code against specs frozen once written, with the page that holds each choice. It also lists six deliberate departures: the instruction review at the driver tier with a trailer the commit check requires, CI on all three systems before a merge, the merge on GitHub, the kit seeding the contract and index, spec-driven work and the epic folder in every lane, and the pin moving after a person's merge.
+- **Verified, the sixteen decisions:** twelve new records, [0008](../decisions/0008-success-is-a-teammate-who-does-not-ask.md) to [0019](../decisions/0019-every-fix-lands-on-trunk-first.md), cover the purpose, the boundary, the three guidance kinds, pages straight to main, one lookup, the knowledge graph, the three tiers, the archive, specs, the epic folder, unattended runs and the branching standard. Decision 0001 gained a dated amendment, the personal-versus-team line. Decision 0005 already holds the two on sessions and the lease, and C8's decision 0007 the kit.
+- **Verified, criterion 24 in public:** each lesson that maps to this slice is now a stated reason or is queued. Fourteen parts' `why` lines in `workspace.json` state theirs; layout, parts, size the work, the reuse checklist, git-host operations, the eval page and decision 0006 each gained one sentence. Five lessons were already stated on pages earlier slices wrote, and are mapped to them. The reason for B7's cut rule went into decision 0006's amendment, so no B7 page was edited. The reasons for the definition of done, fix a bug and the request map are queued for slice Z below.
+- **Verified, the review, per page:** 53 findings in 28 records, 10 of them blocking. One round fixed 47, 4 of them in part, and every blocking one. 3 are queued for slice Z, 1 deferred to M5, 1 declined and 1 is a known defect. Escape analysis's added sentence was removed, and its reason moved to the eval page's rule it belongs with.
+
+| Page | Findings | Blocking | Not fixed in the round |
+|---|---|---|---|
+| Decision 0001 | 4 | 1 | 1 queued for slice Z |
+| Decision 0006 | 2 | 0 | 0 |
+| Decisions 0008, decision interview, README, templates index | 0 | 0 | 0 |
+| Decision 0009 | 2 | 0 | 0 |
+| Decision 0010 | 2 | 1 | 0 |
+| Decision 0011 | 3 | 2 | 0 |
+| Decision 0012 | 2 | 0 | 0 |
+| Decision 0013 | 1 | 0 | 1 declined: no page here runs a graph tool yet |
+| Decision 0014 | 2 | 1 | 0 |
+| Decision 0015 | 1 | 1 | 0 |
+| Decision 0016 | 2 | 0 | 0 |
+| Decision 0017 | 2 | 1 | 0 |
+| Decision 0018 | 3 | 2 | 0 |
+| Decision 0019 | 2 | 0 | 0 |
+| Decision 0020 | 5 | 0 | 1 queued for slice Z |
+| Decision record template | 4 | 0 | 1 queued for slice Z, 1 deferred to M5 |
+| Size the work | 5 | 1 | 0 |
+| Extend the workspace, layout, parts, git-host operations, reuse checklist | 1 each | 0 | 0 |
+| Escape analysis | 3 | 0 | 0 |
+| Eval page | 2 | 0 | 1 known defect, for the docs audit |
+| Spec template | 1 | 0 | 0 |
+
+- **Verified, the stop rule did not fire:** the two fresh re-checks upheld all 48 dispositions they read and found nothing blocking that a fix broke or the first reading missed. Their 10 non-blocking items are in the records' "Known defects", for the docs audit.
+- **Verified, two defects found in passing,** now in the [defect register](../records/defects.md): git does not ignore the secrets file `.env`, and orchestration says the tier binding is the only place a model name appears, though the eval harness sets its own.
+- **Verified, kept to the rules:** on the branch, `python3 ws.py selftest` and `python3 ws.py check` pass, the check with only the known warning on fix a bug's eval record, and `python3 -m unittest discover -b tests` passes; CI's result is on the pull request.
+- **Verified, the ledger:** its rows for this slice moved to their pages, decision records and `workspace.json`, and five lessons to slice Z; its check prints 0 unmapped.
+
+Decisions made in the slice:
+
+- **"What it gave up" stands for the catalog's three-way consequences,** and `rejected` stays a status. The costs are what a later reader weighs; a rejected proposal stays on record. Decision 0020 lists both.
+- **Records an approved plan asks for start accepted,** with `deciders: the maintainer, through M3's approved plan`. The approved plan is the person's yes. The branching standard alone is `proposed`, as the catalog marked it, for each instance's DevOps owner to decide.
+- **Spec-driven work and the epic folder carry no lane.** The size gate and the size of the work decide, not the lane.
+- **The unattended run's pin moves after a person's merge,** not at the run's end, since `pin_on_default` holds a pin to the default branch.
+- **One reviewer limit, 30 minutes,** for disagreement 7, held by M4's review machinery; no page names one yet.
+- **The check fails when it reads no record,** as `page_kinds` does, and does not judge whether an edit to an accepted record is an amendment, as layout says nothing does.
+- **A lesson's reason goes in the part's `why`** where a part enforces the rule, and on the page only where the rule lives there.
+
+Queued for slice Z, in the list below: the reasons for the definition of done, fix a bug and the request map, and the `INDEX.md` rows for the decision records.
+
+Not done: nothing.
+Parked: none
+Next: the coordinator — B5 is the last slice of lane B; B6 and B7 may start. Slice Z adds the queued lines below. The docs audit takes the known defects in B5's records.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -2013,3 +2068,9 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - PSFIX, `docs/agent-settings.md` and `docs/parts.md`: the dump bullet and the `secrets_shell` row name PowerShell's environment-variables method beside its `env:` drive, and say the name passes in a message body or in a heredoc fed to a program that is not a shell.
 - C8, `INDEX.md`, Topics: a row "Make an instance of the workspace; a file refused by `kit_drift`; keep a synced file; upgrade an instance; `kit.lock.json`" linking [decision 0007](../decisions/0007-the-kit.md) and [the kit](../parts.md#the-kit).
 - C8, `INDEX.md`, cross-cutting chains: a chain "Change what the kit ships" with `kit/`, `wslib/kit.py`, `tests/test_kit.py`, `docs/decisions/0007-the-kit.md` and `README.md`.
+- B5, `docs/definition-of-done.md`, "What does not count": "A green run of the checks on files that were never staged; the commit check reads the staged files, so stage first, then check." The reason: a green run on unstaged files once proved nothing.
+- B5, `docs/definition-of-done.md`, "What does not count": "A passing check taken as proof of more than it checks." The reason: green gates were once read as truth.
+- B5, `docs/definition-of-done.md`: with B1's queued line on rows that apply only where the work has them, the reason that a done list once demanded checks a repository could not run.
+- B5, `docs/playbooks/fix-a-bug.md`: with B2's queued fix-path section, the fix brief's seam part gives its reason: a fix was once placed at the visible layer again and again while the cause stayed reachable.
+- B5, the one-line request map slice Z writes: its opening says why it exists, that common kinds of work once had no entry point.
+- B5, `INDEX.md`, Topics: a row "Decision records; write, amend or supersede a decision; why a rule exists" linking [the decision record template](../templates/decision-record.md); "Where the ported pages disagreed; departures from the ported pages" linking [decision 0020](../decisions/0020-where-the-sources-disagreed.md); "What the workspace holds and refuses; what success means" linking decisions [0008](../decisions/0008-success-is-a-teammate-who-does-not-ask.md) and [0009](../decisions/0009-hold-what-nobody-can-derive.md); "Retired pages; the archive; what search still finds" linking [decision 0015](../decisions/0015-retired-pages-move-to-an-archive.md); "Unattended runs; moving a pin after a run" linking [decision 0018](../decisions/0018-unattended-runs-write-only-to-a-branch.md); "Branching for product repositories; hotfixes; release branches" linking [decision 0019](../decisions/0019-every-fix-lands-on-trunk-first.md); "A knowledge graph of the code" linking [decision 0013](../decisions/0013-knowledge-graph-output-is-scratch.md); and the row that routes to decision 0001 also names where a person's agent memory, notes and settings belong.

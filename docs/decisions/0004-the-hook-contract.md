@@ -1,6 +1,8 @@
 ---
 kind: decision
 status: accepted
+date: 2026-11-16
+deciders: the maintainer
 last-reviewed: 2026-11-22
 ---
 

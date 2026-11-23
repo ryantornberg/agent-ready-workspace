@@ -216,3 +216,31 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-c8-instruction-review.md](2026-11-23-c8-instruction-review.md) | `docs/playbooks/instruction-review.md` | enforcement, placement |
 | [2026-11-23-c8-seed-readme-checks.md](2026-11-23-c8-seed-readme-checks.md) | `kit/seed/README.md` | contradiction |
 | [2026-11-23-c8-decision-0007-seeded.md](2026-11-23-c8-decision-0007-seeded.md) | `docs/decisions/0007-the-kit.md` | contradiction |
+| [2026-11-23-b5-decision-0001.md](2026-11-23-b5-decision-0001.md) | `docs/decisions/0001-pin-code-repositories.md` | contradiction, trigger, placement |
+| [2026-11-23-b5-decision-0006.md](2026-11-23-b5-decision-0006.md) | `docs/decisions/0006-what-proven-means.md` | contradiction, enforcement |
+| [2026-11-23-b5-decision-0008.md](2026-11-23-b5-decision-0008.md) | `docs/decisions/0008-success-is-a-teammate-who-does-not-ask.md` | none |
+| [2026-11-23-b5-decision-0009.md](2026-11-23-b5-decision-0009.md) | `docs/decisions/0009-hold-what-nobody-can-derive.md` | contradiction, enforcement |
+| [2026-11-23-b5-decision-0010.md](2026-11-23-b5-decision-0010.md) | `docs/decisions/0010-three-kinds-of-guidance-plus-reference.md` | contradiction |
+| [2026-11-23-b5-decision-0011.md](2026-11-23-b5-decision-0011.md) | `docs/decisions/0011-pages-go-straight-to-main.md` | contradiction, enforcement |
+| [2026-11-23-b5-decision-0012.md](2026-11-23-b5-decision-0012.md) | `docs/decisions/0012-one-lookup-by-what-you-know.md` | contradiction, enforcement |
+| [2026-11-23-b5-decision-0013.md](2026-11-23-b5-decision-0013.md) | `docs/decisions/0013-knowledge-graph-output-is-scratch.md` | none |
+| [2026-11-23-b5-decision-0014.md](2026-11-23-b5-decision-0014.md) | `docs/decisions/0014-three-tiers-bound-in-one-place.md` | contradiction, enforcement |
+| [2026-11-23-b5-decision-0015.md](2026-11-23-b5-decision-0015.md) | `docs/decisions/0015-retired-pages-move-to-an-archive.md` | contradiction |
+| [2026-11-23-b5-decision-0016.md](2026-11-23-b5-decision-0016.md) | `docs/decisions/0016-a-spec-lives-in-its-plan.md` | contradiction, trigger |
+| [2026-11-23-b5-decision-0017.md](2026-11-23-b5-decision-0017.md) | `docs/decisions/0017-one-folder-per-large-piece-of-work.md` | contradiction, trigger |
+| [2026-11-23-b5-decision-0018.md](2026-11-23-b5-decision-0018.md) | `docs/decisions/0018-unattended-runs-write-only-to-a-branch.md` | contradiction |
+| [2026-11-23-b5-decision-0019.md](2026-11-23-b5-decision-0019.md) | `docs/decisions/0019-every-fix-lands-on-trunk-first.md` | contradiction, step |
+| [2026-11-23-b5-decision-0020.md](2026-11-23-b5-decision-0020.md) | `docs/decisions/0020-where-the-sources-disagreed.md` | contradiction, trigger, enforcement |
+| [2026-11-23-b5-decision-interview.md](2026-11-23-b5-decision-interview.md) | `docs/playbooks/decision-interview.md` | none |
+| [2026-11-23-b5-decision-record-template.md](2026-11-23-b5-decision-record-template.md) | `docs/templates/decision-record.md` | contradiction, step, trigger, enforcement |
+| [2026-11-23-b5-escape-analysis.md](2026-11-23-b5-escape-analysis.md) | `docs/playbooks/escape-analysis.md` | step, enforcement, placement |
+| [2026-11-23-b5-evals-readme.md](2026-11-23-b5-evals-readme.md) | `evals/README.md` | contradiction, enforcement |
+| [2026-11-23-b5-extend-the-workspace.md](2026-11-23-b5-extend-the-workspace.md) | `docs/extend-the-workspace.md` | contradiction |
+| [2026-11-23-b5-git-host-operations.md](2026-11-23-b5-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | step |
+| [2026-11-23-b5-layout.md](2026-11-23-b5-layout.md) | `docs/layout.md` | placement |
+| [2026-11-23-b5-parts.md](2026-11-23-b5-parts.md) | `docs/parts.md` | enforcement |
+| [2026-11-23-b5-readme.md](2026-11-23-b5-readme.md) | `README.md` | none |
+| [2026-11-23-b5-reuse-checklist.md](2026-11-23-b5-reuse-checklist.md) | `docs/playbooks/reuse-checklist.md` | enforcement |
+| [2026-11-23-b5-size-the-work.md](2026-11-23-b5-size-the-work.md) | `docs/size-the-work.md` | contradiction, trigger, enforcement |
+| [2026-11-23-b5-spec-template.md](2026-11-23-b5-spec-template.md) | `docs/templates/spec.md` | placement |
+| [2026-11-23-b5-templates-index.md](2026-11-23-b5-templates-index.md) | `docs/templates/README.md` | none |
