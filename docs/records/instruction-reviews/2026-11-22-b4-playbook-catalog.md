@@ -44,3 +44,22 @@ Broke:
 - "Before you pick one", the new git-host sentence: it justifies skipping the gate with "it changes no file", but git-host operations covers pushing a branch and publishing and merging, which change the target branch's files. Inferred, from reading git-host operations' operations table.
 
 Missed: none.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: says a git-host write changes no file | fixed: the sentence now says such a request writes no change of its own, since a push or a merge carries work its own page already put through the gate. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: says a git-host write changes no file | fixed | "Before you pick one" now says such a request "writes no change of its own", since a push or a merge carries work its own page already put through the gate, which matches git-host operations' "a page that sent you here commits its own work before you open a pull request for it"; verified by reading both. |
+
+Broke: none.
+Missed: none.

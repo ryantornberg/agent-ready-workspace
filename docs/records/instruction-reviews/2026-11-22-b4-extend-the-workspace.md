@@ -50,3 +50,24 @@ Broke:
 - Steps, step 5: its new default queues every eval-covered change, with no case for an approved plan that must make one. Adopt's "Write the facts from evidence" sends contract and alias writes to this page's table, whose contract row points at step 5, while adopt's step 6 commits them on a branch. Inferred.
 
 Missed: none.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: step 5 queues every eval-covered change, with no case for an approved plan | fixed: step 5 keeps the queue as the default, and sends a change a check refuses without, or one an approved plan makes, to a branch as maintain's step 4 says; a new rules row holds it. Step 8 commits a question-log entry as the log's page says. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: step 5 queues every eval-covered change, with no case for an approved plan | fixed | Verified: step 5 keeps the queue as the default and sends a change a check refuses without, or one an approved plan makes, such as an adoption's, to a branch through maintain's step 4, whose anchor resolves; a new `prose` rules row holds it. |
+
+Broke:
+- Steps, steps 6 and 7: their refusal paths, unchanged, have no case for the `eval_record` refusal that step 5's new branch route meets. That finding names the playbook, such as `docs/playbooks/fix-a-bug.md`, not the edited file, so step 7's "fix the cause" or "leave that file out" fits neither. Verified that `eval_record`'s findings name the playbook page; that a reader takes step 7's path over the trap maintain's step 4 names is inferred.
+
+Missed: none.

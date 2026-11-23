@@ -42,3 +42,24 @@ Broke:
 
 Missed:
 - Steps, step 8 and Posting: step 8 has the agent run `git push` on the author's yes, while Posting and git-host operations say a person pushes in a team's workspace; verified by reading them.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: Posting names the author's yes as a hold on a write it forbids | fixed: Posting now says nothing but the rule holds it until the guard exists. |
+| Missed: step 8 has the agent push where a person pushes in a team's workspace | fixed: step 8 pushes in this repository only; in a team's workspace it gives the author the command and waits. A rules row holds it. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: Posting names the author's yes as a hold on a write it forbids | fixed | Posting now says "until it exists, nothing but this rule holds it", naming no yes as a hold; verified by reading the paragraph. |
+| Missed: step 8 has the agent push where a person pushes in a team's workspace | fixed | Step 8 runs `git push` only in this repository, and in a team's workspace gives the author the command and waits; a rules row holds it and Posting points to step 8, matching changing the machinery's step 5; verified by reading both pages. |
+
+Broke: none.
+Missed: none.

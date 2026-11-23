@@ -45,3 +45,29 @@ Broke:
 
 Missed:
 - "The report and the fixes", last paragraph: "Nothing this how-to does is committed" sits beside the contract's question-log write, with no word on committing that entry, while the docs audit says to commit it staged by name. Verified by reading both pages.
+
+## Batch 5's fix round
+
+The builder's one fix round on the re-check's items, on 2026-11-22. A fix that touched a rule several pages share changed every page holding it: how a question-log entry is committed now lives on [the question log](../../question-log.md) and the other pages link it; who pushes follows [changing the machinery](../../changing-the-machinery.md#the-path-for-a-machinery-change).
+
+| Item | Disposition |
+|---|---|
+| Broke: the refused-shell branch marks steps "not run" | fixed: the branch gives the person steps 1 to 5 for their own terminal, records each result from the pasted output, and marks steps 6 to 11 skipped with the reason. |
+| Broke: work in progress has no place in the report | fixed: the report template has a "Work in progress" line, the In short line names the class, the step still reads fail, and it is not offered as a fix. |
+| Missed: no commit path for the question-log entry | fixed: the closing paragraph excepts the entry from "nothing is committed" and commits it as the log's page says; a rules row holds it. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-22, after batch 5's fix round.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke: the refused-shell branch marks steps "not run" | fixed | The branch now has the person run steps 1 to 5, records each from the pasted output, and marks steps 6 to 11 skipped with a reason, so every step has a state the report header allows; verified by reading the page and its diff. |
+| Broke: work in progress has no place in the report | fixed | The template has a "Work in progress" line, In short names the class, the step stays fail for the header's count, and a closing line says it is not a fix to offer; verified by reading. |
+| Missed: no commit path for the question-log entry | fixed | The closing paragraph excepts the entry from "nothing is committed" and links the question log's "Adding an entry" rule, which exists and says how to stage, commit and push it; verified by reading both pages, and `python3 ws.py check` exits 0 with the link. |
+
+Broke:
+- "Rules" table: the new question-log row says to add the entry "before you report", but the closing paragraph says "before you finish", after the report and fixes, and the first rule says change nothing until the report is given. Verified by reading.
+
+Missed:
+- "When every shell command is refused" against step 1: with no Python 3.9, step 1 marks steps 5 to 10 skipped, while the branch makes step 5 a fail and skips 6 to 11; the exception is not labelled. The round restated this, it did not start it. Verified by reading.

@@ -765,6 +765,33 @@ Slice B2 stopped after batch 4 under the stop rule. The maintainer's answer to t
 
 Approved by: the maintainer, 2026-11-22
 
+The maintainer ended slice B2's porting in the answer to Q29 in the workspace queue, and asked for the plan to be revisited. The revisit proposed three revisions for B2's remainder and for B3 to B5, and the maintainer approved all three. No criterion is dropped or weakened. Criterion 20 moves from B2 to B2t.
+
+**B3 opens with two changes, before any other page.** Both are guidance pages and get an instruction review each.
+
+1. The instruction review gains a severity mark, on its page and in its record format. The reviewer marks each finding blocking or not; the builder cannot lower it. A finding is blocking when an agent following the page would write where it may not, skip a person's yes, run a command that fails, or follow a step that contradicts the contract or a rule page.
+2. A reference page, `docs/procedure-endings.md`, states once each rule a procedure ends with, carried to its end: staging by name and the review trailer; who commits and pushes, and when; the question-log entry and how it is committed; the report with each claim marked verified or inferred; and asking before an outward write. The question log's paragraph on adding an entry moves there, since a record takes no review. Pages written from B3 on link the page instead of restating it, and the review counts a restated rule as a finding. A batch's shared-interface sheet keeps only what is local to that batch. B2's pages switch to the link when a slice next edits them.
+
+These come from B3's row, which already holds the authoring conventions and the pull request standard; they move to the front.
+
+**The stop rule's instruction-review item changes for lane B.** For B2t, B3, B4 and B5 it replaces the class count, and B2's rules of Q14 and Q19 end with B2. Each batch gets one fix round, and a fix to a shared rule sweeps every page holding it. A fresh re-check reads every blocking fix and every page holding a changed shared rule, and rules on every blocking finding the builder declined. The rule fires only when a blocking finding survives the fix round, a decline of a blocking finding is rejected, or a fix creates a blocking finding. A non-blocking finding is fixed once in the round. What remains goes to a "Known defects" section of the page's review record, for the page's `prove-by` milestone or the docs audit. A missing `INDEX.md` row still does not count. The plan's other stop items, the limit of two fix rounds on the same failure among them, are unchanged. The routed arm in slice Z (criterion 54) still measures whether the unproven pages harm the proven one.
+
+**B2's remainder moves to slices with a gate of their own.**
+
+| Slice | Work | Tier | Done when |
+|---|---|---|---|
+| B2t, the tutorials and B2's open items | The two tutorials, under B2's brief and the change of 2026-11-21 on Git's bash. One fix round on the 18 items left open under B2's results, linking `docs/procedure-endings.md` on each page it edits. A fresh re-check, under the stop rule above. | worker; driver for the reviews | Criterion 20; each of the 18 items fixed, or in its page's "Known defects" |
+
+B2t starts once B3's two opening changes merge. B3's other pages may be built beside it.
+
+Slice Z writes the one-line request map, then links it from the contract as its row says. The map gets an instruction review, as Z's other edits do.
+
+The private ledger maps the two tutorials to B2t and the request map to slice Z.
+
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
 A new slice, TFIX, the hook timing fix. It has no row in the slice tables; this entry is its scope. The maintainer's answer to Q21 in the workspace queue settles it, and the maintainer confirmed it after round 6. No criterion is dropped or weakened.
 
 **The timing fix runs before C5e (Q21).** The macOS jobs in CI keep failing the hook case runner's 200-millisecond budget, most often with Python 3.9. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, and fixes the hooks so they meet the budget that criterion 28 sets. It may run alongside C5b. C5e waits for it, since C5e adds work to every push. TFIX is done when criterion 28 holds on every CI job, and its report is under "Results".
@@ -1149,7 +1176,7 @@ Proposed revisions (template rule 7):
 - Criterion 20 says the blocks run green "on three systems". B2's tutorials must then run in Git's bash on Windows. A block that starts Python gets the clone's launcher, so `python3 ws.py check` works there; a block that needs another tool must be one Git for Windows ships.
 - Criterion 62's list leaves out `.github/copilot-instructions.md`, which sub-batch A also added. It has no record. The README and the index now say the required list is the plan's.
 
-### B2, core procedures: stopped after batch 4
+### B2, core procedures: stopped at batch 5's opening fix round
 
 Built at the worker tier on 2026-11-21, docs straight to main as `ed9a55a`; the one machinery piece is pull request #33, merged as `5100315` after CI passed on Linux, macOS and Windows. Pages were written by worker-tier helper sessions from a rewrite brief and the private catalog, and each was reviewed by a fresh driver-tier session. No file the eval hashes was edited. The slice stopped under the stop rule after its first batch.
 
@@ -1281,6 +1308,56 @@ Decisions made in batch 4:
 - **Outward writes follow one rule on every page:** a write the request names is its yes; another person's item, an unasked item, a reassignment, a rejection, closing a parent and any post on a pull request ask first; nothing is written on a repository outside this one and those pinned under `src/`.
 - **The periodic duties run once per milestone, before its record is signed off,** owned by the maintainer named as approver in the current plan, until M10 schedules the docs audit.
 - **The report rule carries `eval:fix-a-bug`,** the tag the contract gives it, on every page of the batch.
+
+#### Batch 5's opening fix round, 2026-11-22
+
+Built at the worker tier under the maintainer's answer to Q19, recorded under "Changes after approval" before any fix. The approval was recorded as `1fa880a`. The builder made one fix round on batch 4's 16 re-check items in the main working copy, which no other session held, and swept each shared rule a fix touched across every page holding it. Three fresh driver-tier sessions then re-checked every fixed page and every page holding a changed rule. Docs straight to main as `eb02843`. No file the eval hashes was edited. Batch 5's own pages were not built: the stop rule fired first.
+
+- **Verified, the sweep:** how a question-log entry is committed now lives once, in the [question log](../question-log.md)'s "Adding an entry", and every page that logs one links it. Who pushes follows [changing the machinery](../changing-the-machinery.md#the-path-for-a-machinery-change)'s step 5 on git-host operations and the feedback walk-through. An eval-covered change is queued by default, and goes on a branch when a check or an approved plan needs it, on extend and maintain alike.
+- **Verified, the fix round, per page:** all 16 items fixed, none surviving, as each record's "Second re-check" section says.
+
+| Page | Items | Fixed | Broke, at the second re-check | Missed, at the second re-check |
+|---|---|---|---|---|
+| Adopt the workspace | 1 | 1 | 1: the milestone listing misses section proof lines, and its sort puts M9 after M10 | 0 |
+| Extend the workspace | 1 | 1 | 1: steps 6 and 7 give no path for the commit that step 5's new eval branch makes | 0 |
+| Maintain the workspace | 1 | 1 | 0 | 0 |
+| Docs audit | 1 | 1 | 0 | 1: the first rules row still says the audit changes no line it reads |
+| Prompt retrospective | 0, a sweep change | none due | 0 | 0 |
+| Git-host operations | 2 | 2 | 1: the Create row's "that page" lost its antecedent | 1: the push and `gh pr create` act on the checked-out branch, which may not be the one the request names |
+| Tracker operations | 2 | 2 | 1: step 4 asks for a yes on a security review comment not written until step 5 | 0 |
+| Search every source | 2 | 2 | 1: reading an item through tracker operations' step 2 inherits its stop when the person does not answer | 1: the purpose line and the report's "Written" line leave no room for the question-log entry |
+| Feedback walk-through | 2 | 2 | 0 | 0 |
+| Playbook catalog | 1 | 1 | 0 | 0 |
+| Machine self-check | 3 | 3 | 1: the new rules row logs a question before the report, the closing paragraph before finishing | 1: with no Python, step 1 and the refused-shell branch skip different steps |
+| Decision interview, a new record for its sweep change | 0, a sweep change | none due | 2 findings: the rules row omits the commit; step 10 does not say whether the plan's commit is pushed, which the log's push rule needs | 0 |
+
+- **Verified, the stop rule fired a fifth time,** under the rule of Q14: no item survived the fix round, but the re-check found 6 things the fixes broke, on 6 pages, and the sweep's change to the decision interview drew 2 findings.
+- **Inferred, also found:** the question log's new paragraph, which is a record and takes no review, drew four defects from a re-checker who read it: staging the whole file takes another session's uncommitted rows; its push sentence cites a step about branches; it does not say where a worktree's commit lands; and an entry logged after the report has no report left for a refusal. Handoff's step 2 still restates the commit instead of linking the log, and the review orchestrator's "nothing is committed" lines have no exception for the entry. None is fixed: a second fix round is the next decision, not this run's.
+- **Inferred, why:** breaks fell from 10 to 6, and none is about the shared rules the sweep moved. Four of the six sit where a step hands off to another step or page: an approval asked before its text exists, a stop inherited from another page's step, a commit path a new branch did not get, and a log entry timed against the report. The sweep closed the rules; each new sentence still meets its neighbours at a new edge.
+- **Verified:** the private ledger's check prints 0 unmapped. Its batch 5 rows stay on slice B2, since no batch 5 page was built.
+- **Verified, ready for batch 5:** the shared-interface sheet is at version 2. Its refusal idiom works under the runner's `set -eu`, it gives the first task a default change (a practice row in the question log, which needs no review trailer), and it carries each shared rule to its end. The rewrite brief's fifth version carries the sweep.
+
+The question for the maintainer, queued as Q29 in the workspace queue: how B2 resumes. The options are to carry these items into batch 5's one fix round and build now, which is recommended since breaks are shrinking and criterion 20 needs the tutorials; one more fix round on batch 4's pages first, a third round that needs a yes; repeating fix rounds while each re-check finds fewer breaks; or ending B2's porting here.
+
+Decisions made in batch 5's opening:
+
+- **A shared rule is stated once and linked.** The question-log commit moved to the log's own page, where the contract's rule already sends every session, rather than restated on eight pages.
+- **The fix round ran in one session,** not in helpers, since every fix touched a rule several pages share.
+- **The re-check covered every page holding a changed rule,** not only the fixed pages, as Q19 asks, and a page with a sweep change and no batch 4 record got a record of its own.
+
+Not done: batch 5, the two tutorials and the request map; the 6 breaks, the 4 older defects and the decision interview's 2 findings in the table; the question log's four defects; and the handoff and review orchestrator lines.
+Parked: Q29.
+Next: the maintainer — answer Q29 in the workspace queue, then a B2 session resumes batch 5.
+
+#### Ended, 2026-11-22
+
+The maintainer ended B2's porting in the answer to Q29, and approved a revision of the plan the same day, recorded under "Changes after approval". Batches 1 to 4 and batch 5's opening fix round stand as built. No page was edited when B2 ended.
+
+- **Verified, unmet:** criterion 20. The tutorial runner passes with no tutorial to run. The two tutorials move to slice B2t.
+- **Verified, moved:** the request map to slice Z; the 18 open items to B2t; the private ledger's rows for the tutorials and the map to B2t and slice Z.
+- **Inferred, why the fix rounds kept breaking shared rules:** each page restated rules several pages share, so a fix changed one copy and left the others. The sheet named those rules but not how each ends. The sweep closed the restated rules, and the breaks moved to the places where one step or page hands off to the next. Breaks fell from 10 to 6, but open items rose from 16 to 18, so further rounds were not converging.
+
+Next: a B3 session builds B3's two opening changes; B2t follows once they merge.
 
 ### Queued for slice Z
 
