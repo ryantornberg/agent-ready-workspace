@@ -67,5 +67,14 @@
    "docs/a.md": "| Word | Means |\n|---|---|\n| R | `hope` |\n"
   },
   "expect": []
+ },
+ {
+  "name": "in an instance, an eval tag naming one of the kit's cases passes",
+  "files": {
+   "workspace.json": "{\"version\": \"x\", \"parts\": [{\"use\": \"links\", \"why\": \"w\"}]}",
+   "docs/a.md": "| Rule | Enforced by |\n|---|---|\n| R | `eval:gone` |\n",
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {},\n  \"proof\": {},\n  \"cases\": [\n    \"gone\"\n  ]\n}\n"
+  },
+  "expect": []
  }
 ]

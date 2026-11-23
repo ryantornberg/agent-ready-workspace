@@ -39,6 +39,10 @@ says so.
 It trusts the record file: it shows that someone ran the case on this wording. CI re-grades every stored
 transcript against its record (evals/grade.py --recorded).
 
+In an instance made from the kit (one that holds kit.lock.json), a synced page the lock marks proven was proven in
+the kit, on the kit's cases and records, which are never synced. It is not gated here, with or without a case of
+the instance's own; only the pages the instance proves itself are (wslib/kitlock.py, decision record 0007).
+
 Config: "cases" (default evals/cases), "runs" (default evals/runs), "playbooks": a folder in which every page
 marked proven must have a case (optional). The arms file and the harness are found next to the cases folder,
 not set here, so a manifest edit cannot take them out of the hash.
@@ -50,6 +54,7 @@ import posixpath
 import re
 import types
 
+from wslib import kitlock
 from wslib.parts import finding
 
 KIND = "check"
@@ -307,6 +312,14 @@ def run(snapshot, config):
                                                "a map of where each file goes to where it comes from"))
             return found
 
+    try:
+        lock = kitlock.read(snapshot)
+    except kitlock.LockError as error:
+        return found + [finding(kitlock.LOCK, 1, f"{error}; see docs/decisions/0007-the-kit.md")]
+    kit_proven = {name for name, (state, _, _) in
+                  ((n, s) for page in kitlock.synced(lock) for n, s in kitlock.proof_states(lock, page).items())
+                  if state == "proven"}
+
     by_playbook, records, all_paths = {}, {}, list(snapshot.paths())
     for path in case_paths:
         try:
@@ -357,6 +370,8 @@ def run(snapshot, config):
                 records[name] = record
 
     for playbook, entries in sorted(by_playbook.items()):
+        if playbook in kit_proven:
+            continue
         state, anchors = _proof_state(snapshot, proof, playbook)
         if state != "proven":
             continue
@@ -381,11 +396,11 @@ def run(snapshot, config):
         tested = {page_of(p) for p in by_playbook} | set(by_playbook)
         for page in snapshot.paths(suffixes=(".md",), under=playbooks):
             text = snapshot.read(page) or ""
-            if proof.keys(text)[0].get("proof") == "proven" and page not in tested:
+            if proof.keys(text)[0].get("proof") == "proven" and page not in tested and page not in kit_proven:
                 found.append(finding(page, 1, f"marked proven, but no eval case tests this playbook; see {PAGE}"))
             for heading, line in proof.keys(text)[1]:
                 key = f"{page}#{_slug(heading)}"
-                if proof.parse_section(line)[0] == "proven" and key not in tested:
+                if proof.parse_section(line)[0] == "proven" and key not in tested and key not in kit_proven:
                     found.append(finding(page, 1, f"section {heading!r} is marked proven, but no eval case names "
                                                   f"{key}; see {PAGE}"))
     return found

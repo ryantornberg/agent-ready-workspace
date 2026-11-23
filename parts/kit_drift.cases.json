@@ -1,0 +1,86 @@
+[
+ {
+  "name": "synced files as the lock holds them pass",
+  "files": {
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {\n    \".githooks/pre-commit\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:31580adb4b8614db78b855d930451a30ebe79c0cab418727bd8f87d5ef318ae9\"\n    },\n    \"docs/a.md\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:77ed4017ddc8635238493701f64f3549daecbd68e77610bdb746b1fedd94eb9b\"\n    },\n    \"AGENTS.md\": {\n      \"class\": \"seeded\",\n      \"hash\": \"sha256:0a757a54b49956de48ff31b4f0cf897818a3e789b6ccc6677d7646b20509b27e\"\n    },\n    \"docs/plans/m1.md\": {\n      \"class\": \"never\",\n      \"hash\": \"sha256:0000000000000000000000000000000000000000000000000000000000000000\"\n    }\n  },\n  \"proof\": {},\n  \"cases\": []\n}\n",
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n",
+   "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n"
+  },
+  "expect": []
+ },
+ {
+  "name": "a hand-edited synced file fails",
+  "files": {
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {\n    \".githooks/pre-commit\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:31580adb4b8614db78b855d930451a30ebe79c0cab418727bd8f87d5ef318ae9\"\n    },\n    \"docs/a.md\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:77ed4017ddc8635238493701f64f3549daecbd68e77610bdb746b1fedd94eb9b\"\n    },\n    \"AGENTS.md\": {\n      \"class\": \"seeded\",\n      \"hash\": \"sha256:0a757a54b49956de48ff31b4f0cf897818a3e789b6ccc6677d7646b20509b27e\"\n    },\n    \"docs/plans/m1.md\": {\n      \"class\": \"never\",\n      \"hash\": \"sha256:0000000000000000000000000000000000000000000000000000000000000000\"\n    }\n  },\n  \"proof\": {},\n  \"cases\": []\n}\n",
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n",
+   "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n\nA line the instance added.\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n"
+  },
+  "expect": [
+   "edited since kit 0.3.0 shipped it as synced"
+  ]
+ },
+ {
+  "name": "a deleted synced file fails",
+  "files": {
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {\n    \".githooks/pre-commit\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:31580adb4b8614db78b855d930451a30ebe79c0cab418727bd8f87d5ef318ae9\"\n    },\n    \"docs/a.md\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:77ed4017ddc8635238493701f64f3549daecbd68e77610bdb746b1fedd94eb9b\"\n    },\n    \"AGENTS.md\": {\n      \"class\": \"seeded\",\n      \"hash\": \"sha256:0a757a54b49956de48ff31b4f0cf897818a3e789b6ccc6677d7646b20509b27e\"\n    },\n    \"docs/plans/m1.md\": {\n      \"class\": \"never\",\n      \"hash\": \"sha256:0000000000000000000000000000000000000000000000000000000000000000\"\n    }\n  },\n  \"proof\": {},\n  \"cases\": []\n}\n",
+   "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n"
+  },
+  "expect": [
+   "deleted, but kit 0.3.0 ships it as synced"
+  ]
+ },
+ {
+  "name": "an edited seeded file, and a file the kit never shipped, pass",
+  "files": {
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {\n    \".githooks/pre-commit\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:31580adb4b8614db78b855d930451a30ebe79c0cab418727bd8f87d5ef318ae9\"\n    },\n    \"docs/a.md\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:77ed4017ddc8635238493701f64f3549daecbd68e77610bdb746b1fedd94eb9b\"\n    },\n    \"AGENTS.md\": {\n      \"class\": \"seeded\",\n      \"hash\": \"sha256:0a757a54b49956de48ff31b4f0cf897818a3e789b6ccc6677d7646b20509b27e\"\n    },\n    \"docs/plans/m1.md\": {\n      \"class\": \"never\",\n      \"hash\": \"sha256:0000000000000000000000000000000000000000000000000000000000000000\"\n    }\n  },\n  \"proof\": {},\n  \"cases\": []\n}\n",
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n",
+   "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n\nA trap the team found.\n",
+   "parts/own.py": "KIND = 'check'\n"
+  },
+  "expect": []
+ },
+ {
+  "name": "line endings alone are not an edit",
+  "files": {
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {\n    \".githooks/pre-commit\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:31580adb4b8614db78b855d930451a30ebe79c0cab418727bd8f87d5ef318ae9\"\n    },\n    \"docs/a.md\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:77ed4017ddc8635238493701f64f3549daecbd68e77610bdb746b1fedd94eb9b\"\n    },\n    \"AGENTS.md\": {\n      \"class\": \"seeded\",\n      \"hash\": \"sha256:0a757a54b49956de48ff31b4f0cf897818a3e789b6ccc6677d7646b20509b27e\"\n    },\n    \"docs/plans/m1.md\": {\n      \"class\": \"never\",\n      \"hash\": \"sha256:0000000000000000000000000000000000000000000000000000000000000000\"\n    }\n  },\n  \"proof\": {},\n  \"cases\": []\n}\n",
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n",
+   "docs/a.md": "---\r\nkind: how-to\r\n---\r\n\r\n# A\r\n\r\nThe kit's page.\r\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n"
+  },
+  "expect": []
+ },
+ {
+  "name": "a kept file is the instance's, edited or not",
+  "files": {
+   "kit.lock.json": "{\n  \"kit\": {\n    \"version\": \"0.3.0\",\n    \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"changed\": false\n  },\n  \"files\": {\n    \".githooks/pre-commit\": {\n      \"class\": \"synced\",\n      \"hash\": \"sha256:31580adb4b8614db78b855d930451a30ebe79c0cab418727bd8f87d5ef318ae9\"\n    },\n    \"docs/a.md\": {\n      \"class\": \"kept\",\n      \"hash\": \"sha256:77ed4017ddc8635238493701f64f3549daecbd68e77610bdb746b1fedd94eb9b\"\n    },\n    \"AGENTS.md\": {\n      \"class\": \"seeded\",\n      \"hash\": \"sha256:0a757a54b49956de48ff31b4f0cf897818a3e789b6ccc6677d7646b20509b27e\"\n    },\n    \"docs/plans/m1.md\": {\n      \"class\": \"never\",\n      \"hash\": \"sha256:0000000000000000000000000000000000000000000000000000000000000000\"\n    }\n  },\n  \"proof\": {},\n  \"cases\": []\n}\n",
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n",
+   "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n\nThe instance's own step.\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n"
+  },
+  "expect": []
+ },
+ {
+  "name": "an unreadable lock fails",
+  "files": {
+   "kit.lock.json": "{ not json",
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n",
+   "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n",
+   "AGENTS.md": "# Contract\n\nThe instance's facts.\n"
+  },
+  "expect": [
+   "kit.lock.json is not readable JSON"
+  ]
+ },
+ {
+  "name": "a workspace with no lock is not an instance and finds nothing",
+  "files": {
+   ".githooks/pre-commit": "#!/bin/sh\nexec python3 ws.py check --staged\n# edited\n",
+   "docs/a.md": "---\nkind: how-to\n---\n\n# A\n\nThe kit's page.\n"
+  },
+  "expect": []
+ }
+]
