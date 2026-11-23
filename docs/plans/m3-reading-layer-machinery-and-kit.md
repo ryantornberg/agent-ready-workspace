@@ -815,6 +815,14 @@ Four items from the maintainer's read of batches 1 and 2, which is recorded unde
 
 **A procedure left unwrapped gets its wrapper when proven.** The program plan now carries this as a rule for every milestone: a lane draft, or a page waiting for M4 or M8, gets its wrapper and selection cases in the milestone that proves it. Nothing in M3 changes for it.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+The order of lane B, given by the maintainer after the plan revisit, before the unattended run. No criterion is dropped or weakened.
+
+**Lane B runs B3, then B2t, then B4, then B5.** B3 builds its two opening changes first, as the revisit's entry above orders, and then the rest of its row. B2t starts once B3 is done. This replaces the revisit's start condition for B2t, which was the merge of B3's two opening changes, and its note that B3's other pages may be built beside B2t.
+
 ## Results
 
 ### C1, launcher and baselines
