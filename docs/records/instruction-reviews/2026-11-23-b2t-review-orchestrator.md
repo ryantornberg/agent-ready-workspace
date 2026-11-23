@@ -51,3 +51,36 @@ Broke:
 Missed:
 
 - none.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q42 in the workspace queue, recorded in the M3 plan. Procedure endings gained one rule, under "Off main": a procedure pushes nothing for pages when the branch checked out holds work other than its own pages, and the commits reach main with the branch's pull request. Its own review is in `2026-11-23-b2t-procedure-endings.md`. The non-blocking items of the re-check are not fixed in this round; each goes to "Known defects".
+
+| Item | Disposition |
+|---|---|
+| Second fix round: the paragraph after step 11 and the rules row labelled the off-main rule an exception to procedure endings | changed: that page now holds the rule, so both link it instead of labelling an exception. The paragraph names the case: on a branch of the work it reviews. |
+| Re-check, broke, not blocking: on a pages-only worktree branch or a merged branch, the commits never reach main | fixed in part: a pages-only worktree reviewing someone else's pull request holds only its own page commits, so it is not off main and pushes as procedure endings' table says. A merged branch is a known defect, for M6. |
+
+## Second re-check
+
+A fresh driver-tier session re-checked the second fix round on 2026-11-23, narrowly. It read the contract, the instruction review's "The record", the M3 plan's Q42 entry and lane B's stop rule, `git diff HEAD` of the six pages, procedure endings and the six records, and procedure endings' "The order", "The commit", "The question-log entry", "The push" and its new "Off main". `python3 ws.py check` exits 0, with only the known warning on fix a bug's eval record. In a scratch repository with a local bare remote, `git log --format='%h %s' origin/main..HEAD` listed the code commit on a fix branch holding a code commit and then a page commit, so the test finds it off main. On a pages-only worktree it listed only the page commit, and `git push origin HEAD:main` from there put no code on the remote's main. On a fix branch with no code commit yet, it listed only the page commit. The record the round names for procedure endings, `2026-11-23-b2t-procedure-endings.md`, is not yet in the worktree (verified, `ls`); that rule is a separate reviewer's.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Second fix round: the paragraph after step 11 and the rules row labelled the off-main rule an exception to procedure endings | upheld | The paragraph now pushes "as procedure endings says" and, on a branch of the work it reviews, calls the review off main and pushes nothing, linking `#off-main`; the rules row says "as procedure endings says". No "By exception" is left. Step 10's plan commit and the log row are named, and neither is pushed from that branch. Its wording matches architecture review's step 9. Verified: the texts; the anchor resolves and `ws.py check` passes. |
+| Re-check, broke, not blocking: on a pages-only worktree branch or a merged branch, the commits never reach main | upheld | On someone else's pull request, step 10 commits nothing in this repository, and the session starts in the main working copy with the pull request in a detached review worktree that it edits nothing in. So the only commit is the log row, made where the session works: main, or a pages-only worktree of its own, which procedure endings says is not off main. In the scratch test such a worktree's push put no code on main. The merged branch is in "Known defects" for M6, the page's `prove-by`. Verified: the texts of steps 3 and 10 and of review in a worktree. |
+
+Broke:
+
+- none.
+
+Missed:
+
+- none.
+
+## Known defects
+
+The plan allows the page no further fix round, so the re-check's non-blocking items stay here.
+
+- Re-check, broke: on a branch whose pull request has merged, step 10's plan commit and the log row stay on the branch; the report names each. For M6.
+- Procedure endings' re-check: this page still says its commits reach main with the branch's pull request, without procedure endings' "only if the branch is pushed again before it merges". For M6.

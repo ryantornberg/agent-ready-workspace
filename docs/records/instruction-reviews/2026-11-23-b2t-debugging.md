@@ -54,3 +54,42 @@ Broke:
 Missed:
 
 - Not blocking. Step 7 has three paths: cause only, a fix that passes the gate, and a fix that does not ("Otherwise go to step 8, and let the work be sized"). Step 8's exception keeps the regression test uncommitted only for the first, and fix a bug commits it only on the second. On the third, procedure endings' commit and push apply, so the agent commits a test that fails on the code to a branch in the code's repository and, where it has a remote, pushes it with a draft pull request, before anyone has sized the fix. Inferred: from step 7, step 8 and procedure endings' "Where the commit goes" and push table. Naming the third path in step 8's exception settles it.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q42 in the workspace queue, recorded in the M3 plan. Procedure endings gained one rule, under "Off main": a procedure pushes nothing for pages when the branch checked out holds work other than its own pages, and the commits reach main with the branch's pull request. Its own review is in `2026-11-23-b2t-procedure-endings.md`. The non-blocking items of the re-check are not fixed in this round; each goes to "Known defects".
+
+| Item | Disposition |
+|---|---|
+| Re-check, broke, blocking: step 1 takes RUN from the last part of a link, the job's number in a job link | fixed: step 1 takes the number right after `/runs/`, and says a job's link goes on past it. |
+| Re-check, item 2, not blocking: when all three first runs pass, step 1 does not say whether to loop or halt | known defect, for M4. |
+| Re-check, item 3, not blocking: a 1-in-100 failure gives 100 clean runs about 37% of the time | known defect, for M4. |
+| Re-check, missed, not blocking: step 8's exception does not cover a fix that fails the gate | known defect, for M4. |
+
+## Second re-check
+
+A fresh driver-tier session re-checked the second fix round on 2026-11-23, narrowly. It read the contract, the instruction review's "The record", the M3 plan's Q42 entry and lane B's stop rule, and `git diff HEAD` of the page and its record. It ran `gh pr checks 45`, `gh run list --limit 5`, `gh run list --status failure -L 2`, `gh run view 45192296457 --json jobs,number,databaseId`, `gh run view 45192296457 --log-failed`, `gh run view 137753507639 --log-failed`, `gh run view 237 --log-failed` and `python3 ws.py check`, which exits 0 with only the known warning on fix a bug's eval record. It searched `docs/` outside records and plans for other wording of the run number; only git-host operations' "Read CI" row has one, and it already says the number after `/runs/`.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Re-check, broke, blocking: step 1 takes RUN from the last part of a link, the job's number in a job link | upheld | `gh pr checks 45` prints job links such as `.../actions/runs/45198559481/job/137775504831`. The failed run 45192296457's failed job link is `.../runs/45192296457/job/137753507639`. The number right after `/runs/` works: `gh run view 45192296457 --log-failed` printed the failed step's log and exited 0. The job's number does not: `gh run view 137753507639 --log-failed` failed with HTTP 404. `gh run list --limit 5` lists the same kind of number, such as 45202012668. Verified: the commands. |
+| Re-check, item 2, not blocking: when all three first runs pass, step 1 does not say whether to loop or halt | upheld | Listed in "Known defects" for M4, the page's `prove-by`. Verified. |
+| Re-check, item 3, not blocking: a 1-in-100 failure gives 100 clean runs about 37% of the time | upheld | Listed in "Known defects" for M4. Verified. |
+| Re-check, missed, not blocking: step 8's exception does not cover a fix that fails the gate | upheld | Listed in "Known defects" for M4. Verified. |
+
+Broke:
+
+- none.
+
+Missed:
+
+- Not blocking. "The run's number" is another number in GitHub's own words. `gh run view 45192296457 --json number` prints `237`, the run's count in its workflow, which the Actions page shows as "#237", and `gh run view 237 --log-failed` fails with HTTP 404. The colon after it defines RUN as the number after `/runs/`, so a careful reader gets the right one. Verified: the commands. Inferred: that an agent takes "#237" from the page's title. "The run's ID", the column `gh run list` prints, would not collide.
+
+## Known defects
+
+The plan allows the page no further fix round, so the re-check's non-blocking items stay here.
+
+- Re-check, item 2: when all three first runs pass, step 1 does not say whether to treat the failure as flaky and loop, or halt as not reproduced. For M4.
+- Re-check, item 3: a failure that shows only in the 100-run loop, about 1 in 100, still gives 100 clean runs about 37% of the time, so step 4 can confirm a wrong cause for it. For M4.
+- Re-check, missed: step 8's exception keeps the regression test uncommitted only on a cause-only run; on a fix that fails the gate, procedure endings commits and may push a failing test before the fix is sized. For M4.
+- Second re-check, missed: "the run's number" collides with GitHub's own run number, such as `#237`, which `gh run view` refuses; the colon after it defines RUN correctly. "The run's ID" would not collide. For M4.

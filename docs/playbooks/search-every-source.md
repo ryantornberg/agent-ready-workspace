@@ -44,7 +44,7 @@ The ladder's rule against stacking lookups holds for step 1, inside the workspac
 
     Stop when the report is given.
 
-The procedure writes nothing on the pages, code or sources it reads. If you had to ask a person something this workspace should have answered, log it before you report, as [procedure endings](../procedure-endings.md#the-question-log-entry) says; that entry is the one file the procedure may commit.
+The procedure writes nothing on the pages, code or sources it reads. If you had to ask a person something this workspace should have answered, log it before you report, as [procedure endings](../procedure-endings.md#the-question-log-entry) says; that entry is the one file the procedure may commit. When the search runs on a fix's or a feature's branch, you are [off main](../procedure-endings.md#off-main): commit the row and push nothing.
 
 ## The helper brief
 

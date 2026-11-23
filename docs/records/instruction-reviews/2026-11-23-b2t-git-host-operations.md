@@ -52,3 +52,9 @@ Broke:
 Missed:
 
 - none.
+
+## Known defects
+
+Items found after this page's re-check, which the plan allows no further fix round. Each stays here.
+
+- Q42's second fix round, swept by neither round: step 7 and the rules row keep their own rule, "by exception to" procedure endings, that off `main` the question-log row is left uncommitted. Procedure endings now says that off main the row is committed on the branch and nothing is pushed, and that a worktree made for pages alone is not off main, which this page's "not `main`" catches. Neither path carries code to main. Found by the second re-check of tracker operations and federated search. For M8.

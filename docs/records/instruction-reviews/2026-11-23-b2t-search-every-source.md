@@ -48,3 +48,34 @@ Broke:
 Missed:
 
 - Blocking. The paragraph after the steps logs a question "as procedure endings says", with no exception for a branch other than `main`. Procedure endings commits the row "on the worktree's branch in a worktree", then pushes it with `git push origin HEAD:main`. A search asked for mid-task, from a fix's or a feature's worktree, has an unmerged code branch checked out, so the push carries that code to main with no pull request and no CI. That goes against procedure endings' "never on its main" for code and the contract's draft pull request rule. `direct_push` refuses only machinery paths. Git-host operations' finding 1 was this same chain, marked blocking, and was fixed there; this page got no exception. Verified: the texts of this page and procedure endings' "The commit" and "The push"; the scratch push above. Inferred: that the search runs with a code branch checked out, and that an agent follows procedure endings through to the push. The fix is the exception git-host operations has, or one rule on procedure endings for every procedure.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q42 in the workspace queue, recorded in the M3 plan. Procedure endings gained one rule, under "Off main": a procedure pushes nothing for pages when the branch checked out holds work other than its own pages, and the commits reach main with the branch's pull request. Its own review is in `2026-11-23-b2t-procedure-endings.md`. The re-check found no non-blocking item on this page.
+
+| Item | Disposition |
+|---|---|
+| Re-check, missed, blocking: the question-log row is committed on any branch and pushed to main | fixed: the paragraph after the steps links procedure endings' off-main rule: on a fix's or a feature's branch, commit the row and push nothing. |
+
+## Second re-check
+
+A fresh driver-tier session re-checked the second fix round on 2026-11-23, narrowly. It read the contract, the instruction review's "The record", the M3 plan's Q42 entry and lane B's stop rule, `git diff HEAD` of the six pages, procedure endings and the six records, and procedure endings' "The order", "The commit", "The question-log entry", "The push" and its new "Off main". `python3 ws.py check` exits 0, with only the known warning on fix a bug's eval record. In a scratch repository with a local bare remote, `git log --format='%h %s' origin/main..HEAD` listed the code commit on a fix branch holding a code commit and then a page commit, so the test finds it off main. On a pages-only worktree it listed only the page commit, and `git push origin HEAD:main` from there put no code on the remote's main. On a fix branch with no code commit yet, it listed only the page commit. The record the round names for procedure endings, `2026-11-23-b2t-procedure-endings.md`, is not yet in the worktree (verified, `ls`); that rule is a separate reviewer's.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Re-check, missed, blocking: the question-log row is committed on any branch and pushed to main | upheld | The paragraph after the steps now says that on a fix's or a feature's branch you are off main, linking procedure endings' `#off-main`: commit the row and push nothing. Procedure endings agrees in "Where the commit goes" and its push table. So the row's push no longer carries the branch's code to main. Verified: the texts; the anchor resolves and `ws.py check` passes; the scratch test lists the code commit on a fix branch. |
+
+Broke:
+
+- Not blocking. The paragraph after the steps names the case by the branch, "a fix's or a feature's branch"; procedure endings decides by its test. On a fix's branch with no commit of its own yet, the test lists only the row, so procedure endings pushes it with `git push origin HEAD:main`, while the page says push nothing. On a machinery change's branch the page is silent, but its log step leads to procedure endings' push, whose test finds the branch off main. Both gaps are safe: no code reaches main either way. Verified: the texts; the scratch test on a fresh fix branch. Inferred: that the push from there carries only the row, from the log it printed.
+
+Missed:
+
+- Not blocking. Git-host operations, a page of this batch that holds the same shared rule, was not swept. Its step 7 and its rules row still say, "by exception to" procedure endings, that off `main` the row is left uncommitted and its text given in the report. Procedure endings now says that off main the row is committed on the branch checked out and nothing is pushed. Its "not `main`, such as a pull request's branch" also catches a pages-only worktree, which procedure endings says is not off main. Lane B's stop rule says a fix to a shared rule sweeps every page holding it. Neither path carries code to main. Verified: `grep` of git-host operations and procedure endings; the plan's stop rule.
+
+## Known defects
+
+The plan allows the page no further fix round, so the second re-check's non-blocking items stay here.
+
+- Second re-check, broke: the paragraph after the steps named off main by the kind of branch while procedure endings decided by a commit test. Procedure endings' own fix round, after this re-check, made off main a matter of the branch checked out, as this page says, so the two now agree; the procedure endings record holds it.
+- Second re-check, missed: git-host operations still leaves the question-log row uncommitted off `main`; see tracker operations' record. For M8.

@@ -162,6 +162,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b2t-how-tos.md](2026-11-23-b2t-how-tos.md) | `docs/how-tos.md` | contradiction, trigger |
 | [2026-11-23-b2t-machine-self-check.md](2026-11-23-b2t-machine-self-check.md) | `docs/machine-self-check.md` | contradiction, step |
 | [2026-11-23-b2t-playbook-catalog.md](2026-11-23-b2t-playbook-catalog.md) | `docs/playbooks/README.md` | trigger |
+| [2026-11-23-b2t-procedure-endings.md](2026-11-23-b2t-procedure-endings.md) | `docs/procedure-endings.md` | step, contradiction, trigger |
 | [2026-11-23-b2t-red-team-review.md](2026-11-23-b2t-red-team-review.md) | `docs/playbooks/red-team-review.md` | contradiction |
 | [2026-11-23-b2t-review-orchestrator.md](2026-11-23-b2t-review-orchestrator.md) | `docs/playbooks/review-orchestrator.md` | contradiction, step, enforcement |
 | [2026-11-23-b2t-search-every-source.md](2026-11-23-b2t-search-every-source.md) | `docs/playbooks/search-every-source.md` | trigger, step, placement |
