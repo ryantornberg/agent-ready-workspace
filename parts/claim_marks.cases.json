@@ -1,0 +1,76 @@
+[
+  {
+    "name": "a fix record whose claim lines are all marked passes",
+    "files": {
+      "docs/records/fixes/2026-11-22-refund.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Where it stands\n\n- Commit: abc1234\n\n## Report\n\nFixed: a refund rounded down.\n\n- verified: the regression test failed before the fix and passes after it.\n- inferred: no other caller rounds this way.\n\nNot done: nothing.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a claim line not marked verified or inferred fails",
+    "files": {
+      "docs/records/fixes/2026-11-22-refund.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Where it stands\n\n- Commit: abc1234\n\n## Report\n\nFixed: a refund rounded down.\n\n- verified: the test passes.\n- the other callers are fine.\n\nNot done: nothing.\n"
+    },
+    "expect": [
+      "not marked verified or inferred"
+    ]
+  },
+  {
+    "name": "a fix record with no report section fails",
+    "files": {
+      "docs/records/fixes/2026-11-22-refund.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Where it stands\n\n- verified: the test passes.\n"
+    },
+    "expect": [
+      "has no '## Report' section"
+    ]
+  },
+  {
+    "name": "the definition of done's block shape passes",
+    "files": {
+      "docs/records/fixes/2026-11-22-refund.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Where it stands\n\n- Commit: abc1234\n\n## Report\n\n```\nFixed: a refund rounded down.\n\nverified  the regression test failed before the fix and passes after it\ninferred  no other caller rounds this way\n\nNot done: nothing\n```\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "bold marks pass, and a word that only starts like a mark fails",
+    "files": {
+      "docs/records/fixes/2026-11-22-refund.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Where it stands\n\n- Commit: abc1234\n\n## Report\n\n- **verified**: the test passes.\n- **inferred:** no other caller.\n- verifiedish: a guess.\n"
+    },
+    "expect": [
+      "'- verifiedish: a guess.'"
+    ]
+  },
+  {
+    "name": "lines under the next section are not read",
+    "files": {
+      "docs/records/fixes/2026-11-22-refund.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Where it stands\n\n- Commit: abc1234\n\n## Report\n\n- verified: the test passes.\n\n## Review of abc1234\n\nA table row that is not a claim.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a README in the folder and a folder with no records pass",
+    "files": {
+      "docs/records/fixes/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-22\n---\n\n# Fix records\n\nNo report here.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a page outside the folder is not read",
+    "files": {
+      "docs/records/other.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Report\n\n- the test passes.\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "the folder setting moves the check",
+    "files": {
+      "fixes/2026-11-22-a.md": "---\nkind: record\nlast-reviewed: 2026-11-22\n---\n\n# Fix: a refund rounds the wrong way\n\nWhat was fixed, for the person who asked.\n\n## Where it stands\n\n- Commit: abc1234\n\n## Report\n\n- the test passes.\n"
+    },
+    "config": {
+      "folder": "fixes"
+    },
+    "expect": [
+      "not marked verified or inferred"
+    ]
+  }
+]

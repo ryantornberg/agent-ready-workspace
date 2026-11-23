@@ -325,6 +325,14 @@
       ]
     },
     {
+      "use": "claim_marks",
+      "why": "A claim recorded because it was plausible, not because it was checked, is how a confident wrong answer gets merged; a fix record marks each claim in its report verified or inferred, so a reader knows which ones to trust."
+    },
+    {
+      "use": "plan_budgets",
+      "why": "A plan nobody can read in one sitting is approved unread: a Key points block over 200 words, or a table cell over 60, buries what the approver must know. Only draft plans are read, since approved ones are frozen."
+    },
+    {
       "use": "proof",
       "why": "A page marked proven must hold its evidence, an unproven one must name the milestone that will prove it, and neither mark may move quietly: a proven page marked unproven leaves the eval gate."
     }
