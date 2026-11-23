@@ -915,6 +915,14 @@ How slice B4 resumes after batch 2's re-check stopped it, from the maintainer's 
 
 **Batch 2's index review gets its fix round, then batch 2 merges.** The seven non-blocking findings on batch 2's index, README, reading paths, epic folder and QA test plan edits get one fix round and a fresh re-check.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+The order of lane B for the next run, given by the maintainer after reviewing B2t's naming results and B5's spec decision. No criterion is dropped or weakened.
+
+**Lane B runs B6, then B7.** B6 builds in full. B7 builds its cases and two-line texts, then stops before its baseline until the maintainer agrees to its eval budget. Slice Z waits for B7. No paid eval run starts without the maintainer.
+
 ## Results
 
 ### C1, launcher and baselines
