@@ -20,7 +20,7 @@
   "parts": [
     {
       "use": "links",
-      "why": "A page that points at a moved or deleted page sends an agent to nothing.",
+      "why": "A page that points at a moved or deleted page sends an agent to nothing, and a renamed heading breaks every link to its anchor, which a check of file names alone once missed.",
       "skip": [
         "evals/scaffold",
         "archive"
@@ -45,7 +45,7 @@
     },
     {
       "use": "page_kinds",
-      "why": "A page an agent cannot place by kind, or whose opening buries its purpose, is read wrong or not at all; and a page nobody has reviewed in months is trusted as if it were current.",
+      "why": "A page an agent cannot place by kind, or whose opening buries its purpose, is read wrong or not at all; and a page nobody has reviewed in months is trusted as if it were current. It reads every page under docs/ and fails when it reads none, since a gate scoped to one folder once passed while pages elsewhere broke its rule.",
       "max_age_days": 180,
       "require_date": [
         "docs",
@@ -75,12 +75,12 @@
     },
     {
       "use": "eval_record",
-      "why": "A playbook marked proven stays only while a recorded eval run shows it beating the bare model and two lines, so it cannot change without one.",
+      "why": "A playbook marked proven stays only while a recorded eval run shows it beating the bare model and two lines, so it cannot change without one. Guidance changed with no real case to run it was once taken as better on no evidence, so every proven page has cases drawn from real tasks.",
       "playbooks": "docs/playbooks"
     },
     {
       "use": "no_stage_all",
-      "why": "Staging everything sweeps another session's edits into a commit; the reminder comes before the commit refuses it."
+      "why": "Staging everything sweeps another session's edits into a commit, as it once did in a checkout two sessions shared; the reminder comes before the commit refuses it."
     },
     {
       "use": "edit_ledger",
@@ -88,7 +88,7 @@
     },
     {
       "use": "shelved",
-      "why": "src/orders-service-v1 looks current and is kept read-only for audits; an edit there fixes nothing that runs.",
+      "why": "src/orders-service-v1 looks current and is kept read-only for audits; an edit there fixes nothing that runs. A fact like this once sat in a parenthesis and was missed, so the contract states it among its first facts and this hook refuses the edit.",
       "paths": [
         "src/orders-service-v1"
       ]
@@ -112,7 +112,7 @@
     },
     {
       "use": "handoff_tier",
-      "why": "Every delegated task names its tier and runs at that tier's model and effort, as the orchestration rules require."
+      "why": "Every delegated task names its tier and runs at that tier's model and effort, as the orchestration rules require. The rule is one binding and one checked line, since heavier tier machinery once cost more than the evidence for it."
     },
     {
       "use": "direct_push",
@@ -142,7 +142,7 @@
     },
     {
       "use": "no_admin_merge",
-      "why": "The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in; a squash or rebase merge drops the branch's commits, and the proof anchors pinned to them, from main's history."
+      "why": "An agent's pull request was once merged unreviewed, onto a target nobody meant. The branch rule does not bind the owner, and gh pr merge --admin merges past red CI with the owner's sign-in; a squash or rebase merge drops the branch's commits, and the proof anchors pinned to them, from main's history."
     },
     {
       "use": "secret_scan",
@@ -163,7 +163,7 @@
     },
     {
       "use": "no_discard",
-      "why": "While another live session holds the main working copy, a hard reset, forced checkout, rebase or stash drop by this one erases its uncommitted work."
+      "why": "While another live session holds the main working copy, a hard reset, forced checkout, rebase or stash drop by this one erases its uncommitted work, as a reset in a shared checkout once did."
     },
     {
       "use": "push_lease",
@@ -198,12 +198,12 @@
     },
     {
       "use": "stale_pages",
-      "why": "The commit check fails only a stale page the commit edits; the rest stay out of sight until a session starts and is told.",
+      "why": "The commit check fails only a stale page the commit edits, since gates that blocked commits for drift the commit did not cause were routed around; the rest stay out of sight until a session starts and is told.",
       "part": "page_kinds"
     },
     {
       "use": "stale_pins",
-      "why": "A session can start work on a pinned repository that is behind its upstream without knowing."
+      "why": "A session can start work on a pinned repository that is behind its upstream without knowing, and lag nobody reports only grows."
     },
     {
       "use": "pin_on_default",
@@ -237,8 +237,12 @@
       "why": "A reporting page that opens with background makes its reader read all of it for the verdict."
     },
     {
+      "use": "decisions",
+      "why": "A decision record is read long after it was written, to learn what was decided, when, by whom and what it gave up; a record changed in place, with no date, no longer says what was decided then."
+    },
+    {
       "use": "rule_pages",
-      "why": "Some agent tools load path-scoped rules on their own and others do not; every session sees the rules for the file it edits.",
+      "why": "Some agent tools load path-scoped rules on their own and others do not, and pages once claimed loading that never happened; every session sees the rules for the file it edits.",
       "folder": "docs/rules"
     },
     {
@@ -256,7 +260,7 @@
     },
     {
       "use": "pointers",
-      "why": "GitHub Copilot and opencode read their own instruction files; if one stops naming the contract and the rule pages, sessions in that tool work without them.",
+      "why": "GitHub Copilot and opencode read their own instruction files; if one stops naming the contract and the rule pages, sessions in that tool work without them. That a tool loads a file is checked here, not assumed, since pages once claimed loading that never happened.",
       "files": [
         ".github/copilot-instructions.md",
         "opencode.json"
@@ -264,11 +268,11 @@
     },
     {
       "use": "rules",
-      "why": "A rule that claims a check enforces it, when the check is gone or never tested it, teaches that rules are optional."
+      "why": "A rule that claims a check enforces it, when the check is gone, never tested it or runs only where someone turned it on, teaches that rules are optional; enforcement once advertised was opt-in on each machine."
     },
     {
       "use": "loaded_size",
-      "why": "Every byte of the always-loaded layer costs every session, and added text can draw attention from the rest.",
+      "why": "Every byte of the always-loaded layer costs every session, and added text can draw attention from the rest. Stale doctrine and duplicates once built up there, and a plugin once loaded its own doctrine into every session, so the layer and the wrappers' descriptions each have a ceiling.",
       "limits": [
         {
           "what": "the contract and the agent tools' pointer files",
