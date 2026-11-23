@@ -32,7 +32,7 @@ import posixpath
 import re
 import shlex
 
-from wslib import secrets
+from wslib import secretrules
 from wslib import shell
 
 KIND = "hook"
@@ -48,6 +48,7 @@ PATTERN_FIRST = frozenset({"grep", "egrep", "fgrep", "zgrep", "rg", "ag", "ack",
                            "mawk", "nawk"})
 PATTERN_OPTIONS = ("--regexp", "--file", "--expression", "--source")
 FILE_MESSAGES = ("-F", "--file", "--body-file", "--notes-file")   # message options that name a file to read
+PS_VALUES = {"-o", "-O", "-p", "-q", "-u", "-U", "-g", "-G", "-t", "-C", "-k", "-F", "-M", "-N"}
 DUMPERS = frozenset({"export", "declare", "typeset"})
 ENVIRON = "proc/*/environ"
 SPLIT = re.compile(r"[\s'\"`()\[\]{}<>|;&=:,@$!]+")
@@ -77,7 +78,8 @@ def _glob(pattern):
 def _patterns(config):
     """[(regex, sample paths)] for each secrets pattern, matched against a path's end."""
     found = []
-    for pattern in list(config.get("secrets", ())) + list(config.get("home", ())) + [ENVIRON]:
+    extra = [config["file"]] if isinstance(config.get("file"), str) and config["file"] else []
+    for pattern in list(config.get("secrets", ())) + list(config.get("home", ())) + extra + [ENVIRON]:
         text = re.sub(r"^(?:~/|\./)", "", pattern.replace("\\", "/"))
         while text.startswith("**/"):
             text = text[3:]
@@ -161,6 +163,18 @@ def _names_a_file(args, i):
                                                               if option.startswith("--"))
 
 
+def _ps_environment(args):
+    """True when ps is asked for each process's environment: a BSD-style letter group holding e, such as `eww` or
+    `auxe`, or a dash group holding E, as macOS spells it. A value of an option such as `-o user` is not a group."""
+    for i, word in enumerate(args):
+        if word.startswith("-"):
+            if not word.startswith("--") and "E" in word:
+                return True
+        elif re.match(r"^[A-Za-z]+$", word) and "e" in word and (i == 0 or args[i - 1] not in PS_VALUES):
+            return True
+    return False
+
+
 def _dump(program, args):
     """Why the command prints the environment, or None."""
     names = [word for word in args if not word.startswith(("-", "+"))]
@@ -168,6 +182,8 @@ def _dump(program, args):
         return "`env` with no program to run prints the whole environment"
     if program == "printenv":
         return "`printenv` prints the environment"
+    if program == "ps" and _ps_environment(args):
+        return "`ps` with `e` or `-E` prints each process's environment"
     if program == "set" and not args:
         return "`set` with no argument prints every variable"
     if program in DUMPERS and not names and not (args and all(set(word.lstrip("-")) <= set("fF") for word in args)):
@@ -182,7 +198,7 @@ def _with_secrets_child(command):
     """The program and arguments `ws.py with-secrets` would start, or None when the command is not that. ws.py is
     found by name wherever it stands, so `python3 -X utf8 ws.py`, `./ws.py` and the launcher all count."""
     words = [command["program"] or ""] + list(command["args"])
-    at = next((i for i, word in enumerate(words) if secrets.program_name(word) in STARTERS), None)
+    at = next((i for i, word in enumerate(words) if secretrules.program_name(word) in STARTERS), None)
     if at is None or "with-secrets" not in words[at + 1:]:
         return None
     rest = words[words.index("with-secrets", at + 1) + 1:]
@@ -190,10 +206,12 @@ def _with_secrets_child(command):
 
 
 def _child_refusal(child):
-    reason = secrets.refusal(child[0])
+    reason = secretrules.refusal(child[0])
     if reason:
         return f"`ws.py with-secrets` refuses this program itself: {reason}"
     for inner in shell.analyze(shlex.join(child)):
+        if _with_secrets_child(inner) is not None:
+            return "`ws.py with-secrets` inside another is refused: its program would go unjudged"
         if inner["git"] or inner["gh"] or inner["writes"]:
             return ("`ws.py with-secrets` may not run git, gh or a program that writes a file the shell guards "
                     "judge, since they would not see it: run git and gh by their own names, which sign in "
@@ -226,11 +244,14 @@ def _inner_text(words, out):
         texts = texts[1:]
     if not texts:
         return
-    name = secrets.program_name(texts[0])
+    name = secretrules.program_name(texts[0])
     if name == "eval":
         _input_redirections(shell.parse(" ".join(texts[1:])), out)
-    elif name in shell.SHELL_PROGRAMS and "-c" in texts[1:-1]:
-        _input_redirections(shell.parse(texts[texts.index("-c", 1) + 1]), out)
+    elif name in shell.SHELL_PROGRAMS:
+        at = next((i for i, text in enumerate(texts[1:], 1) if re.match(r"^-[A-Za-z]*c[A-Za-z]*$", text)), None)
+        body = next((text for text in texts[at + 1:] if not text.startswith(("-", "+"))), None) if at else None
+        if body is not None:                  # -c, -lc, -ec, and -c -e: the first word that is no option
+            _input_redirections(shell.parse(body), out)
 
 
 def decide(event, config):
@@ -247,7 +268,8 @@ def decide(event, config):
         program = call["program"]
         reason = _dump(program, call["args"])
         if reason:
-            return f"{reason}, secrets included. Ask the person for the one value you need."
+            return (f"{reason}, secrets included. To see a variable that holds no secret, such as PATH, echo it "
+                    f"by name; ask the person for a secret.")
         child = _with_secrets_child(call)
         if child:
             reason = _child_refusal(child)

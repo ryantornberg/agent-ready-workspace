@@ -20,6 +20,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from wslib import parts as partlib  # noqa: E402
+from wslib import secretrules  # noqa: E402
 from wslib import secrets  # noqa: E402
 
 VALUE = "s3cr3t-value-for-the-test"
@@ -125,6 +126,25 @@ class WithSecretsTests(unittest.TestCase):
         self.assertEqual(secrets.file_of(self.repo, {}).resolve(), (self.repo / ".env").resolve())
         self.assertEqual(entry("secrets_shell")["file"], ".env")
 
+    @unittest.skipIf(os.name == "nt" or (hasattr(os, "geteuid") and os.geteuid() == 0), "needs file modes that bind")
+    def test_a_file_the_process_may_not_read_names_the_codex_profile(self):
+        (self.repo / ".env").chmod(0)
+        try:
+            done = self.ws("API_KEY", "--", sys.executable, "-c", "pass")
+        finally:
+            (self.repo / ".env").chmod(0o600)
+        self.assertEqual(done.returncode, 2)
+        self.assertIn("agent-ready profile", done.stderr)
+        self.assertNotIn(VALUE, done.stdout + done.stderr)
+
+    def test_a_batch_file_with_a_character_cmd_reads_is_refused(self):
+        self.assertIsNone(secretrules.batch_refusal("C:/node/npm.cmd", ["publish", "--tag", "next"]))
+        self.assertIsNone(secretrules.batch_refusal("C:/tools/tool.exe", ["a&set"]))
+        for word in ("x&set", "a|b", "%API_KEY%", "!API_KEY!", "a^b", 'a"b', "a>b", "(a)"):
+            with self.subTest(word=word):
+                self.assertIsNotNone(secretrules.batch_refusal("C:/node/NPM.CMD", ["publish", word]))
+                self.assertIsNotNone(secretrules.batch_refusal("C:/x/run.bat", [word]))
+
     def test_the_file_is_read_as_its_format_says(self):
         values = secrets.read('# c\nexport A=1\nB="x \\"q\\" y"\nC=\'lit $x\'\nD=plain # note\nE=\nnot a line\n')
         self.assertEqual(values, {"A": "1", "B": 'x "q" y', "C": "lit $x", "D": "plain", "E": ""})
@@ -147,6 +167,10 @@ class HookAndCommandAgreeTests(unittest.TestCase):
 
     def test_the_hook_refuses_reading_the_file_with_secrets_reads(self):
         self.assertIsNotNone(self.part.decide({"command": f"cat {entry('secrets_shell')['file']}"}))
+
+    def test_the_command_and_the_hook_share_one_list(self):
+        self.assertIs(secrets.REFUSED, secretrules.REFUSED)
+        self.assertIs(secrets.refusal, secretrules.refusal)
 
 
 if __name__ == "__main__":

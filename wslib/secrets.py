@@ -10,14 +10,17 @@ values reach the child without passing through the agent's context or its shell.
 The file holds one `NAME=value` per line. Blank lines and lines starting with `#` are skipped, a leading `export `
 is dropped, and a value in single or double quotes loses its quotes. An unquoted value ends at ` #`.
 
-The child gets the calling environment plus the named values, and nothing else from the file. It runs with no
-shell, so `$NAME` on the command line is never filled in: the child must read the variable itself, as gh, npm and
-most command-line tools do.
+The child gets the calling environment plus the named values, and nothing else from the file. It is started with
+no shell of its own, so it must read the variable itself, as gh, npm and most command-line tools do. `$NAME` written
+on the command line is filled in by the calling shell before this runs, with what that shell holds, which is not
+the file's value.
 
-It refuses a child in REFUSED: a shell, `env`, `printenv`, or a program that runs another program it is given,
-such as `sudo`, `xargs` or `nohup`, since any of them would print or pass on every value. It judges the program
-by the name it is called by and by the name of the file a symbolic link leads to. An interpreter, a script or a
-program that starts a shell itself can still print the values; the README's limits say so. M3 slice C5f.
+It refuses a child in wslib/secretrules.py's REFUSED: a shell, `env`, `printenv`, or a program that runs another
+program it is given, such as `sudo`, `xargs` or `nohup`, since any of them would print or pass on every value. It
+judges the program by the name it is called by and by the name of the file a symbolic link leads to. On Windows, a
+batch file such as `npm.cmd` runs under cmd.exe, which reads its arguments, so one with a character cmd.exe treats
+as special in an argument is refused. An interpreter, a script or a program that starts a shell itself can still
+print the values; the README's limits say so. M3 slice C5f.
 
 Exit codes: the child's; 2 when it refuses, the file or a name is missing, or the child cannot start.
 """
@@ -27,39 +30,14 @@ import re
 import shutil
 import subprocess
 
+from .secretrules import REFUSED, batch_refusal, program_name, refusal  # noqa: F401  REFUSED is read by tests
+
 DEFAULT_FILE = ".env"
 NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
-SHELLS = frozenset({"sh", "bash", "zsh", "dash", "ksh", "ash", "mksh", "fish", "csh", "tcsh", "pwsh", "powershell",
-                    "cmd", "busybox"})
-RUNNERS = frozenset({"sudo", "doas", "su", "command", "exec", "time", "nohup", "timeout", "nice", "xargs", "builtin",
-                     "stdbuf", "setsid", "script", "watch", "chroot", "unbuffer", "runuser", "start"})
-REFUSED = SHELLS | RUNNERS | {"env", "printenv"}
-SUFFIXES = (".exe", ".cmd", ".bat", ".com")
 
 
 class SecretsError(Exception):
     pass
-
-
-def program_name(word):
-    """The program a word names: its last path segment, in lower case, without a Windows suffix."""
-    name = re.split(r"[\\/]", word)[-1].lower()
-    for suffix in SUFFIXES:
-        if name.endswith(suffix):
-            return name[:-len(suffix)]
-    return name
-
-
-def refusal(program):
-    """Why `program` may not be the child, or None. program is the word as given."""
-    name = program_name(program)
-    if name in SHELLS:
-        return f"{name} is a shell, which would show every value to whatever it runs"
-    if name in ("env", "printenv"):
-        return f"{name} prints the environment, the values included"
-    if name in RUNNERS:
-        return f"{name} runs another program it is given, which could be a shell"
-    return None
 
 
 def split(rest):
@@ -133,6 +111,10 @@ def run(root, rest, entry=None):
         values = read(path.read_text(encoding="utf-8-sig"))
     except FileNotFoundError:
         raise SecretsError(f"no secrets file at {path}; a person writes it, with one NAME=value per line")
+    except PermissionError:
+        raise SecretsError(f"cannot read the secrets file {path}: permission denied. Codex CLI's agent-ready profile "
+                           f"denies it to every process; with that profile, a person sets the \"file\" of "
+                           f"secrets_shell in workspace.json to a path outside the workspace")
     except (OSError, UnicodeDecodeError) as error:
         raise SecretsError(f"cannot read the secrets file {path}: {type(error).__name__}")
     missing = [name for name in names if name not in values]
@@ -146,6 +128,10 @@ def run(root, rest, entry=None):
     reason = refusal(program) or (refusal(real) if program_name(real) != "busybox" else None)
     if reason:
         raise SecretsError(f"refused: {child[0]} leads to {real}, and {reason}")
+    if os.name == "nt":
+        reason = batch_refusal(program, child[1:])
+        if reason:
+            raise SecretsError(f"refused: {reason}")
     try:
         done = subprocess.run([program, *child[1:]], env=env)
     except OSError as error:
