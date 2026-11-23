@@ -893,6 +893,18 @@ A new slice, KILLFIX, from main's red CI after B3's second resume: C6's kill tes
 
 **C6's kill test measures the check's run time instead of assuming it.** `test_a_killed_commit_check_leaves_nothing_behind` times one whole run of the commit check and places every kill point as a fraction of that one sample. When the sample runs slow, a later point falls after the check has ended, and the test fails though the check left nothing behind. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, so that a kill point never falls after the check has ended. KILLFIX is done when the test holds under a slow sample that fails it today, and its report is under "Results".
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+How slice B2t resumes after its re-check stopped it, from the maintainer's answer to Q42 in the workspace queue. It adds one page to B2t's scope and gives its pages a second fix round; no criterion is dropped or weakened.
+
+**Procedure endings gains one rule: off main, a procedure pushes nothing for pages.** Three of the re-check's four blocking items had one cause. Federated search, tracker operations and defect escape analysis commit their own pages on whatever branch is checked out, and procedure endings then pushes a worktree's pages with `git push origin HEAD:main`, which carries a code branch's unmerged commits to main. B2t adds the rule to procedure endings, under its instruction review, and links it from those three pages. Architecture review and the review orchestrator, which label the same rule an exception to procedure endings, link it instead.
+
+**Debugging's run number is fixed.** Step 1 takes the number after `/runs/` in a link, not its last part, which in a job's link is the job's number.
+
+**A narrow re-check follows.** A fresh session reads the changed pages and procedure endings' new rule. This is the pages' second fix round, and lane B's stop rule applies to it unchanged.
+
 ## Results
 
 ### C1, launcher and baselines
