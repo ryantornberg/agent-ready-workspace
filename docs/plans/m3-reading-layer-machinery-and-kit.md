@@ -823,6 +823,16 @@ The order of lane B, given by the maintainer after the plan revisit, before the 
 
 **Lane B runs B3, then B2t, then B4, then B5.** B3 builds its two opening changes first, as the revisit's entry above orders, and then the rest of its row. B2t starts once B3 is done. This replaces the revisit's start condition for B2t, which was the merge of B3's two opening changes, and its note that B3's other pages may be built beside B2t.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+Slice B3 stopped after its two opening changes under lane B's stop rule. The maintainer's answer to Q30 in the workspace queue settles how it resumes, and approves the revision B3 proposed under template rule 7. No criterion is dropped or weakened.
+
+**Procedure endings gets a second fix round first (Q30).** One more fix round on `docs/procedure-endings.md` only, on the items its re-check found. When main has moved and the main working copy holds uncommitted changes, the page pushes from a throwaway worktree of `origin/main` instead of pulling with rebase. A fresh re-check follows, then the reviews of batches 1 and 2 start. This is the page's second fix round on the same failure, which the stop rule's limit of two allows, with the maintainer's yes.
+
+**Lane B's stop rule: a blocking finding the re-check finds stops the slice.** A blocking finding that only the fresh re-check finds, one the first reading missed, stops the slice as one a fix creates does. It is never recorded as a known defect. This adds a trigger to lane B's rule in the revisit's entry above; the rule's other triggers are unchanged.
+
 ## Results
 
 ### C1, launcher and baselines
