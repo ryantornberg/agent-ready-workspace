@@ -39,7 +39,7 @@ These serve one lane of work, named in each page's `lane` key. Each is a draft t
 | [Regression candidates ledger](regression-candidates.md) | QA | A bug is proposed as a new regression case. | One file, `docs/records/regression-candidates.md` | M10 |
 | [QA test plan](qa-test-plan.md) | QA | You hand QA a release or a change to test. | The tracker's QA sub-task, as an outward write | M6 |
 | [Standup log](standup-log.md) | Product | A [standup report](../playbooks/standup-report.md) saves its entry. | One file outside every repository, as the page says | M9 |
-| [Epic satellites](epic-satellites.md) | Product | An epic needs questions for other teams, a tracker map or an unattended-run plan beside its hub. | As the page says, beside the [epic folder](epic-folder.md)'s hub | M9 |
+| [Epic satellites](epic-satellites.md) | Product | An epic needs questions for other teams, a tracker map or an unattended-run plan. | As the page says: the first two as sections of the [epic folder](epic-folder.md)'s hub, the run plan as a plan beside it | M9 |
 
 ## Record shapes another page defines
 

@@ -45,3 +45,9 @@ A fresh session read the page at `4190d8d`, with the uncommitted change of the B
 What a fix broke: none.
 
 What the first reading missed: none.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking, finding 1 fixed in part: the bug report template still says triage adds the labels, while this page says the filer sets them. Settling it takes a line in the template. Known defect, for M9.

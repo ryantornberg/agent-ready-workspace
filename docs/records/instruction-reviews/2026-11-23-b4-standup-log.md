@@ -50,3 +50,10 @@ What a fix broke:
 What the first reading missed:
 
 - Not blocking. The skeleton's no-movement line is `<...> (<mark>)`, with no link, but the worked example's no-movement line carries a link. A writer cannot tell from the skeleton whether the line takes one. Verified: the skeleton and the example.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking: the rule that a blocked item goes under Waiting on only is stated on both this template and the standup report. Known defect, for the docs audit.
+- Not blocking: the skeleton's no-movement line has no link, while the worked example's has one. Known defect, for M9.

@@ -58,3 +58,9 @@ What a fix broke:
 - Not blocking. Step 3's `git worktree remove TEMP` refuses when the reproduction leaves a file git does not ignore, such as a log or a build folder, and the step gives no next move. The way out, `--force`, is refused by `no_discard` for a worktree the session is not in while another live session is on record, the very case step 3 guards against. Verified: in a clone, one untracked file made the plain remove exit 128; an ignored file did not. Inferred, from reading `parts/no_discard.py`: the refusal of `--force`. What is left is a folder outside the workspace and an entry in the shared worktree list; nothing is written where it may not be. A default such as "if the remove is refused, leave the folder and name it in the report" would settle it.
 
 What the first reading missed: none.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking, what a fix broke: step 3's `git worktree remove TEMP` refuses when the reproduction leaves an untracked file, and the step gives no next move. Known defect, for M9.

@@ -61,3 +61,9 @@ What a fix broke:
 What the first reading missed:
 
 - Not blocking. Step 2's git-host bullet says to check access "as step 1 of git-host operations says". That step sends a failed check to its own step 7, the report, while this page's step 7 is "Show it" and step 2 still has the tracker to read. Step 2's output, each unreachable source with its reason, is the intended path, but the borrowed step does not say so. Verified: git-host operations' step 1. Inferred: that an agent might jump.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking: step 2 borrows git-host operations' step 1, whose failure path jumps to that page's report step. Known defect, for M9.

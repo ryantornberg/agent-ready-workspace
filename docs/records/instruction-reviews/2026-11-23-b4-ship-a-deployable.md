@@ -47,3 +47,9 @@ What a fix broke:
 What the first reading missed:
 
 - Not blocking. Steps, step 6, and the last Rules row: "Deploying to a shared environment needs the person's yes first, even when CI passes" has no "unless the request names the write". A deploy that people outside the workspace can see is an outward write as procedure endings defines one. So this is stricter than the rule step 4 now follows, and the page does not label the difference. Stricter is safe. Verified: step 6, the Rules row and procedure endings' "Outward writes".
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking: step 6 asks for a yes before every deploy to a shared environment, stricter than procedure endings' outward-write rule, and does not label the difference. Known defect, for M11.

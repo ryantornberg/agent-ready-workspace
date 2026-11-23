@@ -23,7 +23,7 @@ The page has no `## References` heading.
 
 | # | Class | Where | Finding | Disposition |
 |---|---|---|---|---|
-| 1 | trigger | The catalog, the tracker operations row; Lane drafts, the bug triage meeting and bug grooming rows | Not blocking. The tracker operations row fires on "A request acts on a work item: read it, create one, change its fields, sub-tasks or status". A request to apply a triage meeting's outcomes, or to groom a filed bug, matches it as well as its new lane row, and the catalog says nothing on which wins. Tracker operations' own "which page wins" table does not route either away. Only the triage meeting page's own table says it wins, and an agent sent to tracker operations never reads it. There, it would apply outcomes with no hardening row before a rejection, and groom with no fresh-session re-check. Every write still needs a yes on that page, so nothing is written without one. Verified: the two rows, and tracker operations' table. Inferred: that an agent picks the "Any stage" row for such a request. | open |
+| 1 | trigger | The catalog, the tracker operations row; Lane drafts, the bug triage meeting and bug grooming rows | Not blocking. The tracker operations row fires on "A request acts on a work item: read it, create one, change its fields, sub-tasks or status". A request to apply a triage meeting's outcomes, or to groom a filed bug, matches it as well as its new lane row, and the catalog says nothing on which wins. Tracker operations' own "which page wins" table does not route either away. Only the triage meeting page's own table says it wins, and an agent sent to tracker operations never reads it. There, it would apply outcomes with no hardening row before a rejection, and groom with no fresh-session re-check. Every write still needs a yes on that page, so nothing is written without one. Verified: the two rows, and tracker operations' table. Inferred: that an agent picks the "Any stage" row for such a request. | fixed: the tracker operations row's task cell now says that applying a bug triage meeting's outcomes or grooming a bug takes its lane row instead. |
 
 ## Checked with no finding
 
@@ -32,3 +32,15 @@ The page has no `## References` heading.
 - enforcement: the first Rules row holds: every playbook in the folder has a row here. Verified: a shell loop over `docs/playbooks/*.md` found none missing. The wrapper rule holds: each new row's page names a `prove-by`.
 - placement: the rows route only; none restates a procedure's steps or a rule of procedure endings.
 - eval-case: the page is a reference. No eval case or arm in `evals/arms.json` reads it, and each new row routes to a page marked unproven with a `prove-by`.
+
+## Re-check
+
+A fresh session read the fix round's `git diff -- docs/playbooks/README.md` and the whole catalog as it now stands. It read beside it tracker operations' "When to use it, and which page wins", the bug triage meeting's "Which page wins", and bug grooming's opening and steps. It ran `python3 ws.py check`, which exited 0 with only the known `eval_record` warning on `fix-a-bug.md`. Verified: the catalog table keeps four columns on every row.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | upheld | Verified: the catalog's tracker operations row now ends "To apply a bug triage meeting's outcomes or to groom a bug, take its lane row below instead." Both lane rows sit below it, under "Lane drafts". The routing matches the bug triage meeting's "Which page wins": applying outcomes goes to that page, checking one bug goes to bug grooming, and one field change outside a meeting stays with tracker operations. Left as it was, outside this record: tracker operations' own "which page wins" table still routes neither request away, so an agent that reaches that page by another route still meets the first reading's gap. Inferred: few agents reach it without the catalog or the triage meeting page. |
+
+What a fix broke:
+
+- None.

@@ -50,3 +50,9 @@ What a fix broke:
 - Not blocking. Step 5's temporary copy inherits the cleanup gap bug grooming's re-check records for step 3: the remove refuses when the run leaves a file git does not ignore. Inferred from the shared commands.
 
 What the first reading missed: none.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking, what a fix broke: step 5's temporary copy shares bug grooming's cleanup gap when the run leaves an untracked file. Known defect, for M9.

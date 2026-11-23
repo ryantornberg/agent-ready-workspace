@@ -23,7 +23,7 @@ The page has no `## References` heading.
 
 | # | Class | Where | Finding | Disposition |
 |---|---|---|---|---|
-| 1 | contradiction | Filling it in, the first paragraph | Not blocking. The sentence binds each copy to pages for a product reader. That page's **In short** line says its rules add to the reader standard, "which still apply", and its first Rules row says such a page "follows the style guide and the reader standard as well as this page". The reader standard's "Who it binds" says its four shape rules bind exactly three templates, and another template "only when its own opening says so and links this page". This template's opening does neither. So a writer cannot tell whether a copy must meet the shape rules, such as naming its top layer's word budget. The copy is written either way, so nothing goes wrong on a write. Verified: the three texts. Inferred: that a writer reads "still apply" as binding the shape rules. The cleaner fix may sit on pages for a product reader, which is outside this review. | open |
+| 1 | contradiction | Filling it in, the first paragraph | Not blocking. The sentence binds each copy to pages for a product reader. That page's **In short** line says its rules add to the reader standard, "which still apply", and its first Rules row says such a page "follows the style guide and the reader standard as well as this page". The reader standard's "Who it binds" says its four shape rules bind exactly three templates, and another template "only when its own opening says so and links this page". This template's opening does neither. So a writer cannot tell whether a copy must meet the shape rules, such as naming its top layer's word budget. The copy is written either way, so nothing goes wrong on a write. Verified: the three texts. Inferred: that a writer reads "still apply" as binding the shape rules. The cleaner fix may sit on pages for a product reader, which is outside this review. | fixed: the sentence now adds that the reader standard's shape rules do not bind a copy, since this template's opening does not say so. The names and references rules, which bind every new page, are untouched. Pages for a product reader was left as it is. |
 
 ## Checked with no finding
 
@@ -33,3 +33,15 @@ The page has no `## References` heading.
 - enforcement: the sentence imports rules whose page states their enforcement, each `prose`; it adds no must of its own that needs a row here.
 - placement: the sentence links the rules and restates none of them, so each stays on the page that owns it, as the style guide's "One rule, one page" asks.
 - eval-case: a lane template carries no proof keys, and this one carries none. No eval case or arm in `evals/arms.json` reads it; its first use is named as M6.
+
+## Re-check
+
+A fresh session read the fix round's `git diff -- docs/templates/qa-test-plan.md`, the whole template as it now stands, the reader standard's "Who it binds" and Rules, and pages for a product reader in full. It ran `python3 ws.py check`, which exited 0 with only the known `eval_record` warning on `fix-a-bug.md`.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | upheld | Verified: "Filling it in", the first paragraph, now adds that the reader standard's shape rules do not bind a copy, since this template does not say so in its opening. That is true to "Who it binds": another template comes under the shape rules only when its own opening says so and links that page, and this template's opening, through its **In short** line, does neither. The new link sits in "Filling it in", not the opening, and says the opposite, so it does not bring the template under them. A writer of a copy can now tell. Left as it was, as the disposition says: pages for a product reader's first Rules row still says such a page follows "the reader standard" with no qualifier. Inferred: that reads consistently, since following the reader standard includes its own binding section, but another product-reader page, such as the triage sheet, still carries the first reading's ambiguity. |
+
+What a fix broke:
+
+- None.

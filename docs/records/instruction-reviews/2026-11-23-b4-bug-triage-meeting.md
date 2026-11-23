@@ -63,3 +63,9 @@ What a fix broke:
 - Not blocking. Step 1's new scope, "filed since the last meeting", drops a bug the meeting left undecided. Step 6's default leaves a bug with no outcome as it is, at the first status with no release, the same state as a "No release yet" bug. It was filed before the last meeting, so no later run gathers it, and nothing on the tracker tells it apart. The page also gives no source or default for the last meeting's date. Verified by reading steps 1 and 6. Asking the person for that date, and recording each outcome as a comment so an undecided bug can be told from a "No release yet" one, would settle both.
 
 What the first reading missed: none.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking, what a fix broke: step 1's "filed since the last meeting" drops a bug the last meeting left undecided, and the page gives no source for that meeting's date. Known defect, for M9.

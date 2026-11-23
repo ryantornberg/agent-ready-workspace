@@ -54,7 +54,7 @@ Keep the headings in this order. Every heading stays. [Rule 10](../playbooks/qa-
 
 ## Filling it in
 
-A copy is a page for a product reader, so the [rules for such a page](../product-reader-pages.md) apply to it too.
+A copy is a page for a product reader, so the [rules for such a page](../product-reader-pages.md) apply to it too. The [reader standard](../reader-standard.md)'s shape rules do not bind a copy, since this template does not say so in its opening.
 
 - **Before you start:** only what a tester needs before the first scenario.
 - **Scenario checklists:** one scenario per user journey, each item written as [the verification list's rules](../playbooks/qa-verification-list.md#the-rules) say.

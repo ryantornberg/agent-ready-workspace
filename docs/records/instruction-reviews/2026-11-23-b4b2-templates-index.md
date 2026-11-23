@@ -23,7 +23,7 @@ The page has no `## References` heading.
 
 | # | Class | Where | Finding | Disposition |
 |---|---|---|---|---|
-| 1 | contradiction | Lane templates, the epic satellites row | Not blocking. The "Your copy goes" cell says "As the page says, beside the epic folder's hub", and the "Use it when" cell says the shapes go "beside its hub". The satellites template's "Where each one lives" puts questions for other teams and the tracker map in the hub, as sections of `README.md`; only the unattended-run plan is a file beside it. A section written as a page beside the hub would break the epic folder's rule that every page there but the hub is a plan. The cell opens "As the page says", so a reader who opens the page gets the place right, and the `page_kinds` check refuses such a page. Verified: the row and the satellites template's table. | open |
+| 1 | contradiction | Lane templates, the epic satellites row | Not blocking. The "Your copy goes" cell says "As the page says, beside the epic folder's hub", and the "Use it when" cell says the shapes go "beside its hub". The satellites template's "Where each one lives" puts questions for other teams and the tracker map in the hub, as sections of `README.md`; only the unattended-run plan is a file beside it. A section written as a page beside the hub would break the epic folder's rule that every page there but the hub is a plan. The cell opens "As the page says", so a reader who opens the page gets the place right, and the `page_kinds` check refuses such a page. Verified: the row and the satellites template's table. | fixed: the epic satellites row now places the first two shapes as sections of the epic folder's hub and the run plan as a plan beside it, and "Use it when" drops "beside its hub". |
 
 ## Checked with no finding
 
@@ -33,3 +33,15 @@ The page has no `## References` heading.
 - enforcement: the section's rule that a new lane template adds its row here and a line in its role's path holds for both. Verified: both are on reading paths' product path.
 - placement: the rows route only; neither restates a template's shape or rules.
 - eval-case: the page is a reference, and lane templates carry no proof keys, as layout's controlled values say. No eval case or arm in `evals/arms.json` reads the page.
+
+## Re-check
+
+A fresh session read the fix round's `git diff -- docs/templates/README.md`, the "Lane templates" table as it now stands, the epic satellites template in full and the epic folder template's naming table and last paragraph of "Filling it in". It ran `grep -rn "beside.*hub" docs` outside records and `python3 ws.py check`, which exited 0 with only the known `eval_record` warning on `fix-a-bug.md`. Verified: the "Lane templates" table keeps five columns on every row, and the epic folder link resolves. Side note, not created by this round: the satellites template's own purpose line still says all three shapes "sit beside an epic's hub", against its own table; reading paths' product item 6 repeats it. Both sit outside this record.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | upheld | Verified: the epic satellites row's "Your copy goes" cell now reads "As the page says: the first two as sections of the epic folder's hub, the run plan as a plan beside it", and "Use it when" no longer says "beside its hub". That matches the satellites template's "Where each one lives" table, and the epic folder template's fixed paragraph and new naming row say the same. |
+
+What a fix broke:
+
+- None.

@@ -52,3 +52,10 @@ What a fix broke:
 What the first reading missed:
 
 - Not blocking. The example scores "Storage and its migration" medium, with the reason "no migration exists to copy". The rubric scores a data migration, or a layer with no pattern to copy, large, and step 3 now says a touched layer with "no pattern found" scores large. The example contradicts both; scored large, its range becomes 320 to 1,100 lines and 3 to 8 points. Verified: the rubric, step 3 and the example's sums.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking, what a fix broke: step 5 always writes a range, while bug grooming's step 5, using the same points table, gives one value when both ends match. Known defect, for M9.
+- Not blocking, what a fix broke: the example scores "Storage and its migration" medium, where the rubric and step 3 score it large. Known defect, for M9.

@@ -80,7 +80,7 @@ How-tos and reference pages that serve one lane of work, named in each page's `l
 | Automation | Write or run a script that dispatches helper sessions in a fixed shape | [Saved workflows](saved-workflows.md) | Each helper's prompt names its tier; the script names no model. The script is machinery wherever it lives. | unproven, M10 |
 | Product | Label a bug so a triage meeting can sort it without reading it | [Bug triage labels](triage-labels.md) | One label from each of five categories, plus an area. Labels describe the fault; triage decides what to do. | reference |
 | Product | Check a shelved predecessor for a major security bug's fault | [Checking a shelved predecessor](predecessor-check.md) | Only for a major security bug; the result is one origin line. Never edit the predecessor. | unproven, M9 |
-| Product | Write a page whose reader is a product manager or another non-developer | [Pages for a product reader](product-reader-pages.md) | Colour says what it means in plain words. Never ask the reader to fill in a column on every row. | reference |
+| Product | Write a page whose reader is a product manager or another non-developer | [Pages for a product reader](product-reader-pages.md) | Color says what it means in plain words. Never ask the reader to fill in a column on every row. | reference |
 | DevOps | Check that the product's local container environment runs on your machine | [Environment self-check](environment-self-check.md) | Paste its prompt. It reports first, and fixes only on your yes. | unproven, M11 |
 | DevOps | Give a new service, job or site its infrastructure and CI | [Ship a new deployable](ship-a-deployable.md) | Do the two steps no generator covers, and verify locally before you push. | unproven, M11 |
 

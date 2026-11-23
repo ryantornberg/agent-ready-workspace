@@ -28,6 +28,7 @@ This hub is not the [project hub](hub.md). A project hub is the front page of on
 |---|---|---|
 | The hub | `docs/plans/<epic-slug>/README.md` | `reference` |
 | A plan for one story | `docs/plans/<epic-slug>/<ticket-key>-<story-slug>.md`, or `<story-slug>.md` when the story has no ticket | `plan`, a copy of the [hand-off plan template](hand-off-plan.md) |
+| An unattended-run plan, which serves the epic rather than one story | `docs/plans/<epic-slug>/unattended-run-<YYYY-MM-DD>.md`, as the [epic satellites template](epic-satellites.md) says | `plan`, a copy of the [hand-off plan template](hand-off-plan.md) |
 
 `<epic-slug>` is the epic's name in two to four lowercase words, joined by hyphens. Put its ticket key in front when it has one, such as `ord-412-account-holds`.
 
@@ -105,7 +106,7 @@ last-reviewed: YYYY-MM-DD
 
 The hub's open questions are design questions the epic has not settled. A question the workspace should have answered goes in the [question log](../question-log.md) instead.
 
-A product epic may also need questions for other teams, a tracker map or an unattended-run plan beside the hub. Their shapes are on the [epic satellites template](epic-satellites.md), a product lane draft.
+An epic may also need questions for other teams and a tracker map, as sections of the hub, or an unattended-run plan, as a plan beside it. Their shapes are on the [epic satellites template](epic-satellites.md), a product lane draft.
 
 ## Rules
 

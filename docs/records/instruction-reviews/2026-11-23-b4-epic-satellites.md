@@ -49,3 +49,9 @@ What a fix broke:
 What the first reading missed:
 
 - none.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking, found by the re-check of batch 2's index edits: the purpose line says all three shapes sit beside an epic's hub, against this page's own "Where each one lives" table; reading paths' product item 6 repeats it. Known defect, for M9.

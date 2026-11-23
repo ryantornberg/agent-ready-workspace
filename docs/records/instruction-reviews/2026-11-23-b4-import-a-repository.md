@@ -56,3 +56,33 @@ What a fix broke:
 What the first reading missed:
 
 - None.
+
+## Second fix round
+
+The page's second and last fix round, on the maintainer's answer to Q43, for the blocking item under "What a fix broke". It takes the re-checker's first suggested fix.
+
+| Item | Disposition |
+|---|---|
+| Step 3 switches the main working copy's branch | fixed: step 3 now always makes the import's worktree, `git worktree add --no-track -b import/REPO .claude/worktrees/import-REPO origin/main`, from the workspace's root after `git fetch origin`, and every later step runs in it. The step labels this as an exception to the contract's worktree line, as the plan's own slices are, and says why: the import's branch must never move the main working copy, and no hook refuses a plain switch. No `git switch` remains, so the failed switch over uncommitted changes and the main copy left on the import's branch go with it. Step 10's clone path, the **In short** line and the Rules row follow, and the decisions table gains a row for the exception. |
+
+## Second re-check
+
+A fresh session read the page with the second fix round's uncommitted change, beside the contract, decision 0005, procedure endings, the instruction review's "Severity", `parts/lease.py`, `parts/no_discard.py`, `.githooks/post-checkout`, the M3 plan's line on worktrees, and the M2 and decision-queue plans. In a throwaway repository with a pinned repository, a local unpushed commit on main and an uncommitted change, it ran step 3's commands from the main copy, then step 4's `git submodule add`, step 5's `git grep` and step 10's clone in the new worktree, and `git worktree remove` on it. Ran `python3 ws.py check`: exit 0, no finding on the page.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Step 3 switches the main working copy's branch | fixed | No `git switch` remains on the page. All three parts close. The switch moving another session's files: `git worktree add` from the main copy left its branch on `main` and its uncommitted change in place; decision 0005's lists refuse neither `git fetch` nor `git worktree add`. The switch failing over uncommitted changes: `worktree add` exited 0 with an uncommitted change and a local unpushed commit present, and the new branch held no commit ahead of `origin/main`. The main copy left on the import's branch: it stayed on `main`. Later steps hold in the worktree: `git submodule add` and `git -C src/REPO rev-parse HEAD` worked there, and step 10's clone from the worktree's path exited 0. An edit in a linked worktree takes no lease, per `parts/lease.py`'s docstring, and lands in that worktree's ledger, per the M2 plan's criterion 30. The exception is labelled against the contract's "Only then" in step 3, the Rules row and the decisions table. Its claim about plans holds: the M3 plan says "Every slice is built in its own worktree", and the decision-queue plan cites the maintainer's standing rule since M2's slice 4. Verified: the throwaway run, the page, and those texts. Inferred: that the `.githooks` hooks run in the worktree as in the main copy, since `core.hooksPath` is the relative `.githooks`. |
+
+What the second fix broke:
+
+- Not blocking. Steps, step 5: a new worktree checks out no pinned repository, so the consumers of the new repository in other pins cannot be found there. In the throwaway run, the other pin showed as not initialized in the worktree. Step 5's `git grep -l NAME -- src` found nothing, exit 1, and `--recurse-submodules` found only the new pin's own file. The plain command also misses pins in the main copy, which the first reading missed: there it found nothing either, and only `--recurse-submodules` found the consumer. The M2 plan's "Later" lists "Worktrees read pinned repositories from the main copy". A fix: after step 3, run `python3 ws.py pins` in the worktree, and search with `git grep --recurse-submodules -l NAME -- src`. Verified: the throwaway run. Inferred: that `ws.py pins` checks pins out in a linked worktree. Not blocking because the command runs and the import goes on, with a consumers column that comes out empty.
+- Not blocking. Steps, step 12: no step removes the import's worktree after the pull request merges, and a plain `git worktree remove` refuses it, since it holds the pin: "working trees containing submodules cannot be moved or removed", exit 128. Removal needs `--force`, which `no_discard` lets a session use on its own worktree. Verified: the throwaway run and `parts/no_discard.py`'s docstring. The M2 plan's "Later" leaves worktree removal open for every session, so the page may leave it too, but the report could name the worktree left behind.
+- Not blocking. Steps, step 3: "From the workspace's root folder" does not say which root when the agent already works in a linked worktree, such as one a lease refusal sent it to. Run there, the relative path nests the import's worktree inside that one. "The main working copy's root folder" would settle it. Inferred: from how git resolves a relative path; not run.
+
+## Known defects
+
+What stays open after the fix rounds the plan allows, each not blocking.
+
+- Not blocking, from the second re-check: step 5's `git grep -l NAME -- src` finds no consumer inside other pins, in the worktree or the main copy; `ws.py pins` and `--recurse-submodules` may settle it. Known defect, for M11.
+- Not blocking, from the second re-check: no step removes the import's worktree, and a plain remove refuses one that holds a pin. Known defect, for M11.
+- Not blocking, from the second re-check: step 3's "the workspace's root folder" does not say which root when the agent is already in a linked worktree. Known defect, for M11.
