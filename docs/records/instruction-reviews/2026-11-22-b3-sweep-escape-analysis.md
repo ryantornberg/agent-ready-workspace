@@ -28,3 +28,13 @@ In scope: the fix round's change, read with `git diff -- docs/playbooks/escape-a
 - trigger: the purpose line, **In short** line and "When it runs" are unchanged and still match what the page does; the lessons log template names this page as one of its two sources. Verified.
 - enforcement: the new same-commit rule for a lessons-log row is held on the lessons log template, which this step links, as a `prose` row; the page adds no must of its own without a tag. Verified with `python3 ws.py rules`.
 - eval-case: the page is `proof: unproven` with `prove-by: M6`, so the new steps need no eval case yet. Verified from its front matter.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q35 in the workspace queue, recorded in the M3 plan. It first cut back: the rule that a review record or a kept handoff note is committed on main from a throwaway worktree is removed, a review round's record goes in the plan's "Results" or the pull request's description, and a kept handoff note waits for M4. Then it fixed the blocking items the re-check found.
+
+| Item | Disposition |
+|---|---|
+| 1, blocking: step 9 gives no default for where an unmerged fix's analysis is committed | fixed: step 9 writes and commits the analysis where the fix record is, by default the fix's branch while the fix is unmerged, since main holds no copy yet, and main once it has merged. It labels that as the one exception to procedure endings' commit. |
+| 2, not blocking: the page knows two places a review is on record | withdrawn by the cut-back: a code review is again on record only in a pull request or a hand-off plan's "Results", the two places the table names. |
+| 3, not blocking: step 9 restates the report rule and names no push | not fixed in this round, which Q35 limits to the blocking items; see "Known defects". |

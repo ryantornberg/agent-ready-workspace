@@ -55,3 +55,17 @@ Broke:
 - Not blocking. The defect register row now says "M4 plans a script for it". No plan in `docs/plans/` says so, and the register's template says only that no script does it yet. Inferred: the source may sit outside this repository.
 
 Missed: none.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q35 in the workspace queue, recorded in the M3 plan. It first cut back: the rule that a review record or a kept handoff note is committed on main from a throwaway worktree is removed, a review round's record goes in the plan's "Results" or the pull request's description, and a kept handoff note waits for M4. Then it fixed the blocking items the re-check found.
+
+| Item | Disposition |
+|---|---|
+| Broke, blocking: the plan bullet commits as procedure endings says, which needs a switch to main from the reviewed branch | fixed: step 10 commits the plan on the branch checked out, which in a worktree is its branch, as procedure endings says for pages, and says not to switch branches. Step 2 counts a tip as reviewed when the commits after the reviewed one change only the hand-off plan or the work's fix record, so this commit sends no round into a delta review. |
+| Broke, blocking: step 10 commits a fix record's review block on main, where no fix record exists | withdrawn by the cut-back: without a plan, the record goes in the report and, once a pull request is open, in its description, as before the first round. A fix record no longer holds reviews, and step 2 no longer reads one or `docs/records/reviews/`. |
+| Broke, blocking: the section adds its worktree with no fetch first | withdrawn by the cut-back: the section is removed. |
+| Broke, blocking: step 1's `-C src/REPO` sends the section's push to a pinned repository's main | fixed for what is left: the section is gone, and step 10's plan bullet says the plan is committed in this workspace, without step 1's `-C`, for work in a repository pinned under `src/`. |
+| Broke, not blocking: the section is copied on two pages | withdrawn by the cut-back. |
+| Broke, not blocking: "M4 plans a script for it" has no source | not fixed in this round, which Q35 limits to the blocking items; see "Known defects". |
+| First-round findings 1 to 3, on where a review record without a plan goes | withdrawn by the cut-back, which sets that place: the report, then the pull request's description. |

@@ -7,7 +7,7 @@ last-reviewed: 2026-11-22
 
 The dated record that one bug fix leaves behind, for the agent making the fix and anyone later checking what it proved.
 
-**In short:** one file per fix in `docs/records/fixes/`, opened when the fix starts and filled as it goes. It holds the fix brief when there is one, where the work stands, one section per reviewed tip, and a `## Report` whose every claim line is marked verified or inferred. The `claim_marks` check reads that report.
+**In short:** one file per fix in `docs/records/fixes/`, opened when the fix starts and filled as it goes. It holds the fix brief when there is one, where the work stands, and a `## Report` whose every claim line is marked verified or inferred. The `claim_marks` check reads that report.
 
 ## When to write one
 
@@ -47,10 +47,6 @@ last-reviewed: YYYY-MM-DD
 - Pull request: <link, and draft or published>, or "none: the repository has no remote"
 - Tracker item: <key and link>, or "none"
 
-## Reviews
-
-<One block per reviewed tip, oldest first, in the shape step 10 of the review orchestrator gives. "None" when no review ran.>
-
 ## Escape analysis
 
 <The analysis, when escape analysis runs on this fix. Delete this section when it did not.>
@@ -71,10 +67,9 @@ Not done: <anything left, and why, or "nothing">
 - **Where it stands.** Write a line only once you have run what it claims. A line you have not reached yet says "not yet". A claim written down because it looked plausible, and never checked, is how a wrong fix gets merged.
 - **The layer.** The red-green line names the layer the failing test exercised. A check that passes at one layer proves nothing about another: a screen that now looks right says nothing about the server behind it. When the bug lives at a layer your test did not reach, say so under "Not done".
 - **The running app.** Name the commit each check ran on. A check on an earlier commit does not count for a later one.
-- **Reviews.** Each round of the [review orchestrator](../playbooks/review-orchestrator.md) on this fix adds its block here, in the shape its step 10 gives; that step, not this page, defines the shape. The author settles each finding in the block's Disposition column, as that page says. Earlier blocks change only in that column.
 - **An escape analysis**, when one runs on this fix, goes in its section, before the report. Step 9 of [escape analysis](../playbooks/escape-analysis.md#steps) says what it holds.
 - **The report.** Always write it, even when the work stopped early. Keep it the last section. The session's report repeats its lines. "Not done" names the same things a report in the session names, as [procedure endings](../procedure-endings.md#the-report) says.
-- **Committing it.** Commit the record with the fix, on the fix's branch, with "Where it stands" filled so far. After the push, fill in the commits, the pull request and the report, then commit and push the record once more on that branch. This follows the order of [procedure endings](../procedure-endings.md#the-order): commit, push, then report. Staging and messages follow [its commit section](../procedure-endings.md#the-commit). When the fix is code in a pinned repository, its branch is not in this repository: the record is then a change of pages only here, committed and pushed as procedure endings' rows for pages say.
+- **Committing it.** Commit the record with the fix, on the fix's branch, with "Where it stands" filled so far. After the push, fill in the commits, the pull request and the report, then commit and push the record once more on that branch. This follows the order of [procedure endings](../procedure-endings.md#the-order): commit, push, then report. Staging and messages follow [its commit section](../procedure-endings.md#the-commit). When the fix is code in a pinned repository, its branch is not in this repository: the record is then a change of pages only here, committed and pushed as procedure endings' rows for pages say. A review is not needed again for that commit: the [review orchestrator](../playbooks/review-orchestrator.md#steps)'s step 2 counts a tip whose only change since the reviewed commit is this record as reviewed. A review round's record goes in the pull request's description, as that page's step 10 says, not here.
 
 ## What the check reads
 
@@ -105,4 +100,3 @@ The check also fails a fix record with no `## Report` section. It does not check
 | A line under "Where it stands" is written only after you ran what it claims. | `prose` |
 | The red-green line names the layer the test exercised. | `prose` |
 | A running-app check names the commit it ran on. | `prose` |
-| Each reviewed tip gets its own block under "Reviews"; earlier blocks change only in their Disposition column. | `prose` |

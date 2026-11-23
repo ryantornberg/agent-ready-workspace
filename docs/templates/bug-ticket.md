@@ -25,7 +25,7 @@ The headings come in a fixed order so that two people filing the same bug write 
 
 On the team's tracker. This workspace's own repository is not a tracker, even when its host has issues turned on. File there only when the team's tracker is that repository. The tracker provider is planned for M8.
 
-Where the tracker is GitHub's issues, the skeleton below works as it stands. File it on the tracker's repository with `gh issue create --repo OWNER/REPO --title "TITLE" --body-file FILE`. Always name the repository: without `--repo`, `gh` files on the repository of the current folder, which is often this workspace. The yes the write needs is as [tracker operations](../playbooks/tracker-operations.md#which-writes-need-a-yes) says.
+Where the tracker is GitHub's issues, the skeleton below works as it stands. File it with `gh issue create --repo OWNER/REPO --title "TITLE" --body-file FILE` only when OWNER/REPO is this workspace's repository or one pinned under `src/`: those are the only repositories an agent writes on, as procedure endings' [rules](../procedure-endings.md#rules) say. On any other repository, file nothing: give the person the title and the body to file, and say so in the report. The outward-write guard refuses a write to a repository outside the instance's list, `outward-repos.json`; a refused write is not retried another way. Always name the repository: without `--repo`, `gh` files on the repository of the current folder, which is often this workspace. The yes the write needs is as [tracker operations](../playbooks/tracker-operations.md#which-writes-need-a-yes) says.
 
 ## Before you write
 
@@ -191,5 +191,6 @@ The import treats the first line as column names. A header line before the rows 
 | A ticket is filed at the tracker's first status, with the fields triage sets left empty. | `prose` |
 | A ticket describes the fault and points at it; it never plans the fix. | `prose` |
 | A ticket is filed on the team's tracker, and `gh issue create` always names its repository with `--repo`. It is never filed on this workspace's repository unless that is the team's tracker. | `prose` |
+| An agent files with `gh issue create` only on this workspace's repository or one pinned under `src/`; for any other, it gives the person the ticket's text. The guard refuses a repository outside `outward-repos.json`. | `prose`, `outward_write#gh issue create on a repository outside the list is refused` |
 | Evidence never links to something that expires or that only the filer can open. | `prose` |
 | A code pointer never gives a line number. | `prose` |

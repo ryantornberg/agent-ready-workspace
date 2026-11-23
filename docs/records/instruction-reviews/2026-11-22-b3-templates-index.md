@@ -47,3 +47,11 @@ Broke:
 Missed:
 
 - Not blocking. This is a reference page a reader goes to for a task, and the how-to index has no row for it. That index's first rule asks for one in the same commit as the page. Verified: `docs/how-tos.md` links two templates and never `templates/README.md`.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q35 in the workspace queue, recorded in the M3 plan. It first cut back: the rule that a review record or a kept handoff note is committed on main from a throwaway worktree is removed, a review round's record goes in the plan's "Results" or the pull request's description, and a kept handoff note waits for M4. Then it fixed the blocking items the re-check found. This page held no blocking break; the cut-back's shared rule swept it.
+
+| Item | Disposition |
+|---|---|
+| The cut-back, swept: the handoff note and review record rows named `docs/records/handoffs/` and `docs/records/reviews/` | fixed: the handoff note row says keep mode waits for M4, and the review record row names the plan's "Results" or the pull request's description. |

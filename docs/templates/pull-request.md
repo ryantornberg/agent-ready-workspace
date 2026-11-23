@@ -35,7 +35,7 @@ The description lives on the pull request. Write it to a file in your scratch fo
 
 ## Review
 
-<A link to the review record for this tip, or "No review ran.">
+<A link to the review record for this tip in the hand-off plan; with no plan, the record itself; or "No review ran.">
 
 ## Decisions made without asking
 
@@ -56,7 +56,7 @@ The page follows the [reader standard](../reader-standard.md).
 - **First line.** The summary, in one or two sentences. A reader who stops there knows what merges.
 - **Changes.** One bullet per change. Say what the code or page does now, not what you did first and undid.
 - **How it was verified.** Mark each line verified or inferred, as a report does: see [the report](../procedure-endings.md#the-report).
-- **Review.** Link the review record for the tip you are opening. It sits in a hand-off plan's Results, a fix record's review section, or a file in `docs/records/reviews/`. The [review orchestrator](../playbooks/review-orchestrator.md) writes it. On the fix a bug path, say plainly when no review ran.
+- **Review.** Link the review record for the tip you are opening. It sits in a hand-off plan's Results. With no plan, paste the review orchestrator's record for the tip into this section. The [review orchestrator](../playbooks/review-orchestrator.md) writes it. On the fix a bug path, say plainly when no review ran.
 - **Decisions made without asking.** The same section the [hand-off plan](hand-off-plan.md#how-to-use-it) has, for the same reason: a reviewer can see each choice and challenge it. A choice the person made is not listed here.
 - **What testing needs.** For a change a tester sees: what to check, on which environment, in which build or commit.
 - **Length.** Under 4,000 characters. Detail beyond that goes in the plan or the record the description links.
@@ -117,7 +117,7 @@ Work down this list once a pull request merges. Do it when you merged it, or whe
 | Rule | Enforced by |
 |---|---|
 | A description states what is true; it does not narrate how the work went. | `prose` |
-| A description holds one bullet per change, and links the review record for its tip or says no review ran. | `prose` |
+| A description holds one bullet per change, and links or holds the review record for its tip, or says no review ran. | `prose` |
 | A description lists each decision made without asking, or says "none". | `prose` |
 | A description stays under 4,000 characters. | `prose` |
 | A description keeps the skeleton's headings in their order, and its title and first line stay within 60 words. | `prose` |

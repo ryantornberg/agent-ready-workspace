@@ -51,3 +51,11 @@ A fresh session re-read the page on 2026-11-22, after the fix round.
 Broke: none.
 
 Missed: none. The bookkeeping list is still not linked from the place an agent merges; that is recorded in the sweep record of git-host operations.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q35 in the workspace queue, recorded in the M3 plan. It first cut back: the rule that a review record or a kept handoff note is committed on main from a throwaway worktree is removed, a review round's record goes in the plan's "Results" or the pull request's description, and a kept handoff note waits for M4. Then it fixed the blocking items the re-check found. This page held no blocking break; the cut-back's shared rule swept it.
+
+| Item | Disposition |
+|---|---|
+| The cut-back, swept: the Review bullet named a fix record's review section and `docs/records/reviews/` | fixed: the Review bullet, the skeleton's Review line and the rules row now say the record is linked from the hand-off plan or, with no plan, held in this description. |

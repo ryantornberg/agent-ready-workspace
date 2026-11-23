@@ -47,3 +47,11 @@ Broke:
 - Blocking. "Where tickets live" now files on "the tracker's repository" with `--repo OWNER/REPO`, whatever that repository is. Procedure endings' Rules table says to "write nothing on a repository outside this one and those pinned under `src/`". Git-host operations says such a write "is never made. Give the person the text to post instead." When a team's issues sit on a repository that is neither, an agent following this page files there, against both rule pages. Verified: the three texts. Inferred: that a team's issue tracker can sit on a repository not pinned under `src/`. The page needs the same limit: file only on this repository or one pinned under `src/`, and otherwise give the person the ticket's text.
 
 Missed: none.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q35 in the workspace queue, recorded in the M3 plan. It first cut back: the rule that a review record or a kept handoff note is committed on main from a throwaway worktree is removed, a review round's record goes in the plan's "Results" or the pull request's description, and a kept handoff note waits for M4. Then it fixed the blocking items the re-check found.
+
+| Item | Disposition |
+|---|---|
+| Broke, blocking: `--repo` files on any repository, against the outward-write rule | fixed: "Where tickets live" files with `gh issue create --repo` only on this workspace's repository or one pinned under `src/`, linking procedure endings' rules. On any other it files nothing and gives the person the title and body. It names the outward-write guard and its list, `outward-repos.json`, and says a refused write is not retried another way. A new rules row carries it, tagged `prose` and the guard's `gh issue create` case. |

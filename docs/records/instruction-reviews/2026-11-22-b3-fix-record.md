@@ -50,3 +50,13 @@ Broke:
 - Blocking. "Committing it" contradicts the review orchestrator's new "Committing a record about a branch", written in the same round. This page commits the record with the fix on the fix's branch, and again on that branch after the push. The orchestrator's step 10 appends each review block to the fix record's "Reviews" and commits it on main, from a throwaway worktree of `origin/main`, "never on the branch it is about, so the branch's tip stays the one reviewed". A fix is reviewed before it merges, so `origin/main` holds no fix record yet. The block then lands in a new file with no `## Report`, which `claim_marks` refuses at the commit. On merge, both branches add the same file. This page's second commit after the push also moves the tip past the reviewed one, which sends the next review into a delta round. Verified: both pages' text; `claim_lines` returns None for a record holding only a "Reviews" section, which the check reports as a finding. Inferred: the merge conflict and the delta round.
 
 Missed: none.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q35 in the workspace queue, recorded in the M3 plan. It first cut back: the rule that a review record or a kept handoff note is committed on main from a throwaway worktree is removed, a review round's record goes in the plan's "Results" or the pull request's description, and a kept handoff note waits for M4. Then it fixed the blocking items the re-check found.
+
+| Item | Disposition |
+|---|---|
+| Broke, blocking: "Committing it" contradicts the orchestrator's commit of a review block on main | withdrawn by the cut-back: the skeleton's "Reviews" section, its filling bullet and its rules row are removed, and "Committing it" says a review round's record goes in the pull request's description. |
+| The same item's inferred part: the commit after the push moves the tip past the reviewed one | fixed: the review orchestrator's step 2 now counts a tip whose only change since the reviewed commit is the fix record, or the plan, as reviewed, and "Committing it" says so. |
+| Re-check item 5, not blocking: the slice Z lines were not in the plan's queue | queued for slice Z: the lines join the M3 plan's "Queued for slice Z" list in the commit that records B3's results, once these pages merge. |
