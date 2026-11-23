@@ -849,6 +849,24 @@ Slice B3 stopped again under lane B's stop rule: the re-check of batches 1 and 2
 
 **B3 cuts back, then takes one more fix round (Q35).** The rule the fix round added, that a review record or a kept handoff note about a branch is committed on main from a throwaway worktree, is removed. A review round's result goes in the plan's Results or the pull request description. A kept handoff note waits for M4. The bug report template files an issue only where the outward-write rule allows. Then one fix round on the 9 blocking breaks, and a fresh re-check, under lane B's stop rule as it stands. This is the batches' second fix round, which the stop rule's limit of two allows.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+A new slice, PSFIX, from the defect C5f found after its merge, and the order of lane C after C6. PSFIX has no row in the slice tables; this entry is its scope. The maintainer's answers to round 7 of the workspace queue settle both. No criterion is dropped or weakened.
+
+**Lane C runs PSFIX, then C8, then C9,** at the tiers the plan's rows name. PSFIX is driver tier.
+
+**The secrets hook stops refusing the name of PowerShell's environment-variables method where nothing runs it.** `secrets_shell` matches that name on the raw command line, so it refuses the name inside a heredoc or a commit message too. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request. The hook then matches the name only where the parser reads a command, and its refusal gives the advice of the dump message: echo by name a variable that holds no secret, and ask the person for a secret. PSFIX is done when a case shows each false refusal gone and each true one kept, and its report is under "Results".
+
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+C6's proposed revision, approved as proposed. It aligns the C6 row and criterion 46 with what C6 built and tested; no guard changes.
+
+**"No guard" means no guard on a tool call, a commit or a push.** The C6 row's first sentence and criterion 46's first sentence read: no guard on a tool call, a commit or a push turns off when one environment variable is unset. The stop gate keeps C1's choice: its wiring lets a session stop when the launcher fails, so it is not such a guard. The rest of the row and the criterion stand.
+
 ## Results
 
 ### C1, launcher and baselines
