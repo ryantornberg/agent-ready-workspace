@@ -60,6 +60,8 @@ The Proof column copies each page's front matter, or the proof line under a sect
 | Task | Go to | Remember | Proof |
 |---|---|---|---|
 | Look up a page's kind, its front matter and the order it opens in; move or archive a page. To add a page, use extend the workspace below. | [Layout](layout.md) | Front matter names the kind. The page opens with its title, a purpose sentence of 25 words or fewer, then its **In short** line. | reference |
+| Write or edit the words on a page: sentences, names, links and citations | [Style guide](authoring.md) | State each rule once, on the page that owns it, and link to it. Pages written before 2026-11-22 are not retrofitted. | reference |
+| Write the bug report, pull request or project hub template, or a copy of one; credit a source under "References" | [Reader standard](reader-standard.md) | Name the reader, keep the top layer within its budget, use fixed headings and give one worked example. | reference |
 | Add a check or a hook | [Parts](parts.md) | A part is a Python file and its cases. Run `python3 ws.py selftest`, then `python3 ws.py check`. | unproven, M4 |
 | Change scripts, parts, hooks or CI | [Changing the machinery](changing-the-machinery.md) | It goes on its own branch and merges only after CI passes on Linux, macOS and Windows. | unproven, M4 |
 | Change what an agent tool may read or fetch | [Agent settings](agent-settings.md) | The `agent_settings` check fails when a deny entry or a documentation domain goes missing. | reference |

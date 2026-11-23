@@ -5,9 +5,9 @@ last-reviewed: 2026-11-21
 
 # Layout: folders and page kinds
 
-Where each kind of page lives, the front matter it carries, and the order it opens in. For anyone adding, moving or amending a page.
+Where each kind of page lives, the front matter it carries, and the order it opens in. For anyone adding, moving or amending a page. How to write a page's words is on the [style guide](authoring.md). The shape of a template a person reads, its top layer's budget included, is on the [reader standard](reader-standard.md).
 
-**In short:** every page under `docs/` names its kind in its front matter. Nine kinds, each with its own folder or place. Every page opens with its title, a purpose sentence of 25 words or fewer, then its **In short** line, except where its kind's row says otherwise. The `page_kinds` check enforces the kinds, their front matter and the opening, at the commit and in CI.
+**In short:** every page under `docs/` names its kind in its front matter. Nine kinds, each with its own folder or place. Every page opens with its title, a purpose sentence of 25 words or fewer, then its **In short** line. Its kind's row may say otherwise. The `page_kinds` check enforces the kinds, their front matter and the opening, at the commit and in CI.
 
 ## Folders
 
@@ -18,6 +18,7 @@ Where each kind of page lives, the front matter it carries, and the order it ope
 | `docs/playbooks/` | Playbooks. |
 | `docs/tutorials/` | Tutorials. |
 | `docs/templates/` | Templates. |
+| `docs/projects/` | One folder per project: its [hub](templates/hub.md) as `README.md` and its unit pages beside it, all reference pages. The default until an instance settles where per-repository docs live. |
 | `docs/rules/` | Rule pages: reference pages with an `applies-to` key, shown when a matching file is edited. |
 | `docs/records/` | Records, such as the instruction reviews in `docs/records/instruction-reviews/`. |
 | `docs/decisions/` | Decision records. |

@@ -1,0 +1,85 @@
+[
+  {
+    "name": "a draft at exactly 200 and 60 words passes",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: draft\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w |\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a draft whose Key points block is over 200 words fails",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: draft\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w |\n"
+    },
+    "expect": [
+      "the Key points block holds 201 words"
+    ]
+  },
+  {
+    "name": "a draft with a table cell over 60 words fails",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: draft\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w |\n"
+    },
+    "expect": [
+      "table cell 2 holds 61 words"
+    ]
+  },
+  {
+    "name": "an approved plan over both budgets is skipped",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: approved\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w |\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a done plan over both budgets is skipped",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: done\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w |\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "an abandoned plan over both budgets is skipped",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: abandoned\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w |\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a table inside a fenced block is not counted",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: draft\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w |\n\n```markdown\n| w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w |\n```\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "a draft in a subfolder is read",
+    "files": {
+      "docs/plans/epic/b.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: draft\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w |\n"
+    },
+    "expect": [
+      "the Key points block holds 250 words"
+    ]
+  },
+  {
+    "name": "a page that is not a plan is skipped",
+    "files": {
+      "docs/plans/epic/README.md": "---\nkind: reference\nlast-reviewed: 2026-11-22\n---\n\n# Hub\n\nWhat.\n\n**In short:** x.\n\n| A |\n|---|\n| w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w |\n"
+    },
+    "expect": []
+  },
+  {
+    "name": "the budgets come from the config",
+    "files": {
+      "docs/plans/a.md": "---\nkind: plan\nlast-reviewed: 2026-11-22\nstatus: draft\n---\n\n# A: hand-off plan\n\nWhat it is.\n\n**In short:** short.\n\n## Key points\n\nword word word word word word word word word word word word word word word word word word word word word word word word word\n\n### A sub-heading inside it\n\n## Slices\n\n| Order | Work |\n|---|---|\n| 1 | w w w w w w w w w w |\n"
+    },
+    "config": {
+      "key_points": 20,
+      "cell": 5
+    },
+    "expect": [
+      "the Key points block holds 30 words",
+      "table cell 2 holds 10 words"
+    ]
+  }
+]

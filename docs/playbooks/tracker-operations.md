@@ -67,7 +67,7 @@ Each row is a rule step 3 applies when it lists the writes.
 | Operation | Rule |
 |---|---|
 | Development sub-task | When the person's own item has no development sub-task and the team's workflow needs one, raise it without being asked. Creating it is housekeeping on the person's item. |
-| Create an item | Fill the team's standard fields, grouped by the lifecycle step that needs them. When you fill a later group, fill any earlier group that is still empty. |
+| Create an item | Fill the team's standard fields, grouped by the lifecycle step that needs them. When you fill a later group, fill any earlier group that is still empty. Write a bug's text from the [bug report template](../templates/bug-ticket.md). |
 | Change a status | Set every field the new status requires first, then move the item. |
 | A finding from testing | Raise one change-request sub-task per finding. Never reopen a sub-task that is done. |
 | Ready for testing | Update the item's test notes: what changed, how to check it, and the commit or build it is in. |
