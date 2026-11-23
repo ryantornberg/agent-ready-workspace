@@ -788,6 +788,16 @@ Slice Z writes the one-line request map, then links it from the contract as its 
 
 The private ledger maps the two tutorials to B2t and the request map to slice Z.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+A new slice, TFIX, the hook timing fix. It has no row in the slice tables; this entry is its scope. The maintainer's answer to Q21 in the workspace queue settles it, and the maintainer confirmed it after round 6. No criterion is dropped or weakened.
+
+**The timing fix runs before C5e (Q21).** The macOS jobs in CI keep failing the hook case runner's 200-millisecond budget, most often with Python 3.9. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, and fixes the hooks so they meet the budget that criterion 28 sets. It may run alongside C5b. C5e waits for it, since C5e adds work to every push. TFIX is done when criterion 28 holds on every CI job, and its report is under "Results".
+
+**The fix is general, not for one Python (the maintainer, during the slice).** CI logs also show the macOS jobs with Python 3.13 over the budget, on the shell and push rows. The maintainer asked for a general fix: TFIX makes every hook call cheaper, on every system and Python, and leaves criterion 28's budgets and its way of timing as they are.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -1098,6 +1108,33 @@ Decisions made in the slice:
 Not done: nothing
 Parked: none
 Next: coordinator — build slice C5e, then C5f, as the maintainer's order sets; slice Z adds the `INDEX.md` rows queued below.
+
+### TFIX, the hook timing fix
+
+Pull request #39, on branch `m3/tfix` from main at `1fa880a`, at the driver tier, following the fix-a-bug playbook. The approval (Q21, and the maintainer's later word that the fix be general) is recorded under "Changes after approval". This entry is committed on the branch, and the branch merges by `python3 ws.py merge 39` once CI passes on its head. It touches no file the eval hashes.
+
+- **Verified, the cause:** a profile of one `git push` hook call in a scratch copy, on the maintainer's Mac with Python 3.9, spent 38 of 68 ms running the cases of the six before-shell hooks: 463 cases on every call, a number each guard slice grows. Imports took 17 ms, 5 of them `runpy` alone. A push from a linked worktree asked git the same `rev-parse` question of the same folder three times, and each edit's git config fact made two git calls one after the other.
+- **Verified, the fix:** a hook call now skips a hook's cases when they passed before on exactly the same files. `wslib/parts.py` keeps the record, `ws-cases.json`, in the working copy's own git folder: a digest of the part, its cases, every engine and workspace module loaded when they passed, and the Python and system. Any change to one of those runs the cases again, and a failure is never recorded. Every other command, the commit check and CI included, still runs every case every time. Within one hook call, each folder's git folders are asked of git once. The git config fact's two calls run at once. The launcher runs a script without `runpy`, and the runner imports `baseline`, `blocks`, `gate`, `merge` and `pins` only in the commands that use them.
+- **Verified, test first:** `CaseMemoryTests` in `tests/test_core.py` (9 tests) failed before the change and pass after. They show a second call runs no case, an edit to the part, its cases, a module the cases reached through a lazy import, or the Python runs them again, a failing part is refused on every call, a forged entry beside changed content is not trusted, and a check command, a missing git folder or an unreadable record runs them every time. `OneCallTests` in `tests/test_shellfacts.py` (3 tests) show three lookups of one folder ask git once inside a hook call and three times outside one, and a timeout stays a timeout.
+- **Verified, criterion 28 in CI:** two runs on the pull request, every job green. macOS with Python 3.9: before-shell 107 and 140 ms, before-edit 104 and 133, the `git push` row 120 and 150, the `gh write` row 107 and 122. macOS with Python 3.13: before-shell 115 and 119, before-edit 132 and 122, `git push` 123 and 136, `gh write` 91 and 95. In the seven failing macOS jobs on main and C5b and C5d before the fix, those rows ran 145 to 253 ms. The budgets and the way the runner times a call are unchanged.
+- **Verified, locally:** an interleaved comparison with main's tree, three full runs of `tests/hook_cases.py` each, gave medians of 92 against 59 ms for before-shell, 99 against 71 for the `git push` row, 78 against 50 for `gh write` and 75 against 61 for before-edit. `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` (686 tests, 3 skipped) pass; `evals/grade.py --recorded` finds no difference.
+- **Verified, impact check:** `load_hooks` has four callers in `wslib/runner.py`, the session, after-edit, stop and tool-call paths, and all four pass the runner's tests and the hook case runner. `load` keeps its signature; `load_all`, `ws.py selftest`, `test_cases_bite` and the session-start findings fact call it without a record. `wslib/start.py` starts four scripts in the wiring, CI and the README: `ws.py`, `tests/hook_cases.py`, `evals/grade.py` and `tools/setup_steps.py`; each ran through the launcher. `-m` still runs through `runpy`. `_run` in `wslib/shellfacts.py` keeps its answers, now through `_start` and `_finish`.
+- **Verified, the instruction review:** two fresh driver-tier helpers reviewed `docs/parts.md` and `docs/glossary.md`, the two guidance pages the slice changed, and found 4 contradictions in 2 records. All four were fixed in one round: the glossary's Case row and the In short line still said the cases run every time, the paragraph gave tool calls alone as the reason, and the glossary's first fix covered checks as well as hooks.
+- **Inferred:** the first hook call after a change to a part or the engine pays the full cost, as every call did before. The runner's five repeats per case include that first call, so a fifth of its samples are such calls.
+- **Inferred:** anyone who can write the git folder and compute a digest could make a broken hook skip its cases. That needs a write the `git_folder` and `git_folder_shell` guards refuse, and is no easier than editing the cases file itself.
+- **Verified:** Windows still only reports, as criterion 28 allows; its `git push` row ran 202 and 218 ms in the second run.
+- One fix round, on the review's findings. Main moved during the slice, so the branch merged main once; the plan's "Changes after approval" was the one conflict. No private ledger row maps to TFIX, which has no plan row, so none moved. No question was queued: the maintainer answered the scope during the slice.
+
+Decisions made in the slice:
+
+- **A cache of passing cases, not a cheaper parser or a looser budget.** The cases were over half of a call and grow with every guard. `wslib/shell.py` is hashed by the eval, so it cannot change before slice Z, and the budget is criterion 28's. The record is keyed by content, not by time or commit, so it cannot go stale, and only hook calls read it.
+- **The modules in the digest are those loaded when the cases passed,** so a lazy import inside `decide` counts. Over-including the runner's own modules costs only a rerun after an engine edit.
+- **The record lives in the working copy's own git folder, not the common one,** so a worktree and the main copy holding different engines do not overwrite each other's entries.
+- **The per-call memo of git folders lasts one hook call only.** A hook decides before its command runs, so nothing it asks about changes meanwhile; a longer-lived memo would go stale in tests and in a long process.
+
+Not done: nothing
+Parked: none
+Next: coordinator — merge pull request #39 once its CI passes, then build slice C5e, which waited for this fix.
 
 ### Sub-batch A, 2026-11-18
 

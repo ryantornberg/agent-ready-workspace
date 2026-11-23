@@ -14,7 +14,7 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Anchor | The commit-pinned eval record, `<sha>:evals/runs/<case>/record.json`, that a proven playbook's guided arm is compared with from then on. |
 | Arm | One way an eval case is run: guided (the workspace's pages), two-line (two lines of instruction) or bare (the code alone). A one-time arm, such as `routed` in `evals/one-time.json`, is recorded once in a record the gate never reads. |
 | Building | The milestones being built now, listed under `building` in `workspace.json`. |
-| Case | Test data a part runs every time it loads; or an eval case, a request an agent is given in each arm. |
+| Case | Test data a part runs when it loads, except a hook's cases in a hook call when they passed before on the same files; or an eval case, a request an agent is given in each arm. |
 | Check | A part that reads a snapshot of files and reports findings. By default it runs at the commit and in CI; a check may name other phases, such as the push or the nightly run. |
 | Contract | `AGENTS.md`: the rules every agent reads first. |
 | Critic | A fresh session that reviews an artifact, such as a plan, without the author's reasoning. See [fresh context for critics](orchestration.md#fresh-context-for-critics) and [adversarial review](playbooks/adversarial-review.md). |

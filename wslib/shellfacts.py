@@ -44,6 +44,23 @@ from . import ledger as ledgers
 from . import shell
 
 TIMEOUT = 3.0          # seconds for one folder's git call; a call cut off leaves the folder unresolved
+# {(flag, folder): outcome} of the git-folder lookup, kept only inside one hook call (see one_call): the session's own
+# working copy, the folders a command acts on and a push's branches each ask git the same question of the same folder.
+_FOLDERS = None
+
+
+class one_call:
+    """Within it, each folder's git folders are asked of git once. A hook call decides before its command runs, so
+    nothing it looks at changes meanwhile; outside one, every lookup asks git again (slice TFIX of the M3 plan)."""
+
+    def __enter__(self):
+        global _FOLDERS
+        _FOLDERS = {}
+        return self
+
+    def __exit__(self, *_):
+        global _FOLDERS
+        _FOLDERS = None
 
 
 def session(event, tool, cwd, top=True):
@@ -133,16 +150,14 @@ def _kind(folder, is_git_dir, workspace=None):
         return {"kind": "other", "top": None}
     where = ["--git-dir", str(folder)] if is_git_dir else ["-C", str(folder)]
     try:
-        done = subprocess.run(["git", *where, "rev-parse", "--path-format=absolute", "--git-dir", "--git-common-dir"],
-                              capture_output=True, env=gitcall.environment(), timeout=TIMEOUT,
-                              stdin=subprocess.DEVNULL)
+        code, text = _git_folders(where)
     except subprocess.TimeoutExpired:
         return {"unresolved": "git did not answer in time"}
     except OSError as error:
         return {"unresolved": f"git could not run: {error}"}
-    if done.returncode != 0:
+    if code != 0:
         return {"kind": "other", "top": None}       # no repository there
-    lines = done.stdout.decode("utf-8", "surrogateescape").replace("\r\n", "\n").splitlines()
+    lines = text.splitlines()
     if len(lines) < 2:
         return {"unresolved": "git gave no git folder"}
     own = pathlib.Path(os.path.realpath(lines[0]))
@@ -154,6 +169,28 @@ def _kind(folder, is_git_dir, workspace=None):
     if not ledgers._same(common, workspace):
         return {"kind": "other", "top": top}
     return {"kind": "main" if main else "linked", "top": top}
+
+
+def _git_folders(where):
+    """(exit code, output) of `git rev-parse` for the folder's own and common git folders. Raises
+    subprocess.TimeoutExpired or OSError as subprocess.run does. Inside one_call, a folder asked once is not asked
+    again."""
+    key = (where[0], os.path.normpath(where[1])) if len(where) == 2 else tuple(where)
+    if _FOLDERS is not None and key in _FOLDERS:
+        found = _FOLDERS[key]
+    else:
+        try:
+            done = subprocess.run(["git", *where, "rev-parse", "--path-format=absolute", "--git-dir",
+                                   "--git-common-dir"], capture_output=True, env=gitcall.environment(),
+                                  timeout=TIMEOUT, stdin=subprocess.DEVNULL)
+            found = (done.returncode, done.stdout.decode("utf-8", "surrogateescape").replace("\r\n", "\n"))
+        except (subprocess.TimeoutExpired, OSError) as error:
+            found = error
+        if _FOLDERS is not None:
+            _FOLDERS[key] = found
+    if isinstance(found, BaseException):
+        raise found
+    return found
 
 
 def _top(own, common, main):
@@ -215,14 +252,17 @@ def git_config(cwd, environ=None):
     if environ.get("GIT_CONFIG_GLOBAL"):
         files.append(environ["GIT_CONFIG_GLOBAL"])
     system = environ.get("GIT_CONFIG_SYSTEM")
+    where = ["-C", str(cwd)] if cwd else []
+    # The two git calls run at once: this runs on every edit, and a second git start in turn cost it about a tenth.
+    asking = None if system else _start([], ["var", "GIT_CONFIG_SYSTEM"])   # git 2.42 and later; older gits give nothing
+    including = _start(where, ["config", "-z", "--show-origin", "--get-regexp", r"^include(if\..*)?\.path$"])
     if not system:
-        found = _run([], ["var", "GIT_CONFIG_SYSTEM"])      # git 2.42 and later; older gits give nothing
+        found = _finish(asking)
         system = found[1].strip() if found and found[0] == 0 else None
     if system:
         files.append(system)
     unresolved = None
-    where = ["-C", str(cwd)] if cwd else []
-    done = _run(where, ["config", "-z", "--show-origin", "--get-regexp", r"^include(if\..*)?\.path$"])
+    done = _finish(including)
     if done is None:
         unresolved = "git did not answer in time"
     elif done[0] not in (0, 1):
@@ -291,14 +331,31 @@ def _place(cwd, folder):
 
 def _run(where, args, env_extra=None):
     """(exit code, output) of git, or None when it cannot run or runs past TIMEOUT."""
+    return _finish(_start(where, args, env_extra))
+
+
+def _start(where, args, env_extra=None):
+    """A git process started with its output captured, or None when it cannot start. _finish waits for it."""
     env = gitcall.environment()
     env.update(env_extra or {})
     try:
-        done = subprocess.run(["git", *where, *args], capture_output=True, env=env, timeout=TIMEOUT,
-                              stdin=subprocess.DEVNULL)
-    except (OSError, subprocess.TimeoutExpired):
+        return subprocess.Popen(["git", *where, *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
+                                stdin=subprocess.DEVNULL)
+    except OSError:
         return None
-    return done.returncode, done.stdout.decode("utf-8", "surrogateescape").replace("\r\n", "\n")
+
+
+def _finish(process):
+    """(exit code, output) of a process _start gave, or None when it did not start or runs past TIMEOUT."""
+    if process is None:
+        return None
+    try:
+        out, _ = process.communicate(timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.communicate()
+        return None
+    return process.returncode, out.decode("utf-8", "surrogateescape").replace("\r\n", "\n")
 
 
 def parse_url(url):
@@ -547,8 +604,9 @@ class _Config:
 def _branches(where):
     """(the branch checked out in the folder, the branch checked out in its repository's main working copy), each
     None when HEAD is detached. One git call finds the git folders; each HEAD file is read from there."""
-    found = _run(where, ["rev-parse", "--path-format=absolute", "--git-dir", "--git-common-dir"])
-    if found is None:
+    try:
+        found = _git_folders(where)
+    except (subprocess.TimeoutExpired, OSError):
         raise TimeoutError
     lines = found[1].splitlines() if found[0] == 0 else []
     if len(lines) < 2:

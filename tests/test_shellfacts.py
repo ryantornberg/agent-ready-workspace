@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -95,6 +96,49 @@ class KindTests(Repositories):
         finally:
             shellfacts.TIMEOUT = original
         self.assertEqual(fact, {"unresolved": "git did not answer in time"})
+
+
+class OneCallTests(Repositories):
+    """Slice TFIX: inside one hook call, each folder's git folders are asked of git once."""
+
+    def lookups(self, work):
+        calls = []
+        original = subprocess.run
+
+        def counted(args, *rest, **options):
+            if "--git-common-dir" in args:
+                calls.append(args)
+            return original(args, *rest, **options)
+        with mock.patch.object(shellfacts.subprocess, "run", counted):
+            work()
+        return len(calls)
+
+    def push_facts(self):
+        shellfacts.own_working_copy(str(self.linked))
+        shellfacts.working_copies(self.main, "git push origin HEAD", str(self.linked))
+        return shellfacts._branches(["-C", str(self.linked)])
+
+    def test_the_same_folder_is_asked_once_within_a_call(self):
+        def inside():
+            with shellfacts.one_call():
+                self.assertEqual(self.push_facts(), ("side", "main"))
+        self.assertEqual(self.lookups(inside), 1)
+
+    def test_outside_a_call_every_lookup_asks_git(self):
+        self.assertEqual(self.lookups(self.push_facts), 3)
+        self.assertIsNone(shellfacts._FOLDERS)
+
+    def test_a_timeout_is_kept_as_a_timeout(self):
+        original = shellfacts.TIMEOUT
+        shellfacts.TIMEOUT = 0.000001
+        try:
+            with shellfacts.one_call():
+                self.assertEqual(shellfacts.working_copies(self.main, "git status", str(self.main))["."],
+                                 {"unresolved": "git did not answer in time"})
+                with self.assertRaises(TimeoutError):
+                    shellfacts._branches(["-C", str(self.main)])
+        finally:
+            shellfacts.TIMEOUT = original
 
 
 class UnresolvedTests(Repositories):

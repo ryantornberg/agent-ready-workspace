@@ -207,6 +207,102 @@ class LoaderTests(Folder):
             partlib.load_manifest(self.root)
 
 
+class CaseMemoryTests(Folder):
+    """A hook call runs a hook's cases only when something they ran changed since they last passed (slice TFIX)."""
+    BODY = ('KIND = "hook"\nEVENT = "before-shell"\n'
+            'def decide(event, config):\n    return "no" if event.get("command") == "bad" else None\n')
+    CASES = [{"name": "allows", "event": {"command": "ok"}, "allow": True},
+             {"name": "refuses", "event": {"command": "bad"}, "allow": False}]
+
+    def setUp(self):
+        super().setUp()
+        self.git("init", "-q")
+        self.write("workspace.json", manifest([{"use": "gate"}]))
+        self.write("parts/gate.py", self.BODY)
+        self.write("parts/gate.cases.json", json.dumps(self.CASES))
+        self.runs = 0
+        original = partlib.Part.failed_cases
+
+        def counted(part):
+            self.runs += 1
+            return original(part)
+        patcher = mock.patch.object(partlib.Part, "failed_cases", counted)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def call(self):
+        return partlib.load_hooks(self.root, "before-shell", partlib.load_manifest(self.root, hook=True))
+
+    def test_a_second_call_with_nothing_changed_runs_no_case(self):
+        self.call()
+        self.call()
+        self.assertEqual(self.runs, 1)
+
+    def test_an_edit_to_the_part_or_its_cases_runs_them_again(self):
+        self.call()
+        self.write("parts/gate.py", self.BODY + "# an edit\n")
+        self.call()
+        self.write("parts/gate.cases.json", json.dumps(self.CASES + [{"name": "more", "event": {}, "allow": True}]))
+        self.call()
+        self.call()
+        self.assertEqual(self.runs, 3)
+
+    def test_an_edit_to_a_module_the_cases_reached_runs_them_again(self):
+        # The module is imported inside decide, as the hooks import lazily, so only running the cases reaches it.
+        self.write("casehelper.py", "def answer(event):\n    return None\n")
+        self.write("parts/gate.py", self.BODY.replace('    return "no"', '    import casehelper\n    return "no"'))
+        sys.path.insert(0, str(self.root))
+        self.addCleanup(sys.path.remove, str(self.root))
+        self.addCleanup(sys.modules.pop, "casehelper", None)
+        self.call()
+        self.call()
+        self.assertEqual(self.runs, 1)
+        self.write("casehelper.py", "def answer(event):\n    return 'changed'\n")
+        self.call()
+        self.assertEqual(self.runs, 2)
+
+    def test_another_python_runs_them_again(self):
+        self.call()
+        with mock.patch.object(sys, "version", "3.99.0 (another build)"):
+            self.call()
+        self.assertEqual(self.runs, 2)
+
+    def test_a_failing_part_is_refused_on_every_call(self):
+        self.write("parts/gate.py", self.BODY.replace('"no" if', 'None if'))
+        for _ in range(2):
+            with self.assertRaisesRegex(partlib.PartError, "refused, 1 of its 2 cases fail"):
+                self.call()
+        self.assertEqual(self.runs, 2)
+
+    def test_a_check_command_runs_the_cases_every_time(self):
+        self.call()
+        partlib.load(self.root, {"use": "gate"})
+        partlib.load(self.root, {"use": "gate"})
+        self.assertEqual(self.runs, 3)
+
+    def test_with_no_git_folder_the_cases_run_every_time(self):
+        shutil.rmtree(self.root / ".git")
+        self.call()
+        self.call()
+        self.assertEqual(self.runs, 2)
+
+    def test_an_unreadable_record_runs_the_cases(self):
+        self.call()
+        (self.root / ".git" / partlib.CASE_MEMORY).write_text("{not json", encoding="utf-8")
+        self.call()
+        self.call()
+        self.assertEqual(self.runs, 2)
+
+    def test_a_forged_entry_for_other_content_is_not_trusted(self):
+        self.call()
+        memory = self.root / ".git" / partlib.CASE_MEMORY
+        recorded = json.loads(memory.read_text(encoding="utf-8"))
+        self.write("parts/gate.py", self.BODY.replace('"no" if', 'None if'))
+        memory.write_text(json.dumps(recorded), encoding="utf-8")     # the old digest, now beside a broken part
+        with self.assertRaisesRegex(partlib.PartError, "refused"):
+            self.call()
+
+
 class RunnerTests(Folder):
     def test_check_reports_an_error_and_exits_1(self):
         self.workspace({"use": "links"})

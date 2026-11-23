@@ -9,7 +9,7 @@ last-reviewed: 2026-11-18
 
 How the checks and hooks plug in, and how to add one. It is for anyone extending the workspace.
 
-**In short:** a part is one Python file plus a file of cases. The manifest lists the parts a workspace uses. The runner runs a part's cases every time it loads the part, and refuses a part with no cases or a failing one.
+**In short:** a part is one Python file plus a file of cases. The manifest lists the parts a workspace uses. The runner runs a part's cases when it loads the part, and refuses a part with no cases or a failing one. A hook call skips the cases when they passed before on the same files.
 
 ## The pieces
 
@@ -199,6 +199,8 @@ The runner refuses to load:
 - any part with a case that fails.
 
 A rule written only in prose gets broken, and a check nobody tests stops checking. The cases run on every command that loads the part, so a part cannot quietly stop working between commits. `python3 ws.py selftest` runs them all and lists each failure, where the other commands stop at the first.
+
+A hook call is the one exception, because hooks run around every tool call and session event, and most have a time budget. It skips a hook's cases when they passed before on exactly the same files. The working copy's git folder keeps a record, `ws-cases.json`, of each hook whose cases passed. The record holds a digest of the part, its cases, every engine and workspace module loaded when they passed, and the Python and system that ran them. A change to any of those runs the cases again, and a failure is never recorded. Every other command, the commit check and CI included, runs every case every time.
 
 The commit check, `check --staged`, reads the staged manifest, the staged parts and their staged cases. An edit you have not staged cannot change its result.
 
