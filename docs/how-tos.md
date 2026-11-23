@@ -1,6 +1,6 @@
 ---
 kind: reference
-last-reviewed: 2026-11-21
+last-reviewed: 2026-11-23
 ---
 
 # How-to index
@@ -13,12 +13,13 @@ Every task a page under `docs/` helps with, where to go for it, and the one thin
 
 The tables run in the order a piece of work meets them: start, plan, build, finish, then changing the workspace itself. A new page adds its row to the table of its stage, in the same commit as the page.
 
-The Proof column copies each page's front matter, or the proof line under a section's heading. "unproven, M4" means the page names M4 as the milestone that is to prove it; see [decision 0006](decisions/0006-what-proven-means.md). A reference page, a record and a template carry no proof state.
+The Proof column copies each page's front matter, or the proof line under a section's heading. "unproven, M4" means the page names M4 as the milestone that is to prove it; see [decision 0006](decisions/0006-what-proven-means.md). A reference page, a tutorial, a record and a template carry no proof state.
 
 ## Starting a task
 
 | Task | Go to | Remember | Proof |
 |---|---|---|---|
+| New here: walk through the workspace with no agent, then run a first task with one | [Get oriented](tutorials/get-oriented.md), then [your first agent task](tutorials/first-agent-task.md) | Run them in a clone no other agent session works in. Every block marked as yours runs as written; CI runs those on three systems. | tutorial |
 | Find code or a page, with a name or a topic in hand | [Research ladder](research-ladder.md) | Pick the one lookup that fits what you already know. Never stack lookups. | unproven, M4 |
 | Learn what a word means in this workspace | [Glossary](glossary.md) | The team's everyday words for the code are in [INDEX.md's search aliases](../INDEX.md#search-aliases), not the glossary. | reference |
 | Decide how much process a change needs | [Size the work](size-the-work.md#the-gate) | Small, easy to reverse, one repository and under a day: all four, or climb the ladder. When you cannot tell, climb. | unproven, M9 |

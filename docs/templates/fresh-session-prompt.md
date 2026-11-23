@@ -18,7 +18,7 @@ Use it when a person asks for a prompt to paste into a new session, for a task o
 | A person starts a new session on a task, or on one slice of a plan. | This template. |
 | A session stops mid-task and a later one carries on. | A note, as [handoff](../playbooks/handoff.md) says. Its resume line is the whole prompt. |
 | This session hands a helper one question, or a slice of an approved plan. | [Handing work off](../orchestration.md#handing-work-off), as orchestration's delegating table says. |
-| A critic reviews a plan or a page. | The template on the critic's own playbook, such as the [adversarial review](../playbooks/adversarial-review.md#the-template). It is kept thin on purpose; do not add these parts to it. |
+| A critic reviews a plan or a page. | The template on the critic's own playbook, such as the [red team review](../playbooks/red-team-review.md#the-template). It is kept thin on purpose; do not add these parts to it. |
 
 ## Where copies go
 

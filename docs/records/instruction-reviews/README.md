@@ -150,3 +150,22 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-b3-sweep-git-host-operations.md](2026-11-22-b3-sweep-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | trigger |
 | [2026-11-22-b3-sweep-escape-analysis.md](2026-11-22-b3-sweep-escape-analysis.md) | `docs/playbooks/escape-analysis.md` | contradiction, step, placement |
 | [2026-11-22-b3-sweep-maintain-the-workspace.md](2026-11-22-b3-sweep-maintain-the-workspace.md) | `docs/maintain-the-workspace.md` | contradiction, step, placement |
+| [2026-11-23-b2t-adopt-the-workspace.md](2026-11-23-b2t-adopt-the-workspace.md) | `docs/adopt-the-workspace.md` | placement, contradiction |
+| [2026-11-23-b2t-architecture-review.md](2026-11-23-b2t-architecture-review.md) | `docs/playbooks/architecture-review.md` | contradiction |
+| [2026-11-23-b2t-debugging.md](2026-11-23-b2t-debugging.md) | `docs/playbooks/debugging.md` | step, contradiction, trigger |
+| [2026-11-23-b2t-decision-interview.md](2026-11-23-b2t-decision-interview.md) | `docs/playbooks/decision-interview.md` | step, contradiction |
+| [2026-11-23-b2t-docs-audit.md](2026-11-23-b2t-docs-audit.md) | `docs/playbooks/docs-audit.md` | step, contradiction |
+| [2026-11-23-b2t-escape-analysis.md](2026-11-23-b2t-escape-analysis.md) | `docs/playbooks/escape-analysis.md` | contradiction, step |
+| [2026-11-23-b2t-extend-the-workspace.md](2026-11-23-b2t-extend-the-workspace.md) | `docs/extend-the-workspace.md` | contradiction, step, enforcement, placement |
+| [2026-11-23-b2t-git-host-operations.md](2026-11-23-b2t-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | step, contradiction, placement |
+| [2026-11-23-b2t-glossary.md](2026-11-23-b2t-glossary.md) | `docs/glossary.md` | contradiction, trigger |
+| [2026-11-23-b2t-how-tos.md](2026-11-23-b2t-how-tos.md) | `docs/how-tos.md` | contradiction, trigger |
+| [2026-11-23-b2t-machine-self-check.md](2026-11-23-b2t-machine-self-check.md) | `docs/machine-self-check.md` | contradiction, step |
+| [2026-11-23-b2t-playbook-catalog.md](2026-11-23-b2t-playbook-catalog.md) | `docs/playbooks/README.md` | trigger |
+| [2026-11-23-b2t-procedure-endings.md](2026-11-23-b2t-procedure-endings.md) | `docs/procedure-endings.md` | step, contradiction, trigger |
+| [2026-11-23-b2t-red-team-review.md](2026-11-23-b2t-red-team-review.md) | `docs/playbooks/red-team-review.md` | contradiction |
+| [2026-11-23-b2t-review-orchestrator.md](2026-11-23-b2t-review-orchestrator.md) | `docs/playbooks/review-orchestrator.md` | contradiction, step, enforcement |
+| [2026-11-23-b2t-search-every-source.md](2026-11-23-b2t-search-every-source.md) | `docs/playbooks/search-every-source.md` | trigger, step, placement |
+| [2026-11-23-b2t-tracker-operations.md](2026-11-23-b2t-tracker-operations.md) | `docs/playbooks/tracker-operations.md` | step, placement |
+| [2026-11-23-b2t-tutorial-first-agent-task.md](2026-11-23-b2t-tutorial-first-agent-task.md) | `docs/tutorials/first-agent-task.md` | step, contradiction, placement, trigger |
+| [2026-11-23-b2t-tutorial-get-oriented.md](2026-11-23-b2t-tutorial-get-oriented.md) | `docs/tutorials/get-oriented.md` | step, contradiction, trigger |

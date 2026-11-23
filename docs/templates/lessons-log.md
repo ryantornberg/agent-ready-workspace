@@ -14,7 +14,7 @@ The shape of the lessons log, which records each mistake that led to a change th
 Add a row when a mistake led you to change what prevents it: a rule on a page, a check, a hook, a template or an eval case. The commit that makes the change adds the row. Two procedures end with such a change:
 
 - [Maintain the workspace](../maintain-the-workspace.md), when the same mistake shows up twice.
-- [Escape analysis](../playbooks/escape-analysis.md), once it has changed what let a defect through.
+- [Defect escape analysis](../playbooks/escape-analysis.md), once it has changed what let a defect through.
 
 A lesson you learned but did not act on is not a row. Raise it in your report, or offer it as the [research ladder](../research-ladder.md#offer-to-write-a-finding-down) says.
 

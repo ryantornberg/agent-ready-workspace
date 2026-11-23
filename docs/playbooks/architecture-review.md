@@ -2,7 +2,7 @@
 kind: playbook
 proof: unproven
 prove-by: M6
-last-reviewed: 2026-11-21
+last-reviewed: 2026-11-23
 ---
 
 # Architecture review
@@ -17,14 +17,14 @@ It fits a diff of code: a branch or a pull request that changes files under `src
 
 - It runs as one dimension of a full review, which the [review orchestrator](review-orchestrator.md) runs, by hand until its machinery lands in M4. There the dispatched reviewer does step 4 only, and replies in the table that page's template gives, with the "Traces to" value at the start of each Finding cell, then the two closing lines below, then the `Dimension complete: <dimension>` line that template ends with. The orchestrator and the author do the rest, as that page says.
 - The steps below, in full, are for a request for an architecture review alone, of a branch or pull request.
-- When the change is a hand-off plan or a requirements document, not a diff, use [adversarial review](adversarial-review.md) instead.
+- When the change is a hand-off plan or a requirements document, not a diff, use [red team review](red-team-review.md) instead.
 - When the diff changes guidance pages, those pages go to the [instruction review](instruction-review.md); this review takes the code in the same diff.
 - When a finding is about how the code is written, not about what the system has decided, it is not this review's. Leave it to the code dimension of the review, which [code review](../code-review.md) explains.
 - When a finding is about code that already exists for the job, it belongs to the [reuse checklist](reuse-checklist.md).
 
 ## Steps
 
-1. **Check that it fits.** Input: the request and the change. Confirm the change is a diff of code, as "When it runs" says. Default: a diff that mixes code and guidance pages is reviewed here for its code only. Find the tip and the base as step 1 of the [review orchestrator](review-orchestrator.md#steps) does, which fetches a pull request's head. Output: the tip and base commits; the request, word for word, from the sources step 5 of the review orchestrator names, with its default: the plan's spec, the issue, the pull request's description, and, with none of them, the commit messages, saying so; and the plan's path under `docs/plans/`, or none. If the change does not fit, stop and report which playbook fits instead. Nothing is committed.
+1. **Check that it fits.** Input: the request and the change. Confirm the change is a diff of code, as "When it runs" says. Default: a diff that mixes code and guidance pages is reviewed here for its code only. Find the tip and the base as step 1 of the [review orchestrator](review-orchestrator.md#steps) does, which fetches a pull request's head. Output: the tip and base commits; the request, word for word, from the sources step 5 of the review orchestrator names, with its default: the plan's spec, the issue, the pull request's description, and, with none of them, the commit messages, saying so; the plan's path under `docs/plans/`, or none; and the path the change came by: `fix` when it was made under [fix a bug](fix-a-bug.md), otherwise `other`. Default: `fix` when the request is a bug report and there is no plan, otherwise `other`. If the change does not fit, stop and report which playbook fits instead. Nothing is committed.
 2. **Decide who reviews.** Input: what this session has done. If this session wrote or edited the change, or holds the author's reasoning, a fresh agent reviews: go to step 3. If it has done neither, and it runs at the driver tier's model and effort in the `tiers` entry of [workspace.json](../../workspace.json), this session is the reviewer: do step 4 yourself, then go to step 6. Default, when unsure: dispatch.
 3. **Dispatch the reviewer.** Input: [the template](#the-template), with its placeholders filled from step 1's output. Change nothing else, and add nothing: never your reasoning or what you expect it to find, as [fresh context for critics](../orchestration.md#fresh-context-for-critics) says. Send it to one fresh agent at the driver tier's model and effort. Output: the dispatch.
 4. **Review.** This step is the reviewer's. Input: the diff, the request, the plan and this page. Read the diff with `git diff BASE..TIP`, and a file at the tip with `git show TIP:PATH`, so no working copy changes. When the review orchestrator dispatched you, read the folder its template names instead. Edit nothing and post nothing.
@@ -35,15 +35,15 @@ It fits a diff of code: a branch or a pull request that changes files under `src
    - Output: the reply in the shape under [the reply](#the-reply). "No architectural surface" is a valid answer: the findings table says `No findings.` and the two closing lines still follow.
 5. **Read the reply.** Input: the reviewer's reply. Check that it ends with both closing lines. If either is missing, dispatch one more fresh reviewer with the same template. If the second reply also lacks one, stop: report to the person that the review did not complete, with both replies. Nothing is committed. Output: the findings and the two lines.
 6. **Hand on, if the change is not yours.** Input: the reply, when this session did not write the change, such as a review of someone else's pull request. Report the findings to the person who asked, and stop. Posting them on a pull request is an outward write: do it only on that person's yes, and only where the [review orchestrator's](review-orchestrator.md#steps) step 11 allows a post, on a pull request in this repository or one pinned under `src/`. On any other, give the person the findings to post. Default: do not post. Nothing is committed.
-7. **Settle each finding.** Input: the findings, when the change is yours. Verify each one yourself, by reading or running what its evidence cites. Then give it one disposition: `fixed`, with the fix made by the procedure the change follows, such as [test first](test-first.md) for a slice of a plan; `deferred to <where>`, with the reason; or `declined`, with a reason a stranger could judge. A finding against an invariant marked non-declinable is never declined. The alternative line is a proposal for whoever owns the request, never a defect: put it to the person, and without an answer leave it open for that person. Output: a disposition for every finding.
+7. **Settle each finding.** Input: the findings, when the change is yours. Verify each one yourself, by reading or running what its evidence cites. Then give it one disposition: `fixed`, with the fix made by the procedure the change follows, such as [test first](test-first.md) for a slice of a plan; `deferred to <where>`, with the reason; or `declined`, with a reason a stranger could judge. A finding against an invariant marked non-declinable is never declined. The alternative line is a proposal for whoever owns the request, never a defect: put it to the person, and without an answer leave it open for that person. On the `fix` path it is a follow-up note for the person, and the fix is not held for it. Output: a disposition for every finding.
 8. **Decide on another round.** Input: the dispositions. If a fix changed the design of the diff, such as a new path, a moved responsibility or a changed answer to an invariant, go back to step 3 with the new diff. A fix that adds a test or rewords code is not that. Default: no new round. The loop stops as [the limits](../orchestration.md#limits) say. Output: a diff whose last review needs no change in design.
-9. **Record and report.** Input: the last reply and the dispositions. When the work has a plan, write the findings, their dispositions and the two closing lines under the plan's "Results", stage the plan by name and commit it. When it has none, they go in your report, and the review itself commits nothing; the fixes were committed by the procedure that made them. The fix record that will hold them for a bug fix is planned in slice B3 of M3. Report the two closing lines and the count of findings per disposition, each claim marked verified or inferred. Stop.
+9. **Record and report.** Input: the last reply and the dispositions. When the work has a plan, write the findings, their dispositions and the two closing lines under the plan's "Results", stage the plan by name and commit it. When it has none, they go in your report, and the review itself commits nothing; the fixes were committed by the procedure that made them. A question you had to ask a person goes in the question log, committed as [procedure endings](../procedure-endings.md#the-question-log-entry) says. Push as [procedure endings](../procedure-endings.md#the-push) says. On a branch of the work it reviews, the review is [off main](../procedure-endings.md#off-main): push nothing. The plan commit and the log row stay on that branch, and reach main with its pull request. Report the two closing lines, the count of findings per disposition, on the `fix` path the alternative as a follow-up note, and any commit left unpushed, each claim marked verified or inferred as [procedure endings](../procedure-endings.md#the-report) says. Stop.
 
 Stop when the report is written. Stop early and report when the change does not fit, when two reviewers in a row miss a closing line, or when the change is not yours.
 
 ## The template
 
-Send this, with only the angle-bracket placeholders replaced. For `<plan>`, write `none` when there is no plan.
+Send this, with only the angle-bracket placeholders replaced. For `<plan>`, write `none` when there is no plan. For `<path>`, write `fix` or `other`, from step 1.
 
 ```text
 Tier: driver
@@ -52,6 +52,7 @@ Run an architecture review: follow step 4 of docs/playbooks/architecture-review.
 The change: git diff <base commit>..<tip commit>
 The request, word for word: <request>
 The plan: <plan>
+The path: <path>
 Edit nothing and post nothing.
 Reply in the shape under "The reply" on that page.
 ```
@@ -66,7 +67,7 @@ What this system has already decided, numbered. A finding cites an entry by its 
 
 This sample's list starts with one entry. A team adopting this workspace writes its own, one line per decision the system already rests on, each with its source.
 
-The list grows when a defect escapes that an entry would have caught. [Escape analysis](escape-analysis.md) is where such a miss is traced. Adding an entry is a change to this page, so it gets an [instruction review](instruction-review.md).
+The list grows when a defect escapes that an entry would have caught. [Defect escape analysis](escape-analysis.md) is where such a miss is traced. Adding an entry is a change to this page, so it gets an [instruction review](instruction-review.md).
 
 A non-declinable entry is one no author or agent may decline. Only a person can retire it, by changing its source first.
 
@@ -83,7 +84,9 @@ A reviewer handed a diff reviews the diff. A diff can keep every invariant and s
 5. **Look past the repository.** Could a layer the diff does not touch do the job for every caller at once, even one another team owns? For example, a check added in `src/orders-web` that `src/orders-api` could make for every client. When several callers share one cause, weigh fixing it where they meet before adding shared code.
 6. **Name at most one alternative,** and only a concrete one: what changes, what it removes, what it costs, and what the user sees. `none` is a valid answer, and the usual one for a small diff, with a one-line reason.
 
-A fix for a symptom, shown by reading the code, with the cause still reachable on a path the request covers, is a finding. It traces to the restated problem, the one finding that needs no invariant. A suspicion that the code cannot show goes in the alternative line instead.
+The path the change came by decides what the alternative is. On the `fix` path, the dispatch's `The path:` line, the alternative is a follow-up note for the person, never a finding: [fix a bug](fix-a-bug.md) fixes the reported defect and leaves a second one alone, and this review does the same. On any other path it is a proposal for whoever owns the request. Either way it is never a defect.
+
+A fix for a symptom, shown by reading the code, with the cause still reachable on a path the request covers, is a finding, on the `fix` path too: a fix that leaves the cause reachable where the request reported it is wrong, not minimal. It traces to the restated problem, the one finding that needs no invariant. A suspicion that the code cannot show goes in the alternative line instead.
 
 | Misframing | The question that exposes it |
 |---|---|
@@ -122,7 +125,9 @@ Big picture: <the problem in one sentence>. Alternative: <one concrete alternati
 | The reviewer edits nothing and posts nothing. | `prose` |
 | Never post findings on someone else's pull request without the person's yes, and never on one outside this repository and the repositories it pins. | `prose` |
 | The big-picture pass runs on every review, even when the diff has no architectural surface. | `prose` |
-| Name at most one alternative, and only a concrete one; it is a proposal, never a defect. | `prose` |
+| Name at most one alternative, and only a concrete one; it is a proposal, never a defect, and on the `fix` path a follow-up note for the person. | `prose` |
+| A fix for a symptom whose cause stays reachable on a path the request covers is a finding, whichever way the change came. | `prose` |
+| Off main, the review pushes nothing, as procedure endings says; its commits reach main with the branch's pull request. | `prose` |
 | The review is complete only when the reply holds both closing lines. | `prose` |
 | A finding against a non-declinable invariant is never declined, and only a person retires such an invariant. | `prose` |
 | An invariant's number is never reused. | `prose` |

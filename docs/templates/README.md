@@ -35,7 +35,7 @@ These have no page here. The page that holds or writes them defines the shape, s
 | Record | Use it when | Shape | Your copy goes |
 |---|---|---|---|
 | Interview summary | A decision interview ends. | [Decision interview, "The summary"](../playbooks/decision-interview.md#the-summary) | Inside the draft hand-off plan, as that section says |
-| Red team review record | A fresh session attacks a finished plan or spec. | [Adversarial review, "The record"](../playbooks/adversarial-review.md#the-record) | `docs/records/adversarial-reviews/`, named as that playbook says |
+| Red team review record | A fresh session attacks a finished plan or spec. | [Red team review, "The record"](../playbooks/red-team-review.md#the-record) | `docs/records/adversarial-reviews/`, named as that playbook says |
 | Handoff note | A session stops mid-task and a later one carries on. | [Handoff, "The note"](../playbooks/handoff.md#the-note) | Outside every repository. Keep mode, a tracked copy, waits for M4: see [two modes](../playbooks/handoff.md#two-modes). |
 | Review record | A change is reviewed by the review orchestrator. | [Review orchestrator](../playbooks/review-orchestrator.md#steps), step 10 | As step 10 says: the hand-off plan's Results, or the pull request's description |
 | Instruction review record | A guidance page is added or changed. | [Instruction review, "The record"](../playbooks/instruction-review.md#the-record) | `docs/records/instruction-reviews/`, with a row in [its index](../records/instruction-reviews/README.md) |

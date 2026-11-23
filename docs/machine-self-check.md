@@ -2,7 +2,7 @@
 kind: how-to
 proof: unproven
 prove-by: M5
-last-reviewed: 2026-11-22
+last-reviewed: 2026-11-23
 ---
 
 # Machine self-check
@@ -24,7 +24,7 @@ A prompt a person pastes into their agent to check that their machine runs this 
 Paste this into an agent session whose working folder is the top of the workspace, the main working copy or a worktree:
 
 ```
-Run the machine self-check in docs/machine-self-check.md. Follow its steps in order, in this session; hand nothing to a helper. Change nothing until you have given me the report. Then offer each fix one at a time, and make one only when I say yes.
+Run the machine self-check in docs/machine-self-check.md. Follow its steps in order, in this session; hand nothing to a helper. Change nothing until you have given me the report, except a question-log row for a question you had to ask me. Then offer each fix one at a time, and make one only when I say yes.
 ```
 
 ## Steps
@@ -35,17 +35,17 @@ The agent runs every step in its own session and hands nothing off. Every comman
 
 **Work in progress.** The self-check may run in a working copy with uncommitted edits, a worktree included. In steps 6, 8 and 9, a failure that comes from those edits, such as a link to a page that is not committed yet, is work in progress, not a bug. It goes on the report's "Work in progress" line, and its step's result is still fail. `git status --short` lists the edits.
 
-1. **Tools.** Input: the session's shell, at the top of the workspace. Run `python3 --version`, `git --version` and `gh --version`. Where `python3` is missing, as on some Windows machines, try `python --version` and `py --version`, which the launcher also tries, and use the name that works in the later steps. On Windows, confirm that the bash that comes with Git is installed: the hook wiring needs a POSIX shell. Pass: Python 3.9 or later, and git. Output: each tool's version, or "missing". A missing `gh` is a note, not a fail: it is needed only for work on GitHub: opening, reading and merging pull requests, including `python3 ws.py merge`, and reading their CI. If no Python 3.9 or later is found, mark steps 5 to 10 skipped and go on to step 2.
+1. **Tools.** Input: the session's shell, at the top of the workspace. Run `python3 --version`, `git --version` and `gh --version`. Where `python3` is missing, as on some Windows machines, try `python --version` and `py --version`, which the launcher also tries, and use the name that works in the later steps. On Windows, confirm that the bash that comes with Git is installed: the hook wiring needs a POSIX shell. Pass: Python 3.9 or later, and git. Output: each tool's version, or "missing". A missing `gh` is a note, not a fail: it is needed only for work on GitHub: opening, reading and merging pull requests, including `python3 ws.py merge`, and reading their CI. If no Python 3.9 or later is found, go on to step 2: steps 2 to 4, 7 and 11 need no Python, step 5 runs and fails with the launcher's error, and steps 6, 8, 9 and 10 are marked skipped. This differs from the branch above in steps 7 and 11, which that branch skips because no command runs at all.
 2. **Line endings.** Input: the checkout. Run `git ls-files --eol | grep "w/crlf"`. Pass: no output, so every file is checked out with the LF endings `.gitattributes` asks for. Fail: the files it lists. A shell script with CRLF endings, such as `wslib/launch.sh`, does not run, so every guard refuses. Output: pass, or the list. Class: machine setup. Something on the machine rewrote the endings, often an editor setting.
 3. **Git hooks.** Input: the checkout. Run `git config core.hooksPath`. Pass: it prints `.githooks`. Fail: no output, so the commit, commit message and push checks never run on this machine, and only CI catches a bad commit, after the push. On Linux and macOS, also run `ls -l .githooks wslib/launch.sh`. Pass: each file shows `x` in its mode; git skips a hook file that is not executable. Output: pass, or what is missing. Class: machine setup.
 4. **Agent tool wiring and local overrides.** Input: the agent tool this session runs in. Claude Code reads its hooks from `.claude/settings.json`, and Codex CLI from `.codex/hooks.json`. For Claude Code, run `grep -ns disableAllHooks .claude/settings.local.json ~/.claude/settings.json`. Pass: no line that sets it to `true`. Also list any `hooks` or `permissions` entries in `.claude/settings.local.json`: a local file can loosen the committed settings, as [agent settings](agent-settings.md#limits) says. For Codex CLI, ask the person whether they have trusted the project and reviewed its hooks with `/hooks`; until they have, no hook runs. Default: with no answer, mark it unknown; step 7 shows the result either way. Output: each override found, or none. Class: machine setup.
-5. **The launcher.** Input: Python from step 1. Run `wslib/launch.sh ws.py --version`. It starts Python the way every hook, git hook and CI step does. Pass: it prints the engine's version. Fail: "no Python 3.9 or later on the path", with exit code 2, means every guard refuses every call; "permission denied" means the launcher is not executable, as in step 3. Output: the version, or the error. Class: machine setup for those two errors; any other error is a workspace bug.
+5. **The launcher.** Input: step 1's result; with no Python 3.9 or later, it still runs, and fails. Run `wslib/launch.sh ws.py --version`. It starts Python the way every hook, git hook and CI step does. Pass: it prints the engine's version. Fail: "no Python 3.9 or later on the path", with exit code 2, means every guard refuses every call; "permission denied" means the launcher is not executable, as in step 3. Output: the version, or the error. Class: machine setup for those two errors; any other error is a workspace bug.
 6. **Hook replay.** Input: a working launcher. Run `python3 tests/hook_cases.py`. It builds scratch repositories in a temporary folder and calls every hook event through each agent tool's real wiring, with that tool's own payload, and times each call. It takes about a minute. Pass: the last line reads `<n> of <n> cases pass`. Fail: each failing case is named. Output: the count, and each failing case. Class: work in progress when the failure comes from uncommitted edits; otherwise a workspace bug when steps 1 to 5 passed, or the earlier step's cause when one failed.
 7. **Proof that a hook fires in this session.** Input: this session's own shell tool. Steps 5 and 6 call the wiring by hand; this step shows that the agent tool itself calls it. Run `: >> .git/HEAD` through the session's shell tool. Pass: the call is refused, with a message that starts `Refused by git_folder_shell`. Fail: the command runs with no refusal, so this session's hooks are off. The command writes no content either way: `:` writes nothing, so the file keeps its content, and in a worktree, where `.git` is a file, the command only fails. Output: the refusal, or what ran. Class: machine setup when step 4 found an override or an untrusted project; otherwise a workspace bug.
 8. **Script tests.** Input: Python from step 1. Run `python3 ws.py selftest`, then `python3 -m unittest discover -b tests`. Selftest runs every part's own cases, in about a second. The tests take a minute or two. Pass: every part is listed `ok`, and the tests end with `OK`; skipped tests are allowed. Output: both results, and each failure. Class: work in progress when the failure comes from uncommitted edits; machine setup when it names a tool step 1 found missing; otherwise a workspace bug.
 9. **Commit gates.** Input: Python from step 1. Run `python3 ws.py check`, then `sh .githooks/pre-commit`. The first runs every check on the working folder. The second runs the git hook's own command on what is staged, as a commit would. Pass: both exit 0; a warning does not fail. Output: both results, and each finding. Class: a finding on a file with uncommitted edits is work in progress, reported as such, not a bug; a finding on a committed file is a workspace bug.
 10. **Lookup.** Input: Python from step 1. Run `python3 tools/symbols.py ReconciliationWorker src`. Pass: it prints `src/orders-api/ReconciliationWorker.cs` and a line number. In an instance, use a name from your own code, such as one from [INDEX.md's search aliases](../INDEX.md#search-aliases). Fail: no output. Output: the file and line, or nothing. Class: in an instance, first run step 11's pin check, since a pinned repository that is not checked out holds no names; otherwise a workspace bug.
-11. **Extras.** Input: Python and git from step 1. Default: run all three; each reads only.
+11. **Extras.** Input: git from step 1; none of them needs Python. Default: run all three; each reads only.
     - GitHub: `gh auth status`. Pass: signed in. Needed for every `gh` call on GitHub, such as opening, reading or merging a pull request and reading its CI.
     - Pinned code repositories: `git submodule status`. Pass: no line starts with `-`; such a line is a repository that is not checked out. This sample pins none, so no output passes.
     - A browser for agent sessions: `npx --version`, since the browser server starts through it, as [browsers](browsers.md) says. Pass: a version.
@@ -70,7 +70,8 @@ Machine setup fixes: <one line each, or none>
 Workspace bugs: <one line each, or none>
 Work in progress: <step and finding, one line each, or none>
 Skipped: <step, and why>
-Changed: nothing.
+Changed on the machine: nothing.
+Question log: <the row added and committed, or none>
 ```
 
 Then offer the fixes, one at a time, machine setup first, since one may explain a later failure.
@@ -81,16 +82,16 @@ Then offer the fixes, one at a time, machine setup first, since one may explain 
 
 Work in progress is not a fix to offer: it clears when those edits are finished or committed.
 
-Stop when every fix offered is made or declined and each step run again has its result reported. Nothing this how-to does is committed, except a question-log entry; the last line of the report says what was changed on the machine, or nothing. If you had to ask a person something this workspace should have answered, add it to the [question log](question-log.md) before you finish, and commit it as that page says.
+Stop when every fix offered is made or declined and each step run again has its result reported. Nothing this how-to does is committed, except a question-log entry; the last line of the report says what was changed on the machine, or nothing. If you had to ask a person something this workspace should have answered, log it before the report, as [procedure endings](procedure-endings.md#the-question-log-entry) says. That entry is the one exception to changing nothing until the report is given. A question that comes up while you offer fixes is logged and committed, as that page says, before your last reply.
 
 ## Rules
 
 | Rule | Enforced by |
 |---|---|
-| Change nothing until the report is given. | `prose` |
+| Change nothing until the report is given, except a question-log entry. | `prose` |
 | Run every step in the person's own session; hand nothing off. | `prose` |
 | Offer fixes one at a time, and make one only on the person's yes. | `prose` |
 | A fix to the person's machine is never committed. | `prose` |
 | A workspace bug is reported, not fixed in this run without the person's yes; its fix starts at the size gate. | `prose` |
-| If you had to ask a person something this workspace should have answered, add it to the question log before you report, and commit it as that page says. | `prose` |
+| If you had to ask a person something this workspace should have answered, log it as procedure endings says: before the report, or for a question asked while offering fixes, before your last reply. | `prose` |
 | Mark every claim in the report verified or inferred. | `eval:fix-a-bug` |

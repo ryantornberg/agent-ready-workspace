@@ -1,13 +1,13 @@
 ---
 kind: reference
-last-reviewed: 2026-11-22
+last-reviewed: 2026-11-23
 ---
 
 # Procedure endings
 
 The rules a procedure ends with, stated once, for the agent finishing a playbook or how-to and for anyone writing one.
 
-**In short:** a procedure ends the same way, whatever it did. Get a yes before any write outside the workspace that the request does not name. Log a question the workspace should have answered. Commit what you wrote, staged by name, with a review trailer when a guidance page changed. Push as this page says. Then report, each claim marked verified or inferred. A page links here instead of restating these rules.
+**In short:** a procedure ends the same way, whatever it did. Get a yes before any write outside the workspace that the request does not name. Log a question the workspace should have answered. Commit what you wrote, staged by name, with a review trailer when a guidance page changed. Push as this page says; off main, push nothing for pages. Then report, each claim marked verified or inferred. A page links here instead of restating these rules.
 
 ## The order
 
@@ -39,7 +39,7 @@ Commit every file the procedure wrote, once the work is verified, and the questi
 - **Leave other changes alone.** An uncommitted change you did not make is not yours: do not stage it, revert it or stash it.
 - **Name the review.** A commit that adds, changes or deletes a guidance page carries `Instructions-review: <record>` for each record, or a listed skip reason. [The instruction review](playbooks/instruction-review.md) says which pages are guidance and how to get the record.
 - **Write the subject** as [commits](commits.md) says: a conventional commit by default.
-- **Where the commit goes.** A change of pages only: on main in the main working copy, or on the worktree's branch in a worktree. A change to scripts, parts, hooks or CI: on a branch of its own, as [changing the machinery](changing-the-machinery.md#the-path-for-a-machinery-change) says. A change to code under `src/` or in a pinned repository: on a branch of its own in the repository that holds the code, never on its main. This page holds that rule; [fix a bug](playbooks/fix-a-bug.md)'s step 5 states it too, until it links here.
+- **Where the commit goes.** A change of pages only: on main in the main working copy, or on the worktree's branch in a worktree. [Off main](#off-main), on the branch checked out. A change to scripts, parts, hooks or CI: on a branch of its own, as [changing the machinery](changing-the-machinery.md#the-path-for-a-machinery-change) says. A change to code under `src/` or in a pinned repository: on a branch of its own in the repository that holds the code, never on its main. This page holds that rule; [fix a bug](playbooks/fix-a-bug.md)'s step 5 states it too, until it links here.
 
 If the commit is refused, read the refusal, fix what it names, and commit again. If it is still refused, leave the files uncommitted and name each in the report with the refusal.
 
@@ -56,10 +56,11 @@ If you had to ask a person something this workspace should have answered, add a 
 
 ## The push
 
-Push the commits of step 3. First run `git fetch origin`. Main has moved when `git merge-base --is-ancestor origin/main HEAD` exits with 1.
+Push the commits of step 3. First run `git fetch origin`. Then check whether you are [off main](#off-main): if you are, the table's first row applies and no other. Main has moved when `git merge-base --is-ancestor origin/main HEAD` exits with 1.
 
 | What you committed | What you push | Who pushes |
 |---|---|---|
+| Pages, [off main](#off-main) | Nothing. The commits stay on the branch, for its pull request. | Nobody: the report names each commit left on the branch. |
 | Pages only, in the main working copy | `git push origin main`, or, if main has moved, as [the next section](#when-main-has-moved) says | In this repository, the agent. In a team's workspace, a person: leave the commits unpushed and say so in the report. |
 | Pages only, in a worktree | `git push origin HEAD:main`, after `git pull --rebase origin main` if main has moved | As above. |
 | Machinery, on its own branch | The branch, then a draft pull request | As [changing the machinery](changing-the-machinery.md#the-path-for-a-machinery-change) says: in this repository the agent publishes and merges once CI passes on Linux, macOS and Windows; in a team's workspace, a person does. |
@@ -68,6 +69,19 @@ Push the commits of step 3. First run `git fetch origin`. Main has moved when `g
 A push is done when, after `git fetch origin`, `git rev-parse HEAD` in the copy you pushed from prints the same commit as the branch you pushed to, such as `git rev-parse origin/main`.
 
 If the push is refused, read why. The pre-push hook names a commit and its reason: fix it and push again, once. The remote's rejection as not a fast-forward means the branch moved after your fetch: fetch again, follow the table's row for a moved main, and push again, once. If it is still refused, leave the commits unpushed and name them in the report.
+
+### Off main
+
+Off main, push nothing for pages. You are off main when the branch checked out is not `main`, unless it is a worktree's branch made for pages alone, as the contract sends you to when another session holds the main working copy. A fix's, a feature's, a machinery change's or a pull request's branch is off main, in the main working copy or in a worktree. A push of pages from there would carry the branch's other work to main ahead of its pull request and its review.
+
+In a worktree made for pages, check before any push: run `git log --format='%h %s' origin/main..HEAD`. It lists each commit the push would carry. If one is not a page commit made for this worktree's work, such as a code or machinery commit, your own included, or one you cannot account for, you are off main.
+
+Off main:
+
+- Push nothing. Leave the page commits, the question-log row among them, on the branch checked out.
+- Name each one in the report. Say that it reaches main only if the branch is pushed again before its pull request merges; until then it is on this copy alone.
+
+This holds for every page commit the procedure makes, including one made by a procedure it calls. It narrows [changing the machinery](changing-the-machinery.md)'s rule that a page change goes straight to main: it does, from main or from a worktree made for pages.
 
 ### When main has moved
 
@@ -101,6 +115,7 @@ Then name what is not done: anything left uncommitted or unpushed, any refusal f
 | A commit that changes a machinery path reaches main only through a pull request. | `direct_push#a commit that changes a part fails, naming the commit and the path` |
 | Mark every claim in a report as verified or inferred. | `eval:fix-a-bug` |
 | Ask before an outward write the request does not name, and write nothing on a repository outside this one and those pinned under `src/`. | `prose` |
+| Off main, push nothing for pages; the commits stay on the branch for its pull request, and the report names each. | `prose` |
 | Log a question the workspace should have answered, and commit the entry before the report, unless the log holds uncommitted rows you did not add; then give its text in the report. | `prose` |
 | A refused step does not skip the report; the report names the refusal. | `prose` |
 | An uncommitted change you did not make is left alone: not staged, not reverted, not stashed. | `prose` |

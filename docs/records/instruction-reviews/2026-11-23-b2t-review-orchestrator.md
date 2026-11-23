@@ -1,0 +1,86 @@
+---
+kind: record
+last-reviewed: 2026-11-23
+covers: docs/playbooks/review-orchestrator.md
+reviewed-at: 18eccc5, with the uncommitted change of the B2t builder
+---
+
+# Instruction review: docs/playbooks/review-orchestrator.md
+
+This records the instruction review of B2t's change to the review orchestrator, for its author and for any agent recording a review.
+
+**In short:** 5 findings, 1 of them blocking: 1 contradiction, 2 step, 1 enforcement, 1 placement. The blocking one: the new paragraph after step 11 links procedure endings again and keeps a question-log row uncommitted so that no push carries the reviewed branch to main, while step 10 commits the plan on that same branch, which procedure endings' push for pages then carries to main from a worktree.
+
+## Scope
+
+In scope: the changed text, which is the red team review row of "Which page wins", step 1's path note, step 8's `fix`-path sentences, step 11's guard text, the new paragraph on "nothing is committed" and the question log, the dispatch template's `<path>` and `The path:` line, and the three changed or new rules rows; and anything on the page, or a page it links to, that the change contradicts or leaves stale.
+
+Read: the page whole; `git diff fad9f23` of it; `AGENTS.md`, `CLAUDE.md`, `INDEX.md`; `docs/procedure-endings.md`; `docs/definition-of-done.md`; `docs/orchestration.md`'s "Fresh context for critics" and "Limits"; `docs/playbooks/fix-a-bug.md`; the `outward_write` and `outward_list` rows of `docs/parts.md`; `outward-repos.json`; decision 0004's "The list"; `parts/outward_write.cases.json`'s case names; `parts/rules.py`'s docstring; architecture review, escape analysis, red team review, git-host operations' guard rows, `docs/review-in-a-worktree.md`, the question log's "Adding an entry", `workspace.json`'s `direct_push` entry, the record `2026-11-22-b3-review-orchestrator.md`'s "Re-check after the revert", and the M3 plan's "Changes after approval" of 2026-11-22 and 2026-11-23 with B3's results. Ran `python3 ws.py check` in the worktree: it passes, with only the known warning on fix a bug's eval record, so the new anchors resolve and the `outward_write#...` tag names a real case. In a scratch repository with a local bare remote, ran `git push origin HEAD:main` from a worktree on a task branch holding a code commit and a plan commit.
+
+## Findings
+
+| # | Class | Where | Finding | Disposition |
+|---|---|---|---|---|
+| 1 | contradiction | The paragraph after step 11; Steps, step 10, the plan bullet | Blocking. Step 10 commits the plan on whatever branch the session has checked out, and on your own branch step 3 reads the tip where you work, so that is the reviewed branch. The new paragraph links procedure endings' question-log entry, whose section commits the row "in the next step" of procedure endings' order; that order commits every file the procedure wrote and then pushes, and for pages only, in a worktree, gives `git push origin HEAD:main`. The paragraph leaves the row uncommitted "so no push of the row carries the branch's code to main", but the plan commit from step 10 is a commit of the same procedure on the same branch, and gets no such exception. The push then carries the reviewed branch's unmerged code to main, against procedure endings' "never on its main" for code and the contract's draft pull request rule; `direct_push` stops it only for machinery paths, and in this sample `src/` is checked in. The record of B3's revert upheld the earlier blocking item on this push as withdrawn because "the page no longer links procedure endings at all"; this change links it again. Verified: the texts, that record, `workspace.json`'s `direct_push` list, and in the scratch repository the push exited 0 and moved the remote's main to include the code commit. Inferred: that an agent sent into procedure endings for a question runs its order through the push. Q41 left where a review commits on a branch for M4, so whether to say the review pushes nothing or to widen the exception is the plan owner's choice. | fixed: off `main`, the review pushes nothing; step 10's plan commit and the log row reach main with the branch's pull request. A rules row holds it. |
+| 2 | step | Steps, step 8 and step 10 | Not blocking. Step 8 says only what happens to the architecture reply's alternative on the `fix` path: never a row, a follow-up note in the report. On any other path the page gives it no place. The qualifier implies it is a row there, but no step says so or gives it a severity or kind, and step 10's record holds only the heading, range, patch id, dimension lines and table, so the alternative and both closing lines are dropped. Step 10's report list, decision rows, security and architecture rows, counts, and dimensions not complete, also does not name the `fix`-path follow-up note that step 8 sends to the report. Verified: the texts of steps 7, 8 and 10 and architecture review's "The reply". | fixed: step 8 places the alternative on every path, and step 10's report names it. |
+| 3 | step | Steps, steps 1, 5 and 6; The dispatch template | Not blocking. Step 1 notes the path with the default "`fix` when the request is a bug report and there is no plan", but the request is read only in step 5. Step 1's Output names only the tip and base, and step 6's Input list omits the path, while the template's lead-in says `<path>` comes "from step 1". An agent can still fill it, but by reading ahead. Verified: the texts. | fixed: the path is named in step 5, after the request, and is in its Output and step 6's Input. |
+| 4 | enforcement | Rules, the post row; Steps, step 11 | Not blocking. The row cites `outward_write#gh pr review on a repository outside the list is refused` for "never on one outside this repository and the repositories it pins". The guard enforces a different set, the instance's list in `outward-repos.json`. Here that list holds only this repository, so the guard also refuses a post on a pinned repository, which step 11 says to make with `-R OWNER/REPO`; in a team's workspace the list may hold a repository that is not pinned, which the rule forbids and the guard allows. Step 11's text says "outside the instance's list" correctly; the row's claim is the part that overstates. Git-host operations' post row has the same shape. Not blocking, since step 11 already says a refused post goes to the report. Verified: `outward-repos.json`, decision 0004's "The list", the case name, and git-host operations' rules row. | fixed: the row says the guard refuses a pinned repository until a person lists it. |
+| 5 | placement | The paragraph after step 11 | Not blocking. The question-log exception to procedure endings is stated here and again in architecture review's step 9, in two wordings, "when the copy you work in has the reviewed branch checked out" here and "while the reviewed branch is checked out" there. It is a rule about procedure endings' question-log entry that any procedure ending on an unmerged branch meets, so it belongs once on that page, linked from both. The new rules row restates it a third time. Verified: the texts. | declined: the one place for it is procedure endings, which this slice's row does not edit and which has had its two fix rounds; where a review commits on a branch is M4's, as the plan's entry for Q41 says. |
+
+## Checked with no finding
+
+- trigger: the purpose line, the **In short** line and the catalog row still fit; "Which page wins" now sends a plan or requirements document to red team review, which exists at `docs/playbooks/red-team-review.md`; escape analysis's row still routes by its unchanged file name. Verified.
+- eval-case: the page is `proof: unproven` with `prove-by: M6`, so the `fix`-path behavior and the question-log exception need no eval case yet. Verified: the front matter.
+
+## Re-check
+
+A fresh session re-read the page on 2026-11-23 after B2t's fix round, with `git diff fad9f23`, procedure endings, changing the machinery, the contract, `outward-repos.json`, the `outward_write` case names, the M3 plan's Q41 entry, and the other five pages of this batch that share the off-`main` rule: architecture review, defect escape analysis, git-host operations, tracker operations and federated search. `python3 ws.py check` passes, with only the known warning on fix a bug's eval record.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | holds | The paragraph after step 11 now pushes as procedure endings says only when `main` is checked out. On any other branch it pushes nothing, labelled "By exception to that page", and it names step 10's plan commit as well as the log row. So procedure endings' `git push origin HEAD:main` is never reached from the reviewed branch. The last rules row holds it. Verified: the text. The wording matches architecture review's step 9 word for word. Verified. |
+| 2 | holds in part | Step 8 now places the alternative on every path: never a row, in the report, a follow-up note on the `fix` path and a proposal otherwise. Step 10's report list names it. A new rules row holds both. Verified: the text. Still open: step 10's record holds only the heading, range, patch id, dimension lines and table. So the architecture reply's `Invariants checked:` line, and the alternative, are still kept in no record, only in the report. Not blocking. Verified: step 10's text. |
+| 3 | holds | Step 5 now names the path after it reads the request, with its default. Its Output lists the path, step 6's Input lists it, and the template's lead-in says `<path>` comes "from step 5". Verified: the text. |
+| 4 | holds | The post row now says the guard refuses a post on any repository not in `outward-repos.json`, so a pinned repository is refused until a person lists it. The tag `outward_write#gh pr review on a repository outside the list is refused` names a real case. Verified: the row, the case names, and `outward-repos.json`, which lists only this repository. |
+| 5 | accepted | Same reason as architecture review's finding 3: the one place for the rule is procedure endings, which B2t's row does not edit, and Q41 leaves where a review commits on a branch for M4. Verified: the M3 plan's Q41 entry. The two wordings the finding named are now one wording on both pages. Verified. |
+
+Broke:
+
+- Not blocking. The paragraph after step 11 says step 10's plan commit and the log row "reach main with its pull request". That holds only when the checked-out branch has an open pull request. It fails on someone else's pull request reviewed from a session's own pages-only worktree branch, which has no pull request, and on a branch whose pull request has merged. There the commits stay on the branch. The report names each commit left unpushed, so nothing is lost silently. Verified: the texts of the paragraph, step 3 and procedure endings' "The push". Inferred: that a review runs in such a branch.
+
+Missed:
+
+- none.
+
+## Second fix round
+
+The builder's second fix round, on 2026-11-23, under the maintainer's answer to Q42 in the workspace queue, recorded in the M3 plan. Procedure endings gained one rule, under "Off main": a procedure pushes nothing for pages when the branch checked out holds work other than its own pages, and the commits reach main with the branch's pull request. Its own review is in `2026-11-23-b2t-procedure-endings.md`. The non-blocking items of the re-check are not fixed in this round; each goes to "Known defects".
+
+| Item | Disposition |
+|---|---|
+| Second fix round: the paragraph after step 11 and the rules row labelled the off-main rule an exception to procedure endings | changed: that page now holds the rule, so both link it instead of labelling an exception. The paragraph names the case: on a branch of the work it reviews. |
+| Re-check, broke, not blocking: on a pages-only worktree branch or a merged branch, the commits never reach main | fixed in part: a pages-only worktree reviewing someone else's pull request holds only its own page commits, so it is not off main and pushes as procedure endings' table says. A merged branch is a known defect, for M6. |
+
+## Second re-check
+
+A fresh driver-tier session re-checked the second fix round on 2026-11-23, narrowly. It read the contract, the instruction review's "The record", the M3 plan's Q42 entry and lane B's stop rule, `git diff HEAD` of the six pages, procedure endings and the six records, and procedure endings' "The order", "The commit", "The question-log entry", "The push" and its new "Off main". `python3 ws.py check` exits 0, with only the known warning on fix a bug's eval record. In a scratch repository with a local bare remote, `git log --format='%h %s' origin/main..HEAD` listed the code commit on a fix branch holding a code commit and then a page commit, so the test finds it off main. On a pages-only worktree it listed only the page commit, and `git push origin HEAD:main` from there put no code on the remote's main. On a fix branch with no code commit yet, it listed only the page commit. The record the round names for procedure endings, `2026-11-23-b2t-procedure-endings.md`, is not yet in the worktree (verified, `ls`); that rule is a separate reviewer's.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Second fix round: the paragraph after step 11 and the rules row labelled the off-main rule an exception to procedure endings | upheld | The paragraph now pushes "as procedure endings says" and, on a branch of the work it reviews, calls the review off main and pushes nothing, linking `#off-main`; the rules row says "as procedure endings says". No "By exception" is left. Step 10's plan commit and the log row are named, and neither is pushed from that branch. Its wording matches architecture review's step 9. Verified: the texts; the anchor resolves and `ws.py check` passes. |
+| Re-check, broke, not blocking: on a pages-only worktree branch or a merged branch, the commits never reach main | upheld | On someone else's pull request, step 10 commits nothing in this repository, and the session starts in the main working copy with the pull request in a detached review worktree that it edits nothing in. So the only commit is the log row, made where the session works: main, or a pages-only worktree of its own, which procedure endings says is not off main. In the scratch test such a worktree's push put no code on main. The merged branch is in "Known defects" for M6, the page's `prove-by`. Verified: the texts of steps 3 and 10 and of review in a worktree. |
+
+Broke:
+
+- none.
+
+Missed:
+
+- none.
+
+## Known defects
+
+The plan allows the page no further fix round, so the re-check's non-blocking items stay here.
+
+- Re-check, broke: on a branch whose pull request has merged, step 10's plan commit and the log row stay on the branch; the report names each. For M6.
+- Procedure endings' re-check: this page still says its commits reach main with the branch's pull request, without procedure endings' "only if the branch is pushed again before it merges". For M6.

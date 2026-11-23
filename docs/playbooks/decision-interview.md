@@ -2,7 +2,7 @@
 kind: playbook
 proof: unproven
 prove-by: M9
-last-reviewed: 2026-11-21
+last-reviewed: 2026-11-23
 ---
 
 # Decision interview
@@ -30,7 +30,7 @@ Run it in the session the person talks to: it is a conversation, so it is never 
 7. **Sharpen the terms.** Input: the answer, and any word in it that is vague or used two ways. Propose one meaning and ask the person to confirm it. On a yes, write it at once, as "Where a term goes" below says. Output: the word defined, or the question of its meaning listed as open.
 8. **Offer a decision record.** Input: a decision just made. Offer a record only when all three conditions under "When a decision gets a record" hold. Write it only on a yes. Output: a record with `status: proposed`, or nothing. Then go back to step 4 for the next question on the list; when none is left, go to step 9.
 9. **End the interview** when every question on the list is answered or listed as open, or when the person stops it. Write the summary below. Output: the summary, written where "The summary" says.
-10. **Finish.** Input: the summary, and the glossary rows and decision records you wrote. If you wrote any, run the [instruction review](instruction-review.md) on them, as its steps say, and commit them with the plan, staged by name, naming the review's record in the trailer. With none, commit the plan alone. Log any question you had to ask a person that the workspace should have answered, as "The question log" below says, and commit it as [the log's page](../question-log.md) says. Report the summary's next step and any row that waits for an eval run, with each claim marked verified or inferred, as the contract says. Output: the commit and the report. Stop.
+10. **Finish.** Input: the summary, and the glossary rows and decision records you wrote. If you wrote any, run the [instruction review](instruction-review.md) on them, as its steps say, and commit them with the plan, staged by name, naming the review's record in the trailer. With none, commit the plan alone. Then end as [procedure endings](../procedure-endings.md) says: log any question you had to ask a person that the workspace should have answered, as "The question log" below says, and commit the row; push the commits, or leave them for the person where that page says a person pushes; and report the summary's next step and any row that waits for an eval run. Output: the commits, pushed as that page says, and the report. Stop.
 
 ## Where a term goes
 
@@ -66,7 +66,7 @@ Write it in the draft hand-off plan for the work, in two places, since "Settled 
 
 ## The question log
 
-Design questions are what the interview is for; they are not workspace failures. But a question of fact that you had to ask the person, and that the workspace should have answered, goes in the [question log](../question-log.md) before you finish, as the contract says. An example is which service is the live one. An open question that nobody answered is not logged there: it stays in the summary.
+Design questions are what the interview is for; they are not workspace failures. But a question of fact that you had to ask the person, and that the workspace should have answered, goes in the [question log](../question-log.md) before you report, as [procedure endings](../procedure-endings.md#the-question-log-entry) says. An example is which service is the live one. An open question that nobody answered is not logged there: it stays in the summary.
 
 ## Rules
 
@@ -80,4 +80,4 @@ Design questions are what the interview is for; they are not workspace failures.
 | A glossary row or decision record is committed with an instruction review. | `review_trailer#a guidance page changed with no trailer fails` |
 | The interview ends with a dated summary in the work's hand-off plan, its decisions under "Settled decisions" and its open questions outside it. | `prose` |
 | The glossary rows and decision records it wrote are reviewed and committed before it stops. | `prose` |
-| A question of fact the workspace should have answered goes in the question log before you finish. | `prose` |
+| A question of fact the workspace should have answered goes in the question log before you report, committed and pushed as procedure endings says. | `prose` |
