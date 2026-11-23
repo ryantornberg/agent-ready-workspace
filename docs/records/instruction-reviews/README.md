@@ -123,3 +123,4 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-c5f-agent-settings.md](2026-11-22-c5f-agent-settings.md) | `docs/agent-settings.md` | contradiction, enforcement, trigger |
 | [2026-11-22-c5f-decision-0004.md](2026-11-22-c5f-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
 | [2026-11-22-c5f-parts.md](2026-11-22-c5f-parts.md) | `docs/parts.md` | enforcement, contradiction |
+| [2026-11-22-c6-readme.md](2026-11-22-c6-readme.md) | `README.md` | contradiction, enforcement, placement |
