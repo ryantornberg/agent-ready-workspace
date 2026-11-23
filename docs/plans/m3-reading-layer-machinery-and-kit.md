@@ -853,6 +853,14 @@ Slice B3 stopped again under lane B's stop rule: the re-check of batches 1 and 2
 
 Approved by: the maintainer, 2026-11-23
 
+Slice B3 stopped a third time under lane B's stop rule: the second re-check found 3 blocking items, all in a commit or push step one page hands to another. The maintainer's answer to Q41 in the workspace queue settles how B3 finishes. It narrows three of B3's page edits; no criterion is dropped or weakened.
+
+**B3 reverts the commit steps, then merges (Q41).** The review orchestrator, escape analysis and handoff go back to main's wording for where and how they commit and push. Only their stale pointers to B3's new pages change. The orchestrator's step 2 clause, which counted a plan-only commit as reviewed, is removed. The fix record template loses its escape analysis section. One narrow fresh re-check of those pages follows, then the pull request. Where a review commits on a branch stays unsettled, for M4.
+
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
 A new slice, PSFIX, from the defect C5f found after its merge, and the order of lane C after C6. PSFIX has no row in the slice tables; this entry is its scope. The maintainer's answers to round 7 of the workspace queue settle both. No criterion is dropped or weakened.
 
 **Lane C runs PSFIX, then C8, then C9,** at the tiers the plan's rows name. PSFIX is driver tier.
@@ -1314,7 +1322,7 @@ Fixed: secrets_shell refused any command whose raw text held the name of PowerSh
 - **Inferred:** the macOS 3.13 rows are runner noise, not the fix. The new code runs only on a line that holds the name, which no timed case does, and main's last runs put the same rows anywhere from 79 to 151 ms.
 - **Verified, impact check:** `decide` is called by the runner's before-shell path, by `ws.py selftest` and the hook case runner through both tools' wiring (`tests/hooks/before-shell.json`, five secrets rows, all passing), by `tests/test_secrets.py` and by `tests/test_not_inherited.py`, which uses the secrets-file row; all pass. The fix reads `shell.parse` and `secretrules.SHELLS` and changes neither. `_child_refusal` and the file and dump checks are unchanged.
 - **Inferred, stated limits:** the name is still refused where it is a plain word of a command that does not run it, such as `echo` or a `grep` pattern for the name, and in a message body whose quoting the line spells differently from the parsed text, such as escaped quotes inside double quotes. Both refuse too much, never too little. A heredoc fed to any shell keeps its text, so the name in a `bash` heredoc's text is refused.
-- No fix round: the cases passed on the first run of the fix, and CI on its first run. Main moved during CI, so the branch merged main once; the milestone record's table was the one conflict. No instruction review: the slice changed no guidance page. No private ledger row maps to PSFIX, which has no plan row, so none moved (verified, a search of the ledger; its check prints 0 unmapped). No question was queued.
+- No fix round: the cases passed on the first run of the fix, and CI on its first run. Main moved twice during CI, so the branch merged main twice; the milestone record's table and the plan's "Changes after approval" were the conflicts. No instruction review: the slice changed no guidance page. No private ledger row maps to PSFIX, which has no plan row, so none moved (verified, a search of the ledger; its check prints 0 unmapped). No question was queued.
 - **Verified, a side finding, queued for slice Z below:** `docs/agent-settings.md`'s dump bullet and the `secrets_shell` row of `docs/parts.md` name PowerShell's `env:` drive but not the method, which C5f's hook already refused.
 
 Decisions made in the slice:
