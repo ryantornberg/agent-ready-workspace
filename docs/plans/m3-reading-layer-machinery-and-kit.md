@@ -1443,6 +1443,32 @@ Not done: nothing
 Parked: none
 Next: coordinator — merge pull request #47 once CI passes on its head, then build slice C9; slice Z takes the two index rows queued below; M5 takes the kill rules' quarterly count onto maintain the workspace's duties and the six synced pages' eval-run sentences.
 
+### C9, the two-session demonstration
+
+Pull request #49, on branch `m3/c9` from main at `ac636b9`, at the driver tier. The maintainer's approvals page names C9 only in lane C's order, which the entry of 2026-11-23 under "Changes after approval" already records, so no entry was added. This entry is committed on the branch, and the branch merges by `python3 ws.py merge 49` once CI passes on its head. No file the eval hashes was edited, and no guidance page, so no instruction review was needed (verified: `eval_record` passes, and `python3 evals/grade.py --recorded` finds no difference).
+
+- **Verified, criterion 48, the run:** two headless Claude Code 2.1.330 sessions, on the small model, were started by one script on the main working copy of a scratch clone of main at `ac636b9`. Both session-start hooks fired at the same recorded moment. The clone's remote was a local bare repository. Session A's edit took the lease. Session B's edit in the main copy, 1.7 seconds later, was refused by `lease`, which named A's session and the worktree command. B ran `git worktree add --no-track -b session-b-orders-note .claude/worktrees/session-b-orders-note origin/main`, edited there, committed, and pushed `HEAD:main`. That push was rejected because A had pushed first. B rebased in its worktree and pushed again. The scratch remote's main holds A's commit, then B's, and each commit holds only its own session's file. A's session end released the lease.
+- **Verified, the records:** `tests/records/two-sessions.json` holds each session's tool calls and what it was shown, its final reply, every payload a capture hook saw with its time, and the scratch remote's main afterwards. Paths are redacted.
+- **Verified, the replay test:** `tests/test_two_sessions.py`. Six tests read the record. Three replay its 13 edit and shell calls and both session ends through the real runner, in recorded order, in a scratch clone with a bare remote. A live process plays each session's Claude Code process, and the test does each call's git step, so the next call meets the same state. Every decision matches what the session was shown. Two negative controls: with the holder's process dead, the refused edit takes the lease over; and B's push, made from the main copy instead, is refused by `push_lease`. Marking the refused edit as allowed in the loaded record fails the replay, and so does marking an allowed one as refused (verified, both run).
+- **Verified, nothing reached this repository's main:** the scratch clone's remote was the bare repository's local path, as the recorded `git remote -v` shows. After the run, `git ls-remote origin` here still gave main at `ac636b9`. A test checks that neither scratch commit exists in this repository.
+- **Verified, a stated limit:** the scratch clone had no `core.hooksPath`. The guards refused this session's `git config core.hooksPath .githooks` there, and the README makes that a person's step. So the git hooks did not run in the demonstration: no commit check, no pre-push check, and no post-commit hook to clear the edit ledgers. The hooks the agent tool runs did: the lease, the shell guards, the session hooks and the stop gate. That neither commit holds the other's files is shown by the remote's commits, not by the commit check. A person can rerun it with the hooks installed.
+- **Verified, a side finding:** Claude Code itself blocks a foreground `sleep 60`. Each session ran it in the background and waited, as that block's message says. The block is the tool's, not this workspace's.
+- **Inferred:** the prompt's one-minute sleep makes the refusal certain rather than a race. Without it, the holder could commit and push before the other's first edit. The lease would then pass by state, as decision 0005 allows. The two prompts differ only in file, line and subject, so either session could have held the lease.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` (772 tests, 3 skipped) pass locally; `python3 tests/hook_cases.py` passes 93 of 93. The private ledger's check prints 0 unmapped.
+- No fix round. The run cost about two cents of model use, 22 turns in all. One question was queued, Q44, on main's red CI: the scheduled run of 2026-11-23 failed only the `git push` row's timing on macOS with Python 3.9, 214 ms against 200, with all 93 cases passing. No private ledger row maps to C9, so none moved (verified, a search of the ledger).
+
+Decisions made in the slice:
+
+- **The small model,** as the earlier recorded runs used. It also tests whether the refusal's text alone gets the cheapest model to a worktree. It did, at the first try.
+- **Permission prompts off in the sessions,** so a headless permission refusal could not stand in for a hook's. The hooks still ran, and the lease still refused.
+- **No way around the missing git hooks.** Passing `-c core.hooksPath` in the prompts would change what the agents do, and writing the config another way is what the guard refuses.
+- **The replay plays each session's process with a live process of its own,** since the recorded process ids are gone. Each call's git step is done by the test, keyed on the recorded command.
+- **No CHANGELOG entry,** as slices C1 to C8.
+
+Not done: nothing
+Parked: Q44
+Next: coordinator — merge pull request #49 once CI passes on its head; the maintainer answers Q44 on main's red CI; slice Z and the sign-off take the demonstration's EVIDENCE.md row.
+
 ### Sub-batch A, 2026-11-18
 
 Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
