@@ -841,6 +841,14 @@ One item for slice C5e, from the maintainer's answer to Q20 in the workspace que
 
 **The lease and discard refusals point to a worktree made from the remote's main (Q20).** Slice C5d's push guard tells a session to start its worktree from `origin/main` with `--no-track`, so the worktree holds none of the lease holder's commits. The refusals of the `lease` hook and of `no_discard` still advise a worktree made from the main copy's HEAD, which may hold them. Both change to the push guard's advice: `git worktree add --no-track -b BRANCH .claude/worktrees/NAME origin/main`. The two message edits and their cases join C5e's pull request.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+Slice B3 stopped again under lane B's stop rule: the re-check of batches 1 and 2 found 9 blocking breaks that the fix round made. The maintainer's answer to Q35 in the workspace queue settles how it resumes. It narrows two of B3's pages; no criterion is dropped or weakened.
+
+**B3 cuts back, then takes one more fix round (Q35).** The rule the fix round added, that a review record or a kept handoff note about a branch is committed on main from a throwaway worktree, is removed. A review round's result goes in the plan's Results or the pull request description. A kept handoff note waits for M4. The bug report template files an issue only where the outward-write rule allows. Then one fix round on the 9 blocking breaks, and a fresh re-check, under lane B's stop rule as it stands. This is the batches' second fix round, which the stop rule's limit of two allows.
+
 ## Results
 
 ### C1, launcher and baselines
