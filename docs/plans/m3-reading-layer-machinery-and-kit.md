@@ -883,6 +883,16 @@ One item for slice B2t, from the maintainer's answer to Q31 in the workspace que
 
 **B2t updates the guard lines C5e left stale (Q31).** Three B2 pages still say the outward-write guard is planned in slice C5e, which has since built it: the review orchestrator's step 11, and the guard rows of tracker operations and git-host operations. B2t corrects the three in its fix round, under the instruction review it already runs.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+A new slice, KILLFIX, from main's red CI after B3's second resume: C6's kill test failed once on macOS with Python 3.9, and the maintainer had the failed job rerun. KILLFIX has no row in the slice tables; this entry is its scope. No criterion is dropped or weakened.
+
+**Lane C runs KILLFIX after PSFIX, then C8,** at the driver tier.
+
+**C6's kill test measures the check's run time instead of assuming it.** `test_a_killed_commit_check_leaves_nothing_behind` times one whole run of the commit check and places every kill point as a fraction of that one sample. When the sample runs slow, a later point falls after the check has ended, and the test fails though the check left nothing behind. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, so that a kill point never falls after the check has ended. KILLFIX is done when the test holds under a slow sample that fails it today, and its report is under "Results".
+
 ## Results
 
 ### C1, launcher and baselines
@@ -1344,6 +1354,35 @@ Not done: nothing
 Parked: none
 Next: coordinator — build slice KILLFIX, which the maintainer put after PSFIX in lane C, then C8; slice Z takes the agent-settings and parts item queued below.
 
+### KILLFIX, the kill test's timing
+
+Pull request #45, on branch `m3/killfix` from main at `713fe88`, at the driver tier, following the fix-a-bug playbook. The maintainer's approval is recorded under "Changes after approval" as an entry of 2026-11-23, committed on the branch before the fix. This entry is committed on the branch, and the branch merges by `python3 ws.py merge 45` once CI passes on its head. It touches no file the eval hashes and no guidance page.
+
+```
+Fixed: C6's kill test placed its kill points by one timed run of the commit check, so a slow sample put a point after the check had ended; it now measures the run time and never kills a check that has already ended.
+```
+
+- **Verified, the failure on main:** attempt 1 of CI run 45174839367, on `df370a8`, failed only the macOS job with Python 3.9, at point 0.6: "the check ended before it was killed, so this kill tested nothing". The rerun passed.
+- **Verified, the cause, reproduced before the fix:** a scratch copy of the pre-commit hook that sleeps one second on its second run, the one main's test times, made main's test fail at point 0.6 with the same message. The test timed one whole run and placed every point as a fraction of that one sample.
+- **Verified, the fix:** `tests/test_not_inherited.py` now takes the run time as the shortest of three whole runs, each started exactly as a killed run is. `kill_inside` polls the run up to its kill point. A run that ends first is timed, its time becomes the new shortest, and the point is tried again on a new run, up to three times. Every point, not only those up to 0.6, must now kill a running check. The checks of the working copy, the git folder, the temporary folder and the worktree list are unchanged.
+- **Verified, the fix holds under a slow sample:** with the same scratch hook, the fixed test passes with the second run slowed, and with all three measured runs slowed, where it took one retry. Ten plain runs in a row passed, and five under eight busy processes.
+- **Verified, test first for the helper:** two new unit tests in `KillInsideTests`. A run of 0.4 seconds measured as 3 is killed while running on the second try, and a long run is killed on the first.
+- **Verified, the test still bites:** a scratch hook that holds a lock file while the check runs, and removes it at the end, failed the test from the first point.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` (735 tests, 3 skipped) pass locally; `python3 tests/hook_cases.py` passes 93 of 93; `python3 evals/grade.py --recorded` finds no difference. CI passed all five check jobs on `2565c8e`, on Linux, macOS and Windows.
+- **Verified, impact check:** `kill_inside`, `start_check`, `run_time` and `sleeper` are new and used only in this test file. `kill_tree` and `listing` are unchanged, and only this file calls them.
+- **Inferred, stated limit:** the test can still fail if three runs in a row each end before their point, each faster than the one before. That needs the check to speed up sharply within one test, and it would then say so, with the three run times.
+- No fix round. Main moved during the slice, so the branch merged main once; the plan's "Changes after approval" was the one conflict. No instruction review: the slice changed no guidance page. No private ledger row maps to KILLFIX, which has no plan row, so none moved (verified, a search of the ledger; its check prints 0 unmapped). No question was queued.
+
+Decisions made in the slice:
+
+- **Measure and correct, not widen the margin.** Moving the asserted points lower, or timing more runs, would only make the flake rarer. Timing the run that ended early gives a real run time, so the next try's point falls inside the run.
+- **Every point must now kill a running check.** The old test let points 0.75 and 0.9 test nothing in silence. With retries, all seven points are real kills.
+- **No CHANGELOG entry,** as slices C1 to PSFIX.
+
+Not done: nothing
+Parked: none
+Next: coordinator — merge pull request #45 once CI passes on its head, then build slice C8, the next slice of lane C.
+
 ### Sub-batch A, 2026-11-18
 
 Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
@@ -1735,6 +1774,59 @@ Decisions made in this resume:
 Not done: nothing
 Parked: none
 Next: the coordinator — start slice B2t, which lane B runs after B3, with Q31's answer on the three B2 pages that still call the outward-write guard planned.
+
+### B2t, the tutorials and B2's open items
+
+Built unattended on 2026-11-23, at the worker tier, with every review at the driver tier, in the worktree `.claude/worktrees/m3-b2t`, since another session held the main working copy. The maintainer's answer to Q31 was recorded under "Changes after approval" as `fad9f23` before any page changed. The slice's own session made the pages and the fix round; six fresh driver-tier sessions reviewed and three re-checked. No file the eval hashes was edited. The slice stopped under lane B's stop rule: its re-check found four blocking items. The pages and records are on branch `m3/b2t`, pushed as `ee36e60`, and are not on main.
+
+- **Verified, built:** get oriented, `docs/tutorials/get-oriented.md`, and your first agent task, `docs/tutorials/first-agent-task.md`, on branch `m3/b2t`. Each block a reader runs is marked runnable, and uses only `python3` through the clone's launcher, git, and tools Git for Windows ships. The first walks through setup, three lookups, the checks, a guard's reminder and refusal, and a broken link the check catches. The second runs a research question and a one-row change with an agent on a practice branch it then deletes. The how-to index routes to both.
+- **Verified, criterion 20 on macOS only:** on the branch, `tests/test_tutorials.py` ran both tutorials' blocks in a fresh clone and passed, inside `python3 -m unittest discover -b tests`: 733 tests, 3 skipped, OK. Linux and Windows have not run them, since no pull request is open; the push check runs them only on a push to main.
+- **Verified, the names pass:** every page B2 wrote and the instruction review was read for its title and purpose line. Adversarial review moved to red team review, `docs/playbooks/red-team-review.md`, in a link-only commit, `18eccc5`, and every link followed. Escape analysis is titled defect escape analysis, and search every source federated search, the standard terms; their paths stay. Debugging's purpose line covers a bug report, a failing test or CI run, and a flaky test, and its steps gained a loop for a flaky failure. The other titles and purpose lines stand, since each is already the standard term or states its real scope.
+- **Verified, the review path:** on the `fix` path, architecture review's alternative is a follow-up note for the person, never a finding, and its symptom rule stays a finding on every path. The review orchestrator names the path in step 5, sends it to each dimension and keeps the alternative out of its findings table.
+- **Verified, References:** red team review credits the UK Ministry of Defence's Red Teaming Handbook, and debugging credits the chapter "Introduction to Debugging" of Andreas Zeller's *The Debugging Book*. The builder read both, and the reviewers opened both.
+- **Verified, Q31:** the guard rows of tracker operations and git-host operations, and the review orchestrator's step 11, now say the outward-write guard is built and what it refuses.
+- **Verified, the 18 open items:** 13 were fixed in this round, on adopt, extend, git-host operations (2), tracker operations, federated search (2), the machine self-check (2), the docs audit and the decision interview (2), and the review orchestrator's committing lines. Five were already fixed by B3's procedure endings, verified by reading: the question log's four defects and handoff's step 2. Each edited page links [procedure endings](../procedure-endings.md).
+- **Verified, the review, per page:** 65 findings in 18 records, 11 of them blocking. One fix round fixed 60, including all 11 blocking; 2 were declined, 2 are known defects and 1 is queued for slice Z.
+
+| Page | Findings | Blocking | Fixed | Not fixed | Blocking, at the re-check |
+|---|---|---|---|---|---|
+| Red team review | 4 | 0 | 4 | 0 | 0 |
+| Glossary | 2 | 0 | 2 | 0 | 0 |
+| Playbook catalog | 2 | 0 | 2 | 0 | 0 |
+| Architecture review | 3 | 1 | 2 | 1 declined | 0 |
+| Review orchestrator | 5 | 1 | 4 | 1 declined | 0 |
+| Defect escape analysis | 2 | 1 | 1 | 1 known defect, for M4 | 1, missed: step 7's page change pushes as procedure endings says, on the fix's branch |
+| Git-host operations | 5 | 1 | 5 | 0 | 0 |
+| Tracker operations | 3 | 0 | 3 | 0 | 1, missed: step 7 commits the question-log row on any branch, and procedure endings then pushes it to main |
+| Federated search | 3 | 0 | 3 | 0 | 1, missed: the same commit of the question-log row |
+| Debugging | 6 | 1 | 6 | 0 | 1, broke: step 1 takes the run number from the last part of a link, which is the job's number in a job link |
+| Docs audit | 2 | 0 | 2 | 0 | 0 |
+| Decision interview | 2 | 0 | 2 | 0 | 0 |
+| Machine self-check | 4 | 1 | 4 | 0 | 0 |
+| Extend the workspace | 7 | 1 | 7 | 0 | 0 |
+| Adopt the workspace | 2 | 0 | 2 | 0 | 0 |
+| How-to index | 2 | 0 | 1 | 1 known defect, for the docs audit | 0 |
+| Get oriented | 5 | 2 | 4 | 1 queued for slice Z | 0 |
+| Your first agent task | 6 | 2 | 6 | 0 | 0 |
+
+- **Verified, the stop rule fired:** no first-round blocking finding survived and no decline was rejected, but the re-check found one blocking break and three blocking misses. They are in each record's "Re-check" section and are not fixed. The re-check's non-blocking items are left open there, for the decision on how the slice resumes.
+- **Inferred, why:** three of the four sit on one rule. A page commits its own work, such as a question-log row, on whatever branch is checked out, and procedure endings then pushes a worktree's pages with `git push origin HEAD:main`, which carries a code branch's commits to main. The fix round gave four pages an exception off main, in two wordings, and missed three. This is the cause of B3's three stops too, and only procedure endings can state the rule once; the slice's row does not cover that page.
+- **Verified, kept off main:** on branch `m3/b2t`, `python3 ws.py check` passes with only the known warning on fix a bug's eval record, and `python3 ws.py check --commits origin/main..HEAD` passes on both commits.
+- **Verified:** the private ledger's two tutorial rows stay on slice B2t, since neither page reached main.
+
+Decisions made in the slice:
+
+- **A review run off main pushes nothing.** Architecture review, the review orchestrator and defect escape analysis commit on the branch checked out and push only from main, so no push of pages carries a branch's code to main. Git-host operations instead leaves its question-log row uncommitted off main. Both are labelled exceptions to procedure endings, since this slice does not edit that page.
+- **Titles change, paths stay,** except red team review's, which the plan's entry named. A moved path breaks links in frozen pages and records; a title does not.
+- **Aliases wait for slice Z.** "Adversarial review", "escape analysis" and "search every source" are not repeated on the pages or in the glossary, as the reader standard says of a coined term; they go in the queued `INDEX.md` rows.
+- **The tutorials' practice stays on a branch the reader deletes,** and the broken link goes in a page of its own, so no run touches main or a page someone else is editing.
+- **The second tutorial's agent steps are prompts, not runnable blocks.** CI cannot run an agent, so it runs every command the reader types, each green whether or not the agent ran.
+
+Queued for slice Z once the pages merge, not yet in the list below: an `INDEX.md` row "New here; a tutorial; a first task with an agent" linking both tutorials; the queued rows for search every source and escape analysis name the new titles, with the old names as search aliases; the queued debugging row also names a failing CI run.
+
+Not done: the four blocking items and the re-check's non-blocking items; criterion 20 on Linux and Windows, and the tutorials reaching main; the slice Z lines above, and the ledger's moves for the tutorials, which follow the merge.
+Parked: Q42
+Next: the maintainer — answer Q42 in the workspace queue on how B2t resumes, then a B2t session resumes from branch `m3/b2t` in `.claude/worktrees/m3-b2t`.
 
 ### Queued for slice Z
 

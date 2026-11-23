@@ -13,7 +13,9 @@
    path, the check runs with the variable unset.
 3. Killing the commit check mid-run leaves no temporary file, worktree or lock: the pre-commit hook is killed,
    with its whole process tree, at points spread across its run, and the working copy, its git folder and the
-   temporary folder are then exactly as they were.
+   temporary folder are then exactly as they were. The run time is measured, never assumed: each point is a
+   fraction of the shortest whole run seen, and a run that ends before its point is timed and the point tried
+   again, so every kill lands while the check is still running.
 
 The stop gate is not a guard here: its wiring lets a session stop when the launcher fails, by design (slice C1),
 and the README says so. Session hooks and reminders never refuse.
@@ -467,10 +469,74 @@ def kill_tree(process):
     process.wait()
 
 
+def start_check(root, env):
+    """Start the commit check as git does, in a process group of its own so that kill_tree reaches all of it."""
+    options = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt" \
+        else {"start_new_session": True}
+    return subprocess.Popen([hook_cases.shell(), ".githooks/pre-commit"], cwd=root, env=env,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **options)
+
+
+def run_time(start):
+    """Seconds one whole run takes, started exactly as a killed run is."""
+    started = time.perf_counter()
+    start().wait()
+    return time.perf_counter() - started
+
+
+def kill_inside(start, fraction, shortest, tries=3):
+    """Kill one run at fraction of its run time, and never after it has ended.
+
+    shortest is the shortest whole run measured so far. A run that ends before its kill point tested nothing:
+    its own run time, timed by polling, becomes the new shortest, and the point is tried again on a new run.
+    Returns (killed, shortest, ended): whether a kill landed on a running check, the shortest run time now
+    known, and the run times of the runs that ended first.
+    """
+    ended = []
+    for _ in range(tries):
+        started = time.perf_counter()
+        process = start()
+        deadline = started + shortest * fraction
+        while process.poll() is None and time.perf_counter() < deadline:
+            time.sleep(0.005)
+        if process.poll() is None:
+            kill_tree(process)
+            return True, shortest, ended
+        took = time.perf_counter() - started
+        ended.append(round(took, 3))
+        shortest = min(shortest, took)
+    return False, shortest, ended
+
+
+def sleeper(seconds):
+    """A start function for kill_inside whose every run lasts about seconds."""
+    def start():
+        return subprocess.Popen([sys.executable, "-c", f"import time; time.sleep({seconds})"],
+                                **({} if os.name == "nt" else {"start_new_session": True}))
+    return start
+
+
+class KillInsideTests(unittest.TestCase):
+    """The kill point follows the run time it measures, not the one it was given (slice KILLFIX)."""
+
+    def test_a_run_shorter_than_the_measured_time_is_still_killed_while_running(self):
+        # Each run lasts 0.4 s, but the measured time says 3 s: one slow sample, as on a busy CI runner.
+        killed, shortest, ended = kill_inside(sleeper(0.4), 0.6, 3.0)
+        self.assertTrue(killed, f"every run ended before its kill point: {ended}")
+        self.assertEqual(len(ended), 1, "the first run, timed against the slow sample, should end first")
+        self.assertLess(shortest, 1.8)
+
+    def test_a_run_that_outlasts_its_point_is_killed_on_the_first_try(self):
+        started = time.perf_counter()
+        killed, shortest, ended = kill_inside(sleeper(5), 0.5, 0.4)
+        self.assertEqual((killed, shortest, ended), (True, 0.4, []))
+        self.assertLess(time.perf_counter() - started, 4, "the run was not killed")
+
+
 class KilledCommitCheckTests(unittest.TestCase):
     """Criterion 46: killing the commit check mid-run leaves no temporary file, worktree or lock."""
 
-    POINTS = (0.05, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9)    # fractions of one whole run
+    POINTS = (0.05, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9)    # fractions of the shortest whole run measured
 
     def test_a_killed_commit_check_leaves_nothing_behind(self):
         scratch = hook_cases.Scratch()
@@ -482,21 +548,15 @@ class KilledCommitCheckTests(unittest.TestCase):
             hook_cases.git(root, "add", "docs/notes.md")
             env = hook_cases.clean_environment({"TMPDIR": str(temporary), "TEMP": str(temporary),
                                                 "TMP": str(temporary), "WS_DENY_LIST": ""})
+            def start():
+                return start_check(root, env)
             git_hook(root, "pre-commit", env)            # a first whole run compiles the engine once
-            started = time.perf_counter()
-            git_hook(root, "pre-commit", env)            # the second is timed, as each killed run starts warm
-            whole = time.perf_counter() - started
+            shortest = min(run_time(start) for _ in range(3))    # then each killed run starts warm
             worktrees = hook_cases.git(root, "worktree", "list", "--porcelain")
             before, before_temporary = listing(root), listing(temporary)
             for point in self.POINTS:
                 with self.subTest(point=point):
-                    options = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt" \
-                        else {"start_new_session": True}
-                    process = subprocess.Popen([hook_cases.shell(), ".githooks/pre-commit"], cwd=root, env=env,
-                                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **options)
-                    time.sleep(whole * point)
-                    still_running = process.poll() is None
-                    kill_tree(process)
+                    killed, shortest, ended = kill_inside(start, point, shortest)
                     time.sleep(0.2)
                     after = listing(root)
                     self.assertEqual(sorted(set(after) - set(before)), [], "left behind in the working copy")
@@ -505,9 +565,8 @@ class KilledCommitCheckTests(unittest.TestCase):
                                      "changed in the working copy")
                     self.assertEqual(listing(temporary), before_temporary, "left behind in the temporary folder")
                     self.assertEqual(hook_cases.git(root, "worktree", "list", "--porcelain"), worktrees)
-                    if point <= 0.6:
-                        self.assertTrue(still_running, "the check ended before it was killed, so this kill tested "
-                                                       "nothing")
+                    self.assertTrue(killed, f"the check ended before every kill, in {ended} s, so this point "
+                                            f"tested nothing")
         finally:
             scratch.close()
             shutil.rmtree(temporary, ignore_errors=True)
