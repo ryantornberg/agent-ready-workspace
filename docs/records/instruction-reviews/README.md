@@ -169,3 +169,17 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b2t-tracker-operations.md](2026-11-23-b2t-tracker-operations.md) | `docs/playbooks/tracker-operations.md` | step, placement |
 | [2026-11-23-b2t-tutorial-first-agent-task.md](2026-11-23-b2t-tutorial-first-agent-task.md) | `docs/tutorials/first-agent-task.md` | step, contradiction, placement, trigger |
 | [2026-11-23-b2t-tutorial-get-oriented.md](2026-11-23-b2t-tutorial-get-oriented.md) | `docs/tutorials/get-oriented.md` | step, contradiction, trigger |
+| [2026-11-23-b4-regression-run.md](2026-11-23-b4-regression-run.md) | `docs/playbooks/regression-run.md` | step, contradiction, enforcement, placement |
+| [2026-11-23-b4-regression-triage.md](2026-11-23-b4-regression-triage.md) | `docs/playbooks/regression-triage.md` | contradiction, step |
+| [2026-11-23-b4-regression-case.md](2026-11-23-b4-regression-case.md) | `docs/templates/regression-case.md` | contradiction, step, trigger, placement |
+| [2026-11-23-b4-regression-report.md](2026-11-23-b4-regression-report.md) | `docs/templates/regression-report.md` | contradiction, step |
+| [2026-11-23-b4-regression-candidates.md](2026-11-23-b4-regression-candidates.md) | `docs/templates/regression-candidates.md` | contradiction, step, trigger |
+| [2026-11-23-b4-qa-test-plan.md](2026-11-23-b4-qa-test-plan.md) | `docs/templates/qa-test-plan.md` | contradiction, placement |
+| [2026-11-23-b4-qa-verification-list.md](2026-11-23-b4-qa-verification-list.md) | `docs/playbooks/qa-verification-list.md` | step, contradiction, trigger, enforcement |
+| [2026-11-23-b4-feature-layer-walk.md](2026-11-23-b4-feature-layer-walk.md) | `docs/playbooks/feature-layer-walk.md` | contradiction, step, enforcement, trigger |
+| [2026-11-23-b4-saved-workflows.md](2026-11-23-b4-saved-workflows.md) | `docs/saved-workflows.md` | contradiction, step, enforcement |
+| [2026-11-23-b4-reading-paths.md](2026-11-23-b4-reading-paths.md) | `docs/reading-paths.md` | contradiction, trigger, placement |
+| [2026-11-23-b4-readme.md](2026-11-23-b4-readme.md) | `README.md` | none |
+| [2026-11-23-b4-playbook-catalog.md](2026-11-23-b4-playbook-catalog.md) | `docs/playbooks/README.md` | contradiction, enforcement, trigger |
+| [2026-11-23-b4-how-tos.md](2026-11-23-b4-how-tos.md) | `docs/how-tos.md` | contradiction, trigger |
+| [2026-11-23-b4-templates-index.md](2026-11-23-b4-templates-index.md) | `docs/templates/README.md` | contradiction |

@@ -53,7 +53,7 @@ git config core.hooksPath .githooks
 | [workspace.json](workspace.json) | The manifest: which parts this workspace runs, and their settings. |
 | `ws.py`, `wslib/` | The engine. `wslib/` holds all of its code: the runner and the small core the parts plug into. `ws.py` only starts it. |
 | [parts/](docs/parts.md) | The checks and hooks, each one file plus its cases. `python3 ws.py list` names them. |
-| [docs/](docs/layout.md) | The pages: the [layout](docs/layout.md) of folders and page kinds, the definition of done, the playbooks, the how-tos, the decision records, the question log, the glossary, the templates, and the plans and records of each milestone. |
+| [docs/](docs/layout.md) | The pages: the [layout](docs/layout.md) of folders and page kinds, the definition of done, the playbooks, the how-tos, the decision records, the question log, the glossary, the templates, and the plans and records of each milestone. [Reading paths by role](docs/reading-paths.md) says what to read first for development, QA, product, automation or DevOps work. |
 | [evals/](evals/README.md) | Three eval cases in a small sample order system, and 45 recorded runs per arm of a real model: with the workspace's guidance, with a two-line instruction instead, and with neither. |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [EVIDENCE.md](EVIDENCE.md), [CHANGELOG.md](CHANGELOG.md) | What each claim rests on and how to re-run it; what changed in each version. |
@@ -155,8 +155,13 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/playbooks/search-every-source.md](docs/playbooks/search-every-source.md) | unproven | M8 |
 | [docs/playbooks/docs-audit.md](docs/playbooks/docs-audit.md) | unproven | M10 |
 | [docs/playbooks/prompt-retrospective.md](docs/playbooks/prompt-retrospective.md) | unproven | M10 |
+| [docs/playbooks/regression-run.md](docs/playbooks/regression-run.md) | unproven | M10 |
+| [docs/playbooks/regression-triage.md](docs/playbooks/regression-triage.md) | unproven | M10 |
+| [docs/playbooks/qa-verification-list.md](docs/playbooks/qa-verification-list.md) | unproven | M6 |
+| [docs/playbooks/feature-layer-walk.md](docs/playbooks/feature-layer-walk.md) | unproven | M9 |
+| [docs/saved-workflows.md](docs/saved-workflows.md) | unproven | M10 |
 
-Proven: 1. Unproven: 34.
+Proven: 1. Unproven: 39.
 
 ## What stays prose
 

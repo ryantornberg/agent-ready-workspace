@@ -28,6 +28,17 @@ Every shape this workspace asks you to copy: the templates in this folder, and t
 
 An outward write, such as a ticket or a pull request description, follows [procedure endings](../procedure-endings.md#outward-writes).
 
+## Lane templates
+
+These serve one lane of work, named in each page's `lane` key. Each is a draft that no real work has used yet; the milestone in the last column uses it first. [Reading paths by role](../reading-paths.md) lists each lane's pages in reading order. A new lane template adds its row here and a line in its role's path there, in the same commit.
+
+| Template | Lane | Use it when | Your copy goes | First used in |
+|---|---|---|---|---|
+| [Regression case](regression-case.md) | QA | You write or fix one case of a regression suite. | The instance's suite, by default `regression/cases/<area>/<case-id>.md` | M10 |
+| [Regression run report](regression-report.md) | QA | A [regression run](../playbooks/regression-run.md) writes its report set. | `docs/records/regression-runs/<YYYY-MM-DD>-<run-id>/`, three files | M10 |
+| [Regression candidates ledger](regression-candidates.md) | QA | A bug is proposed as a new regression case. | One file, `docs/records/regression-candidates.md` | M10 |
+| [QA test plan](qa-test-plan.md) | QA | You hand QA a release or a change to test. | The tracker's QA sub-task, as an outward write | M6 |
+
 ## Record shapes another page defines
 
 These have no page here. The page that holds or writes them defines the shape, so open it there.

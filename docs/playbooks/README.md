@@ -15,7 +15,7 @@ A request to change something first goes through the [size gate](../size-the-wor
 
 ## The catalog
 
-Rows run roughly in the order a piece of work meets them: before building, while building, at the commit, review, then after the fix. A review reads committed work, so it comes after the commit that made it. Upkeep rows keep the workspace itself sound, on a cadence or after an event. Any-stage rows serve whatever stage a task is at. A new playbook adds its row in its stage, in the same commit as the page.
+Rows run roughly in the order a piece of work meets them: before building, while building, at the commit, review, then after the fix. A review reads committed work, so it comes after the commit that made it. Upkeep rows keep the workspace itself sound, on a cadence or after an event. Any-stage rows serve whatever stage a task is at. A new playbook adds its row in its stage, in the same commit as the page. A lane playbook is the exception: its row goes under its lane in [lane drafts](#lane-drafts), not in a stage.
 
 | Stage | Playbook | Use it when | Proof |
 |---|---|---|---|
@@ -41,6 +41,17 @@ Rows run roughly in the order a piece of work meets them: before building, while
 
 "unproven, M4" means the page has no proof yet and names M4 as the milestone that is to prove it. See [decision 0006](../decisions/0006-what-proven-means.md). The [README's table](../../README.md#proven-and-unproven-pages) is the one the `proof` check holds to the pages. If this column ever disagrees with a page's front matter, the front matter is right.
 
+## Lane drafts
+
+These playbooks serve one lane of work, named in each page's `lane` key: QA, product, automation, DevOps or development. Each is a draft that has not run on real work yet; the milestone in its Proof column runs it first. None gets a wrapper until that milestone proves it. [Reading paths by role](../reading-paths.md) lists each lane's pages in reading order. By exception to the stage rule above, a new lane playbook adds its row here, under its lane, and a line in its role's path on reading paths, in the same commit.
+
+| Lane | Playbook | Use it when | Proof |
+|---|---|---|---|
+| QA | [Regression run](regression-run.md) | A person asks for a regression suite to run against an environment, by default their local one, and its report set to be written. | unproven, M10 |
+| QA | [Regression triage](regression-triage.md) | A regression run's report set is written and its failures need sorting and filing, in a fresh session. | unproven, M10 |
+| QA | [QA verification list](qa-verification-list.md) | You write a document QA reads, such as a QA test plan, and must choose what goes in it. | unproven, M6 |
+| Development | [Feature layer walk](feature-layer-walk.md) | You start a feature of a known type and need the list of layers it will touch, with path hints, before its slices are planned. What a change to an existing path or name reaches is impact analysis. It writes no code. | unproven, M9 |
+
 ## The page is canonical
 
 Each playbook page is the one place its procedure lives. Anything else that starts a playbook stays thin: it says when to use it and points at the page, and never restates or changes its steps.
@@ -59,3 +70,4 @@ The playbook page is the procedure in each case. Only the way you reach it diffe
 |---|---|
 | Every playbook in `docs/playbooks/` has a row here, added in the same commit as the page. No check catches a missing row. | `prose` |
 | A wrapper or any other pointer to a playbook stays thin: it never restates or changes the page's steps. Where the two differ, the page wins. | `prose` |
+| A lane draft gets no wrapper until the milestone its `prove-by` names proves it. | `prose` |
