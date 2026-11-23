@@ -769,6 +769,8 @@ A new slice, TFIX, the hook timing fix. It has no row in the slice tables; this 
 
 **The timing fix runs before C5e (Q21).** The macOS jobs in CI keep failing the hook case runner's 200-millisecond budget, most often with Python 3.9. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, and fixes the hooks so they meet the budget that criterion 28 sets. It may run alongside C5b. C5e waits for it, since C5e adds work to every push. TFIX is done when criterion 28 holds on every CI job, and its report is under "Results".
 
+**The fix is general, not for one Python (the maintainer, during the slice).** CI logs also show the macOS jobs with Python 3.13 over the budget, on the shell and push rows. The maintainer asked for a general fix: TFIX makes every hook call cheaper, on every system and Python, and leaves criterion 28's budgets and its way of timing as they are.
+
 ## Results
 
 ### C1, launcher and baselines

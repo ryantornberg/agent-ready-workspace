@@ -25,6 +25,12 @@ part runs its cases, every time. A part with no cases, or with a case that
 fails, is refused. A check that nobody tests can stop finding things, and a
 hook can stop firing, and nobody notices. A case runs with its own "config"
 only, never the manifest's settings, so changing a setting cannot fail a case.
+One exception, for speed: a hook call skips a hook's cases when they passed
+before on exactly the same files. The working copy's git folder records, in
+CASE_MEMORY, a digest of the part, its cases and every engine or workspace
+module loaded when they passed, with the Python and the system. Any change to
+one of those runs them again, and a failure is never recorded. Every command
+other than a hook call runs every case, every time.
 
 A part's config is its manifest entry without "use" and "why", plus the manifest's
 tier binding as "tiers" when the manifest has one. The binding lives in one place:
@@ -53,13 +59,17 @@ The manifest's "parts" lists the parts in use. A part that an older manifest
 used may leave only by being listed under "retired", with a reason:
     "retired": [{"use": "no_stage_all", "why": "the commit check now compares staged paths"}]
 """
+import hashlib
 import json
+import os
 import pathlib
 import re
 import subprocess
+import sys
 import types
 
 from . import VERSION
+from . import ledger as ledgers
 from . import snapshot as snapshots
 
 KINDS = ("check", "hook")
@@ -83,6 +93,8 @@ TIERS = ("driver", "worker", "mechanical")
 TOP_LEVEL = ("version", "tiers", "parts", "retired", "building")
 MILESTONE = re.compile(r"^M[1-9][0-9]*$")
 MANIFEST = "workspace.json"
+CASE_MEMORY = "ws-cases.json"   # in the working copy's own git folder: which hooks' cases passed, on what files
+ENGINE = pathlib.Path(__file__).resolve().parent
 
 
 class PartError(Exception):
@@ -174,6 +186,86 @@ class Part:
             except PartError as error:  # a case that crashes the part is a failed case
                 failures.append(f"{case['name']}: {error}")
         return failures
+
+
+class CaseMemory:
+    """Which hooks' cases passed in this working copy, and a digest of every file they ran. Only hook calls use it.
+
+    An entry is trusted only when the digest of its files, as they are now, matches; anything unreadable is treated
+    as no entry, so the worst a damaged or stale record can do is make the cases run again."""
+
+    def __init__(self, root):
+        self.root = pathlib.Path(root).resolve()
+        folder = ledgers.git_dir(self.root)
+        self.path = None if folder is None else folder / CASE_MEMORY
+        self.entries, self.changed, self.files = {}, False, {}
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8")) if self.path else {}
+        except (OSError, ValueError):
+            data = {}
+        if isinstance(data, dict) and isinstance(data.get("passed"), dict):
+            self.entries = data["passed"]
+
+    def _file(self, name):
+        """The sha256 of one file's bytes, or None. name is relative to the working copy, or absolute."""
+        if name not in self.files:
+            try:
+                self.files[name] = hashlib.sha256((self.root / name).read_bytes()).hexdigest()
+            except OSError:
+                self.files[name] = None
+        return self.files[name]
+
+    def _digest(self, names):
+        found = hashlib.sha256(f"{VERSION}\0{sys.version}\0{sys.platform}\0{os.name}\0".encode("utf-8"))
+        for name in sorted(names):
+            one = self._file(name)
+            if one is None:
+                return None
+            found.update(f"{name}\0{one}\0".encode("utf-8"))
+        return found.hexdigest()
+
+    def passed(self, relative, cases_file):
+        entry = self.entries.get(relative)
+        if not isinstance(entry, dict) or not isinstance(entry.get("files"), list) \
+                or not all(isinstance(name, str) for name in entry["files"]) \
+                or not {relative, cases_file} <= set(entry["files"]):
+            return False
+        return entry.get("digest") is not None and self._digest(entry["files"]) == entry["digest"]
+
+    def remember(self, relative, cases_file):
+        """Record that the part's cases just passed: on its file, its cases, and every module of this workspace or of
+        the engine loaded so far, which holds every one the cases reached, lazy imports included."""
+        names = {relative, cases_file}
+        for module in list(sys.modules.values()):
+            source = getattr(module, "__file__", None)
+            if not isinstance(source, str) or not source.endswith(".py"):
+                continue
+            path = pathlib.Path(source).resolve()
+            for top in (self.root, ENGINE):
+                try:
+                    inside = path.relative_to(top)
+                except ValueError:
+                    continue
+                names.add(inside.as_posix() if top == self.root else str(path))   # the engine outside: absolute
+                break
+        digest = self._digest(names)
+        if digest is not None:
+            self.entries[relative] = {"digest": digest, "files": sorted(names)}
+            self.changed = True
+
+    def save(self):
+        """Write the record if it changed. A record that cannot be written costs only speed."""
+        if not self.changed or self.path is None:
+            return
+        temporary = self.path.with_name(f"{CASE_MEMORY}.{os.getpid()}.tmp")
+        try:
+            temporary.write_text(json.dumps({"passed": self.entries}, sort_keys=True), encoding="utf-8")
+            os.replace(str(temporary), str(self.path))
+        except OSError:
+            try:
+                temporary.unlink()
+            except OSError:
+                pass
 
 
 def _gives_a_reason(entry):
@@ -311,13 +403,14 @@ def _read_cases(name, kind, cases_file, text, mode="refuse"):
     return cases
 
 
-def load(root, entry, run_cases=True, snapshot=None, tiers=None):
+def load(root, entry, run_cases=True, snapshot=None, tiers=None, memory=None):
     """Load one manifest entry: {"use": "links", ...config}. "use" is a name under parts/, or a path to a .py file.
 
     The part's cases run as it loads, and a failing case refuses the part.
     run_cases=False is for `ws.py selftest`, which reports every failure instead of stopping at the first.
     snapshot: read the part and its cases from it (the staged commit) instead of from disk.
     tiers: the manifest's tier binding, given to the part as config["tiers"].
+    memory: a CaseMemory, for hook calls only: the cases are skipped when they passed on the same files.
     """
     name, relative = source_of(root, entry)
     text = _read(root, relative, snapshot)
@@ -363,10 +456,14 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None):
     if tiers is not None:
         config["tiers"] = tiers
     part = Part(name, module, cases, config)
+    if memory is not None and snapshot is None and memory.passed(relative, cases_file):
+        return part
     if run_cases:
         failures = part.failed_cases()
         if failures:
             raise PartError(f"part {name}: refused, {len(failures)} of its {len(cases)} cases fail; first: {failures[0]}")
+        if memory is not None and snapshot is None:
+            memory.remember(relative, cases_file)
     return part
 
 
@@ -378,9 +475,18 @@ def load_all(root, manifest=None, run_cases=True, snapshot=None):
 def load_hooks(root, event, manifest):
     """Only the hooks for one event, each with its cases run. Checks and other events' hooks are not run at all.
 
+    A hook's cases are skipped when they passed before on the same files; see CaseMemory.
     Fails closed: a part whose file is missing, or whose KIND cannot be read without running it, refuses the call,
     because it might be a hook for this event.
     """
+    memory = CaseMemory(root)
+    try:
+        return _load_hooks(root, event, manifest, memory)
+    finally:
+        memory.save()
+
+
+def _load_hooks(root, event, manifest, memory):
     hooks = []
     for entry in manifest["parts"]:
         name, relative = source_of(root, entry)
@@ -393,7 +499,7 @@ def load_hooks(root, event, manifest):
                             "so no hook call can be decided")
         # A hook whose EVENT is unreadable or unknown loads, and so refuses: a misspelt event must not hide a hook.
         if kind == "hook" and (declared(text, "EVENT") == event or declared(text, "EVENT") not in EVENTS):
-            hooks.append(load(root, entry, tiers=manifest.get("tiers")))
+            hooks.append(load(root, entry, tiers=manifest.get("tiers"), memory=memory))
     return hooks
 
 

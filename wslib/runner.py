@@ -55,16 +55,13 @@ import subprocess
 import sys
 
 from . import VERSION
-from . import baseline as baselines
-from . import blocks
+# baseline, blocks, gate, merge and pins are imported in the commands that use them: a hook call runs on every tool
+# call, and importing them cost it several milliseconds it never used (slice TFIX of the M3 plan).
 from . import events
-from . import gate as gates
 from . import gitcall
 from . import lease as leases
 from . import ledger as ledgers
-from . import merge as merges
 from . import parts as partlib
-from . import pins as pinlib
 from . import shellfacts
 from . import snapshot as snapshots
 
@@ -272,6 +269,7 @@ def push_tutorials(root, local, remote):
     """Run the runnable blocks of every tutorial a push to main changes, in a fresh clone of the commit pushed.
     A tutorial edit is a doc and goes straight to main, so this is the check that runs before it lands; CI runs
     every tutorial after. Returns the number of tutorials that failed."""
+    from . import blocks
     commits = pushed_commits(root, local, remote)
     pages = sorted({path for commit in commits for path in commit["paths"] if blocks.is_tutorial(path)})
     failed = 0
@@ -324,6 +322,7 @@ def command_commits(root, args):
 def command_history(root, args):
     """CI: the parts that set HISTORY, run over every line every commit in HEAD's history added. A finding listed in
     baselines/<check>.history.json is tolerated when the base's history has it too (wslib/baseline.py)."""
+    from . import baseline as baselines
     manifest = partlib.load_manifest(root)
     parts = [part for part in partlib.load_all(root, manifest)
              if part.kind == "check" and getattr(part.module, "HISTORY", False) is True]
@@ -364,6 +363,7 @@ def command_history(root, args):
 
 
 def command_check(root, args):
+    from . import baseline as baselines
     if args.push is not None:
         return command_push(root, args)
     if args.commits is not None:
@@ -460,6 +460,7 @@ def command_baseline(root, args):
     """Write baselines/<check>.json for each check of the phase that finds errors in the folder now, and rewrite any
     that exists. A check with no findings and no file gets none. With --history, write baselines/<check>.history.json
     for each check that reads the history, from HEAD's history."""
+    from . import baseline as baselines
     manifest = partlib.load_manifest(root)
     if args.history:
         snapshot = snapshots.history(root)
@@ -711,6 +712,7 @@ def command_after_edit(root, args):
 def stop_event(root, event, hooks):
     """The stop event with "own_edits" read at once, from the ledger files, and "gate" worked out only when a hook
     reads it: a session with no entries of its own runs nothing (decision 0005)."""
+    from . import gate as gates
     needs = {need for part in hooks for need in getattr(part.module, "NEEDS", ())}
     if not needs:
         return event
@@ -759,6 +761,11 @@ def command_stop(root, args):
 
 
 def command_hook(root, args):
+    with shellfacts.one_call():          # each folder's git folders are asked of git once per call
+        return _command_hook(root, args)
+
+
+def _command_hook(root, args):
     if args.event in partlib.SESSION_EVENTS:
         return command_session(root, args)
     if args.event in partlib.AFTER_EVENTS:
@@ -863,6 +870,7 @@ def command_ledger(root, args):
 
 def command_pins(root, _args):
     """Check out each pinned code repository whose remote answers; never touch one already there."""
+    from . import pins as pinlib
     results = pinlib.initialize(root)
     if not results:
         print("No pinned repositories: nothing to initialize.")
@@ -918,6 +926,7 @@ def handoff_branch(root):
 
 def command_merge(root, args):
     """Merge one pull request on GitHub once CI passed on its head commit (wslib/merge.py)."""
+    from . import merge as merges
     if not ROOT.samefile(root):
         raise partlib.PartError(f"merge acts only on the repository that holds this ws.py ({ROOT}), so --root "
                                 f"cannot point it at another one")

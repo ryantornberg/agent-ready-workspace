@@ -29,7 +29,6 @@ def main():
         sys.stderr.write("ws: %s is Python %d.%d, older than %d.%d.\n"
                          % (sys.executable, sys.version_info[0], sys.version_info[1], MINIMUM[0], MINIMUM[1]))
         sys.exit(TOO_OLD)
-    import runpy
     if len(sys.argv) < 2:
         sys.stderr.write("ws: wslib/start.py needs the workspace folder as its first argument\n")
         sys.exit(2)
@@ -38,6 +37,7 @@ def main():
         if len(args) < 2:
             sys.stderr.write("ws: -m needs a module name\n")
             sys.exit(2)
+        import runpy
         sys.argv = [args[1]] + args[2:]
         first_path(os.getcwd())                      # as python -m sets it
         runpy.run_module(args[1], run_name="__main__", alter_sys=True)
@@ -51,7 +51,19 @@ def main():
     script = os.path.abspath(script)
     sys.argv = [script] + rest
     first_path(os.path.dirname(script))              # as python SCRIPT sets it
-    runpy.run_path(script, run_name="__main__")
+    run_script(script)
+
+
+def run_script(script):
+    """Run a script as __main__, as python SCRIPT does. Not through runpy, whose imports cost every hook call about
+    five milliseconds, half of a bare Python start (slice TFIX of the M3 plan)."""
+    import types
+    with open(script, "rb") as stream:
+        code = compile(stream.read(), script, "exec")
+    module = types.ModuleType("__main__")
+    module.__file__ = script
+    sys.modules["__main__"] = module
+    exec(code, module.__dict__)
 
 
 if __name__ == "__main__":
