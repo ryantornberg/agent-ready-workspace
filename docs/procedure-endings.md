@@ -15,7 +15,7 @@ Run these in order, after the procedure's own last step. Skip a step only where 
 
 1. [Outward writes](#outward-writes): settled before any is made.
 2. [The question-log entry](#the-question-log-entry): only if you had to ask a person something.
-3. [The commit](#the-commit): every file the procedure wrote, the log included.
+3. [The commit](#the-commit): every file the procedure wrote, the log row included unless step 2 leaves it uncommitted.
 4. [The push](#the-push): the commits of step 3.
 5. [The report](#the-report): always, and last.
 
@@ -33,13 +33,13 @@ Pushing and merging in this workspace's own repository follow [the commit](#the-
 
 ## The commit
 
-Commit every file the procedure wrote, once the work is verified, and the question-log row of step 2. A procedure that wrote nothing commits nothing.
+Commit every file the procedure wrote, once the work is verified, and the question-log row of step 2 unless that step leaves it uncommitted. A procedure that wrote nothing commits nothing.
 
 - **Stage each file by name.** Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder. The commit check refuses a staged file your edit tools did not write. Record one you wrote another way, such as by shell, with `python3 ws.py ledger --add PATH`.
-- **Leave other changes alone.** An uncommitted change you did not make is not yours: do not stage it or revert it.
+- **Leave other changes alone.** An uncommitted change you did not make is not yours: do not stage it, revert it or stash it.
 - **Name the review.** A commit that adds, changes or deletes a guidance page carries `Instructions-review: <record>` for each record, or a listed skip reason. [The instruction review](playbooks/instruction-review.md) says which pages are guidance and how to get the record.
 - **Write the subject** as [commits](commits.md) says: a conventional commit by default.
-- **Where the commit goes.** A change of pages only: on main in the main working copy, or on the worktree's branch in a worktree. A change to scripts, parts, hooks or CI: on a branch of its own, as [changing the machinery](changing-the-machinery.md#the-path-for-a-machinery-change) says. A change to code under `src/` or in a pinned repository: as the procedure that made it says, such as [fix a bug](playbooks/fix-a-bug.md), which opens a draft pull request where the repository has a remote.
+- **Where the commit goes.** A change of pages only: on main in the main working copy, or on the worktree's branch in a worktree. A change to scripts, parts, hooks or CI: on a branch of its own, as [changing the machinery](changing-the-machinery.md#the-path-for-a-machinery-change) says. A change to code under `src/` or in a pinned repository: on a branch of its own in the repository that holds the code, never on its main. This page holds that rule; [fix a bug](playbooks/fix-a-bug.md)'s step 5 states it too, until it links here.
 
 If the commit is refused, read the refusal, fix what it names, and commit again. If it is still refused, leave the files uncommitted and name each in the report with the refusal.
 
@@ -49,24 +49,39 @@ If you had to ask a person something this workspace should have answered, add a 
 
 - Add the row with your edit tools, so the edit ledger holds the file.
 - It is committed in the next step, with the rest or on its own, and needs no `Instructions-review:` trailer: the log is a record, not a guidance page.
-- A procedure that otherwise commits nothing still commits this entry.
+- A procedure that otherwise commits nothing still commits this entry, unless the next bullet applies.
 - If the log already holds uncommitted rows you did not add, do not stage it, since they are not yours to commit. Leave your row in the file, and give its text in the report.
+- Rows left uncommitted are the person's to settle. The report says the log holds them. A session commits them only when the person names which rows to commit. Until then, the start-of-session fast-forward of [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md) holds back, and [the push](#the-push) takes its path for a main copy with uncommitted changes.
 - If the edit is refused, give the row's text and the refusal in the report.
 
 ## The push
 
-Push the commits of step 3. First run `git fetch origin`; if main moved, run `git pull --rebase origin main` before a push to main.
+Push the commits of step 3. First run `git fetch origin`. Main has moved when `git merge-base --is-ancestor origin/main HEAD` exits with 1.
 
 | What you committed | What you push | Who pushes |
 |---|---|---|
-| Pages only, in the main working copy | `git push origin main` | In this repository, the agent. In a team's workspace, a person: leave the commits unpushed and say so in the report. |
-| Pages only, in a worktree | `git push origin HEAD:main` | As above. |
+| Pages only, in the main working copy | `git push origin main`, or, if main has moved, as [the next section](#when-main-has-moved) says | In this repository, the agent. In a team's workspace, a person: leave the commits unpushed and say so in the report. |
+| Pages only, in a worktree | `git push origin HEAD:main`, after `git pull --rebase origin main` if main has moved | As above. |
 | Machinery, on its own branch | The branch, then a draft pull request | As [changing the machinery](changing-the-machinery.md#the-path-for-a-machinery-change) says: in this repository the agent publishes and merges once CI passes on Linux, macOS and Windows; in a team's workspace, a person does. |
-| Code under `src/` or in a pinned repository | As the procedure that made it says | As that procedure says. |
+| Code under `src/` or in a pinned repository | The branch, to the remote of the repository that holds the code, then a draft pull request. With no remote, nothing. | As the contract's rule on draft pull requests says for that repository. |
 
-Read the push's output. A push is done when, after `git fetch origin`, `git rev-parse HEAD` prints the same commit as the branch you pushed to, such as `git rev-parse origin/main`.
+A push is done when, after `git fetch origin`, `git rev-parse HEAD` in the copy you pushed from prints the same commit as the branch you pushed to, such as `git rev-parse origin/main`.
 
-If the push is refused, read why. The pre-push hook names a commit and its reason: fix it and push again, once. The remote's rejection as not a fast-forward means the branch moved: pull with rebase and push again, once. If it is still refused, leave the commits unpushed and name them in the report.
+If the push is refused, read why. The pre-push hook names a commit and its reason: fix it and push again, once. The remote's rejection as not a fast-forward means the branch moved after your fetch: fetch again, follow the table's row for a moved main, and push again, once. If it is still refused, leave the commits unpushed and name them in the report.
+
+### When main has moved
+
+In the main working copy, first run `git status --porcelain --untracked-files=no`.
+
+- **It prints nothing:** run `git pull --rebase origin main`, then `git push origin main`.
+- **It prints a file:** a tracked file holds an uncommitted change, another session's or a row you left in the question log. `git pull --rebase` refuses while it does. Do not stash it or pull with `--autostash`: either one sweeps up changes that are not yours. Push from a throwaway worktree of `origin/main` instead:
+  1. Run `git log --format='%h %s' origin/main..main`. It lists the commits to push. If it lists one this procedure did not make, stop: push nothing, and name the commits in the report.
+  2. `git worktree add --detach .claude/worktrees/push-main origin/main`. If that folder exists, add a word to its name, here and below.
+  3. `git -C .claude/worktrees/push-main cherry-pick origin/main..main`. If it stops on a conflict, run `git -C .claude/worktrees/push-main cherry-pick --abort` and go to step 6, leaving the commits unpushed.
+  4. `git -C .claude/worktrees/push-main push origin HEAD:main`.
+  5. Check the push as above, with `git -C .claude/worktrees/push-main rev-parse HEAD`.
+  6. `git worktree remove .claude/worktrees/push-main`.
+  7. If the push is done, run `git reset --keep origin/main` in the main working copy. Main there then matches what you pushed, and the uncommitted changes stay. If it is refused, a file with an uncommitted change also changed on `origin/main`. Leave the main copy as it is. Say in the report that its main still holds the commits as first made, that they are on `origin/main`, and that a person runs `git reset --keep origin/main` once that file's change is settled.
 
 ## The report
 
@@ -86,7 +101,7 @@ Then name what is not done: anything left uncommitted or unpushed, any refusal f
 | A commit that changes a machinery path reaches main only through a pull request. | `direct_push#a commit that changes a part fails, naming the commit and the path` |
 | Mark every claim in a report as verified or inferred. | `eval:fix-a-bug` |
 | Ask before an outward write the request does not name, and write nothing on a repository outside this one and those pinned under `src/`. | `prose` |
-| Log a question the workspace should have answered, and commit the entry, before the report. | `prose` |
+| Log a question the workspace should have answered, and commit the entry before the report, unless the log holds uncommitted rows you did not add; then give its text in the report. | `prose` |
 | A refused step does not skip the report; the report names the refusal. | `prose` |
-| An uncommitted change you did not make is left alone: not staged, not reverted. | `prose` |
+| An uncommitted change you did not make is left alone: not staged, not reverted, not stashed. | `prose` |
 | A page links this one instead of restating its rules. The instruction review counts a restated rule as a finding. | `prose` |
