@@ -875,6 +875,16 @@ C6's proposed revision, approved as proposed. It aligns the C6 row and criterion
 
 **"No guard" means no guard on a tool call, a commit or a push.** The C6 row's first sentence and criterion 46's first sentence read: no guard on a tool call, a commit or a push turns off when one environment variable is unset. The stop gate keeps C1's choice: its wiring lets a session stop when the launcher fails, so it is not such a guard. The rest of the row and the criterion stand.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+A new slice, KILLFIX, from main's red CI after B3's second resume: C6's kill test failed once on macOS with Python 3.9, and the maintainer had the failed job rerun. KILLFIX has no row in the slice tables; this entry is its scope. No criterion is dropped or weakened.
+
+**Lane C runs KILLFIX after PSFIX, then C8,** at the driver tier.
+
+**C6's kill test measures the check's run time instead of assuming it.** `test_a_killed_commit_check_leaves_nothing_behind` times one whole run of the commit check and places every kill point as a fraction of that one sample. When the sample runs slow, a later point falls after the check has ended, and the test fails though the check left nothing behind. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, so that a kill point never falls after the check has ended. KILLFIX is done when the test holds under a slow sample that fails it today, and its report is under "Results".
+
 ## Results
 
 ### C1, launcher and baselines
