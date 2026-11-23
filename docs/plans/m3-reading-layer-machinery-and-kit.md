@@ -1538,7 +1538,7 @@ Next: a B3 session builds B3's two opening changes; B2t follows once they merge.
 
 B7 starts after B2t merges, not on these reads alone.
 
-### B3, templates and records: stopped at batches 1 and 2's re-check
+### B3, templates and records: stopped at the batches' second re-check
 
 Built at the worker tier on 2026-11-22, with its two checks at the driver tier, in the main working copy, which no other session held. The opening changes went straight to main as `a6159d7`. The slice's own session wrote them, since every later page links their rules; five worker-tier helpers wrote batches 1 and 2 from a shared-interface sheet; fresh driver-tier sessions reviewed and re-checked. No file the eval hashes was edited. The maintainer's order for lane B is recorded under "Changes after approval" as `0d7c926`.
 
@@ -1617,6 +1617,40 @@ Decisions made in the resume:
 Not done: the 9 blocking breaks and the re-check's non-blocking items; the claim_marks and plan_budgets pull request and the batch pages reaching main; the queued slice Z lines, which join the queue when the pages merge; and the ledger's moves for B3's rows.
 Parked: Q35.
 Next: the maintainer — answer Q35 in the workspace queue on how B3 resumes, then a B3 session resumes from branch `m3/b3-claim-marks` in `.claude/worktrees/m3-b3`.
+
+#### Resumed again, 2026-11-23
+
+Resumed unattended under the maintainer's answer to Q35, recorded under "Changes after approval" as `8c4ccc7` before any change. The slice's own session ran at the driver tier and made the cut-back and the fix round itself, since every change touched the same rule across seven pages; a fresh driver-tier session re-checked. No file the eval hashes was edited. The slice stopped a third time under lane B's stop rule.
+
+- **Verified, the cut-back:** the rule that a review record or a kept handoff note is committed on main from a throwaway worktree is gone, from handoff and the review orchestrator both. A review round's record goes in the plan's "Results" or, with no plan, the report and then the pull request's description. The fix record template has no "Reviews" section. Keep mode waits for M4. The pull request template, the templates index and the records index say the same. A search of `docs/` finds no link to the removed section or to `docs/records/reviews/` or `docs/records/handoffs/`.
+- **Verified, the second fix round on the 9 breaks:** the bug report template files with `gh issue create --repo` only on this repository or one pinned under `src/`, and otherwise gives the person the text; its rules row is tagged with the outward-write guard's `gh issue create` case. Handoff's step 2 and the orchestrator's plan bullet commit on the branch checked out, never switching. Escape analysis's step 9 commits on the fix record's branch while the fix is unmerged. The orchestrator's step 2 counts a tip as reviewed when later commits change only the plan or the fix record. On branch `m3/b3-claim-marks` as `65a6f5c`.
+- **Verified, the second re-check:** all nine breaks are fixed or withdrawn with the rule they came from; no withdrawal was rejected. It found 3 blocking items, in the "Second re-check" sections of the seven records in `docs/records/instruction-reviews/` on the branch, committed as `6898a09`.
+
+| Page | Second round's items | Fixed | Withdrawn | Left open, not blocking | Blocking, at the second re-check |
+|---|---|---|---|---|---|
+| Handoff | 4 | 1 | 3 | 0 | 0 |
+| Review orchestrator | 7 | 2 | 4 | 1 | 2: in a worktree, the plan commit on the reviewed branch is then pushed by procedure endings' pages row, `git push origin HEAD:main`, which publishes the unmerged code (missed); the step 2 clause stops on a tip git-host operations will not open a pull request for (broke) |
+| Fix record template | 3 | 1 | 1 | 1 queued for slice Z | 0 |
+| Escape analysis | 3 | 1 | 1 | 1 | 1: the analysis committed on an unmerged fix's branch is pushed by the same row to main (broke) |
+| Bug report template | 1 | 1 | 0 | 0 | 0 |
+| Pull request template, swept | 1 | 1 | 0 | 0 | 0 |
+| Templates index, swept | 1 | 1 | 0 | 0 | 0 |
+
+- **Verified, the stop rule fired:** two fixes created blocking items and the re-check found one the reads missed. These pages have had two fix rounds, the stop rule's limit, so a third needs the maintainer's yes.
+- **Inferred, why:** as in both earlier stops, each break sits where one page hands a step to another: here, a commit placed on a branch, then a push that procedure endings places by what was committed, not where.
+- **Verified, kept off main:** the pages and records stay on the branch, pushed. There `python3 ws.py check` passes with only the known warning on fix a bug's eval record, and `python3 -m unittest discover -b tests` passes, 732 tests, 3 skipped.
+- **Verified, a trap for the pull request:** `python3 ws.py check --commits origin/main..HEAD` refuses the merge of main into the branch, `9c08932`. Both sides changed the README and `docs/parts.md`, so a merge's combined diff lists them, and `review_trailer` asks for a record the merge itself changes. CI would refuse the pull request the same way.
+- **Verified:** the private ledger's B3 rows stay on slice B3, since none of their pages reached main.
+
+Decisions made in this resume:
+
+- **The slice's own session made the fix round,** not worker helpers, since the cut-back and every fix moved one rule across seven pages.
+- **The re-check's non-blocking items are left open, not written to "Known defects":** Q35 limited the round to the blocking items, and Q41 decides whether these pages get another round.
+- **The merge that trips `review_trailer` is left for the session that opens the pull request:** it rebases the branch onto `origin/main` and force-pushes the branch, which the contract allows off main, since main will have moved again by then.
+
+Not done: the 3 blocking items and the re-checks' non-blocking items; the claim_marks and plan_budgets pull request and the batch pages reaching main; the queued slice Z lines, which join the queue when the pages merge; and the ledger's moves for B3's rows.
+Parked: Q41.
+Next: the maintainer — answer Q41 in the workspace queue on how B3 finishes, then a B3 session resumes from branch `m3/b3-claim-marks` in `.claude/worktrees/m3-b3`.
 
 ### Queued for slice Z
 
