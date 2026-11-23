@@ -849,6 +849,14 @@ Slice B3 stopped again under lane B's stop rule: the re-check of batches 1 and 2
 
 **B3 cuts back, then takes one more fix round (Q35).** The rule the fix round added, that a review record or a kept handoff note about a branch is committed on main from a throwaway worktree, is removed. A review round's result goes in the plan's Results or the pull request description. A kept handoff note waits for M4. The bug report template files an issue only where the outward-write rule allows. Then one fix round on the 9 blocking breaks, and a fresh re-check, under lane B's stop rule as it stands. This is the batches' second fix round, which the stop rule's limit of two allows.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+Slice B3 stopped a third time under lane B's stop rule: the second re-check found 3 blocking items, all in a commit or push step one page hands to another. The maintainer's answer to Q41 in the workspace queue settles how B3 finishes. It narrows three of B3's page edits; no criterion is dropped or weakened.
+
+**B3 reverts the commit steps, then merges (Q41).** The review orchestrator, escape analysis and handoff go back to main's wording for where and how they commit and push. Only their stale pointers to B3's new pages change. The orchestrator's step 2 clause, which counted a plan-only commit as reviewed, is removed. The fix record template loses its escape analysis section. One narrow fresh re-check of those pages follows, then the pull request. Where a review commits on a branch stays unsettled, for M4.
+
 ## Results
 
 ### C1, launcher and baselines
