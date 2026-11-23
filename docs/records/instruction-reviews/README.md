@@ -124,3 +124,29 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-c5f-decision-0004.md](2026-11-22-c5f-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
 | [2026-11-22-c5f-parts.md](2026-11-22-c5f-parts.md) | `docs/parts.md` | enforcement, contradiction |
 | [2026-11-22-c6-readme.md](2026-11-22-c6-readme.md) | `README.md` | contradiction, enforcement, placement |
+| [2026-11-22-b3-hand-off-plan.md](2026-11-22-b3-hand-off-plan.md) | `docs/templates/hand-off-plan.md` | step, enforcement, placement |
+| [2026-11-22-b3-spec.md](2026-11-22-b3-spec.md) | `docs/templates/spec.md` | contradiction, trigger, enforcement |
+| [2026-11-22-b3-hub.md](2026-11-22-b3-hub.md) | `docs/templates/hub.md` | contradiction, step, trigger, enforcement |
+| [2026-11-22-b3-epic-folder.md](2026-11-22-b3-epic-folder.md) | `docs/templates/epic-folder.md` | contradiction, step, trigger, placement |
+| [2026-11-22-b3-unit-doc.md](2026-11-22-b3-unit-doc.md) | `docs/templates/unit-doc.md` | contradiction, step |
+| [2026-11-22-b3-bug-ticket.md](2026-11-22-b3-bug-ticket.md) | `docs/templates/bug-ticket.md` | contradiction, step, trigger, enforcement |
+| [2026-11-22-b3-pull-request.md](2026-11-22-b3-pull-request.md) | `docs/templates/pull-request.md` | contradiction, step, trigger |
+| [2026-11-22-b3-fresh-session-prompt.md](2026-11-22-b3-fresh-session-prompt.md) | `docs/templates/fresh-session-prompt.md` | step, trigger |
+| [2026-11-22-b3-fix-record.md](2026-11-22-b3-fix-record.md) | `docs/templates/fix-record.md` | contradiction, step, trigger, enforcement |
+| [2026-11-22-b3-defect-register.md](2026-11-22-b3-defect-register.md) | `docs/templates/defect-register.md` | contradiction, trigger, enforcement |
+| [2026-11-22-b3-lessons-log.md](2026-11-22-b3-lessons-log.md) | `docs/templates/lessons-log.md` | contradiction, step |
+| [2026-11-22-b3-templates-index.md](2026-11-22-b3-templates-index.md) | `docs/templates/README.md` | contradiction, trigger |
+| [2026-11-22-b3-authoring.md](2026-11-22-b3-authoring.md) | `docs/authoring.md` | contradiction, trigger, enforcement, placement |
+| [2026-11-22-b3-reader-standard.md](2026-11-22-b3-reader-standard.md) | `docs/reader-standard.md` | contradiction, step, trigger, placement |
+| [2026-11-22-b3-layout.md](2026-11-22-b3-layout.md) | `docs/layout.md` | contradiction, trigger |
+| [2026-11-22-b3-readme.md](2026-11-22-b3-readme.md) | `README.md` | contradiction |
+| [2026-11-22-b3-parts.md](2026-11-22-b3-parts.md) | `docs/parts.md` | contradiction |
+| [2026-11-22-b3-handoff.md](2026-11-22-b3-handoff.md) | `docs/playbooks/handoff.md` | contradiction, step, trigger, placement |
+| [2026-11-22-b3-review-orchestrator.md](2026-11-22-b3-review-orchestrator.md) | `docs/playbooks/review-orchestrator.md` | contradiction, step, placement |
+| [2026-11-22-b3-sweep-extend-the-workspace.md](2026-11-22-b3-sweep-extend-the-workspace.md) | `docs/extend-the-workspace.md` | contradiction, placement |
+| [2026-11-22-b3-sweep-how-tos.md](2026-11-22-b3-sweep-how-tos.md) | `docs/how-tos.md` | contradiction, trigger |
+| [2026-11-22-b3-sweep-instruction-review.md](2026-11-22-b3-sweep-instruction-review.md) | `docs/playbooks/instruction-review.md` | step |
+| [2026-11-22-b3-sweep-tracker-operations.md](2026-11-22-b3-sweep-tracker-operations.md) | `docs/playbooks/tracker-operations.md` | step, trigger |
+| [2026-11-22-b3-sweep-git-host-operations.md](2026-11-22-b3-sweep-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | trigger |
+| [2026-11-22-b3-sweep-escape-analysis.md](2026-11-22-b3-sweep-escape-analysis.md) | `docs/playbooks/escape-analysis.md` | contradiction, step, placement |
+| [2026-11-22-b3-sweep-maintain-the-workspace.md](2026-11-22-b3-sweep-maintain-the-workspace.md) | `docs/maintain-the-workspace.md` | contradiction, step, placement |
