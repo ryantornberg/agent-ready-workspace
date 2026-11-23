@@ -54,6 +54,8 @@ Keep the headings in this order. Every heading stays. [Rule 10](../playbooks/qa-
 
 ## Filling it in
 
+A copy is a page for a product reader, so the [rules for such a page](../product-reader-pages.md) apply to it too.
+
 - **Before you start:** only what a tester needs before the first scenario.
 - **Scenario checklists:** one scenario per user journey, each item written as [the verification list's rules](../playbooks/qa-verification-list.md#the-rules) say.
 - **Do not file:** each known issue a tester will meet in this build, with its ticket, so it is not reported twice.

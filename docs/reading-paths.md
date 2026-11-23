@@ -52,7 +52,14 @@ A lane draft gets no wrapper yet, as the [playbook catalog's rules](playbooks/RE
 3. [Red team review](playbooks/red-team-review.md), to have a finished plan or spec attacked before anyone builds from it.
 4. [Bug report template](templates/bug-ticket.md): the plain top layer a product reader gets on every bug.
 5. [Tracker operations](playbooks/tracker-operations.md): reads and writes on work items, and which writes need your yes.
-6. [Epic folder template](templates/epic-folder.md): one place for a large piece of work.
+6. [Epic folder template](templates/epic-folder.md): one place for a large piece of work, and the [epic satellites template](templates/epic-satellites.md) beside its hub.
+7. [Bug triage labels](triage-labels.md): the labels a triage meeting sorts bugs by.
+8. [Bug triage meeting](playbooks/bug-triage-meeting.md): prepare the sheet and apply the outcomes. A product lane draft, for M9.
+9. [Bug grooming](playbooks/bug-grooming.md): check a bug and fill its gaps before a fixer picks it up. A product lane draft, for M9.
+10. [Checking a shelved predecessor](predecessor-check.md), for a major security bug. A product lane draft, for M9.
+11. [Effort estimate](playbooks/effort-estimate.md): how big a feature is, as a range. A product lane draft, for M9.
+12. [Standup report](playbooks/standup-report.md) and the [standup log template](templates/standup-log.md): what you moved since the last standup. A product lane draft, for M9.
+13. [Pages for a product reader](product-reader-pages.md): the rules for a page a non-developer reads.
 
 Planned for M9: the request door, where a new request from outside development enters the workspace and is sized. M9 builds it from real requests.
 
@@ -72,6 +79,9 @@ Planned for M9: the request door, where a new request from outside development e
 3. [Machine self-check](machine-self-check.md): check that a machine runs the workspace's hooks, checks and tools.
 4. [Agent settings](agent-settings.md): what an agent tool may read or fetch, and how secrets reach a program.
 5. [Commits](commits.md): the subject format and the trailer.
+6. [Import a repository](playbooks/import-a-repository.md): pin a new code repository and update every page that names one. A DevOps lane draft, for M11.
+7. [Environment self-check](environment-self-check.md): check the product's local container environment on your machine. A DevOps lane draft, for M11.
+8. [Ship a new deployable](ship-a-deployable.md): infrastructure and CI for a new service, job or site. A DevOps lane draft, for M11.
 
 Planned for M11: release and rollback, how a change ships and how it is undone. M11 builds them from real work.
 

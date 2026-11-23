@@ -160,8 +160,16 @@ A page marked proven has a real run on record and an eval in which it beats both
 | [docs/playbooks/qa-verification-list.md](docs/playbooks/qa-verification-list.md) | unproven | M6 |
 | [docs/playbooks/feature-layer-walk.md](docs/playbooks/feature-layer-walk.md) | unproven | M9 |
 | [docs/saved-workflows.md](docs/saved-workflows.md) | unproven | M10 |
+| [docs/playbooks/bug-grooming.md](docs/playbooks/bug-grooming.md) | unproven | M9 |
+| [docs/playbooks/bug-triage-meeting.md](docs/playbooks/bug-triage-meeting.md) | unproven | M9 |
+| [docs/predecessor-check.md](docs/predecessor-check.md) | unproven | M9 |
+| [docs/playbooks/standup-report.md](docs/playbooks/standup-report.md) | unproven | M9 |
+| [docs/playbooks/effort-estimate.md](docs/playbooks/effort-estimate.md) | unproven | M9 |
+| [docs/playbooks/import-a-repository.md](docs/playbooks/import-a-repository.md) | unproven | M11 |
+| [docs/environment-self-check.md](docs/environment-self-check.md) | unproven | M11 |
+| [docs/ship-a-deployable.md](docs/ship-a-deployable.md) | unproven | M11 |
 
-Proven: 1. Unproven: 39.
+Proven: 1. Unproven: 47.
 
 ## What stays prose
 

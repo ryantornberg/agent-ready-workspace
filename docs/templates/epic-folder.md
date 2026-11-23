@@ -105,6 +105,8 @@ last-reviewed: YYYY-MM-DD
 
 The hub's open questions are design questions the epic has not settled. A question the workspace should have answered goes in the [question log](../question-log.md) instead.
 
+A product epic may also need questions for other teams, a tracker map or an unattended-run plan beside the hub. Their shapes are on the [epic satellites template](epic-satellites.md), a product lane draft.
+
 ## Rules
 
 | Rule | Enforced by |

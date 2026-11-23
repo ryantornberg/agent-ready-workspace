@@ -49,7 +49,12 @@ These playbooks serve one lane of work, named in each page's `lane` key: QA, pro
 |---|---|---|---|
 | QA | [Regression run](regression-run.md) | A person asks for a regression suite to run against an environment, by default their local one, and its report set to be written. | unproven, M10 |
 | QA | [Regression triage](regression-triage.md) | A regression run's report set is written and its failures need sorting and filing, in a fresh session. | unproven, M10 |
-| QA | [QA verification list](qa-verification-list.md) | You write a document QA reads, such as a QA test plan, and must choose what goes in it. | unproven, M6 |
+| QA | [QA verification list](qa-verification-list.md) | You write or check a document QA reads, such as a QA test plan, and must choose what goes in it. | unproven, M6 |
+| Product | [Bug grooming](bug-grooming.md) | A filed bug needs its claims checked, its gaps filled against the bug report template, and a size, before a fixer picks it up. | unproven, M9 |
+| Product | [Bug triage meeting](bug-triage-meeting.md) | A bug triage meeting needs its sheet prepared from the labels, or its outcomes applied afterwards. | unproven, M9 |
+| Product | [Effort estimate](effort-estimate.md) | Someone asks how big a feature is, as a range of changed lines and story points. A bug's size is grooming's. | unproven, M9 |
+| Product | [Standup report](standup-report.md) | A person asks what they moved since their last standup, as outcomes rather than commits. | unproven, M9 |
+| DevOps | [Import a repository](import-a-repository.md) | A new code repository is to be pinned under `src/`, with every page that names repositories brought up to date. | unproven, M11 |
 | Development | [Feature layer walk](feature-layer-walk.md) | You start a feature of a known type and need the list of layers it will touch, with path hints, before its slices are planned. What a change to an existing path or name reaches is impact analysis. It writes no code. | unproven, M9 |
 
 ## The page is canonical

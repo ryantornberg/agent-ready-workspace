@@ -183,3 +183,22 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b4-playbook-catalog.md](2026-11-23-b4-playbook-catalog.md) | `docs/playbooks/README.md` | contradiction, enforcement, trigger |
 | [2026-11-23-b4-how-tos.md](2026-11-23-b4-how-tos.md) | `docs/how-tos.md` | contradiction, trigger |
 | [2026-11-23-b4-templates-index.md](2026-11-23-b4-templates-index.md) | `docs/templates/README.md` | contradiction |
+| [2026-11-23-b4-bug-grooming.md](2026-11-23-b4-bug-grooming.md) | `docs/playbooks/bug-grooming.md` | step, contradiction, enforcement |
+| [2026-11-23-b4-triage-labels.md](2026-11-23-b4-triage-labels.md) | `docs/triage-labels.md` | contradiction, step, trigger, placement |
+| [2026-11-23-b4-predecessor-check.md](2026-11-23-b4-predecessor-check.md) | `docs/predecessor-check.md` | contradiction, step, trigger |
+| [2026-11-23-b4-bug-triage-meeting.md](2026-11-23-b4-bug-triage-meeting.md) | `docs/playbooks/bug-triage-meeting.md` | contradiction, step, trigger, placement |
+| [2026-11-23-b4-effort-estimate.md](2026-11-23-b4-effort-estimate.md) | `docs/playbooks/effort-estimate.md` | contradiction, enforcement, step |
+| [2026-11-23-b4-product-reader-pages.md](2026-11-23-b4-product-reader-pages.md) | `docs/product-reader-pages.md` | trigger, contradiction |
+| [2026-11-23-b4-standup-report.md](2026-11-23-b4-standup-report.md) | `docs/playbooks/standup-report.md` | contradiction, step, enforcement, placement |
+| [2026-11-23-b4-standup-log.md](2026-11-23-b4-standup-log.md) | `docs/templates/standup-log.md` | contradiction, enforcement, placement |
+| [2026-11-23-b4-epic-satellites.md](2026-11-23-b4-epic-satellites.md) | `docs/templates/epic-satellites.md` | contradiction, trigger, step, placement |
+| [2026-11-23-b4-import-a-repository.md](2026-11-23-b4-import-a-repository.md) | `docs/playbooks/import-a-repository.md` | contradiction, step, enforcement |
+| [2026-11-23-b4-environment-self-check.md](2026-11-23-b4-environment-self-check.md) | `docs/environment-self-check.md` | contradiction, step, enforcement |
+| [2026-11-23-b4-ship-a-deployable.md](2026-11-23-b4-ship-a-deployable.md) | `docs/ship-a-deployable.md` | step, contradiction |
+| [2026-11-23-b4b2-readme.md](2026-11-23-b4b2-readme.md) | `README.md` | none |
+| [2026-11-23-b4b2-playbook-catalog.md](2026-11-23-b4b2-playbook-catalog.md) | `docs/playbooks/README.md` | trigger |
+| [2026-11-23-b4b2-how-tos.md](2026-11-23-b4b2-how-tos.md) | `docs/how-tos.md` | contradiction |
+| [2026-11-23-b4b2-templates-index.md](2026-11-23-b4b2-templates-index.md) | `docs/templates/README.md` | contradiction |
+| [2026-11-23-b4b2-reading-paths.md](2026-11-23-b4b2-reading-paths.md) | `docs/reading-paths.md` | none |
+| [2026-11-23-b4b2-epic-folder.md](2026-11-23-b4b2-epic-folder.md) | `docs/templates/epic-folder.md` | contradiction, trigger |
+| [2026-11-23-b4b2-qa-test-plan.md](2026-11-23-b4b2-qa-test-plan.md) | `docs/templates/qa-test-plan.md` | contradiction |
