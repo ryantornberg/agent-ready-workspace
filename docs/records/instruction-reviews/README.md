@@ -112,3 +112,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-c5b-readme.md](2026-11-22-c5b-readme.md) | `README.md` | contradiction |
 | [2026-11-22-tfix-parts.md](2026-11-22-tfix-parts.md) | `docs/parts.md` | contradiction |
 | [2026-11-22-tfix-glossary.md](2026-11-22-tfix-glossary.md) | `docs/glossary.md` | contradiction |
+| [2026-11-22-c5e-readme.md](2026-11-22-c5e-readme.md) | `README.md` | enforcement, contradiction |
+| [2026-11-22-c5e-changing-the-machinery.md](2026-11-22-c5e-changing-the-machinery.md) | `docs/changing-the-machinery.md` | step |
+| [2026-11-22-c5e-decision-0004.md](2026-11-22-c5e-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction, placement |
+| [2026-11-22-c5e-parts.md](2026-11-22-c5e-parts.md) | `docs/parts.md` | contradiction |

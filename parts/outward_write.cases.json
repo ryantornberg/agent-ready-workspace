@@ -7343,6 +7343,367 @@
     "allow": true
   },
   {
+    "name": "git push --recurse-submodules=on-demand is refused: each submodule goes to its own remote",
+    "event": {
+      "command": "git push --recurse-submodules=on-demand origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"--recurse-submodules=on-demand\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git push --recurse-submodules only is refused",
+    "event": {
+      "command": "git push --recurse-submodules only origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"--recurse-submodules\", \"only\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git push --recurse-submodules=check goes ahead",
+    "event": {
+      "command": "git push --recurse-submodules=check origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"--recurse-submodules=check\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a bare push after gh pr checkout is refused: it may set an upstream on a fork",
+    "event": {
+      "command": "gh pr checkout 5 && git push",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {
+        "[\".\", \"gh\", [\"pr\", \"checkout\", \"5\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": null,
+          "refspecs": null,
+          "mirror": false,
+          "branch": null,
+          "main_branch": null
+        }
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push to a remote gh pr checkout may add is refused",
+    "event": {
+      "command": "gh pr checkout 5 && git push contributor HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {
+        "[\".\", \"gh\", [\"pr\", \"checkout\", \"5\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": null,
+          "refspecs": null,
+          "mirror": false,
+          "branch": null,
+          "main_branch": null
+        }
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"contributor\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "local": true,
+              "path": "contributor",
+              "url": "contributor"
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack to a URL outside the list is refused",
+    "event": {
+      "command": "git send-pack git@github.com:them/theirs.git main",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack to a local path goes ahead",
+    "event": {
+      "command": "git send-pack ../remote.git main",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git http-push to the listed repository goes ahead",
+    "event": {
+      "command": "git http-push https://github.com/me/ours main",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git send-pack to a URL that is a variable is refused",
+    "event": {
+      "command": "git send-pack \"$U\" main",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a nested group of the same last two names is another repository",
+    "event": {
+      "command": "git push origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "unresolved": null,
+        "repositories": [
+          {
+            "host": "gitlab.com",
+            "owner": "team",
+            "name": "app",
+            "path": "team/app"
+          }
+        ]
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "gitlab.com",
+              "owner": "team",
+              "name": "app",
+              "path": "othergroup/team/app",
+              "url": "https://gitlab.com/othergroup/team/app.git"
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "the listed repository by its whole path goes ahead",
+    "event": {
+      "command": "git push origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "unresolved": null,
+        "repositories": [
+          {
+            "host": "gitlab.com",
+            "owner": "team",
+            "name": "app",
+            "path": "team/app"
+          }
+        ]
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "gitlab.com",
+              "owner": "team",
+              "name": "app",
+              "path": "team/app",
+              "url": "https://gitlab.com/team/app.git"
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git remote add of a nested group outside the list is refused",
+    "event": {
+      "command": "git remote add up https://gitlab.com/othergroup/team/app.git",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "unresolved": null,
+        "repositories": [
+          {
+            "host": "gitlab.com",
+            "owner": "team",
+            "name": "app",
+            "path": "team/app"
+          }
+        ]
+      }
+    },
+    "allow": false
+  },
+  {
     "name": "git remote add of a URL outside the list is refused",
     "event": {
       "command": "git remote add upstream git@github.com:them/theirs.git",
@@ -7887,6 +8248,101 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "git mv of the list of repositories is refused",
+    "event": {
+      "command": "git mv outward-repos.json old.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git checkout of another version of the list of repositories is refused",
+    "event": {
+      "command": "git checkout HEAD~1 -- outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git restore of the list of repositories is refused",
+    "event": {
+      "command": "git restore --source=HEAD~1 outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git rm of the list of repositories is refused",
+    "event": {
+      "command": "git rm outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git checkout of a branch goes ahead",
+    "event": {
+      "command": "git checkout main",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
   },
   {
     "name": "reading the list goes ahead",

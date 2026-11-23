@@ -24,13 +24,18 @@ On every repository, this one included:
 `git remote add` and `set-url` to a URL outside the list are refused. A push is also refused when it sets one of
 the keys the guards read with `-c`, `--config-env` or a GIT_CONFIG_* variable, or sets HOME and the rest
 (wslib/gitrules.py, `config_write`), and when a call earlier in the line changes where it goes: a `git remote`
-write before any push, and for a push that names no remote, a change of branch or upstream as well.
+write, or a gh call that can add a remote such as `gh pr checkout`, before any push, and for a push that names no
+remote, a change of branch or upstream as well.
+
+It also refuses `git send-pack` and `git http-push` to a URL outside the list, a push that recurses into
+submodules on demand, and `git mv`, `rm`, `checkout` or `restore` naming the list. A URL matches an entry of the
+list by its host and its whole path, so a GitLab group nested under another is a different repository.
 
 It refuses a command it cannot judge, as the other shell guards do: a program word that is a variable, text piped
 into a shell, an alias that runs a shell command or that it could not read, a gh subcommand that is a variable
 or is not one of gh's own (a gh alias or extension may run anything), arguments that `xargs` or `find -exec` give
-gh or git push, a remote URL that is a variable, and a target the runner could not work out. A read on the list
-with arguments `xargs` supplies passes, since none of gh's arguments turns a read into a write elsewhere.
+gh or git push, a remote URL that is a variable, and a target the runner could not work out. A read subcommand
+from READS with arguments `xargs` supplies passes, since none of gh's arguments turns a read into a write.
 See docs/decisions/0004-the-hook-contract.md.
 """
 import posixpath
@@ -69,6 +74,12 @@ READS = {
 NEW_REPOSITORY = {("repo", "create"), ("repo", "fork")}
 OWNER_WRITES = {"project"}
 OWNER_FLAGS = {"--org", "-o", "--user", "-u"}
+# git subcommands that rewrite or remove the files they name: the parser does not report them as writes.
+GIT_FILE_WRITERS = {"mv", "rm", "checkout", "restore"}
+# git subcommands that push without `git push`: each names its destination as its first operand.
+PLUMBING_PUSHES = {"send-pack", "http-push"}
+# gh calls that can add a remote or set a branch's upstream, so a later push may go somewhere the guard did not see.
+GH_REMOTE_CHANGES = {("pr", "checkout"), ("pr", "co"), ("repo", "fork"), ("repo", "set-default"), ("repo", "clone")}
 # gh's own top-level commands. Any other first word is a gh alias or an extension, which may run anything.
 GH_COMMANDS = {"pr", "issue", "repo", "release", "gist", "run", "workflow", "secret", "variable", "label",
                "project", "codespace", "cs", "cache", "ruleset", "rs", "attestation", "at", "auth", "config",
@@ -100,6 +111,10 @@ def _list_write(call, name):
     writes = list(call.get("writes") or ())
     if call.get("program") in gitrules.REMOVERS:
         writes += [{"path": word, "dynamic": _dynamic(word)} for word in call.get("args") or []
+                   if not word.startswith("-")]
+    git = call.get("git") or {}
+    if git.get("subcommand") in GIT_FILE_WRITERS:
+        writes += [{"path": word, "dynamic": _dynamic(word)} for word in git.get("args") or []
                    if not word.startswith("-")]
     for write in writes:
         path = write.get("path") or ""
@@ -224,7 +239,8 @@ def _gh_read(call):
         api = gh.get("api") or {}
         if api.get("dynamic"):
             return False
-        return api.get("effective_method") == "GET" and not any(OVERRIDE.match(h or "") for h in api.get("headers") or ())
+        overridden = any(OVERRIDE.match(header or "") for header in api.get("headers") or ())
+        return api.get("effective_method") == "GET" and not overridden
     return _is_read_path(path)
 
 
@@ -232,7 +248,8 @@ def _name(destination):
     if destination.get("local"):
         return f"the local path {destination.get('path')}"
     if destination.get("owner") and destination.get("name"):
-        return f"{destination.get('host')}/{destination['owner']}/{destination['name']}"
+        path = destination.get("path") or f"{destination['owner']}/{destination['name']}"
+        return f"{destination.get('host')}/{path}"
     return destination.get("url") or f"{destination.get('host')} with no repository named"
 
 
@@ -362,11 +379,47 @@ def _remote(call, repos):
     return repos.refusal(f"git remote {remote['action']} {url} sets a remote that", destination)
 
 
+def _plumbing(call, repos):
+    """git send-pack and git http-push push without git push. They are judged by the URL they name, read as it is
+    written: git applies no insteadOf to it."""
+    git = call["git"]
+    operands = [word for word in git.get("args") or [] if not word.startswith("-")]
+    shown = f"git {git['subcommand']}"
+    if not operands or _dynamic(operands[0]) or call.get("runtime_args"):
+        return _cannot_judge(f"where {shown} pushes is not written on the line")
+    destination = gitrules.parse_url(operands[0])
+    if destination.get("local") or not repos.unlisted(destination):
+        return None
+    return repos.refusal(shown, destination)
+
+
 def _earlier_remote(calls, index):
-    """True when a git remote write runs earlier in the line than the call at index."""
+    """Why a call earlier in the line than the call at index adds or changes a remote, or None: a git remote write,
+    or a gh call that adds a remote or sets an upstream to another repository, such as gh pr checkout of a pull
+    request from a fork. A remote it adds does not exist yet when the guard asks git, so its name would read as a
+    local path."""
     for call in calls[:index]:
         git = call.get("git") or {}
         if git.get("subcommand") == "remote" and git.get("action") not in gitrules.READ_ONLY_REMOTE:
+            return "git remote earlier in the line changes a remote, which decides where a push goes"
+        path = tuple(((call.get("gh") or {}).get("path") or [])[:2])
+        if path in GH_REMOTE_CHANGES:
+            return f"gh {' '.join(path)} earlier in the line can add a remote or set an upstream"
+    return None
+
+
+def _recurses(git):
+    """True when a push also pushes submodules, each to its own remote, which the guard does not work out."""
+    args = list(git.get("args") or [])
+    for index, word in enumerate(args):
+        if word == "--":
+            break
+        value = None
+        if word.startswith("--recurse-submodules="):
+            value = word.split("=", 1)[1]
+        elif word == "--recurse-submodules" and index + 1 < len(args):
+            value = args[index + 1]
+        if value is not None and value.lower() in ("on-demand", "only"):
             return True
     return False
 
@@ -378,8 +431,12 @@ def _push(call, calls, index, event, repos):
     changed = gitrules.config_write(call, every_guarded=True)
     if changed:
         return f"{changed}. This guard cannot tell where the push goes. Run it without that setting. See {PAGE}"
-    earlier = gitrules.earlier_change(calls, index)
-    if earlier and (push.get("remote") is None or _earlier_remote(calls, index)):
+    if _recurses(call["git"]):
+        return (f"--recurse-submodules pushes each submodule to its own remote, which this guard does not work out. "
+                f"Push each repository on its own, such as with git -C src/NAME push. See {PAGE}")
+    earlier = _earlier_remote(calls, index) or (gitrules.earlier_change(calls, index)
+                                                if push.get("remote") is None else None)
+    if earlier:
         return (f"{earlier}, and the guard worked out where this push goes before that call runs. Run the two "
                 f"commands one at a time. See {PAGE}")
     fact = (event.get("destinations") or {}).get(gitrules.target_key(call))
@@ -421,6 +478,8 @@ def decide(event, config):
             refused = _remote(call, repos)
         elif git.get("subcommand") == "push":
             refused = _push(call, calls, index, event, repos)
+        elif git.get("subcommand") in PLUMBING_PUSHES:
+            refused = _plumbing(call, repos)
         else:
             refused = None
         if refused:

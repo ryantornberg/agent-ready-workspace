@@ -309,12 +309,16 @@ class TargetTests(Repositories):
         git(self.main, "config", "include.path", extra.as_posix())
         self.assertEqual(self.repos(self.target("git push origin main")), [("github.com", "octo", "included")])
 
-    def test_a_url_on_the_command_line_gets_insteadof_only(self):
+    def test_a_url_on_the_command_line_gets_pushinsteadof_then_insteadof(self):
+        """M3 slice C5e's review: git rewrites a typed URL for a push with pushInsteadOf when one matches (verified
+        on real git 2.50.1), so this test no longer expects insteadOf alone, as it did from slice C3."""
         git(self.main, "config", "url.https://github.com/octo/.insteadOf", "gh:")
         git(self.main, "config", "url.https://github.com/evil/.pushInsteadOf", "https://github.com/acme/")
         self.assertEqual(self.repos(self.target("git push gh:thing.git HEAD:main")), [("github.com", "octo", "thing")])
         self.assertEqual(self.repos(self.target("git push https://github.com/acme/x.git HEAD:main")),
-                         [("github.com", "acme", "x")])
+                         [("github.com", "evil", "x")])
+        git(self.main, "config", "url.https://github.com/pushed/.pushInsteadOf", "gh:")
+        self.assertEqual(self.repos(self.target("git push gh:thing.git HEAD:main")), [("github.com", "pushed", "thing")])
 
     def test_local_and_ssh_destinations(self):
         self.assertEqual(self.repos(self.target("git push ../bare.git main")), [("local", "../bare.git")])

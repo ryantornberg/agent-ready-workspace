@@ -29,8 +29,8 @@ for a local path or a file:// URL, {"local": True, "path", "url"}. For gh: `gh a
 repository, with {owner} and {repo} filled from GH_REPO, then gh's set-default value, then the only remote;
 for any other gh call, -R or --repo, then GH_REPO, then the set-default value, then the only remote. For a push:
 every URL git would push to, from `git remote get-url --push --all` with the command's own config values, or,
-for a URL on the command line, the URL with the longest `insteadOf` applied. With no refspec, the branch push.default
-and the upstream send, in "refspecs". Anything not modelled is unresolved. A push also gives "branch", the branch
+for a URL on the command line, the URL with the longest `pushInsteadOf` applied, else the longest `insteadOf`.
+With no refspec, the branch push.default and the upstream send, in "refspecs". Anything not modelled is unresolved. A push also gives "branch", the branch
 checked out in its folder, and "main_branch", the one checked out in the main working copy of that repository
 (M3 slice C5d). A git alias is expanded first, from the aliases read in the call's folder, so a stored alias that
 pushes has its target worked out as the guards read it (wslib/gitrules.py, `expand`).
@@ -554,10 +554,11 @@ def _push_destinations(call, cwd):
 
 
 def repositories(root, name):
-    """The outward-write list: {"file", "repositories": [{"host", "owner", "name"}], "unresolved"}. name: the file
-    the hook's config names, relative to the workspace. A missing or unreadable file, or one not in the form
-    {"repositories": ["HOST/OWNER/NAME", ...]}, gives an empty list and says why, so every write to a repository
-    is refused until a person repairs it."""
+    """The outward-write list: {"file", "repositories": [{"host", "owner", "name", "path"}], "unresolved"}. name: the
+    file the hook's config names, relative to the workspace. Each entry is HOST/PATH, the path as the repository's
+    URL gives it: OWNER/NAME on GitHub, GROUP/SUBGROUP/NAME on GitLab, ORG/PROJECT/_git/NAME on Azure Repos. A
+    missing or unreadable file, or one not in the form {"repositories": ["HOST/OWNER/NAME", ...]}, gives an empty
+    list and says why, so every write to a repository is refused until a person repairs it."""
     file = pathlib.Path(root) / name
     found = {"file": name, "repositories": [], "unresolved": None}
     try:
@@ -573,12 +574,14 @@ def repositories(root, name):
         found["unresolved"] = f'the list {name} has no "repositories" list'
         return found
     for entry in entries:
-        parts = entry.split("/") if isinstance(entry, str) else []
-        if len(parts) != 3 or not all(part.strip() for part in parts):
+        parts = entry.strip().strip("/").split("/") if isinstance(entry, str) else []
+        if len(parts) < 3 or not all(part.strip() for part in parts):
             found["repositories"] = []
-            found["unresolved"] = f"the list {name} holds {entry!r}, which is not HOST/OWNER/NAME"
+            found["unresolved"] = f"the list {name} holds {entry!r}, which is not HOST/OWNER/NAME or a longer HOST/PATH"
             return found
-        found["repositories"].append({"host": parts[0].lower(), "owner": parts[1], "name": parts[2]})
+        name_part = parts[-1][:-4] if parts[-1].endswith(".git") else parts[-1]
+        found["repositories"].append({"host": parts[0].lower(), "owner": parts[-2], "name": name_part,
+                                      "path": "/".join(parts[1:-1] + [name_part])})
     return found
 
 
@@ -688,17 +691,22 @@ def _head(where, git_dir):
 
 
 def _insteadof(config, url):
-    """A URL typed on the command line, with the longest matching insteadOf prefix applied. git applies no
-    pushInsteadOf to it."""
-    best = ("", url)
-    for key, values in config.values.items():
-        if not (key.startswith("url.") and key.endswith(".insteadof")):
-            continue
-        base = key[len("url."):-len(".insteadof")]
-        for prefix in values:
-            if prefix and url.startswith(prefix) and len(prefix) > len(best[0]):
-                best = (prefix, base + url[len(prefix):])
-    return best[1]
+    """A URL typed on the command line, rewritten as git rewrites it for a push: the longest matching pushInsteadOf
+    prefix when one matches, else the longest matching insteadOf prefix (git's remote.c, `add_url_alias`: a URL
+    given as the remote is an anonymous remote, and its push URL is the pushInsteadOf rewrite of what was typed).
+    M3 slice C5e: until then only insteadOf was applied, which its instruction review found git does not do."""
+    for suffix in (".pushinsteadof", ".insteadof"):
+        best = ("", None)
+        for key, values in config.values.items():
+            if not (key.startswith("url.") and key.endswith(suffix)):
+                continue
+            base = key[len("url."):-len(suffix)]
+            for prefix in values:
+                if prefix and url.startswith(prefix) and len(prefix) > len(best[0]):
+                    best = (prefix, base + url[len(prefix):])
+        if best[1] is not None:
+            return best[1]
+    return url
 
 
 def _refspec(text):

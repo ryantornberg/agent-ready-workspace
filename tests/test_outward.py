@@ -93,6 +93,23 @@ class PushTests(Repository):
         git(self.repo, "config", f"url.git@github.com:them/theirs.git.pushInsteadOf", self.remote.as_posix())
         self.assertRefused("git push origin HEAD", "github.com/them/theirs")
 
+    def test_pushinsteadof_applies_to_a_url_on_the_command_line(self):
+        """The instruction review's finding: git rewrites a typed URL with pushInsteadOf for a push."""
+        git(self.repo, "config", "url.https://github.com/them/.pushInsteadOf", "../")
+        self.assertRefused(f"git push ../{self.remote.name} HEAD", "github.com/them/")
+        self.assertRefused(f"git push --dry-run ../{self.remote.name} HEAD" + " && git push ../x HEAD")
+
+    def test_a_nested_group_is_matched_by_its_whole_path(self):
+        self.write_list(["gitlab.com/team/app"])
+        git(self.repo, "remote", "add", "lab", "https://gitlab.com/team/app.git")
+        git(self.repo, "remote", "add", "near", "https://gitlab.com/othergroup/team/app.git")
+        self.assertPasses("git push lab HEAD")
+        self.assertRefused("git push near HEAD", "gitlab.com/othergroup/team/app")
+
+    def test_submodules_pushed_on_demand_are_refused(self):
+        self.assertRefused("git push --recurse-submodules=on-demand origin HEAD", "submodule")
+        self.assertPasses("git push --recurse-submodules=check origin HEAD")
+
     def test_push_default_and_push_remote(self):
         git(self.repo, "remote", "add", "up", "https://github.com/them/theirs.git")
         git(self.repo, "config", "remote.pushDefault", "up")

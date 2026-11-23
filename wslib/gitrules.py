@@ -599,18 +599,24 @@ def parse_url(url):
 
 
 def _repository(host, path, url):
+    """owner and name are the URL's last two segments; path is the whole repository path, so a group nested on
+    GitLab or an Azure Repos project is told apart from another of the same last two names."""
     parts = [part for part in path.split("/") if part]
     if len(parts) < 2:
         return {"host": host, "owner": None, "name": None, "url": url}
     name = parts[-1][:-4] if parts[-1].endswith(".git") else parts[-1]
-    return {"host": host, "owner": parts[-2], "name": name, "url": url}
+    return {"host": host, "owner": parts[-2], "name": name, "url": url, "path": "/".join(parts[:-1] + [name])}
+
+
+def _path(place):
+    return (place.get("path") or f"{place.get('owner')}/{place.get('name')}").strip("/").lower()
 
 
 def listed(destination, repositories):
-    """True when a destination names one of the repositories, each {"host", "owner", "name"}, compared without
-    regard to case, as GitHub compares them. A destination with no owner or name is never listed."""
+    """True when a destination names one of the repositories: the same host and the same whole repository path,
+    OWNER/NAME on GitHub, compared without regard to case, as GitHub compares them. A destination with no owner or
+    name is never listed."""
     if not destination.get("owner") or not destination.get("name"):
         return False
-    key = ((destination.get("host") or "").lower(), destination["owner"].lower(), destination["name"].lower())
-    return any(key == ((entry.get("host") or "").lower(), (entry.get("owner") or "").lower(),
-                       (entry.get("name") or "").lower()) for entry in repositories or ())
+    key = ((destination.get("host") or "").lower(), _path(destination))
+    return any(key == ((entry.get("host") or "").lower(), _path(entry)) for entry in repositories or ())
