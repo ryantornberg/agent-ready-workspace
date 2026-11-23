@@ -702,5 +702,39 @@
   "expect": [
    "deletes docs/a.md, which kit.lock.json still holds"
   ]
+ },
+ {
+  "name": "an upgrade's commit may name a record for the README row it corrects beside the kit's reason",
+  "files": {},
+  "config": {
+   "guidance": [
+    "README.md",
+    "docs/"
+   ],
+   "except": [
+    "docs/records/",
+    "docs/plans/"
+   ]
+  },
+  "pushed": [
+   {
+    "commit": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+    "subject": "chore: take kit 0.4.0",
+    "message": "chore: take kit 0.4.0\n\nInstructions-review: skipped: as the kit wrote it\nInstructions-review: docs/records/instruction-reviews/2026-11-23-row.md\n",
+    "paths": [
+     "docs/a.md",
+     "README.md",
+     "kit.lock.json",
+     "docs/records/instruction-reviews/2026-11-23-row.md"
+    ],
+    "files": {
+     "docs/a.md": "# A\n\nThe kit's page, now unproven.\n",
+     "README.md": "# Ours\n\n| [docs/a.md](docs/a.md) | unproven |\n",
+     "kit.lock.json": "{\"kit\": {\"version\": \"0.3.0\", \"commit\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"changed\": false}, \"files\": {\"docs/a.md\": {\"class\": \"synced\", \"hash\": \"sha256:4aba95114b1aa27574f2349714c74b2d8c06c69fad98ab8de85153d3f6732228\"}, \"README.md\": {\"class\": \"seeded\", \"hash\": \"sha256:55bfcba6326329972f32ce58bf0027b5af8dd721ceec4803a226bf67b0c245dc\"}}, \"proof\": {}, \"cases\": []}",
+     "docs/records/instruction-reviews/2026-11-23-row.md": "---\nkind: record\nlast-reviewed: 2026-11-23\ncovers: README.md\nreviewed-at: x\n---\n\n# Instruction review: README.md\n"
+    }
+   }
+  ],
+  "expect": []
  }
 ]

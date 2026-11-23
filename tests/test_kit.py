@@ -286,6 +286,42 @@ class UpgradeTests(unittest.TestCase):
         self.assertIn("  removed docs/browsers.md", report)
         self.assertIn("  new parts, which run only once workspace.json uses them: kit_test_part", report)
 
+    def test_an_upgrade_that_changes_a_proof_state_commits_with_its_readme_row_reviewed(self):
+        hooks = ("-c", "core.hooksPath=.githooks")
+        git(self.instance, "add", "--all")
+        first = git(self.instance, *hooks, "commit", "--quiet", "-m",
+                    "chore: make the workspace from the kit\n\nInstructions-review: skipped: as the kit wrote it")
+        self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+        playbook = self.new / "docs/playbooks/fix-a-bug.md"
+        text = playbook.read_text(encoding="utf-8").split("\n")
+        text = [("prove-by: M9" if line.startswith("proven-by: ") else
+                 "proof: unproven" if line == "proof: proven" else line) for line in text]
+        playbook.write_text("\n".join(text), encoding="utf-8")
+        git(self.new, "add", "--all")
+        git(self.new, "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "--no-verify", "-m", "chore: demoted")
+        kit.upgrade(self.new, self.instance)
+        readme = self.instance / "README.md"
+        row = "| [docs/playbooks/fix-a-bug.md](docs/playbooks/fix-a-bug.md) | proven |"
+        self.assertIn(row, readme.read_text(encoding="utf-8"))
+        readme.write_text(readme.read_text(encoding="utf-8").replace(row, row.replace("| proven |", "| unproven |")),
+                          encoding="utf-8")
+        record = "docs/records/instruction-reviews/2026-11-23-readme-row.md"
+        (self.instance / record).write_text(
+            "---\nkind: record\nlast-reviewed: 2026-11-23\ncovers: README.md\nreviewed-at: HEAD\n---\n\n"
+            "# Instruction review: README.md\n\nThe review of the proof table's row after an upgrade.\n\n"
+            "**In short:** no findings.\n\n## Scope\n\nThe changed row.\n\n## Findings\n\n"
+            "| # | Class | Where | Finding | Disposition |\n|---|---|---|---|---|\n\nNo findings.\n\n"
+            "## Checked with no finding\n\n- step: the row names the page's state.\n", encoding="utf-8")
+        index = self.instance / "docs/records/instruction-reviews/README.md"
+        index.write_text(index.read_text(encoding="utf-8").rstrip("\n") +
+                         "\n| [2026-11-23-readme-row.md](2026-11-23-readme-row.md) | `README.md` | none |\n",
+                         encoding="utf-8")
+        git(self.instance, "add", "--all")
+        made = git(self.instance, *hooks, "commit", "--quiet", "-m",
+                   f"chore: take the newer kit\n\nInstructions-review: skipped: as the kit wrote it\n"
+                   f"Instructions-review: {record}")
+        self.assertEqual(made.returncode, 0, made.stdout + made.stderr)
+
     def test_it_refuses_on_drift_and_changes_nothing(self):
         with open(self.instance / "docs/parts.md", "a", encoding="utf-8") as handle:
             handle.write("\nA hand edit.\n")

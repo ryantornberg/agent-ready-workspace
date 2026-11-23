@@ -8,9 +8,10 @@ several trailers. A skip reason excuses every guidance page no named record cove
 real.
 
 "as the kit wrote it" is for an instance made from the kit: its first commit, and the commit of an upgrade, which
-bring pages the kit's own reviews read (decision record 0007). It is checked, not taken on trust: each guidance
-page the commit leaves in the tree must match the hash the commit's kit.lock.json holds for it as synced or
-seeded, and each page the commit deletes must be one that lock no longer holds.
+bring pages the kit's own reviews read (decision record 0007). It is checked against the commit's kit.lock.json:
+each guidance page the commit leaves in the tree must match the hash that lock holds for it as synced or seeded,
+and each page the commit deletes must be one that lock no longer holds. A page a record the commit names covers is
+judged by that record instead, such as the README's proof table corrected in an upgrade's commit.
 
 A guidance page is a path that matches "guidance" and not "except": patterns in the form direct_push uses (a
 path ending in "/" is a folder and everything under it; "*" matches within one folder).
@@ -106,14 +107,13 @@ def judge(commit, guidance, outside, folder):
                                      f"Run the review, then add the line 'Instructions-review: <record path>' to the "
                                      f"message, or 'Instructions-review: skipped: <reason>' with a reason from "
                                      f"{', '.join(REASONS)}; see {PAGE}")]
-    found, covered, skipped = [], set(), False
+    found, covered, skipped, kit = [], set(), False, False
     for value in values:
         skip = SKIP.match(value)
         if skip:
             reason = skip.group(1).strip().lower()
             if reason == KIT:
-                found += _as_the_kit_wrote_it(name, pages, files)
-                skipped = True
+                kit = skipped = True
             elif reason in REASONS:
                 skipped = True
             else:
@@ -135,6 +135,8 @@ def judge(commit, guidance, outside, folder):
                                               f"on this change and commit its record with it; see {PAGE}"))
         else:
             covered |= covers(files.get(record))
+    if kit and not found:
+        found += _as_the_kit_wrote_it(name, [page for page in pages if page not in covered], files)
     if found or skipped:
         return found
     left = [page for page in pages if page in files and page not in covered]
@@ -147,6 +149,8 @@ def judge(commit, guidance, outside, folder):
 
 def _as_the_kit_wrote_it(name, pages, files):
     """Findings for each guidance page the commit changes that is not as the commit's kit lock holds it."""
+    if not pages:
+        return []
     try:
         lock = json.loads(files.get(kitlock.LOCK) or "")
         entries = lock["files"]

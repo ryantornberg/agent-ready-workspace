@@ -46,4 +46,4 @@ The check accepts this form: it looks for the pinned package and `--isolated` am
 - **The server writes page snapshots to `.playwright-mcp/`** in the folder it starts in. Git ignores that folder.
 - **A running session keeps its old server.** Restart the session after the config changes.
 - **Claude Code asks once.** An interactive session asks you to approve the project's server the first time it appears.
-- **Codex is not shown loading it yet.** The check holds Codex's config to the same rule, but no recorded Codex run here shows the server starting. A recorded Claude Code session does: [tests/records/claude-code-browser-session.json](../tests/records/claude-code-browser-session.json).
+- **Codex is not shown loading it yet.** The check holds Codex's config to the same rule, but no recorded Codex run here shows the server starting. A recorded Claude Code session in the kit's tests does: `tests/records/claude-code-browser-session.json`.

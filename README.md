@@ -37,7 +37,7 @@ python3 tools/symbols.py ReconciliationWorker src                         # file
 
 Rename the class in `src/orders-api/ReconciliationWorker.cs` and `python3 ws.py check` fails, because the index still sends agents to the old name. Edit `docs/playbooks/fix-a-bug.md` and it fails again, because the playbook no longer matches its last passing eval run. Both changes are easy to undo with `git checkout`.
 
-To run the checks before every commit, and on every commit message:
+To run the checks before every commit, and on every commit message, a person runs this from their own terminal; the guards refuse an agent's change to git config:
 
 <!-- setup -->
 ```
@@ -58,13 +58,14 @@ git config core.hooksPath .githooks
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [EVIDENCE.md](EVIDENCE.md), [CHANGELOG.md](CHANGELOG.md) | What each claim rests on and how to re-run it; what changed in each version. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
+| `kit/` | What `python3 ws.py adopt` gives a new instance: each file's class, and the seed files it writes in place of this repository's own. See [decision 0007](docs/decisions/0007-the-kit.md). |
 
 ## What is checked, and by what
 
 | Rule | Enforced by | When |
 |---|---|---|
 | A link points at a real file and heading, and on the pages the manifest opts in, a backticked path such as `src/orders-api` exists. A link that cannot resolve on purpose is exempted in the manifest by page and target, with a reason; an exemption with no reason or target, or one that no longer tolerates anything, fails. | `links` check | Commit, CI |
-| A fresh clone works by following the README's marked setup steps alone: the checks and the tests pass on it. | The `cold-clone` job, on Linux and macOS | Nightly; a pull request or a push to main that changes the README or the job |
+| A fresh clone works by following the README's marked setup steps alone: the checks and the tests pass on it. An instance adopted from that clone works by following its own README's marked steps alone. | The `cold-clone` job, on Linux and macOS | Nightly; a pull request or a push to main that changes a setup page (the README or the kit's seed README), the script that reads them, or the job |
 | Whoever edits a page past its review date reviews it. `AGENTS.md`, `INDEX.md` and every page under `docs/` carry a date. Every page under `docs/` names its kind, carries the front matter its kind needs, and opens with its title, a purpose sentence of 25 words or fewer and its **In short** line. | `page_kinds` check | Commit, CI |
 | Every path in the index's cross-cutting chains exists; the Copilot and opencode pointer files name the contract and the rule pages; the always-loaded layer stays under its ceilings. | `chains`, `pointers` and `loaded_size` checks | Commit, CI |
 | Every rule in a rules table is tagged with how it is enforced, and a tag that names a part or case is true. `python3 ws.py rules` prints the register. | `rules` check | Commit, CI |
@@ -107,6 +108,7 @@ git config core.hooksPath .githooks
 | A hook refuses an event it cannot read, and a guard's wiring refuses when Python is missing, too old or crashes. Hooks, git hooks and CI start Python only through the launcher, once per call. | The runner and `wslib/launch.sh` | Every hook call |
 | No guard on a tool call, a commit or a push turns off when one environment variable is unset. Every hook that refuses a tool call, and the commit, message and push checks, still refuse with any one variable of the test's `VARIABLES` list removed: every variable the workspace reads by name, and some that git, gh, Python and the shell read to find themselves or their config. A few make a guard refuse for another reason, such as Claude Code's wiring, which cannot find the launcher without `CLAUDE_PROJECT_DIR`. One opt-out is intended: with `WS_DENY_LIST` unset and no list at `~/.config/agent-ready-workspace/deny-list.txt`, the `deny_list` check warns and checks nothing, since CI and a clone on another machine have no private list. | `tests/test_not_inherited.py` | CI, on Linux, macOS and Windows |
 | A commit check killed mid-run, with everything it started, leaves no temporary file, worktree or lock: it reads the staged files in memory and writes no file of its own. | `tests/test_not_inherited.py` | CI, on Linux, macOS and Windows |
+| In an instance made from the kit, every file the kit owns is as the kit shipped it, until a person keeps the instance's own copy with `python3 ws.py drift --keep PATH`, and a synced page's proof marks are the kit's. `python3 ws.py adopt PATH` makes an instance whose checks pass, with no repository on its outward-write list; an upgrade replaces the files the kit owns, and refuses while any is edited. See [decision 0007](docs/decisions/0007-the-kit.md). | `kit_drift` and `proof` checks; `ws.py drift`; `tests/test_kit.py` | Commit, CI; on demand; CI, on Linux, macOS and Windows |
 | A check may tolerate a recorded list of known findings, and still fails on any new one. | `baselines/`, read by the runner | Commit, CI |
 | A part's own cases pass, at the level each finding states. | The runner | Every command that loads the part. A hook call loads only the hooks for its event. |
 | A part leaves the manifest only when it is retired with a reason. | The runner | Commit, CI |
@@ -208,15 +210,17 @@ In the recorded runs, fifteen per arm in each of the three cases on a small mode
 
 Start at [adopt the workspace](docs/adopt-the-workspace.md): its steps run the ones below inside a plan a person approves, add a machine self-check and a check that the adoption is done, and say what transfers to your copy and what does not.
 
+Make your copy with the kit. From this repository, `python3 ws.py adopt PATH` writes an instance into PATH, an empty folder. It holds the files the kit owns, a first copy of the files that become yours, and none of this workspace's plans, records or recordings. Its own README carries the steps below. It starts with no repository on its `outward-repos.json` and a `kit.lock.json` that records what the kit gave it. In the instance, `python3 ws.py drift` names any file the kit owns that was edited. From a newer kit, `python3 ws.py upgrade PATH` replaces the files the kit owns, and refuses while any is edited. [Decision 0007](docs/decisions/0007-the-kit.md) says which files are whose.
+
 1. Replace the facts in `AGENTS.md` with the ones a model gets wrong about your code. Leave out anything it gets right from the code alone.
 2. Put your code repositories under `src/` as submodules, and remove the samples. Add `submodules: true` to the checkout step in `.github/workflows/ci.yml`. The checks do not read the pages inside them, so their own links and dates do not fail yours. On a fresh clone, `python3 ws.py pins` checks out each one whose remote answers. It asks for no password, gives each remote ten seconds, skips one it cannot reach with a note, and never touches a folder that already holds a checkout or any files.
 3. Fill the alias table from the words your team actually says.
 4. Write a playbook for the task you repeat most, and one eval case for it.
 5. Start the question log. Each entry is a gap; fix the page, then note the fix.
-6. Put your own repositories in `outward-repos.json`, each as its host and its whole path as the repository's URL gives it: `github.com/your-team/your-workspace`, a GitLab project in a subgroup as `gitlab.com/group/subgroup/project`, an Azure Repos repository as `dev.azure.com/org/project/_git/repo`. Remove this one. Agents write only to the repositories listed there, so the copy's own repository goes first. A person edits the file from their own terminal; the guards refuse an agent's edit. It is machinery, so the change reaches main through a pull request.
+6. Put your own repositories in `outward-repos.json`, each as its host and its whole path as the repository's URL gives it: `github.com/your-team/your-workspace`, a GitLab project in a subgroup as `gitlab.com/group/subgroup/project`, an Azure Repos repository as `dev.azure.com/org/project/_git/repo`. Remove this one. Agents write only to the repositories listed there, so the copy's own repository goes first. An instance the kit makes starts with none listed, so there is nothing to remove. A person edits the file from their own terminal; the guards refuse an agent's edit. It is machinery, so the change reaches main through a pull request.
 7. If your copy lives on GitHub, set two things in the repository's Settings. Under Pull Requests, keep "Allow merge commits" on, and turn "Allow squash merging" and "Allow rebase merging" off. A squash or rebase merge drops a branch's own commits from main's history, and a proof anchor pinned to one of them with it; the setting also covers a merge from the web page. Under Branches, give main a rule that requires your CI jobs to pass. `python3 ws.py merge NUMBER`, the way an agent merges, refuses every pull request while the rule requires no check. See [changing the machinery](docs/changing-the-machinery.md#the-path-for-a-machinery-change).
 
-Steps 1 and 3 change what the eval's guided arm is given, so `eval_record` fails until the eval runs again. The three sample cases test the invented order system, so replace them with cases from your own code in step 4 and record those with `evals/run.py`.
+In a copy made by hand, steps 1 and 3 change what the eval's guided arm is given, so `eval_record` fails until the eval runs again. The three sample cases test the invented order system, so replace them with cases from your own code in step 4 and record those with `evals/run.py`. An instance the kit makes has no case, so nothing fails until it writes its own; [decision 0007](docs/decisions/0007-the-kit.md) says why.
 
 Add a part when the same mistake shows up twice.
 
