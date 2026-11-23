@@ -78,6 +78,8 @@ OWNER_FLAGS = {"--org", "-o", "--user", "-u"}
 GIT_FILE_WRITERS = {"mv", "rm", "checkout", "restore"}
 # git subcommands that push without `git push`: each names its destination as its first operand.
 PLUMBING_PUSHES = {"send-pack", "http-push"}
+# Their options that take the next word as a value, when not written with "=".
+PLUMBING_VALUES = {"--receive-pack", "--exec", "--push-option", "-o", "--signed", "--force-with-lease"}
 # gh calls that can add a remote or set a branch's upstream, so a later push may go somewhere the guard did not see.
 GH_REMOTE_CHANGES = {("pr", "checkout"), ("pr", "co"), ("repo", "fork"), ("repo", "set-default"), ("repo", "clone")}
 # gh's own top-level commands. Any other first word is a gh alias or an extension, which may run anything.
@@ -383,7 +385,14 @@ def _plumbing(call, repos):
     """git send-pack and git http-push push without git push. They are judged by the URL they name, read as it is
     written: git applies no insteadOf to it."""
     git = call["git"]
-    operands = [word for word in git.get("args") or [] if not word.startswith("-")]
+    operands, skip = [], False
+    for word in git.get("args") or []:
+        if skip:
+            skip = False
+        elif word in PLUMBING_VALUES:
+            skip = True                      # its value is the next word, not the destination
+        elif not word.startswith("-"):
+            operands.append(word)
     shown = f"git {git['subcommand']}"
     if not operands or _dynamic(operands[0]) or call.get("runtime_args"):
         return _cannot_judge(f"where {shown} pushes is not written on the line")
@@ -409,17 +418,26 @@ def _earlier_remote(calls, index):
 
 
 def _recurses(git):
-    """True when a push also pushes submodules, each to its own remote, which the guard does not work out."""
+    """True when a push also pushes submodules, each to its own remote, which the guard does not work out: the
+    option in any prefix git accepts (`--recu` on), or `submodule.recurse` or `push.recurseSubmodules` given on the
+    command line by -c, --config-env or GIT_CONFIG_*."""
     args = list(git.get("args") or [])
     for index, word in enumerate(args):
         if word == "--":
             break
-        value = None
-        if word.startswith("--recurse-submodules="):
-            value = word.split("=", 1)[1]
-        elif word == "--recurse-submodules" and index + 1 < len(args):
-            value = args[index + 1]
-        if value is not None and value.lower() in ("on-demand", "only"):
+        name, equals, value = word.partition("=")
+        if not (len(name) >= len("--recu") and "--recurse-submodules".startswith(name)):
+            continue
+        if not equals:
+            value = args[index + 1] if index + 1 < len(args) else ""
+        if value.lower() in ("on-demand", "only"):
+            return True
+    for entry in git.get("config") or ():
+        key = (entry.get("key") or "").lower()
+        value = (entry.get("value") or "true").lower() if not entry.get("dynamic") else "on-demand"
+        if key == "submodule.recurse" and value not in ("false", "no", "off", "0"):
+            return True
+        if key == "push.recursesubmodules" and value in ("on-demand", "only"):
             return True
     return False
 

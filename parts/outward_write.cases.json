@@ -7407,6 +7407,134 @@
     "allow": false
   },
   {
+    "name": "git push --recurse=on-demand, a prefix git accepts, is refused",
+    "event": {
+      "command": "git push --recurse=on-demand origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"--recurse=on-demand\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git push --recu on-demand is refused",
+    "event": {
+      "command": "git push --recu on-demand origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"push\", \"--recu\", \"on-demand\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-c submodule.recurse=true on a push is refused",
+    "event": {
+      "command": "git -c submodule.recurse=true push origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"-c\", \"submodule.recurse=true\", \"push\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "-c submodule.recurse=false on a push goes ahead",
+    "event": {
+      "command": "git -c submodule.recurse=false push origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "destinations": {
+        "[\".\", \"git\", [\"-c\", \"submodule.recurse=false\", \"push\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null
+        }
+      }
+    },
+    "allow": true
+  },
+  {
     "name": "git push --recurse-submodules=check goes ahead",
     "event": {
       "command": "git push --recurse-submodules=check origin HEAD",
@@ -7557,6 +7685,44 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "git send-pack whose --receive-pack value comes first is judged by its URL",
+    "event": {
+      "command": "git send-pack --receive-pack git-receive-pack git@github.com:them/theirs.git main",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack with --receive-pack= to a local path goes ahead",
+    "event": {
+      "command": "git send-pack --receive-pack=git-receive-pack ../remote.git main",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
   },
   {
     "name": "git send-pack to a local path goes ahead",

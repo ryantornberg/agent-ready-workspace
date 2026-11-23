@@ -496,6 +496,8 @@ def _push_target(call, cwd):
     folder = _place(cwd, git.get("folder"))
     if folder is None:
         return _fact(unresolved=git.get("folder_unresolved") or "the folder cannot be placed")
+    if not folder.exists():
+        return _fact(unresolved=f"the folder {git.get('folder')} does not exist yet, so its remotes cannot be read")
     where = ["--git-dir", str(folder)] if git.get("git_dir") else ["-C", str(folder)]
     config_args = _config_args(git)
     if config_args is None:
@@ -533,6 +535,8 @@ def _push_destinations(call, cwd):
     folder = _place(cwd, git.get("folder"))
     if folder is None:
         return _fact(unresolved=git.get("folder_unresolved") or "the folder cannot be placed")
+    if not folder.exists():
+        return _fact(unresolved=f"the folder {git.get('folder')} does not exist yet, so its remotes cannot be read")
     where = ["--git-dir", str(folder)] if git.get("git_dir") else ["-C", str(folder)]
     config_args = _config_args(git)
     if config_args is None:
@@ -547,6 +551,8 @@ def _push_destinations(call, cwd):
                 return _fact([parse_url(url) for url in found[1].splitlines() if url.strip()], remote=remote)
             if found[0] != 2:                 # 2: no such remote, so the word is a URL
                 return _fact(unresolved=f"git cannot say where the remote {remote} pushes")
+            if _bare_name(remote):
+                return _fact(unresolved=_NO_REMOTE.format(remote, remote))
             return _fact([parse_url(_insteadof(_Config(where, config_args), remote))])
         return _push_resolved(where, config_args, push)
     except TimeoutError:
@@ -604,6 +610,8 @@ def _push_resolved(where, config_args, push):
         urls = [line for line in found[1].splitlines() if line.strip()]
         mirror = (config.get(f"remote.{remote}.mirror") or "").lower() in ("true", "yes", "on", "1")
         configured = [line for line in config.get_all(f"remote.{remote}.push") if line.strip()]
+    elif _bare_name(remote):
+        return _fact(unresolved=_NO_REMOTE.format(remote, remote), remote=remote, branch=branch, main_branch=main_branch)
     else:
         urls, mirror, configured = [_insteadof(config, remote)], False, []
     refspecs = None
@@ -618,6 +626,17 @@ def _push_resolved(where, config_args, push):
                              main_branch=main_branch)
     return _fact([parse_url(url) for url in urls], remote=remote if remote in remotes else None, refspecs=refspecs,
                  mirror=mirror, branch=branch, main_branch=main_branch)
+
+
+_NO_REMOTE = ("no remote named {} exists when the guard asks git, so the push may go to a remote made earlier in the "
+              "line; a local path is written with a slash, such as ./{}")
+
+
+def _bare_name(word):
+    """True for a word git would read as a remote's name, not a URL or a path: no slash, no colon, not . or .. and
+    no ~. Such a word that names no remote now may name one a call earlier in the line makes (M3 slice C5e)."""
+    return "/" not in word and ":" not in word and "\\" not in word and word not in (".", "..") \
+        and not word.startswith("~")
 
 
 def _config_key(key):

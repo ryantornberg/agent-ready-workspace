@@ -1975,5 +1975,59 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "git config submodule.recurse is refused, since every later push would send each submodule to its own remote",
+    "event": {
+      "command": "git config submodule.recurse true",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git config --global submodule.recurse is refused",
+    "event": {
+      "command": "git config --global submodule.recurse true",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git -c submodule.recurse on a call passes here: the guard that decides on the call judges it",
+    "event": {
+      "command": "git -c submodule.recurse=true status",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
   }
 ]

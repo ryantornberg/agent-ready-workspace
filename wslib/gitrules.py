@@ -187,9 +187,11 @@ def _config_file(absolute, files):
 
 # Keys a persistent `git config` write may not set, beyond A0's list in wslib/shell.py: core.hooksPath points git
 # at another hooks folder, which turns off every commit and push check (M3 slice C5d, the maintainer's answer to
-# Q16). Kept here, outside the eval's hash, until slice Z moves it into `guarded_key`. A -c value lasts one call,
-# like --no-verify, so it is not counted.
-PERSISTENT_ONLY = {"core.hookspath"}
+# Q16). submodule.recurse makes every later push send each submodule to its own remote, which the outward-write
+# guard does not work out (M3 slice C5e). Kept here, outside the eval's hash, until slice Z moves them into
+# `guarded_key`. A -c value lasts one call, like --no-verify, so it is not counted here; the guard it concerns
+# judges it.
+PERSISTENT_ONLY = {"core.hookspath", "submodule.recurse"}
 
 
 def _persistent_only(key):

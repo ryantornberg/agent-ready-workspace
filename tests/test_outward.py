@@ -108,7 +108,15 @@ class PushTests(Repository):
 
     def test_submodules_pushed_on_demand_are_refused(self):
         self.assertRefused("git push --recurse-submodules=on-demand origin HEAD", "submodule")
+        self.assertRefused("git push --recurse=on-demand origin HEAD", "submodule")
+        self.assertRefused("git -c submodule.recurse=true push origin HEAD", "submodule")
         self.assertPasses("git push --recurse-submodules=check origin HEAD")
+
+    def test_a_remote_that_does_not_exist_yet_is_refused(self):
+        """The re-check's finding: a remote made earlier in the line, here by a clone, read as a local path."""
+        self.assertRefused("git clone https://github.com/them/theirs t && git -C t push", "does not exist yet")
+        self.assertRefused("git push upstream HEAD", "no remote named upstream")
+        self.assertPasses(f"git push {self.remote.as_posix()} HEAD")
 
     def test_push_default_and_push_remote(self):
         git(self.repo, "remote", "add", "up", "https://github.com/them/theirs.git")
