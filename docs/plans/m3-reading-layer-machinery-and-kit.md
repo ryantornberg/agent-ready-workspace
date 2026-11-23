@@ -1469,7 +1469,7 @@ Next: a B3 session builds B3's two opening changes; B2t follows once they merge.
 
 B7 starts after B2t merges, not on these reads alone.
 
-### B3, templates and records: stopped after its two opening changes
+### B3, templates and records: stopped at batches 1 and 2's re-check
 
 Built at the worker tier on 2026-11-22, with its two checks at the driver tier, in the main working copy, which no other session held. The opening changes went straight to main as `a6159d7`. The slice's own session wrote them, since every later page links their rules; five worker-tier helpers wrote batches 1 and 2 from a shared-interface sheet; fresh driver-tier sessions reviewed and re-checked. No file the eval hashes was edited. The maintainer's order for lane B is recorded under "Changes after approval" as `0d7c926`.
 
@@ -1500,6 +1500,54 @@ Proposed revision (template rule 7): lane B's stop rule names three triggers, bu
 Not done: batches 1 and 2's instruction reviews, fix round and re-check, and their commit; the `claim_marks` and `plan_budgets` pull request; the question log's gap kinds and the kickoff prompt; and the private ledger's moves for B3's rows, since none of their pages reached main.
 Parked: Q30.
 Next: the maintainer — answer Q30 in the workspace queue on how B3 resumes, then a B3 session resumes from the worktree.
+
+#### Resumed, 2026-11-22
+
+Resumed under the maintainer's answer to Q30, recorded under "Changes after approval" as `d8f83d2` before any fix. The slice's own session ran at the driver tier and orchestrated; worker-tier helpers made the batches' fix round; fresh driver-tier sessions reviewed and re-checked. No file the eval hashes was edited. The slice stopped again under lane B's stop rule.
+
+- **Verified, procedure endings' second fix round:** the four items its re-check found are fixed, on main as `1d4ca7d`. When main has moved and the main copy holds an uncommitted change, the push now goes from a throwaway worktree of `origin/main`, and `git reset --keep origin/main` brings the main copy up without touching the change. A scratch repository showed both the path and its refused reset. The rows left in the question log get an owner, the person, and the code row states its own rule.
+- **Verified, its fresh re-check:** all four fixes hold, and nothing blocking was found. Its seven non-blocking items are in [the record's "Known defects"](../records/instruction-reviews/2026-11-22-b3-procedure-endings.md#known-defects), for the docs audit, since the plan allows the page no third round.
+- **Verified, built:** the question log gains its three kinds of gap (could not find, did not understand, not there) and the kickoff prompt a newcomer starts from. It is on branch `m3/b3-claim-marks`, with the batch pages.
+- **Verified, the review of batches 1 and 2:** 19 records, 81 findings, 11 of them blocking. The one fix round fixed 71, including all 11 blocking; 6 were declined, 3 queued for slice Z and 1 deferred to M4. Fixes to shared rules swept seven more pages: extend, maintain the workspace, the how-to index, the instruction review, tracker and git-host operations, and escape analysis. Each got a record of its own from the re-check: 15 findings, 1 blocking.
+- **Verified, the stop rule fired:** the fresh re-check found 9 blocking things the fixes created. No first-round blocking finding survived, and no decline was rejected.
+
+| Page | Findings | Blocking | Fixed | Not fixed | Blocking, at the re-check |
+|---|---|---|---|---|---|
+| Hand-off plan template | 3 | 0 | 2 | 1 deferred to M4 | 0 |
+| Spec template | 6 | 0 | 6 | 0 | 0 |
+| Project hub template | 4 | 0 | 4 | 0 | 0 |
+| Epic folder template | 5 | 2 | 5 | 0 | 0 |
+| Unit doc template | 4 | 0 | 4 | 0 | 0 |
+| Bug report template | 5 | 1 | 4 | 1 declined | 1: `gh issue create --repo` lets an agent file on any repository, which the outward-write rule forbids |
+| Pull request template | 8 | 3 | 7 | 1 declined | 0 |
+| Fresh-session prompt | 2 | 1 | 2 | 0 | 0 |
+| Fix record template | 6 | 0 | 4 | 1 declined, 1 queued | 1: the record lives on the fix's branch, while the review orchestrator appends to it on main, where no copy exists and `claim_marks` refuses one |
+| Defect register template | 5 | 0 | 3 | 1 declined, 1 queued | 0 |
+| Lessons log template | 3 | 0 | 3 | 0 | 0 |
+| Templates index | 3 | 0 | 2 | 1 queued | 0 |
+| Style guide | 6 | 0 | 5 | 1 declined | 0 |
+| Reader standard | 5 | 1 | 4 | 1 declined | 0 |
+| Layout | 2 | 0 | 2 | 0 | 0 |
+| README | 1 | 0 | 1 | 0 | 0 |
+| Parts | 2 | 0 | 2 | 0 | 0 |
+| Handoff | 6 | 2 | 6 | 0 | 2: step 2 commits on main, which needs a branch switch that fails from a task branch with uncommitted changes; the throwaway-worktree commit never fetches, so a moved main refuses its push |
+| Review orchestrator | 5 | 1 | 5 | 0 | 4: the plan bullet's branch switch; the fix record not on main; the missing fetch; a pinned repository's `-C` would send the push to that repository's main (inferred) |
+| Escape analysis, swept | 3 | 1 | 0: reviewed at the re-check | 3 open | 1, the sweep's own finding: step 9 gives no default for where the analysis goes in an unmerged fix's record |
+
+- **Inferred, why:** 8 of the 9 breaks come from one rule the fix round added, that a review record or a kept handoff note about a branch is committed on main from a throwaway worktree. It met three existing rules at once: procedure endings' place for a page commit, the fix record living on its branch, and the push after a fetch. As in B2, the breaks sit where one page hands off to another.
+- **Verified, kept off main:** the batch pages, their 26 records and the question log's change are committed on branch `m3/b3-claim-marks` as `ea91bf2` and pushed, beside the two checks. On that branch `python3 ws.py check`, `check --commits origin/main..HEAD` and `python3 -m unittest discover -b tests` (686 tests, 3 skipped) pass. No pull request is open, so no page with an open blocking break reaches main.
+- **Verified:** the private ledger's B3 rows stay on slice B3, since none of their pages reached main.
+
+Decisions made in the resume:
+
+- **Records about a branch were to be committed on main, never on the branch,** so a branch's tip stays the one reviewed. It is the rule the re-check broke; Q35 asks whether to keep it.
+- **The reader standard binds three templates by name,** the bug report, the pull request description and the project hub, and a template that opts in by linking it. A rule that bound "each kind written for a person" could not be tested.
+- **A project's hub and unit pages default to `docs/projects/<project>/`,** in the layout's folder table, until an instance settles the open question on where per-repository docs live.
+- **The bookkeeping list after a merge stays on the pull request template,** where the B3 row puts it, though the review asked to move it to a playbook.
+
+Not done: the 9 blocking breaks and the re-check's non-blocking items; the claim_marks and plan_budgets pull request and the batch pages reaching main; the queued slice Z lines, which join the queue when the pages merge; and the ledger's moves for B3's rows.
+Parked: Q35.
+Next: the maintainer — answer Q35 in the workspace queue on how B3 resumes, then a B3 session resumes from branch `m3/b3-claim-marks` in `.claude/worktrees/m3-b3`.
 
 ### Queued for slice Z
 
