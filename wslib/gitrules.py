@@ -25,12 +25,18 @@ runner reads what it needs from git (decision 0004, "Shell events": the `aliases
                               branch it updates or deletes, and whether it forces (M3 slice C5d).
     touches_branch(update, branch)
                            -> True when an update may land on that branch.
+    parse_url(url)         -> where a remote URL points, by git's rules: {"host", "owner", "name", "url"}, or
+                              {"local": True, "path", "url"} for a local path or a file:// URL (M3 slice C5e;
+                              moved from wslib/shellfacts.py, which still offers it).
+    listed(destination, repositories)
+                           -> True when a destination is one of the repositories in the outward-write list.
 
 A git config file is one of the files the runner lists in `git_config`: the global ones (`~/.gitconfig`,
 `$XDG_CONFIG_HOME/git/config`, `~/.config/git/config`, `GIT_CONFIG_GLOBAL`) and every file an `include.path` or
 `includeIf.*.path` names. The repository's own config lives under `.git`, so the segment rule covers it.
 """
 import json
+import os
 import posixpath
 import re
 import unicodedata
@@ -568,3 +574,43 @@ def push_updates(call, fact):
             found["updates"].append({"src": spec.get("src"), "dst": dst, "force": forced(dst, spec.get("force")),
                                      "delete": False, "glob": "*" in (dst or ""), "every": False})
     return found
+
+
+# -- where a URL points (M3 slice C5e) ------------------------------------------------------------------------
+
+def parse_url(url):
+    """A destination for a remote URL, by git's rules: a scheme, else host:path is ssh unless a slash comes
+    before the colon, else a local path."""
+    text = url.strip()
+    scheme = re.match(r"^([A-Za-z][A-Za-z0-9+.-]*)://(.*)$", text)
+    if scheme:
+        kind, rest = scheme.group(1).lower(), scheme.group(2)
+        if kind == "file":
+            return {"local": True, "path": rest, "url": text}
+        host_part, _, path = rest.partition("/")
+        host = host_part.rsplit("@", 1)[-1].split(":", 1)[0].lower()
+        return _repository(host, path, text)
+    colon, slash = text.find(":"), text.find("/")
+    drive = os.name == "nt" and re.match(r"^[A-Za-z]:[\\/]", text)
+    if colon < 0 or (0 <= slash < colon) or drive:
+        return {"local": True, "path": text, "url": text}
+    host = text[:colon].rsplit("@", 1)[-1].lower()
+    return _repository(host, text[colon + 1:], text)
+
+
+def _repository(host, path, url):
+    parts = [part for part in path.split("/") if part]
+    if len(parts) < 2:
+        return {"host": host, "owner": None, "name": None, "url": url}
+    name = parts[-1][:-4] if parts[-1].endswith(".git") else parts[-1]
+    return {"host": host, "owner": parts[-2], "name": name, "url": url}
+
+
+def listed(destination, repositories):
+    """True when a destination names one of the repositories, each {"host", "owner", "name"}, compared without
+    regard to case, as GitHub compares them. A destination with no owner or name is never listed."""
+    if not destination.get("owner") or not destination.get("name"):
+        return False
+    key = ((destination.get("host") or "").lower(), destination["owner"].lower(), destination["name"].lower())
+    return any(key == ((entry.get("host") or "").lower(), (entry.get("owner") or "").lower(),
+                       (entry.get("name") or "").lower()) for entry in repositories or ())

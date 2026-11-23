@@ -665,6 +665,13 @@ def shell_event(root, event, hooks, tool, cwd):
         makers["aliases"] = lambda: shellfacts.aliases(root, event["command"], cwd)
     if "git_config" in needs:
         makers["git_config"] = lambda: shellfacts.git_config(cwd or root)
+    if "destinations" in needs:
+        makers["destinations"] = lambda: shellfacts.destinations(root, event["command"], cwd)
+    if "repositories" in needs:
+        config = next((getattr(part, "config", {}) for part in hooks
+                       if "repositories" in getattr(part.module, "NEEDS", ())), {})
+        name = config.get("list", "outward-repos.json")
+        makers["repositories"] = lambda: shellfacts.repositories(root, name)
     return LazyEvent(facts, makers)
 
 

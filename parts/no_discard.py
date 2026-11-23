@@ -161,8 +161,9 @@ def decide(event, config):
             drops = sorted(found & MAIN_ONLY)
             if drops:
                 return (f"git {drops[0]} in the main working copy can drop the work of another live agent session "
-                        f"({who}), which holds it. Work in a worktree of your own: git worktree add "
-                        f".claude/worktrees/NAME -b BRANCH, and run it there. See {PAGE}")
+                        f"({who}), which holds it. Work in a worktree of your own, started from the remote's main so "
+                        f"it holds none of that session's commits: git worktree add --no-track -b BRANCH "
+                        f".claude/worktrees/NAME origin/main, and run it there. See {PAGE}")
     return None
 
 

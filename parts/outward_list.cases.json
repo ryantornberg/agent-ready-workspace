@@ -1,0 +1,61 @@
+[
+  {
+    "name": "an edit to the list is refused",
+    "event": {
+      "path": "outward-repos.json",
+      "absolute": "/m/outward-repos.json"
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit to the list in a linked worktree is refused",
+    "event": {
+      "path": "outward-repos.json",
+      "absolute": "/m/.claude/worktrees/w/outward-repos.json"
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit to the list outside a working copy is refused",
+    "event": {
+      "path": "/elsewhere/outward-repos.json",
+      "absolute": "/elsewhere/outward-repos.json"
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit to the list in another case is refused",
+    "event": {
+      "path": "Outward-Repos.json",
+      "absolute": "/m/Outward-Repos.json"
+    },
+    "allow": false
+  },
+  {
+    "name": "an edit to another file goes ahead",
+    "event": {
+      "path": "docs/parts.md",
+      "absolute": "/m/docs/parts.md"
+    },
+    "allow": true
+  },
+  {
+    "name": "an edit to a file whose name only holds the list's goes ahead",
+    "event": {
+      "path": "old-outward-repos.json.md",
+      "absolute": "/m/old-outward-repos.json.md"
+    },
+    "allow": true
+  },
+  {
+    "name": "the list the config names is the one refused",
+    "config": {
+      "list": "lists/repos.json"
+    },
+    "event": {
+      "path": "lists/repos.json",
+      "absolute": "/m/lists/repos.json"
+    },
+    "allow": false
+  }
+]

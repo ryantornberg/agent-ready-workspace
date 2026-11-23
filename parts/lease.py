@@ -27,8 +27,9 @@ def decide(event, config):
         if isinstance(holder.get("taken"), (int, float)):
             since = " since " + datetime.datetime.fromtimestamp(holder["taken"]).strftime("%Y-%m-%d %H:%M")
         who = f"session {str(holder.get('session', '?'))[:8]}{since}" if holder else "a session whose lease is being written"
-        return (f"another live agent session ({who}) holds the main working copy. Work in a worktree of your own: "
-                f"git worktree add .claude/worktrees/NAME -b BRANCH, then edit {where} there. If you are sure no "
+        return (f"another live agent session ({who}) holds the main working copy. Work in a worktree of your own, "
+                f"started from the remote's main so it holds none of that session's commits: git worktree add "
+                f"--no-track -b BRANCH .claude/worktrees/NAME origin/main, then edit {where} there. If you are sure no "
                 f"other session runs, ask the person; they may delete {lease.get('file', 'the lease file')}. See {PAGE}")
     return (f"the writing-session lease could not be checked ({lease.get('error', 'no lease facts')}), so the edit is "
             f"refused. Work in a worktree of your own, or ask the person. See {PAGE}")
