@@ -59,3 +59,20 @@ The builder's second fix round, on 2026-11-23, under the maintainer's answer to 
 | Item | Disposition |
 |---|---|
 | The cut-back, swept: the Review bullet named a fix record's review section and `docs/records/reviews/` | fixed: the Review bullet, the skeleton's Review line and the rules row now say the record is linked from the hand-off plan or, with no plan, held in this description. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-23, after the second fix round.
+
+It read the page whole, `git show 65a6f5c`, the review orchestrator's steps 2 and 10, git-host operations' pull request rows and Rules, the templates index and the records README.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| The cut-back, swept: the Review bullet named a fix record's review section and `docs/records/reviews/` | fixed | The skeleton's Review line, the Review bullet and the rules row say the record is linked from the hand-off plan or, with no plan, pasted into the description. That matches step 10, which puts a no-plan round in the report and then the description. No text names a fix record's review section or `docs/records/reviews/`. Verified: the page and `git grep`. |
+
+Broke:
+
+- Not blocking. With no plan, the Review bullet pastes the whole review record into the description. The Length bullet and its rule keep a description under 4,000 characters, with "detail beyond that" going "in the plan or the record the description links". With no plan there is no such record to link. A findings table of eight columns passes 4,000 characters within a few rows. An agent cannot follow both bullets for a review of any size. Verified: the texts. Inferred: the size of a typical table.
+- Not blocking. "Link the review record for the tip you are opening. It sits in a hand-off plan's Results." On planned work, the review orchestrator's step 10 commits that plan on the branch, so the record names the commit before the tip being opened. The blocking side of this mismatch, with git-host operations' tip check, is recorded in the review orchestrator's record. Verified: the texts.
+
+Missed: none.

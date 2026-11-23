@@ -55,3 +55,19 @@ The builder's second fix round, on 2026-11-23, under the maintainer's answer to 
 | Item | Disposition |
 |---|---|
 | The cut-back, swept: the handoff note and review record rows named `docs/records/handoffs/` and `docs/records/reviews/` | fixed: the handoff note row says keep mode waits for M4, and the review record row names the plan's "Results" or the pull request's description. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-23, after the second fix round.
+
+It read the page whole, `git show 65a6f5c`, the records README, handoff's "Two modes", the review orchestrator's step 10, and the templates each row links.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| The cut-back, swept: the handoff note and review record rows named `docs/records/handoffs/` and `docs/records/reviews/` | fixed | The Handoff note row says "Outside every repository", and that keep mode waits for M4, linking "two modes". The anchor resolves. The Review record row names the plan's "Results" or the pull request's description, as step 10 does. The records README lists four records that live elsewhere, the code review's record among them, and counts them right. Neither page names a removed folder. Verified: the three texts, `git grep`, and `python3 ws.py check`, which checks links. |
+
+Broke: none.
+
+Missed:
+
+- Not blocking. The first re-check's two items are still open: the Unit doc row's "Not settled" against the template's `docs/projects/<project>/` default, and the how-to index's missing row. Neither has a row in "Second fix round", and this record has no "Known defects" section. Verified: the page and `docs/how-tos.md`.

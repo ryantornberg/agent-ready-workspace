@@ -37,4 +37,24 @@ The builder's second fix round, on 2026-11-23, under the maintainer's answer to 
 |---|---|
 | 1, blocking: step 9 gives no default for where an unmerged fix's analysis is committed | fixed: step 9 writes and commits the analysis where the fix record is, by default the fix's branch while the fix is unmerged, since main holds no copy yet, and main once it has merged. It labels that as the one exception to procedure endings' commit. |
 | 2, not blocking: the page knows two places a review is on record | withdrawn by the cut-back: a code review is again on record only in a pull request or a hand-off plan's "Results", the two places the table names. |
-| 3, not blocking: step 9 restates the report rule and names no push | not fixed in this round, which Q35 limits to the blocking items; see "Known defects". |
+| 3, not blocking: step 9 restates the report rule and names no push | not fixed in this round, which Q35 limits to the blocking items. It stays open: a "Known defects" section is written once no fix round is left on the page. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-23, after the second fix round.
+
+It read the page whole, `git show 65a6f5c`, procedure endings, the contract, the fix record template, the review orchestrator, and `workspace.json`'s `direct_push` and `review_trailer` entries. It ran git in a scratch repository with a local bare remote, under its own temp folder.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| 1, blocking: step 9 gives no default for where an unmerged fix's analysis is committed | fixed | Step 9 now has a default: the fix's branch while the fix is unmerged, and main once it has merged. It labels the exception: "except that a record on an unmerged fix's branch is committed on that branch". Verified: the text. The exception covers the commit only, and the push it leads to is under "Broke". |
+| 2, not blocking: the page knows two places a review is on record | withdrawn-upheld | The review orchestrator's step 10 now writes a round only to the plan's "Results" or the pull request's description, the two places this page's table names. Verified: both texts. |
+| 3, not blocking: step 9 restates the report rule and names no push | not fixed | Step 9 still says "Mark each claim verified or inferred" and names no push. Verified. Its disposition says "see 'Known defects'", but this record has no such section. The missing push now matters, under "Broke". |
+
+Broke:
+
+- Blocking. Step 9 commits the fix record on the unmerged fix's branch, then leaves the push to procedure endings, since its exception covers the commit only. What the agent committed is pages only, so procedure endings' push table gives, in a worktree, `git push origin HEAD:main`. HEAD there is the fix's branch, so the push publishes the unmerged fix to main, with no pull request and no CI. That goes against the contract's draft pull request rule and procedure endings' "never on its main" for code under `src/`. The same holds when the fix came from a hand-off plan and the plan is committed in that worktree. The fix record template says to push the record "on that branch". Step 9 links that template only for where the record is, not for the push. No guard stops it for code under `src/`: the pre-push checks are `direct_push`, for machinery paths only, and `review_trailer`, for guidance pages only. Verified in the scratch repository: from a worktree on a branch with a fix commit and a fix record commit, `git push origin HEAD:main` exited 0 and moved the remote's main to include the fix commit. Verified by reading: both parts' configuration in `workspace.json`. Inferred: that an agent picks the row for pages, since that is what it committed. The exception should name the push too: push the fix's branch, as the fix record template's "Committing it" says.
+- Not blocking. For a fix in a repository pinned under `src/`, the fix record template says the record is a change of pages only in this workspace, committed as procedure endings' rows for pages say: on main from the main copy. Step 9's default, "while the fix is not merged, that is the fix's branch ... since main holds no copy of the record yet", is wrong for that case. The fix's branch is in the pinned repository, and main here already holds the record. The governing words "where the record is" and the link to "Committing it" lead the agent right. Verified: both texts.
+- Not blocking. When the fix came from a hand-off plan, step 9 commits the plan "as procedure endings says". Handoff and the review orchestrator, in the same round, moved this kind of commit to the branch checked out. They did so because a switch to main fails from a branch with uncommitted changes. This page was not swept. The risk is low here, since the page starts only once the fix is committed. Verified: the three texts. Inferred: the likelihood.
+
+Missed: none.

@@ -60,3 +60,19 @@ The builder's second fix round, on 2026-11-23, under the maintainer's answer to 
 | Broke, blocking: "Committing it" contradicts the orchestrator's commit of a review block on main | withdrawn by the cut-back: the skeleton's "Reviews" section, its filling bullet and its rules row are removed, and "Committing it" says a review round's record goes in the pull request's description. |
 | The same item's inferred part: the commit after the push moves the tip past the reviewed one | fixed: the review orchestrator's step 2 now counts a tip whose only change since the reviewed commit is the fix record, or the plan, as reviewed, and "Committing it" says so. |
 | Re-check item 5, not blocking: the slice Z lines were not in the plan's queue | queued for slice Z: the lines join the M3 plan's "Queued for slice Z" list in the commit that records B3's results, once these pages merge. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-23, after the second fix round.
+
+It read the page whole, `git show 65a6f5c`, procedure endings, the contract, the review orchestrator, escape analysis, the pull request template, git-host operations and the M3 plan's B3 results and "Queued for slice Z" list. It ran git in a scratch repository with a local bare remote, under its own temp folder.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke, blocking: "Committing it" contradicts the orchestrator's commit of a review block on main | withdrawn-upheld | The skeleton has no "Reviews" section, and the filling bullet and the rules row about it are gone. "Committing it" sends a review round's record to the pull request's description. No page still names a fix record's review section. Verified: the page, and `git grep` for `"Reviews"`, "review section" and `records/reviews` across `docs/` outside plans and these records. |
+| The commit after the push moves the tip past the reviewed one | fixed | "Committing it" points to the review orchestrator's step 2, which now counts as reviewed a tip whose only change since the reviewed commit is this record. Verified in the scratch repository: after a reviewed commit and a commit that changed only the record, `git merge-base --is-ancestor` exited 0, and `git diff --name-only REVIEWED TIP` listed only that file. That commit comes after the pull request opens, so git-host operations' tip check at creation is not hit here. Inferred, from the order "Committing it" gives. |
+| Re-check item 5, not blocking: the slice Z lines are not in the plan's queue | not fixed | The lines are still not in "Queued for slice Z": its only B3 line is procedure endings' index row. B3's "Not done" carries them ("the queued slice Z lines, which join the queue when the pages merge"), so the queue is promised in the plan, not lost. Verified: the plan. |
+
+Broke: none.
+
+Missed: none.

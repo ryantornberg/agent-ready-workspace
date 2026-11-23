@@ -55,3 +55,19 @@ The builder's second fix round, on 2026-11-23, under the maintainer's answer to 
 | Item | Disposition |
 |---|---|
 | Broke, blocking: `--repo` files on any repository, against the outward-write rule | fixed: "Where tickets live" files with `gh issue create --repo` only on this workspace's repository or one pinned under `src/`, linking procedure endings' rules. On any other it files nothing and gives the person the title and body. It names the outward-write guard and its list, `outward-repos.json`, and says a refused write is not retried another way. A new rules row carries it, tagged `prose` and the guard's `gh issue create` case. |
+
+## Second re-check
+
+A fresh session re-read the page on 2026-11-23, after the second fix round.
+
+It read the page whole, `git show 65a6f5c`, procedure endings' "Outward writes" and Rules, the contract, git-host operations, tracker operations, `outward-repos.json`, the case names in `parts/outward_write.cases.json`, the README's row and limits for `outward_write`, and decision 0004's paragraph on the list.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| Broke, blocking: `--repo` files on any repository, against the outward-write rule | fixed | "Where tickets live" files with `gh issue create --repo` only on this workspace's repository or one pinned under `src/`. On any other, it files nothing and gives the person the text. That matches procedure endings' rule, "write nothing on a repository outside this one and those pinned under `src/`", and git-host operations' "Never write to a repository other than this one and those pinned under `src/`; give the person the text instead". The page names the guard and its list, `outward-repos.json`, which lists only this repository. The new rules row's tag names a case that exists, "gh issue create on a repository outside the list is refused". Verified: the texts, the list file and the case names. The page's own limit is the rule; the guard backs it with the instance's list, which a person fills. A pinned repository missing from that list is refused, and the page says not to retry. Verified: the README's setup step 6. |
+
+Broke:
+
+- Not blocking. The page now says the outward-write guard refuses writes outside `outward-repos.json`. Tracker operations, which the page links for the yes, and git-host operations still say in their "what exists" tables that the guard is "Planned in slice C5e of M3", and that until then only the person's yes holds a write. The milestone record says C5e is merged. A reader of both pages gets two accounts. The stricter one holds, so nothing unsafe follows. Verified: the three pages and `docs/milestones/m3.md`.
+
+Missed: none.
