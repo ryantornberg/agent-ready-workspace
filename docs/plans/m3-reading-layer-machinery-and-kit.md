@@ -875,6 +875,14 @@ C6's proposed revision, approved as proposed. It aligns the C6 row and criterion
 
 **"No guard" means no guard on a tool call, a commit or a push.** The C6 row's first sentence and criterion 46's first sentence read: no guard on a tool call, a commit or a push turns off when one environment variable is unset. The stop gate keeps C1's choice: its wiring lets a session stop when the launcher fails, so it is not such a guard. The rest of the row and the criterion stand.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-22
+
+One item for slice B2t, from the maintainer's answer to Q31 in the workspace queue. It adds to B2t's scope; no criterion is dropped or weakened.
+
+**B2t updates the guard lines C5e left stale (Q31).** Three B2 pages still say the outward-write guard is planned in slice C5e, which has since built it: the review orchestrator's step 11, and the guard rows of tracker operations and git-host operations. B2t corrects the three in its fix round, under the instruction review it already runs.
+
 ## Results
 
 ### C1, launcher and baselines
