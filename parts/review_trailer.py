@@ -3,8 +3,15 @@
 The commit message carries a trailer line, `Instructions-review: <record>`, naming a review record under
 "folder" that the same commit adds or changes and whose `covers:` front matter lists every guidance page the
 commit leaves in the tree. Or it carries `Instructions-review: skipped: <reason>`, with a reason from the
-listed set: "link or typo only", "front matter only" or "strike". A commit may carry several trailers. A
-skip reason excuses every guidance page no named record covers; a record named must still be real.
+listed set: "link or typo only", "front matter only", "strike" or "as the kit wrote it". A commit may carry
+several trailers. A skip reason excuses every guidance page no named record covers; a record named must still be
+real.
+
+"as the kit wrote it" is for an instance made from the kit: its first commit, and the commit of an upgrade, which
+bring pages the kit's own reviews read (decision record 0007). It is checked against the commit's kit.lock.json:
+each guidance page the commit leaves in the tree must match the hash that lock holds for it as synced or seeded,
+and each page the commit deletes must be one that lock no longer holds. A page a record the commit names covers is
+judged by that record instead, such as the README's proof table corrected in an upgrade's commit.
 
 A guidance page is a path that matches "guidance" and not "except": patterns in the form direct_push uses (a
 path ending in "/" is a folder and everything under it; "*" matches within one folder).
@@ -25,6 +32,7 @@ See docs/playbooks/instruction-review.md.
 import json
 import re
 
+from wslib import kitlock
 from wslib import markdown
 from wslib.parts import finding
 
@@ -36,7 +44,8 @@ NAME = "review_trailer"
 FOLDER = "docs/records/instruction-reviews"
 TRAILER = re.compile(r"^Instructions-review:[ \t]*(.*?)[ \t]*$", re.I | re.M)
 SKIP = re.compile(r"^skipped:[ \t]*(.*)$", re.I)
-REASONS = ("link or typo only", "front matter only", "strike")
+REASONS = ("link or typo only", "front matter only", "strike", "as the kit wrote it")
+KIT = "as the kit wrote it"
 COVERS = re.compile(r"^covers\s*:\s*(.*?)\s*$")
 
 
@@ -98,11 +107,14 @@ def judge(commit, guidance, outside, folder):
                                      f"Run the review, then add the line 'Instructions-review: <record path>' to the "
                                      f"message, or 'Instructions-review: skipped: <reason>' with a reason from "
                                      f"{', '.join(REASONS)}; see {PAGE}")]
-    found, covered, skipped = [], set(), False
+    found, covered, skipped, kit = [], set(), False, False
     for value in values:
         skip = SKIP.match(value)
         if skip:
-            if skip.group(1).strip().lower() in REASONS:
+            reason = skip.group(1).strip().lower()
+            if reason == KIT:
+                kit = skipped = True
+            elif reason in REASONS:
                 skipped = True
             else:
                 found.append(finding(pages[0], 1, f"{name} skips the instruction review for {skip.group(1).strip()!r}, "
@@ -123,6 +135,8 @@ def judge(commit, guidance, outside, folder):
                                               f"on this change and commit its record with it; see {PAGE}"))
         else:
             covered |= covers(files.get(record))
+    if kit and not found:
+        found += _as_the_kit_wrote_it(name, [page for page in pages if page not in covered], files)
     if found or skipped:
         return found
     left = [page for page in pages if page in files and page not in covered]
@@ -130,6 +144,35 @@ def judge(commit, guidance, outside, folder):
         more = f" and {len(left) - 1} more" if len(left) > 1 else ""
         found.append(finding(left[0], 1, f"{name} changes the guidance page {left[0]}{more}, which no review record "
                                          f"it names covers. Review it and list it in a record's covers line; see {PAGE}"))
+    return found
+
+
+def _as_the_kit_wrote_it(name, pages, files):
+    """Findings for each guidance page the commit changes that is not as the commit's kit lock holds it."""
+    if not pages:
+        return []
+    try:
+        lock = json.loads(files.get(kitlock.LOCK) or "")
+        entries = lock["files"]
+        if not isinstance(entries, dict):
+            raise TypeError
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return [finding(pages[0], 1, f"{name} skips the instruction review as the kit wrote it, but the commit holds "
+                                     f"no readable {kitlock.LOCK}. That reason is for an instance's first commit and "
+                                     f"its upgrades; otherwise run the review; see {PAGE}")]
+    found = []
+    for page in pages:
+        entry = entries.get(page) if isinstance(entries.get(page), dict) else {}
+        held = entry.get("class") in ("synced", "seeded")
+        text = files.get(page)
+        if page not in files:
+            if held or entry.get("class") == "kept":
+                found.append(finding(page, 1, f"{name} deletes {page}, which {kitlock.LOCK} still holds, so the kit "
+                                              f"did not delete it. Run the review; see {PAGE}"))
+        elif not held or text is None or kitlock.digest(text) != entry.get("hash"):
+            found.append(finding(page, 1, f"{name} skips the instruction review as the kit wrote it, but {page} is "
+                                          f"not as {kitlock.LOCK} holds it, so the kit's reviews did not read this "
+                                          f"text. Review it, and name the review's record in the same commit; see {PAGE}"))
     return found
 
 

@@ -260,11 +260,21 @@ python3 ws.py pins
 
 ## The cold-clone job
 
-`.github/workflows/cold-clone.yml` clones the repository fresh on Linux and macOS, with the machine's own git and `python3`. It follows the README's marked setup steps and nothing else, then runs `selftest`, `check` and the tests. A step is a fenced block right after a line `<!-- setup -->`; `tools/setup_steps.py` turns the marked blocks into one script that stops at the first failure, and fails when no block is marked.
+`.github/workflows/cold-clone.yml` clones the repository fresh on Linux and macOS, with the machine's own git and `python3`. It follows the README's marked setup steps and nothing else, then runs `selftest`, `check` and the tests. In the kit's repository, it then adopts the clone into a new folder, as [the kit](#the-kit) says, and follows the instance's own README's marked steps. A step is a fenced block right after a line `<!-- setup -->`; `tools/setup_steps.py` turns the marked blocks into one script that stops at the first failure, and fails when no block is marked.
 
 It runs every night, on main. It also runs on a pull request, and on a push to main, that changes a setup page, `tools/setup_steps.py` or the job itself. Doc changes go straight to main, so a pull request alone would miss most changes to the README. The setup pages are `SETUP_PAGES` in `tools/setup_steps.py`, and `tests/test_cold_clone.py` holds the job's paths to that list.
 
 The README's steps start `python3` by name, as a person would. That is the one place CI starts Python other than through the launcher. Windows is left out, because a Windows install of Python provides no `python3`.
+
+## The kit
+
+`python3 ws.py adopt PATH` makes an instance of this workspace in PATH, an empty folder, and `python3 ws.py upgrade PATH` takes a newer kit into one. Both run from the kit's own repository; `wslib/kit.py` holds them. `kit/kit.json` gives every file git tracks a class, synced, seeded or never synced, by the first rule whose path matches it, and `kit/seed/` holds the files an instance gets in place of this repository's own, such as its README. [Decision 0007](decisions/0007-the-kit.md) says what each class means and why.
+
+`python3 ws.py kit` prints the kit manifest: every file with its class and hash, the proof state of each synced page, and the kit's eval cases. Each file is read as the working copy holds it, and a file git does not track is left out, so commit or stage a new file before making an instance from it; adopt notes when the working copy holds changes not committed. Adopt and upgrade write it into the instance as `kit.lock.json`, its lock.
+
+In an instance, the `kit_drift` check fails a synced file that no longer matches the lock, and `python3 ws.py drift` reports the same on the working folder. `python3 ws.py drift --keep PATH` makes a synced file the instance's own: the lock marks it kept, `kit_drift` and upgrades leave it alone, and the other checks hold it as the instance's own page. It refuses a page the kit marks proven. The `proof`, `eval_record` and `rules` checks read the lock there through `wslib/kitlock.py`, which reads nothing but the snapshot a check is given. A workspace with no lock is not an instance, and all four behave as they do here.
+
+In the kit's repository, `tests/test_kit.py` adopts the working copy into a temporary folder and runs the instance's own `selftest`, `check` and `drift` there. It also upgrades an instance from a small newer kit made in another. The kit's cold-clone job adopts its fresh clone and follows the instance's own README's marked steps.
 
 ## Removing a part
 
@@ -315,7 +325,8 @@ To use a part kept somewhere else, give its path: `{"use": "shared/parts/licence
 | `pointers` | check | The GitHub Copilot or opencode pointer file is missing, or no longer names `AGENTS.md` and the rule pages. |
 | `rules` | check | A rule in a rules table has no tag, or a tag names a part the manifest does not use, a case that part does not have, or an eval case that does not exist. `python3 ws.py rules` prints the register. |
 | `loaded_size` | check | The contract and the pointer files pass 6,000 bytes, or the wrappers' descriptions 9,000, as the manifest sets. |
-| `proof` | check | A proof mark does not hold, or moves without its record: see [decision 0006](decisions/0006-what-proven-means.md). |
+| `proof` | check | A proof mark does not hold, or moves without its record: see [decision 0006](decisions/0006-what-proven-means.md). In an instance, a synced page's marks differ from the kit's lock. |
+| `kit_drift` | check | In an instance made from the kit, a synced file no longer matches the hash in `kit.lock.json`, or is gone. A seeded file, a kept one and a file of the instance's own pass. A workspace with no lock is not checked. See [the kit](#the-kit). |
 | `aliases` | check | The index maps a phrase to a name the code no longer defines, or a contract page names one in backticks. |
 | `eval_record` | check | For each playbook marked proven: anything its eval cases depend on changed since their last recorded run (the case, its scaffold and acceptance test, the files each arm is given, `AGENTS.md` and `INDEX.md` among them, the harness, the graders, the code of a hook a grader runs and the shell parser it shares). It also fails when a record has fewer than five runs in an arm; when, counting runs that pass every grader, the guided arm passes no more often than the bare arm; when, pooled across the playbook's cases, the guided arm does not beat the two-line arm by a one-sided Fisher exact test at p < 0.05; when its guided arm passes more than 3 runs fewer than the previous record's or its anchor's; or when a proven playbook has no case. A page's review date and its exact proof keys are not in the hash. |
 | `deny_list` | check | A file or file name holds a term from a private list kept outside the repository, and so, from the commit-msg hook, does the commit message, the author or the committer. With no list it warns and checks nothing, so CI cannot run it. |

@@ -19,6 +19,10 @@
     python3 ws.py handoff --done             # clear this branch's handoff marker (--done BRANCH: another branch's)
     python3 ws.py handoff                    # list this working copy's handoff markers, pending or merged
     python3 ws.py with-secrets NAME -- PROGRAM ...   # run PROGRAM with NAME from the secrets file, in its environment only
+    python3 ws.py kit                        # the kit manifest: each file with its class and hash, and the proof states
+    python3 ws.py adopt PATH                 # make an instance of this kit in PATH, an empty folder
+    python3 ws.py drift                      # in an instance: each synced file edited or deleted since its lock
+    python3 ws.py upgrade PATH               # take this kit into the instance in PATH; refuses on drift
 
 The engine is the folder wslib/; this file only starts it. wslib/runner.py says how the commands work.
 """

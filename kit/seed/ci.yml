@@ -1,0 +1,46 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 6 * * 1"   # weekly, Monday 06:17 UTC: catches what changes with no commit, such as a new runner image
+
+# The checks only read the repository. A token that can write is not needed, so it is not given.
+permissions:
+  contents: read
+
+# Written once by the kit when this workspace was made; it is this workspace's own from then on. The kit's own
+# tests run in the kit's CI, on three systems, for each kit version.
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    # Every step starts Python through wslib/launch.sh, as the hooks do. On Windows this "bash" is Git's.
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the checks compare with the commit before the push
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: bash wslib/launch.sh ws.py selftest
+      # Each file the kit owns, as the kit shipped it (kit.lock.json).
+      - run: bash wslib/launch.sh ws.py drift
+      # Every line every commit added, scanned for credentials.
+      - run: bash wslib/launch.sh ws.py check --history --changed-from "${{ github.event.pull_request.base.sha || github.event.before }}"
+      # Every commit's message: its subject, and the instruction-review trailer a guidance page needs.
+      - if: github.event_name != 'schedule'
+        run: bash wslib/launch.sh ws.py check --commits "${{ github.event.pull_request.base.sha || github.event.before }}..${{ github.event.pull_request.head.sha || github.sha }}"
+      - if: github.event_name != 'schedule'
+        run: bash wslib/launch.sh ws.py check --phase ci --changed-from "${{ github.event.pull_request.base.sha || github.event.before }}"
+      - if: github.event_name == 'schedule'
+        run: bash wslib/launch.sh ws.py check --phase ci
+      - if: github.event_name == 'schedule'
+        run: bash wslib/launch.sh ws.py check --phase nightly

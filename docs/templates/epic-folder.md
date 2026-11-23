@@ -16,7 +16,7 @@ Make an epic folder when either holds:
 - the work will have three or more plans or specs, counted together;
 - the work is an epic in the team's tracker.
 
-Otherwise the work stays one [hand-off plan](hand-off-plan.md) in `docs/plans/<name>.md`, however many slices it has. A milestone with one plan, such as [M3's](../plans/m3-reading-layer-machinery-and-kit.md), is one file, not a folder.
+Otherwise the work stays one [hand-off plan](hand-off-plan.md) in `docs/plans/<name>.md`, however many slices it has. A milestone with one plan, such as the kit's M3, is one file, not a folder.
 
 The folder exists so that one epic's docs are found in one place. Without it, an epic's plans, specs and questions end up spread across the folders for each page kind.
 
