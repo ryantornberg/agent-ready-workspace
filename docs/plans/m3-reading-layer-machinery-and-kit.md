@@ -905,6 +905,16 @@ How slice B2t resumes after its re-check stopped it, from the maintainer's answe
 
 **A narrow re-check follows.** A fresh session reads the changed pages and procedure endings' new rule. This is the pages' second fix round, and lane B's stop rule applies to it unchanged.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+How slice B4 resumes after batch 2's re-check stopped it, from the maintainer's answer to Q43 in the workspace queue. It narrows one page's branch step and gives that page a second fix round; no criterion is dropped or weakened.
+
+**Import a repository always works in a worktree.** Its step 3 makes the import's branch in a worktree of its own, from `origin/main` with `--no-track`. The page labels this as an exception to the contract's line that sends an agent to a worktree only when the lease refuses an edit, as the plan's own slices are. A narrow re-check of that page follows. This is the page's second fix round, and lane B's stop rule applies to it unchanged.
+
+**Batch 2's index review gets its fix round, then batch 2 merges.** The seven non-blocking findings on batch 2's index, README, reading paths, epic folder and QA test plan edits get one fix round and a fresh re-check.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -1870,7 +1880,7 @@ Not done: nothing.
 Parked: none
 Next: the coordinator — start slice B4 in lane B; B7 may start now that B2t has merged. Slice Z adds the queued `INDEX.md` lines above. The docs audit takes procedure endings' first known defect first: its "first row applies and no other" can be read to bar a machinery branch's own push.
 
-### B4, lane drafts: stopped at batch 2's re-check
+### B4, lane drafts
 
 Built unattended on 2026-11-23, at the worker tier, with every review and re-check at the driver tier, in the main working copy, which no other session held. No approval in the maintainer's list names B4, so no plan entry was recorded first. The slice's session wrote a shared-interface sheet from the private catalog, eight worker-tier helpers wrote the pages in two batches, five more ran the fix rounds, and fresh driver-tier sessions reviewed and re-checked them. No file the eval hashes was edited. The slice stopped under lane B's stop rule: batch 2's re-check found one blocking item that a fix created. Batch 1 is on main as `4190d8d`; batch 2 is on branch `m3/b4`, pushed as `7ae7011`, and is not on main.
 
@@ -1893,9 +1903,19 @@ Decisions made in the slice:
 
 Queued for slice Z, once batch 2 merges: `INDEX.md` Topics rows for reading paths by role ("What to read first for my role; QA, product, automation or DevOps work"), the regression run and triage, the QA verification list and test plan, the feature layer walk, saved workflows, bug grooming, bug triage labels and meeting, the predecessor check, the standup report, effort estimate, epic satellites, pages for a product reader, import a repository, the environment self-check and shipping a new deployable.
 
-Not done: batch 2's twelve pages and their index rows are not on main; the product and DevOps reading paths list them only on branch `m3/b4`.
-Parked: Q43
-Next: the maintainer — answer Q43 on how B4 resumes; the B4 builder then finishes batch 2. B5 waits for B4 under lane B's order.
+Resumed unattended on 2026-11-23 under the maintainer's answer to Q43, recorded under "Changes after approval" in the commit that holds this entry, after the fix round was built rather than before it. The slice's session ran at the worker tier and made both fix rounds itself; two fresh driver-tier sessions re-checked them. It worked in its own worktree on branch `m3/b4`, which merged main once. No file the eval hashes was edited. The slice is finished, and the earlier stop's Q43 is answered.
+
+- **Verified, import a repository's second round:** step 3 now always runs `git worktree add --no-track -b import/REPO .claude/worktrees/import-REPO origin/main`, labelled as an exception to the contract's worktree line, and every later step runs in that worktree. No `git switch` remains. The fresh re-check, in a scratch repository, saw the main copy stay on `main` with its uncommitted change and an unpushed local commit untouched, and the new branch hold nothing ahead of `origin/main`. It ruled the blocking item fixed and found nothing blocking, so the stop rule did not fire.
+- **Verified, the re-check's three non-blocking items:** step 5's search misses consumers inside other pins, no step removes the import's worktree, and step 3's "root folder" is unclear from inside a linked worktree. They are in the record's "Known defects", for M11, since this was the page's last fix round.
+- **Verified, the index fix round:** all seven findings fixed: the epic folder's line and naming table now place the satellites as the satellites template does and drop "product epic"; the how-to index spells "Color"; the playbook catalog's tracker operations row sends triage outcomes and grooming to their lane rows; the QA test plan says the reader standard's shape rules do not bind a copy; the templates index places the satellites. The fresh re-check upheld all seven and found nothing a fix broke.
+- **Verified, known defects recorded:** the earlier re-check's open non-blocking items on nine batch 2 pages, and one side note from the index re-check, the epic satellites purpose line, are now in their records' "Known defects", each for M9, M11 or the docs audit.
+- **Verified, batch 2 on main:** the twelve pages and their index rows reached main with this entry; the product and DevOps reading paths now resolve on main.
+- **Verified, kept to the rules:** on branch `m3/b4` after it merged main, `python3 ws.py selftest` and `python3 ws.py check` pass, the check with only the known warning on fix a bug's eval record, and `python3 -m unittest discover -b tests` ran 735 tests, 3 skipped, OK. The commit check accepted the fix round's commit with its six review records in the trailer.
+- **Verified, the ledger:** batch 2's sixteen rows moved from slice B4 to their pages; no row names slice B4 now.
+
+Not done: nothing.
+Parked: none
+Next: the coordinator — start slice B5 in lane B. Slice Z adds the queued `INDEX.md` lines above. M9 and M11 take the known defects in batch 2's records.
 
 ### Queued for slice Z
 
