@@ -798,6 +798,23 @@ A new slice, TFIX, the hook timing fix. It has no row in the slice tables; this 
 
 **The fix is general, not for one Python (the maintainer, during the slice).** CI logs also show the macOS jobs with Python 3.13 over the budget, on the shell and push rows. The maintainer asked for a general fix: TFIX makes every hook call cheaper, on every system and Python, and leaves criterion 28's budgets and its way of timing as they are.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+Four items from the maintainer's read of batches 1 and 2, which is recorded under B2's results in the same commit. No criterion is dropped or weakened.
+
+**Names and scope are settled before a page is wrapped or recorded.** B2t opens with a pass over every page B2 wrote and the instruction review. A title uses the industry's standard term where one exists; a term coined here stays only as a search alias, in the `INDEX.md` rows queued for slice Z. A purpose line states the page's real scope. B6 wraps no page, and B7 records no page, until the pass on that page has merged. So B7 starts after B2t merges. B3's authoring conventions carry the same rule for every page written from B3 on. Two results are settled now:
+
+- Debugging keeps its name, the standard term. Its purpose line covers any failure whose cause is unknown: a bug report, a failing test or CI run, or a flaky test.
+- Adversarial review becomes red team review, at `docs/playbooks/red-team-review.md`. The session that attacks the plan is the red team. "Adversarial review" stays as a search alias. Its records stay in `docs/records/adversarial-reviews/`, since approved plans link there and are frozen. B2t updates every link and the queued `INDEX.md` line.
+
+**The review knows the path a change came from.** On a diff from the fix path, the big-picture pass's alternative line becomes a follow-up note for the person, never a finding, as fix a bug leaves a second bug alone. Its symptom rule stays a finding: a fix that leaves the cause reachable on the reported path is wrong, not minimal. B2t makes this change on architecture review and the review orchestrator. It must land before M4 makes the review a gate.
+
+**The reader standard prefers standard terms and allows references.** B3's reader standard gains both rules. A page may end with a "References" heading: sources for a named technique it adopts, cited as credit only, each one a source its builder opened and read. The instruction review opens each one. B2t adds the heading to red team review and debugging where such a source exists.
+
+**A procedure left unwrapped gets its wrapper when proven.** The program plan now carries this as a rule for every milestone: a lane draft, or a page waiting for M4 or M8, gets its wrapper and selection cases in the milestone that proves it. Nothing in M3 changes for it.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -1385,6 +1402,13 @@ The maintainer ended B2's porting in the answer to Q29, and approved a revision 
 - **Inferred, why the fix rounds kept breaking shared rules:** each page restated rules several pages share, so a fix changed one copy and left the others. The sheet named those rules but not how each ends. The sweep closed the restated rules, and the breaks moved to the places where one step or page hands off to the next. Breaks fell from 10 to 6, but open items rose from 16 to 18, so further rounds were not converging.
 
 Next: a B3 session builds B3's two opening changes; B2t follows once they merge.
+
+#### The maintainer's reads
+
+- Read by the maintainer, 2026-11-22: batch 1. No page struck. Debugging's purpose line is to cover any failure, under the change of the same date.
+- Read by the maintainer, 2026-11-22: batch 2. No page struck. Adversarial review is to be renamed red team review, under the change of the same date.
+
+B7 starts after B2t merges, not on these reads alone.
 
 ### Queued for slice Z
 
