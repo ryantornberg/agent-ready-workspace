@@ -1,0 +1,686 @@
+{
+ "what": "The two-session demonstration of slice C9 of the M3 plan: two headless Claude Code sessions started at the same moment on the same main working copy of a scratch clone of this repository, whose remote is a local bare repository. One holds the lease; the other is refused there, works in a worktree, and both commits reach the scratch remote's main. Paths are redacted: /scratch is the scratch folder.",
+ "date": "2026-11-23",
+ "setup": [
+  "git clone --bare --single-branch --branch main of this repository at ac636b9 into /scratch/remote.git; git clone /scratch/remote.git /scratch/ws. The clone's origin is /scratch/remote.git, a local path, so no session could push to this repository or to GitHub.",
+  "core.hooksPath was not set in the clone: the guards refuse an agent's write of that key, and the README makes it a person's step. So the git hooks did not run: no commit check at the commits, no pre-push check, and no post-commit hook to drop committed paths from the edit ledgers. The agent tool's own wiring, the clone's .claude/settings.json, ran as committed: the lease, the shell guards, the session hooks and the stop gate.",
+  "A capture hook given on the command line, on PreToolUse for the edit tools and the shell, on SessionStart and on SessionEnd, appended each payload, its time and the hook's parent processes to a log, and replied nothing.",
+  "Both sessions were started by one shell script, in the background one after the other, then waited for. Each got the same prompt with its own file, line and subject. The prompt's one-minute sleep keeps each session's edit uncommitted while the other makes its first edit, so the lease cannot be taken over by state."
+ ],
+ "command": "claude -p \"$(cat prompt-SESSION.txt)\" --model haiku --max-turns 30 --permission-mode bypassPermissions --settings capture-SESSION.json --output-format stream-json --verbose",
+ "prompt": "You are one of two agent sessions started at the same moment in this git repository. Follow the repository's rules. Your task:\n1. Add one comment line at the end of src/orders-api/FILE: // LINE\n   Use your file-editing tool for this, not the shell.\n2. Run the shell command: sleep 60\n   It holds your change open for a minute, so the other session meets it.\n3. Commit only that file, staged by name, with the subject: docs(orders-api): SUBJECT\n4. Push the commit to the remote's main branch. If the push is rejected because the remote's main moved, rebase your commit onto the remote's main and push again.\nIf a hook refuses a step, read the refusal, do what it tells you, and carry on with the task where it sends you. Do not ask questions; nobody is at the keyboard.\nWhen you are done, reply with: the folder you made the edit in, the commit id that reached the remote's main, and every refusal you were shown, quoted word for word.\n",
+ "claude_pid": "Each session's hooks saw CLAUDE_PID set to that session's own Claude Code process; the two differ.",
+ "runs": {
+  "a": {
+   "session_id": "90d00497-3d0d-43f7-b54c-3ef6f0d095b5",
+   "model": "claude-haiku-5-5",
+   "tool": "Claude Code 2.1.330",
+   "file": "src/orders-api/AccountFreeze.cs",
+   "line": "// session A was here",
+   "subject": "docs(orders-api): note from session A",
+   "steps": [
+    {
+     "id": "toolu_019bA3WT8MUZohx2g2quf1Gp",
+     "tool": "Read",
+     "input": {
+      "file_path": "/scratch/ws/src/orders-api/AccountFreeze.cs"
+     },
+     "refused": false,
+     "shown": "1\tnamespace Orders.Api;\n2\t\n3\t/// <summary>A hold on an account: orders are accepted and not shipped until it is lifted.</summary>\n4\tpublic record AccountFreeze(Guid AccountId, string Reason, DateTimeOffset PlacedAt)\n5\t{\n6\t    public bool IsLifted { get; init; }\n7\t\n8\t    public AccountFreeze Lift() => this with { IsLifted = true };\n9\t}\n10\t\n11\tpublic interface IOrderStore\n12\t{\n13\t    Task<IReadOnlyList<Payment>> UnmatchedPaymentsAsync(DateOnly day, CancellationToken cancel);\n14\t}\n15\t\n16\tpublic record Payment(Guid OrderId, decimal Amount);\n17\t"
+    },
+    {
+     "id": "toolu_01WGYE4nxUpzoHyj7je1txyS",
+     "tool": "Bash",
+     "input": {
+      "command": "git status --short && git branch --show-current && git remote -v && git log --oneline -3",
+      "description": "Check repo state, branch, and remotes"
+     },
+     "refused": false,
+     "shown": "main\norigin\t/scratch/remote.git (fetch)\norigin\t/scratch/remote.git (push)\nac636b9 Merge pull request #47 from ryantornberg/m3/c8\n8483542 fix(m3/c8): the feature layer walk is seeded, not synced\na2b0849 docs(m3/c8): C8's results and its milestone row"
+    },
+    {
+     "id": "toolu_01Gh3ZziotukVACzZ9uVFF3Q",
+     "tool": "Edit",
+     "input": {
+      "replace_all": false,
+      "file_path": "/scratch/ws/src/orders-api/AccountFreeze.cs",
+      "old_string": "public record Payment(Guid OrderId, decimal Amount);\n",
+      "new_string": "public record Payment(Guid OrderId, decimal Amount);\n// session A was here\n"
+     },
+     "refused": false,
+     "shown": "The file /scratch/ws/src/orders-api/AccountFreeze.cs has been updated successfully. (file state is current in your context — no need to Read it back)"
+    },
+    {
+     "id": "toolu_0115bFrgv6JXKFJPDzUVDyo3",
+     "tool": "Bash",
+     "input": {
+      "command": "sleep 60",
+      "description": "Hold the change open for one minute"
+     },
+     "refused": true,
+     "shown": "<tool_use_error>Blocked: standalone sleep 60. To wait for a condition, use Monitor with an until-loop (e.g. `until <check>; do sleep 2; done`). To wait for a command you started, use run_in_background: true. Do not chain shorter sleeps to work around this block.</tool_use_error>"
+    },
+    {
+     "id": "toolu_01TEFLospQWvjB1fZ2ZE5qmZ",
+     "tool": "Bash",
+     "input": {
+      "command": "sleep 60",
+      "description": "Hold the change open for one minute (background)",
+      "timeout": 120000,
+      "run_in_background": true
+     },
+     "refused": false,
+     "shown": "Command running in background with ID: b1nl47c2a. Output is being written to: <the tool's task output file> You will be notified when it completes. To check interim output, use Read on that file path."
+    },
+    {
+     "id": "toolu_01DLMgUmVKywzFb6zrVY6xLw",
+     "tool": "Yield",
+     "input": {},
+     "refused": false,
+     "shown": "The wait has ended. The line after this result says why."
+    },
+    {
+     "id": "toolu_01F9VFCe59QknmCqbLE3CFAz",
+     "tool": "Bash",
+     "input": {
+      "command": "git add -- src/orders-api/AccountFreeze.cs && git commit -m \"docs(orders-api): note from session A\" && git push origin main 2>&1; echo \"push exit: $?\"; git log --oneline -2; git status --short",
+      "description": "Stage the file, commit, and push to origin main"
+     },
+     "refused": false,
+     "shown": "[main 9899c58] docs(orders-api): note from session A\n 1 file changed, 1 insertion(+)\nTo /scratch/remote.git\n   ac636b9..9899c58  main -> main\npush exit: 0\n9899c58 docs(orders-api): note from session A\nac636b9 Merge pull request #47 from ryantornberg/m3/c8"
+    }
+   ],
+   "turns": 8,
+   "final_reply": "The commit reached the remote's main as `9899c58`. The push was a fast-forward on the first try, so no rebase was needed.\n\n- **Folder of the edit:** `/scratch/ws`, in `src/orders-api/AccountFreeze.cs`.\n- **Commit on remote main:** `9899c58`, subject `docs(orders-api): note from session A`, one line added. The push went `ac636b9..9899c58`.\n\n**Refusal shown to me:** the first foreground `sleep 60` was blocked with:\n\n> Blocked: standalone sleep 60. To wait for a condition, use Monitor with an until-loop (e.g. `until <check>; do sleep 2; done`). To wait for a command you started, use run_in_background: true. Do not chain shorter sleeps to work around this block.\n\nI ran the same `sleep 60` with `run_in_background: true`, as that message directs, and waited for it to finish before committing. The change was held open for the full minute.\n\n**Hook context:** the Edit hook attached the rules page `docs/rules/orders-api.md`. It says small fixes follow `docs/playbooks/fix-a-bug.md`, which asks for a failing test first. This edit is a comment, not a bug fix, so I made no test. I did not read the playbook itself."
+  },
+  "b": {
+   "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+   "model": "claude-haiku-5-5",
+   "tool": "Claude Code 2.1.330",
+   "file": "src/orders-api/ReconciliationWorker.cs",
+   "line": "// session B was here",
+   "subject": "docs(orders-api): note from session B",
+   "steps": [
+    {
+     "id": "toolu_01W75SDaFL22Yj9829fckdPg",
+     "tool": "Bash",
+     "input": {
+      "command": "pwd && git rev-parse --show-toplevel && git status --short && ls src/orders-api/ 2>&1",
+      "description": "Confirm repo root, status, and target file location"
+     },
+     "refused": false,
+     "shown": "/scratch/ws\n/scratch/ws\nAccountFreeze.cs\nReconciliationWorker.cs"
+    },
+    {
+     "id": "toolu_019GEjTc5EPtEZMPyBASX4p3",
+     "tool": "Read",
+     "input": {
+      "file_path": "/scratch/ws/src/orders-api/ReconciliationWorker.cs"
+     },
+     "refused": false,
+     "shown": "1\tnamespace Orders.Api;\n2\t\n3\t/// <summary>Runs once a night and matches each day's payments to its orders.</summary>\n4\tpublic sealed class ReconciliationWorker\n5\t{\n6\t    private readonly IOrderStore _orders;\n7\t\n8\t    public ReconciliationWorker(IOrderStore orders)\n9\t    {\n10\t        _orders = orders;\n11\t    }\n12\t\n13\t    public async Task<int> RunAsync(DateOnly day, CancellationToken cancel)\n14\t    {\n15\t        var unmatched = await _orders.UnmatchedPaymentsAsync(day, cancel);\n16\t        return unmatched.Count;\n17\t    }\n18\t}\n19\t"
+    },
+    {
+     "id": "toolu_014uuKJXjrpX8Qe6c5MHi998",
+     "tool": "Edit",
+     "input": {
+      "replace_all": false,
+      "file_path": "/scratch/ws/src/orders-api/ReconciliationWorker.cs",
+      "old_string": "        return unmatched.Count;\n    }\n}",
+      "new_string": "        return unmatched.Count;\n    }\n}\n// session B was here"
+     },
+     "refused": true,
+     "shown": "PreToolUse:Edit hook error: [\"$CLAUDE_PROJECT_DIR/wslib/launch.sh\" hook before-edit --tool claude-code || exit 2]: Refused by lease: another live agent session (session 90d00497 since 2026-11-23 11:48) holds the main working copy. Work in a worktree of your own, started from the remote's main so it holds none of that session's commits: git worktree add --no-track -b BRANCH .claude/worktrees/NAME origin/main, then edit src/orders-api/ReconciliationWorker.cs there. If you are sure no other session runs, ask the person; they may delete /scratch/ws/.git/ws-lease.json. See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md\n"
+    },
+    {
+     "id": "toolu_01KHQD7hH36B9hUFwpGjf4d4",
+     "tool": "Bash",
+     "input": {
+      "command": "sleep 60",
+      "description": "Hold the change open for one minute"
+     },
+     "refused": true,
+     "shown": "<tool_use_error>Blocked: standalone sleep 60. To wait for a condition, use Monitor with an until-loop (e.g. `until <check>; do sleep 2; done`). To wait for a command you started, use run_in_background: true. Do not chain shorter sleeps to work around this block.</tool_use_error>"
+    },
+    {
+     "id": "toolu_015NzmY7ekFcfjjhzJ8wxzdu",
+     "tool": "Bash",
+     "input": {
+      "command": "git fetch origin && git worktree add --no-track -b session-b-orders-note .claude/worktrees/session-b-orders-note origin/main && git -C .claude/worktrees/session-b-orders-note log --oneline -1",
+      "description": "Fetch remote and create worktree from origin/main"
+     },
+     "refused": false,
+     "shown": "Preparing worktree (new branch 'session-b-orders-note')\nHEAD is now at ac636b9 Merge pull request #47 from ryantornberg/m3/c8\nac636b9 Merge pull request #47 from ryantornberg/m3/c8"
+    },
+    {
+     "id": "toolu_016oJHaLfSxXbamvcGRNTmaT",
+     "tool": "Read",
+     "input": {
+      "file_path": "/scratch/ws/.claude/worktrees/session-b-orders-note/src/orders-api/ReconciliationWorker.cs"
+     },
+     "refused": false,
+     "shown": "1\tnamespace Orders.Api;\n2\t\n3\t/// <summary>Runs once a night and matches each day's payments to its orders.</summary>\n4\tpublic sealed class ReconciliationWorker\n5\t{\n6\t    private readonly IOrderStore _orders;\n7\t\n8\t    public ReconciliationWorker(IOrderStore orders)\n9\t    {\n10\t        _orders = orders;\n11\t    }\n12\t\n13\t    public async Task<int> RunAsync(DateOnly day, CancellationToken cancel)\n14\t    {\n15\t        var unmatched = await _orders.UnmatchedPaymentsAsync(day, cancel);\n16\t        return unmatched.Count;\n17\t    }\n18\t}\n19\t"
+    },
+    {
+     "id": "toolu_01MhrMRuRcJRfRmsA1k41uiZ",
+     "tool": "Edit",
+     "input": {
+      "replace_all": false,
+      "file_path": "/scratch/ws/.claude/worktrees/session-b-orders-note/src/orders-api/ReconciliationWorker.cs",
+      "old_string": "        return unmatched.Count;\n    }\n}",
+      "new_string": "        return unmatched.Count;\n    }\n}\n// session B was here"
+     },
+     "refused": false,
+     "shown": "The file /scratch/ws/.claude/worktrees/session-b-orders-note/src/orders-api/ReconciliationWorker.cs has been updated successfully. (file state is current in your context — no need to Read it back)"
+    },
+    {
+     "id": "toolu_01LGADzAVB5cZ7DXfDqRSd5J",
+     "tool": "Bash",
+     "input": {
+      "command": "sleep 60",
+      "description": "Hold the change open for one minute",
+      "timeout": 90000,
+      "run_in_background": true
+     },
+     "refused": false,
+     "shown": "Command running in background with ID: b0a1rekcf. Output is being written to: <the tool's task output file> You will be notified when it completes. To check interim output, use Read on that file path."
+    },
+    {
+     "id": "toolu_01MUAH3zy8hz5EQx8oy1MWep",
+     "tool": "Yield",
+     "input": {},
+     "refused": false,
+     "shown": "The wait has ended. The line after this result says why."
+    },
+    {
+     "id": "toolu_01WFYS7rDrGBt63ASddmjd1H",
+     "tool": "Bash",
+     "input": {
+      "command": "cd .claude/worktrees/session-b-orders-note && git status --short && git diff && git add src/orders-api/ReconciliationWorker.cs && git commit -m \"docs(orders-api): note from session B\" && git log --oneline -1",
+      "description": "Check diff, stage the file by name, and commit in worktree"
+     },
+     "refused": false,
+     "shown": " M src/orders-api/ReconciliationWorker.cs\ndiff --git a/src/orders-api/ReconciliationWorker.cs b/src/orders-api/ReconciliationWorker.cs\nindex 9e94bb3..40661bd 100644\n--- a/src/orders-api/ReconciliationWorker.cs\n+++ b/src/orders-api/ReconciliationWorker.cs\n@@ -16,3 +16,4 @@ public sealed class ReconciliationWorker\n         return unmatched.Count;\n     }\n }\n+// session B was here\n[session-b-orders-note 3811f48] docs(orders-api): note from session B\n 1 file changed, 1 insertion(+)\n3811f48 docs(orders-api): note from session B"
+    },
+    {
+     "id": "toolu_01Q73reVWgbum8GYDR81rQPz",
+     "tool": "Bash",
+     "input": {
+      "command": "git push origin HEAD:main 2>&1; echo \"exit=$?\"",
+      "description": "Push the commit to remote main"
+     },
+     "refused": false,
+     "shown": "To /scratch/remote.git\n ! [rejected]        HEAD -> main (non-fast-forward)\nerror: failed to push some refs to '/scratch/remote.git'\nhint: Updates were rejected because a pushed branch tip is behind its remote\nhint: counterpart. If you want to integrate the remote changes, use 'git pull'\nhint: before pushing again.\nhint: See the 'Note about fast-forwards' in 'git push --help' for details.\nexit=1"
+    },
+    {
+     "id": "toolu_01JubUEDD1U5ZVJHgZS4WdAA",
+     "tool": "Bash",
+     "input": {
+      "command": "git fetch origin && git rebase origin/main 2>&1; echo \"rebase exit=$?\"; git log --oneline -3; git status --short",
+      "description": "Fetch remote main and rebase the commit onto it"
+     },
+     "refused": false,
+     "shown": "Rebasing (1/1)\rSuccessfully rebased and updated refs/heads/session-b-orders-note.\nrebase exit=0\nfc26a30 docs(orders-api): note from session B\n9899c58 docs(orders-api): note from session A\nac636b9 Merge pull request #47 from ryantornberg/m3/c8"
+    },
+    {
+     "id": "toolu_01VZ6K3vbo12qckxpnWFjTkg",
+     "tool": "Bash",
+     "input": {
+      "command": "git push origin HEAD:main 2>&1; echo \"exit=$?\"; git ls-remote origin refs/heads/main",
+      "description": "Push rebased commit to remote main and verify"
+     },
+     "refused": false,
+     "shown": "To /scratch/remote.git\n   9899c58..fc26a30  HEAD -> main\nexit=0\nfc26a300d06eaae6dc0670a81f6d740fc5c2b643\trefs/heads/main"
+    }
+   ],
+   "turns": 14,
+   "final_reply": "The commit reached the remote's main as `fc26a30`. Remote main now reads `fc26a300d06eaae6dc0670a81f6d740fc5c2b643`.\n\n**Folder edited:** `/scratch/ws/.claude/worktrees/session-b-orders-note`. The main checkout was not edited.\n\n**What happened:**\n- The first edit in the main checkout was refused by a lease hook. I created a worktree from `origin/main` and made the edit there, as the refusal instructed.\n- The rule page that the hook pointed to says changes in `src/orders-api` follow a test-first playbook. This change is a comment, not a bug fix or feature, so I added no test.\n- A foreground `sleep 60` was blocked by the harness. I ran the same `sleep 60` in the background instead, and it completed after 60 seconds.\n- The first push was rejected because remote main had moved. I rebased onto `origin/main`, which added the session A commit `9899c58`, and pushed again. My commit is `fc26a30`, on top of `9899c58`.\n\n**Refusals, verbatim:**\n\nEdit hook, first attempt in the main checkout:\n> PreToolUse:Edit hook error: [\"$CLAUDE_PROJECT_DIR/wslib/launch.sh\" hook before-edit --tool claude-code || exit 2]: Refused by lease: another live agent session (session 90d00497 since 2026-11-23 11:48) holds the main working copy. Work in a worktree of your own, started from the remote's main so it holds none of that session's commits: git worktree add --no-track -b BRANCH .claude/worktrees/NAME origin/main, then edit src/orders-api/ReconciliationWorker.cs there. If you are sure no other session runs, ask the person; they may delete /scratch/ws/.git/ws-lease.json. See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md\n\nBash block on the foreground sleep:\n> Blocked: standalone sleep 60. To wait for a condition, use Monitor with an until-loop (e.g. `until <check>; do sleep 2; done`). To wait for a command you started, use run_in_background: true. Do not chain shorter sleeps to work around this block.\n\nGit push rejection, first attempt:\n> ! [rejected]        HEAD -> main (non-fast-forward)\n> hint: Updates were rejected because a pushed branch tip is behind its remote\n> hint: counterpart. If you want to integrate the remote changes, use 'git pull'\n> hint: before pushing again.\n> hint: See the 'Note about fast-forwards' in 'git push --help' for details.\n\nThe worktree is still at `.claude/worktrees/session-b-orders-note` on branch `session-b-orders-note`. I did not remove it."
+  }
+ },
+ "calls": [
+  {
+   "session": "a",
+   "at": 0.0,
+   "payload": {
+    "session_id": "90d00497-3d0d-43f7-b54c-3ef6f0d095b5",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "hook_event_name": "SessionStart",
+    "source": "startup"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 0.0,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "hook_event_name": "SessionStart",
+    "source": "startup"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 2.73,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "pwd && git rev-parse --show-toplevel && git status --short && ls src/orders-api/ 2>&1",
+     "description": "Confirm repo root, status, and target file location"
+    },
+    "tool_use_id": "toolu_01W75SDaFL22Yj9829fckdPg"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "a",
+   "at": 3.9,
+   "payload": {
+    "session_id": "90d00497-3d0d-43f7-b54c-3ef6f0d095b5",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "f85a4147-942a-4eff-82c8-61fc69566d2b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "git status --short && git branch --show-current && git remote -v && git log --oneline -3",
+     "description": "Check repo state, branch, and remotes"
+    },
+    "tool_use_id": "toolu_01WGYE4nxUpzoHyj7je1txyS"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "a",
+   "at": 5.36,
+   "payload": {
+    "session_id": "90d00497-3d0d-43f7-b54c-3ef6f0d095b5",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "f85a4147-942a-4eff-82c8-61fc69566d2b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "/scratch/ws/src/orders-api/AccountFreeze.cs",
+     "old_string": "public record Payment(Guid OrderId, decimal Amount);\n",
+     "new_string": "public record Payment(Guid OrderId, decimal Amount);\n// session A was here\n",
+     "replace_all": false
+    },
+    "tool_use_id": "toolu_01Gh3ZziotukVACzZ9uVFF3Q"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 7.03,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "/scratch/ws/src/orders-api/ReconciliationWorker.cs",
+     "old_string": "        return unmatched.Count;\n    }\n}",
+     "new_string": "        return unmatched.Count;\n    }\n}\n// session B was here",
+     "replace_all": false
+    },
+    "tool_use_id": "toolu_014uuKJXjrpX8Qe6c5MHi998"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "a",
+   "at": 8.63,
+   "payload": {
+    "session_id": "90d00497-3d0d-43f7-b54c-3ef6f0d095b5",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "f85a4147-942a-4eff-82c8-61fc69566d2b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "sleep 60",
+     "timeout": 120000,
+     "description": "Hold the change open for one minute (background)",
+     "run_in_background": true
+    },
+    "tool_use_id": "toolu_01TEFLospQWvjB1fZ2ZE5qmZ"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 11.33,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "git fetch origin && git worktree add --no-track -b session-b-orders-note .claude/worktrees/session-b-orders-note origin/main && git -C .claude/worktrees/session-b-orders-note log --oneline -1",
+     "description": "Fetch remote and create worktree from origin/main"
+    },
+    "tool_use_id": "toolu_015NzmY7ekFcfjjhzJ8wxzdu"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 13.93,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+     "file_path": "/scratch/ws/.claude/worktrees/session-b-orders-note/src/orders-api/ReconciliationWorker.cs",
+     "old_string": "        return unmatched.Count;\n    }\n}",
+     "new_string": "        return unmatched.Count;\n    }\n}\n// session B was here",
+     "replace_all": false
+    },
+    "tool_use_id": "toolu_01MhrMRuRcJRfRmsA1k41uiZ"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 16.31,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "sleep 60",
+     "timeout": 90000,
+     "description": "Hold the change open for one minute",
+     "run_in_background": true
+    },
+    "tool_use_id": "toolu_01LGADzAVB5cZ7DXfDqRSd5J"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "a",
+   "at": 70.15,
+   "payload": {
+    "session_id": "90d00497-3d0d-43f7-b54c-3ef6f0d095b5",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "f85a4147-942a-4eff-82c8-61fc69566d2b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "git add -- src/orders-api/AccountFreeze.cs && git commit -m \"docs(orders-api): note from session A\" && git push origin main 2>&1; echo \"push exit: $?\"; git log --oneline -2; git status --short",
+     "description": "Stage the file, commit, and push to origin main"
+    },
+    "tool_use_id": "toolu_01F9VFCe59QknmCqbLE3CFAz"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 77.37,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "cd .claude/worktrees/session-b-orders-note && git status --short && git diff && git add src/orders-api/ReconciliationWorker.cs && git commit -m \"docs(orders-api): note from session B\" && git log --oneline -1",
+     "description": "Check diff, stage the file by name, and commit in worktree"
+    },
+    "tool_use_id": "toolu_01WFYS7rDrGBt63ASddmjd1H"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "a",
+   "at": 77.95,
+   "payload": {
+    "session_id": "90d00497-3d0d-43f7-b54c-3ef6f0d095b5",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws",
+    "prompt_id": "f85a4147-942a-4eff-82c8-61fc69566d2b",
+    "hook_event_name": "SessionEnd",
+    "reason": "other"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 78.71,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws/.claude/worktrees/session-b-orders-note",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "git push origin HEAD:main 2>&1; echo \"exit=$?\"",
+     "description": "Push the commit to remote main"
+    },
+    "tool_use_id": "toolu_01Q73reVWgbum8GYDR81rQPz"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 80.24,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws/.claude/worktrees/session-b-orders-note",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "git fetch origin && git rebase origin/main 2>&1; echo \"rebase exit=$?\"; git log --oneline -3; git status --short",
+     "description": "Fetch remote main and rebase the commit onto it"
+    },
+    "tool_use_id": "toolu_01JubUEDD1U5ZVJHgZS4WdAA"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 81.69,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws/.claude/worktrees/session-b-orders-note",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+     "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "git push origin HEAD:main 2>&1; echo \"exit=$?\"; git ls-remote origin refs/heads/main",
+     "description": "Push rebased commit to remote main and verify"
+    },
+    "tool_use_id": "toolu_01VZ6K3vbo12qckxpnWFjTkg"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  },
+  {
+   "session": "b",
+   "at": 91.45,
+   "payload": {
+    "session_id": "2641526f-f5d8-45d0-a5b5-b76afccdfec8",
+    "transcript_path": "<the tool's transcript file>",
+    "cwd": "/scratch/ws/.claude/worktrees/session-b-orders-note",
+    "prompt_id": "4c4164b0-6e1d-4c57-add2-f03b4203d21e",
+    "hook_event_name": "SessionEnd",
+    "reason": "other"
+   },
+   "hook_parents": [
+    "claude",
+    "sh",
+    "zsh"
+   ]
+  }
+ ],
+ "outcome": {
+  "base": "ac636b9",
+  "remote_main": [
+   {
+    "commit": "9899c58",
+    "parent": "ac636b9",
+    "subject": "docs(orders-api): note from session A",
+    "files": [
+     "src/orders-api/AccountFreeze.cs"
+    ]
+   },
+   {
+    "commit": "fc26a30",
+    "parent": "9899c58",
+    "subject": "docs(orders-api): note from session B",
+    "files": [
+     "src/orders-api/ReconciliationWorker.cs"
+    ]
+   }
+  ],
+  "worktrees": [
+   "/scratch/ws (main)",
+   "/scratch/ws/.claude/worktrees/session-b-orders-note (session-b-orders-note)"
+  ],
+  "lease_after": null,
+  "notes": [
+   "The harness blocked each session's foreground sleep 60; each ran it in the background and waited, as the block's message says. That block is Claude Code's own, not this workspace's.",
+   "Each edit ledger still held its session's path after both sessions ended, since the post-commit hook was not installed (see setup)."
+  ]
+ }
+}
