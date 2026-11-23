@@ -115,3 +115,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-b3-instruction-review.md](2026-11-22-b3-instruction-review.md) | `docs/playbooks/instruction-review.md` | contradiction, step, placement |
 | [2026-11-22-b3-procedure-endings.md](2026-11-22-b3-procedure-endings.md) | `docs/procedure-endings.md` | contradiction, step, trigger, enforcement, placement |
 | [2026-11-22-b3-how-tos.md](2026-11-22-b3-how-tos.md) | `docs/how-tos.md` | placement |
+| [2026-11-22-c5e-readme.md](2026-11-22-c5e-readme.md) | `README.md` | enforcement, contradiction |
+| [2026-11-22-c5e-changing-the-machinery.md](2026-11-22-c5e-changing-the-machinery.md) | `docs/changing-the-machinery.md` | step |
+| [2026-11-22-c5e-decision-0004.md](2026-11-22-c5e-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction, placement |
+| [2026-11-22-c5e-parts.md](2026-11-22-c5e-parts.md) | `docs/parts.md` | contradiction |

@@ -98,6 +98,11 @@
       "why": "Git keeps the history, hooks, lease and edit ledger under .git, and a git config file sets the aliases, remotes and includes every guard reads; an agent that writes one can turn a guard off or change what a command does."
     },
     {
+      "use": "outward_list",
+      "list": "outward-repos.json",
+      "why": "An agent that could add a repository to the outward-write list could then write to it, so only a person edits the list."
+    },
+    {
       "use": "git_folder_shell",
       "why": "A shell write into a git folder or a git config file, or a git config write to a key the guards read, changes what every later git command and guard does, for every session."
     },
@@ -131,7 +136,8 @@
         "tests/",
         "baselines/",
         "evals/one-time.json",
-        "opencode.json"
+        "opencode.json",
+        "outward-repos.json"
       ]
     },
     {
@@ -166,6 +172,11 @@
     {
       "use": "no_force_push",
       "why": "A force push or a deletion of main rewrites the history every clone and proof anchor builds on, and a host's branch rule does not bind every instance or the repository's owner."
+    },
+    {
+      "use": "outward_write",
+      "list": "outward-repos.json",
+      "why": "Agents write on no repository other people own. Outside the instance's list only gh's reads run, and no agent approves a pull request anywhere, so a stray comment, push or approval cannot reach someone else's project."
     },
     {
       "use": "browser_isolation",

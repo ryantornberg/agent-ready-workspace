@@ -833,6 +833,14 @@ Slice B3 stopped after its two opening changes under lane B's stop rule. The mai
 
 **Lane B's stop rule: a blocking finding the re-check finds stops the slice.** A blocking finding that only the fresh re-check finds, one the first reading missed, stops the slice as one a fix creates does. It is never recorded as a known defect. This adds a trigger to lane B's rule in the revisit's entry above; the rule's other triggers are unchanged.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+One item for slice C5e, from the maintainer's answer to Q20 in the workspace queue. It adds to C5e's scope; no criterion is dropped or weakened.
+
+**The lease and discard refusals point to a worktree made from the remote's main (Q20).** Slice C5d's push guard tells a session to start its worktree from `origin/main` with `--no-track`, so the worktree holds none of the lease holder's commits. The refusals of the `lease` hook and of `no_discard` still advise a worktree made from the main copy's HEAD, which may hold them. Both change to the push guard's advice: `git worktree add --no-track -b BRANCH .claude/worktrees/NAME origin/main`. The two message edits and their cases join C5e's pull request.
+
 ## Results
 
 ### C1, launcher and baselines

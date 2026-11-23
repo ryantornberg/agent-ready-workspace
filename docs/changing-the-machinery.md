@@ -23,6 +23,7 @@ Docs go straight to main, a guidance page after its instruction review. The scri
 | `.githooks/`, `.github/`, `.claude/settings.json`, `.codex/hooks.json` | The commit hook, CI and the agent tools' wiring |
 | `.mcp.json`, `.codex/config.toml` | The browser server each agent tool runs; see [browsers](browsers.md) |
 | `opencode.json` | The instructions opencode loads: the contract and the rule pages |
+| `outward-repos.json` | The repositories agents may write to; see [decision 0004](decisions/0004-the-hook-contract.md). The guards refuse an agent's edit in the cases decision 0004 names, and the README's limits name what gets past them; a person edits it on a branch and opens the pull request. It holds data, not code, so step 2's failing case does not apply to it. |
 | `tests/` | The tests of all of the above |
 | `baselines/` | The findings each check tolerates; see [baselines](parts.md#baselines) |
 

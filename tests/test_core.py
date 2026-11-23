@@ -2745,7 +2745,10 @@ class AdminMergeTests(Folder):
         code, output = self.ws_root("hook", "before-shell", stdin='{"version": 1, "command": "gh pr merge 12 --admin"}')
         self.assertEqual(code, 2, output)
         self.assertIn("docs/changing-the-machinery.md", output)
-        code, output = self.ws_root("hook", "before-shell", stdin='{"version": 1, "command": "gh pr merge 12 --merge"}')
+        # The outward-write guard needs a repository in the list, so name the first one (M3 slice C5e).
+        listed = json.loads((ROOT / "outward-repos.json").read_text(encoding="utf-8"))["repositories"][0]
+        command = f"gh pr merge 12 --merge -R {listed}"
+        code, output = self.ws_root("hook", "before-shell", stdin=json.dumps({"version": 1, "command": command}))
         self.assertEqual(code, 0, output)
 
     def ws_root(self, *args, stdin=""):
@@ -3206,7 +3209,7 @@ class LeaseTests(Folder):
                 self.assertEqual(self.edit(self.root / "src/a.cs", tool, f"{tool}-1", env)[0], 0)
                 code, output = self.edit(self.root / "src/a.cs", "claude-code", "intruder", {"CLAUDE_PID": str(self.other.pid)})
                 self.assertEqual(code, 2, output)
-                self.assertIn("git worktree add", output)
+                self.assertIn("git worktree add --no-track -b BRANCH .claude/worktrees/NAME origin/main", output)
                 self.assertIn("docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md", output)
                 self.assertEqual(self.end(tool, f"{tool}-1")[0], 0)
                 self.assertIsNone(self.lease(), "session end releases the holder's lease")

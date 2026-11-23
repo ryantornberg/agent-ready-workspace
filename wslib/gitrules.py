@@ -25,12 +25,18 @@ runner reads what it needs from git (decision 0004, "Shell events": the `aliases
                               branch it updates or deletes, and whether it forces (M3 slice C5d).
     touches_branch(update, branch)
                            -> True when an update may land on that branch.
+    parse_url(url)         -> where a remote URL points, by git's rules: {"host", "owner", "name", "url"}, or
+                              {"local": True, "path", "url"} for a local path or a file:// URL (M3 slice C5e;
+                              moved from wslib/shellfacts.py, which still offers it).
+    listed(destination, repositories)
+                           -> True when a destination is one of the repositories in the outward-write list.
 
 A git config file is one of the files the runner lists in `git_config`: the global ones (`~/.gitconfig`,
 `$XDG_CONFIG_HOME/git/config`, `~/.config/git/config`, `GIT_CONFIG_GLOBAL`) and every file an `include.path` or
 `includeIf.*.path` names. The repository's own config lives under `.git`, so the segment rule covers it.
 """
 import json
+import os
 import posixpath
 import re
 import unicodedata
@@ -181,9 +187,11 @@ def _config_file(absolute, files):
 
 # Keys a persistent `git config` write may not set, beyond A0's list in wslib/shell.py: core.hooksPath points git
 # at another hooks folder, which turns off every commit and push check (M3 slice C5d, the maintainer's answer to
-# Q16). Kept here, outside the eval's hash, until slice Z moves it into `guarded_key`. A -c value lasts one call,
-# like --no-verify, so it is not counted.
-PERSISTENT_ONLY = {"core.hookspath"}
+# Q16). submodule.recurse makes every later push send each submodule to its own remote, which the outward-write
+# guard does not work out (M3 slice C5e). Kept here, outside the eval's hash, until slice Z moves them into
+# `guarded_key`. A -c value lasts one call, like --no-verify, so it is not counted here; the guard it concerns
+# judges it.
+PERSISTENT_ONLY = {"core.hookspath", "submodule.recurse"}
 
 
 def _persistent_only(key):
@@ -568,3 +576,49 @@ def push_updates(call, fact):
             found["updates"].append({"src": spec.get("src"), "dst": dst, "force": forced(dst, spec.get("force")),
                                      "delete": False, "glob": "*" in (dst or ""), "every": False})
     return found
+
+
+# -- where a URL points (M3 slice C5e) ------------------------------------------------------------------------
+
+def parse_url(url):
+    """A destination for a remote URL, by git's rules: a scheme, else host:path is ssh unless a slash comes
+    before the colon, else a local path."""
+    text = url.strip()
+    scheme = re.match(r"^([A-Za-z][A-Za-z0-9+.-]*)://(.*)$", text)
+    if scheme:
+        kind, rest = scheme.group(1).lower(), scheme.group(2)
+        if kind == "file":
+            return {"local": True, "path": rest, "url": text}
+        host_part, _, path = rest.partition("/")
+        host = host_part.rsplit("@", 1)[-1].split(":", 1)[0].lower()
+        return _repository(host, path, text)
+    colon, slash = text.find(":"), text.find("/")
+    drive = os.name == "nt" and re.match(r"^[A-Za-z]:[\\/]", text)
+    if colon < 0 or (0 <= slash < colon) or drive:
+        return {"local": True, "path": text, "url": text}
+    host = text[:colon].rsplit("@", 1)[-1].lower()
+    return _repository(host, text[colon + 1:], text)
+
+
+def _repository(host, path, url):
+    """owner and name are the URL's last two segments; path is the whole repository path, so a group nested on
+    GitLab or an Azure Repos project is told apart from another of the same last two names."""
+    parts = [part for part in path.split("/") if part]
+    if len(parts) < 2:
+        return {"host": host, "owner": None, "name": None, "url": url}
+    name = parts[-1][:-4] if parts[-1].endswith(".git") else parts[-1]
+    return {"host": host, "owner": parts[-2], "name": name, "url": url, "path": "/".join(parts[:-1] + [name])}
+
+
+def _path(place):
+    return (place.get("path") or f"{place.get('owner')}/{place.get('name')}").strip("/").lower()
+
+
+def listed(destination, repositories):
+    """True when a destination names one of the repositories: the same host and the same whole repository path,
+    OWNER/NAME on GitHub, compared without regard to case, as GitHub compares them. A destination with no owner or
+    name is never listed."""
+    if not destination.get("owner") or not destination.get("name"):
+        return False
+    key = ((destination.get("host") or "").lower(), _path(destination))
+    return any(key == ((entry.get("host") or "").lower(), _path(entry)) for entry in repositories or ())

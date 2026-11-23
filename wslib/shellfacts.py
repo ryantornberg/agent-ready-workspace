@@ -15,6 +15,10 @@ and is refused.
                      git call whose subcommand is not one of git's own (M3 slice C5c)
     git_config       {"home", "files": [...], "unresolved": why or None}: the git config files a write must not
                      reach, the global ones and every file an include names (M3 slice C5c); before-edit too
+    repositories     {"file", "repositories": [{"host", "owner", "name"}], "unresolved": why or None}: the
+                     outward-write list, read from the file the hook's config names (M3 slice C5e)
+    destinations     {target_key(call): {"destinations": [...], "unresolved": why or None}}: where each git push
+                     goes, and nothing else, in one git call for a push that names a remote (M3 slice C5e)
 
 A folder is the parser's folder for a git call, read from the session's folder. Its kind comes from git:
 the folder's git folder and common git folder. A `git worktree remove` operand, joined to the call's folder,
@@ -25,12 +29,13 @@ for a local path or a file:// URL, {"local": True, "path", "url"}. For gh: `gh a
 repository, with {owner} and {repo} filled from GH_REPO, then gh's set-default value, then the only remote;
 for any other gh call, -R or --repo, then GH_REPO, then the set-default value, then the only remote. For a push:
 every URL git would push to, from `git remote get-url --push --all` with the command's own config values, or,
-for a URL on the command line, the URL with the longest `insteadOf` applied. With no refspec, the branch push.default
-and the upstream send, in "refspecs". Anything not modelled is unresolved. A push also gives "branch", the branch
+for a URL on the command line, the URL with the longest `pushInsteadOf` applied, else the longest `insteadOf`.
+With no refspec, the branch push.default and the upstream send, in "refspecs". Anything not modelled is unresolved. A push also gives "branch", the branch
 checked out in its folder, and "main_branch", the one checked out in the main working copy of that repository
 (M3 slice C5d). A git alias is expanded first, from the aliases read in the call's folder, so a stored alias that
 pushes has its target worked out as the guards read it (wslib/gitrules.py, `expand`).
 """
+import json
 import os
 import re
 import pathlib
@@ -358,32 +363,7 @@ def _finish(process):
     return process.returncode, out.decode("utf-8", "surrogateescape").replace("\r\n", "\n")
 
 
-def parse_url(url):
-    """A destination for a remote URL, by git's rules: a scheme, else host:path is ssh unless a slash comes
-    before the colon, else a local path."""
-    text = url.strip()
-    scheme = re.match(r"^([A-Za-z][A-Za-z0-9+.-]*)://(.*)$", text)
-    if scheme:
-        kind, rest = scheme.group(1).lower(), scheme.group(2)
-        if kind == "file":
-            return {"local": True, "path": rest, "url": text}
-        host_part, _, path = rest.partition("/")
-        host = host_part.rsplit("@", 1)[-1].split(":", 1)[0].lower()
-        return _repository(host, path, text)
-    colon, slash = text.find(":"), text.find("/")
-    drive = os.name == "nt" and re.match(r"^[A-Za-z]:[\\/]", text)
-    if colon < 0 or (0 <= slash < colon) or drive:
-        return {"local": True, "path": text, "url": text}
-    host = text[:colon].rsplit("@", 1)[-1].lower()
-    return _repository(host, text[colon + 1:], text)
-
-
-def _repository(host, path, url):
-    parts = [part for part in path.split("/") if part]
-    if len(parts) < 2:
-        return {"host": host, "owner": None, "name": None, "url": url}
-    name = parts[-1][:-4] if parts[-1].endswith(".git") else parts[-1]
-    return {"host": host, "owner": parts[-2], "name": name, "url": url}
+parse_url = gitrules.parse_url
 
 
 def _remotes(where, config_args=(), env_extra=None):
@@ -516,6 +496,8 @@ def _push_target(call, cwd):
     folder = _place(cwd, git.get("folder"))
     if folder is None:
         return _fact(unresolved=git.get("folder_unresolved") or "the folder cannot be placed")
+    if not folder.exists():
+        return _fact(unresolved=f"the folder {git.get('folder')} does not exist yet, so its remotes cannot be read")
     where = ["--git-dir", str(folder)] if git.get("git_dir") else ["-C", str(folder)]
     config_args = _config_args(git)
     if config_args is None:
@@ -524,6 +506,89 @@ def _push_target(call, cwd):
         return _push_resolved(where, config_args, push)
     except TimeoutError:
         return _fact(unresolved="git did not answer in time")
+
+
+def destinations(root, command, cwd):
+    """{target_key: {"destinations", "unresolved"}} for every git push in the command, a push through a git alias
+    included: the URLs it reaches, as `targets` gives them, without the branch and refspecs the push guards also
+    need. A push that names a remote takes one git call; one that names a URL, or none, takes what `targets` does."""
+    facts = {}
+    calls, _ = gitrules.expand(command, lambda: aliases(root, command, cwd))
+    for call in calls:
+        git = call.get("git")
+        if git and git.get("push") is not None and git.get("subcommand") == "push":
+            found = _push_destinations(call, cwd)
+            facts[target_key(call)] = {"destinations": found["destinations"], "unresolved": found["unresolved"]}
+    return facts
+
+
+def _push_destinations(call, cwd):
+    git, push = call["git"], call["git"]["push"]
+    if call.get("unresolved") or git.get("unresolved"):
+        return _fact(unresolved=call.get("unresolved") or git["unresolved"])
+    if call.get("config_env"):
+        return _fact(unresolved=f"{sorted(call['config_env'])[0]} is set, which changes the config git reads")
+    if push.get("remote_dynamic"):
+        return _fact(unresolved="the remote is a variable")
+    if push.get("unknown_options"):
+        return _fact(unresolved=f"the option {push['unknown_options'][0]} is not modelled")
+    folder = _place(cwd, git.get("folder"))
+    if folder is None:
+        return _fact(unresolved=git.get("folder_unresolved") or "the folder cannot be placed")
+    if not folder.exists():
+        return _fact(unresolved=f"the folder {git.get('folder')} does not exist yet, so its remotes cannot be read")
+    where = ["--git-dir", str(folder)] if git.get("git_dir") else ["-C", str(folder)]
+    config_args = _config_args(git)
+    if config_args is None:
+        return _fact(unresolved="a config value on the command cannot be known")
+    remote = push.get("remote")
+    try:
+        if remote is not None:
+            found = _run(where, [*config_args, "remote", "get-url", "--push", "--all", remote])
+            if found is None:
+                raise TimeoutError
+            if found[0] == 0:
+                return _fact([parse_url(url) for url in found[1].splitlines() if url.strip()], remote=remote)
+            if found[0] != 2:                 # 2: no such remote, so the word is a URL
+                return _fact(unresolved=f"git cannot say where the remote {remote} pushes")
+            if _bare_name(remote):
+                return _fact(unresolved=_NO_REMOTE.format(remote, remote))
+            return _fact([parse_url(_insteadof(_Config(where, config_args), remote))])
+        return _push_resolved(where, config_args, push)
+    except TimeoutError:
+        return _fact(unresolved="git did not answer in time")
+
+
+def repositories(root, name):
+    """The outward-write list: {"file", "repositories": [{"host", "owner", "name", "path"}], "unresolved"}. name: the
+    file the hook's config names, relative to the workspace. Each entry is HOST/PATH, the path as the repository's
+    URL gives it: OWNER/NAME on GitHub, GROUP/SUBGROUP/NAME on GitLab, ORG/PROJECT/_git/NAME on Azure Repos. A
+    missing or unreadable file, or one not in the form {"repositories": ["HOST/OWNER/NAME", ...]}, gives an empty
+    list and says why, so every write to a repository is refused until a person repairs it."""
+    file = pathlib.Path(root) / name
+    found = {"file": name, "repositories": [], "unresolved": None}
+    try:
+        data = json.loads(file.read_text(encoding="utf-8-sig"))
+    except FileNotFoundError:
+        found["unresolved"] = f"the list {name} does not exist"
+        return found
+    except (OSError, UnicodeDecodeError, ValueError) as error:
+        found["unresolved"] = f"the list {name} cannot be read: {error}"
+        return found
+    entries = data.get("repositories") if isinstance(data, dict) else None
+    if not isinstance(entries, list):
+        found["unresolved"] = f'the list {name} has no "repositories" list'
+        return found
+    for entry in entries:
+        parts = entry.strip().strip("/").split("/") if isinstance(entry, str) else []
+        if len(parts) < 3 or not all(part.strip() for part in parts):
+            found["repositories"] = []
+            found["unresolved"] = f"the list {name} holds {entry!r}, which is not HOST/OWNER/NAME or a longer HOST/PATH"
+            return found
+        name_part = parts[-1][:-4] if parts[-1].endswith(".git") else parts[-1]
+        found["repositories"].append({"host": parts[0].lower(), "owner": parts[-2], "name": name_part,
+                                      "path": "/".join(parts[1:-1] + [name_part])})
+    return found
 
 
 def _push_resolved(where, config_args, push):
@@ -545,6 +610,8 @@ def _push_resolved(where, config_args, push):
         urls = [line for line in found[1].splitlines() if line.strip()]
         mirror = (config.get(f"remote.{remote}.mirror") or "").lower() in ("true", "yes", "on", "1")
         configured = [line for line in config.get_all(f"remote.{remote}.push") if line.strip()]
+    elif _bare_name(remote):
+        return _fact(unresolved=_NO_REMOTE.format(remote, remote), remote=remote, branch=branch, main_branch=main_branch)
     else:
         urls, mirror, configured = [_insteadof(config, remote)], False, []
     refspecs = None
@@ -559,6 +626,17 @@ def _push_resolved(where, config_args, push):
                              main_branch=main_branch)
     return _fact([parse_url(url) for url in urls], remote=remote if remote in remotes else None, refspecs=refspecs,
                  mirror=mirror, branch=branch, main_branch=main_branch)
+
+
+_NO_REMOTE = ("no remote named {} exists when the guard asks git, so the push may go to a remote made earlier in the "
+              "line; a local path is written with a slash, such as ./{}")
+
+
+def _bare_name(word):
+    """True for a word git would read as a remote's name, not a URL or a path: no slash, no colon, not . or .. and
+    no ~. Such a word that names no remote now may name one a call earlier in the line makes (M3 slice C5e)."""
+    return "/" not in word and ":" not in word and "\\" not in word and word not in (".", "..") \
+        and not word.startswith("~")
 
 
 def _config_key(key):
@@ -632,17 +710,22 @@ def _head(where, git_dir):
 
 
 def _insteadof(config, url):
-    """A URL typed on the command line, with the longest matching insteadOf prefix applied. git applies no
-    pushInsteadOf to it."""
-    best = ("", url)
-    for key, values in config.values.items():
-        if not (key.startswith("url.") and key.endswith(".insteadof")):
-            continue
-        base = key[len("url."):-len(".insteadof")]
-        for prefix in values:
-            if prefix and url.startswith(prefix) and len(prefix) > len(best[0]):
-                best = (prefix, base + url[len(prefix):])
-    return best[1]
+    """A URL typed on the command line, rewritten as git rewrites it for a push: the longest matching pushInsteadOf
+    prefix when one matches, else the longest matching insteadOf prefix (git's remote.c, `add_url_alias`: a URL
+    given as the remote is an anonymous remote, and its push URL is the pushInsteadOf rewrite of what was typed).
+    M3 slice C5e: until then only insteadOf was applied, which its instruction review found git does not do."""
+    for suffix in (".pushinsteadof", ".insteadof"):
+        best = ("", None)
+        for key, values in config.values.items():
+            if not (key.startswith("url.") and key.endswith(suffix)):
+                continue
+            base = key[len("url."):-len(suffix)]
+            for prefix in values:
+                if prefix and url.startswith(prefix) and len(prefix) > len(best[0]):
+                    best = (prefix, base + url[len(prefix):])
+        if best[1] is not None:
+            return best[1]
+    return url
 
 
 def _refspec(text):

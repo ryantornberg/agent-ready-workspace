@@ -15,8 +15,9 @@ It refuses:
 - a `git config` that sets, unsets, edits, renames or removes a key A0 lists, in any scope: `remote.*`, `url.*`,
   `push.*`, `branch.*.pushRemote`, `branch.*.merge`, `remote.pushDefault`, `include.*`, `includeIf.*`, `alias.*`,
   `core.worktree` and `core.sshCommand`, or a key it cannot read. Every guard reads those keys from config. So is
-  `core.hooksPath`, which turns off every commit and push check (M3 slice C5d, Q16), and a section renamed to a
-  name that holds such a key;
+  `core.hooksPath`, which turns off every commit and push check (M3 slice C5d, Q16), `submodule.recurse`, which
+  makes every later push send each submodule to its own remote (M3 slice C5e), and a section renamed to a name
+  that holds such a key;
 - through a git alias, read from config at hook time as the discard and push guards read it, so `git cf
   remote.origin.url URL` with `cf = config` is judged as that `git config` (M3 slice C5d, Q17). A call that is not
   one of git's own commands is refused when its aliases could not be read, or when the command changes the config
