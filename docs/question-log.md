@@ -9,7 +9,7 @@ Every question someone had to ask a person because the workspace did not answer 
 
 The measure of a workspace is this list getting shorter per piece of work, not the workspace getting bigger.
 
-**Adding an entry.** Add one dated row before the session finishes. Stage this file by name and commit it, with the session's other work or on its own, with a subject as [commits](commits.md) says. It needs no `Instructions-review:` trailer, since the log is not a guidance page. A procedure that otherwise commits nothing still commits this entry. Push it with the session's other work. With none, an agent may push it in this repository, and in a team's workspace a person does, as [changing the machinery](changing-the-machinery.md#the-path-for-a-machinery-change) says of a branch. If the edit, the commit or the push is refused, leave the entry where it stopped, and give its text and the refusal in your report.
+**Adding an entry.** Add one dated row before the session reports, and commit and push it as [procedure endings](procedure-endings.md#the-question-log-entry) says.
 
 | Date | The question | Where the answer lives now |
 |---|---|---|

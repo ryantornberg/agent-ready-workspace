@@ -112,3 +112,6 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-22-c5b-readme.md](2026-11-22-c5b-readme.md) | `README.md` | contradiction |
 | [2026-11-22-tfix-parts.md](2026-11-22-tfix-parts.md) | `docs/parts.md` | contradiction |
 | [2026-11-22-tfix-glossary.md](2026-11-22-tfix-glossary.md) | `docs/glossary.md` | contradiction |
+| [2026-11-22-b3-instruction-review.md](2026-11-22-b3-instruction-review.md) | `docs/playbooks/instruction-review.md` | contradiction, step, placement |
+| [2026-11-22-b3-procedure-endings.md](2026-11-22-b3-procedure-endings.md) | `docs/procedure-endings.md` | contradiction, step, trigger, enforcement, placement |
+| [2026-11-22-b3-how-tos.md](2026-11-22-b3-how-tos.md) | `docs/how-tos.md` | placement |

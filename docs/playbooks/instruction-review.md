@@ -9,7 +9,7 @@ last-reviewed: 2026-11-21
 
 How a change to a guidance page is reviewed as a program, recorded, and named in its commit. For the author of the change and the reviewer.
 
-**In short:** guidance has no compiler, so a fresh session at the driver tier reads each changed guidance page against six checks and writes a record of its findings. The author settles each finding, commits the record with the pages, and names it in an `Instructions-review:` trailer. The commit hook, the pre-push hook and CI refuse a guidance change that names no record and gives no listed reason to skip.
+**In short:** guidance has no compiler, so a fresh session at the driver tier reads each changed guidance page against six checks and writes a record of its findings, each marked blocking or not. The author settles each finding, commits the record with the pages, and names it in an `Instructions-review:` trailer. The commit hook, the pre-push hook and CI refuse a guidance change that names no record and gives no listed reason to skip.
 
 ## When it runs
 
@@ -29,11 +29,11 @@ Anything else needs a review. When in doubt, review. The check reads the reason,
 
 1. **Finish the change first.** The review reads the pages as they will be committed.
 2. **Hand the review to a fresh session at the driver tier.** Its prompt starts `Tier: driver`, as [orchestration](../orchestration.md#handing-work-off) requires. Give it the changed pages, the diff, and the paths of the files loaded beside them: the contract, the index, and the pages they link to. Never give it your reasoning or what you expect it to find.
-3. **The reviewer runs the six checks** below on each page, verifies each finding before recording it, and writes one record per page, with `open` in every Disposition cell. It edits nothing else.
-4. **Settle every finding.** Verify it yourself. Fix the ones that are plainly right. For one that needs a decision, write your recommendation and ask the person who owns it. Write the outcome in the finding's Disposition cell, in one of the forms under "The record".
+3. **The reviewer runs the six checks** below on each page, verifies each finding before recording it, marks its [severity](#severity), and writes one record per page, with `open` in every Disposition cell. It edits nothing else.
+4. **Settle every finding.** Verify it yourself. Fix the ones that are plainly right. For one that needs a decision, write your recommendation and ask the person who owns it. Write the outcome in the finding's Disposition cell, in one of the forms under "The record". Never lower a finding's severity mark. When the plan you work under allows no more fix rounds, a non-blocking finding still open goes to the record's "Known defects" section. A blocking finding still open then is never a known defect: name it in your report to the plan's owner, who decides.
 5. **Index the record.** Add its row to [the index](../records/instruction-reviews/README.md): the record, the pages it covers, and the classes it found.
-6. **Commit the record with the pages,** staged by name, and name it in the message: `Instructions-review: docs/records/instruction-reviews/<record>.md`. Give one trailer line per record.
-7. **Stop** when every finding has a disposition and the commit check passes. If a fix changes a page again in substance, run the review again on that change.
+6. **Commit the record with the pages,** as [procedure endings](../procedure-endings.md#the-commit) says, and name it in the message: `Instructions-review: docs/records/instruction-reviews/<record>.md`. Give one trailer line per record.
+7. **Stop** when every finding has a disposition and the commit check passes, then push and report as [procedure endings](../procedure-endings.md) says. When a plan asks for a re-check after its fix round, a fresh session writes it in the same record's "Re-check" section. Any other later change to the page in substance gets a review and a record of its own.
 
 ## The six checks
 
@@ -45,8 +45,21 @@ Each finding gets exactly one class.
 | `step` | A step an agent cannot execute as written: a path or command that does not exist, an input that is not defined, a decision with no default, or no stop condition. |
 | `trigger` | Text that decides when guidance applies, such as a purpose line, an **In short** line, a wrapper's description or an index row, firing when it should not, or not firing when it should. |
 | `enforcement` | A must or never with no enforcement stated, or a stated enforcement that is false, such as a rules-table tag whose case does not show the rule. |
-| `placement` | Text on the wrong page, or text in the always-loaded layer that costs every session but belongs on a page loaded only when needed. |
+| `placement` | Text on the wrong page, or text in the always-loaded layer that costs every session but belongs on a page loaded only when needed. A rule that [procedure endings](../procedure-endings.md) states, restated on a page instead of linked, is a placement finding; an older page switches to the link when it is next edited. |
 | `eval-case` | New behavior the page asks of an agent that no eval case covers, where the page is not marked unproven with a `prove-by` milestone. |
+
+## Severity
+
+The reviewer marks each finding **blocking** or **not blocking**. A finding is blocking when an agent following the page as written would:
+
+- write where it may not, such as a path a rule or the contract forbids, or a system outside the workspace without a yes;
+- skip a person's yes that the contract, a rule page or a procedure requires;
+- run a command that fails, or one that does not exist;
+- follow a step that contradicts the contract or a rule page.
+
+Anything else is not blocking, such as a weak trigger, a misplaced paragraph or a rule restated instead of linked. When in doubt, the reviewer marks it blocking.
+
+The mark is the reviewer's. The author may fix, queue, defer or decline a finding, but never lowers its mark. A plan may stop on blocking findings alone, as M3's plan does for lane B.
 
 ## The record
 
@@ -55,10 +68,15 @@ One file per page, in [docs/records/instruction-reviews/](../records/instruction
 It opens with its title, `# Instruction review: <page>`, a purpose sentence, and an **In short** line with the count of findings per class. Then three sections:
 
 - `## Scope`: what the reviewer read, and which part of the page was in scope.
-- `## Findings`: a table with the header `| # | Class | Where | Finding | Disposition |`. "Where" names a heading or a table, never a line number. Each finding marks its evidence verified or inferred. With no findings, the table keeps its header and the line `No findings.` follows it.
+- `## Findings`: a table with the header `| # | Class | Where | Finding | Disposition |`. "Where" names a heading or a table, never a line number. The Finding cell opens with its severity, `Blocking.` or `Not blocking.`, then the finding. Each finding marks its evidence verified or inferred. With no findings, the table keeps its header and the line `No findings.` follows it.
 - `## Checked with no finding`: one line per class with no finding, saying what was checked.
 
-The reviewer writes `open` in each Disposition cell. The author replaces it with one of: `fixed`, `queued for <where>`, `deferred to <slice or milestone>`, or `declined`, each with its reason. A declined finding is not counted in the index.
+Two more sections are added when they apply:
+
+- `## Re-check`: a fresh session's reading after a fix round, with a table `| # | Verdict | Evidence |`, then what a fix broke and what the first reading missed, each marked blocking or not.
+- `## Known defects`: each non-blocking finding still open when the plan allows no more fix rounds, with the milestone that is to fix it, which is the page's `prove-by` milestone, or the docs audit for a page with no `prove-by`.
+
+The reviewer writes `open` in each Disposition cell. The author replaces it with one of: `fixed`, `queued for <where>`, `deferred to <slice or milestone>`, `known defect, for <milestone or the docs audit>`, or `declined`, each with its reason. A declined finding is not counted in the index.
 
 ## Where it is checked
 
@@ -78,6 +96,8 @@ The `review_index` check holds [the index](../records/instruction-reviews/README
 
 A plan may stop when the same class turns up in too many pages. Count from the index: for each class, the rows that list it, over the pages reviewed in the batch being counted. Each record covers one page, and the index counts a class once per record, however many findings of it the record holds.
 
+A plan may instead stop on blocking findings: one that survives the fix round, a declined one a re-check rejects, or one a fix creates. Count those from the records' Finding cells and "Re-check" sections; the index does not hold severity.
+
 ## Rules
 
 | Rule | Enforced by |
@@ -90,3 +110,4 @@ A plan may stop when the same class turns up in too many pages. Count from the i
 | A skip reason is used only when it applies; the check reads the reason, not the change. | `prose` |
 | A fresh session at the driver tier runs the review, without the author's reasoning. | `prose` |
 | The author settles every finding before the commit. | `prose` |
+| The reviewer marks each finding blocking or not, and the author never lowers the mark. | `prose` |
