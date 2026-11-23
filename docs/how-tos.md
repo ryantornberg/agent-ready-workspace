@@ -48,9 +48,10 @@ The Proof column copies each page's front matter, or the proof line under a sect
 | Task | Go to | Remember | Proof |
 |---|---|---|---|
 | Know whether the work is done, and write the report | [Definition of done](definition-of-done.md) | A test failed before the fix, and every claim in the report is marked verified or inferred. | reference |
+| End any procedure: outward writes, the commit, the question-log entry, the push and the report | [Procedure endings](procedure-endings.md) | Every step's refusal still ends in the report. A page links these rules; it does not restate them. | reference |
 | Understand what an agent's code review checks and how to act on its findings | [Code review](code-review.md) | The reviewer sets obvious fix or decision; the author may raise it, never lower it. Nothing posts without your yes. | reference |
-| Commit | [Commits](commits.md) | Stage files by name. A commit that changes a guidance page names its instruction review in a trailer. | reference |
-| Record a question you had to ask a person | [Question log](question-log.md) | Log it before you finish, then fix the page where the next person will look. | record |
+| Commit | [Commits](commits.md) | The subject's format and the trailer's form are here; how a procedure ends, staging included, is in [procedure endings](procedure-endings.md#the-commit). | reference |
+| Record a question you had to ask a person | [Question log](question-log.md) | Fix the page where the next person will look. Adding and committing the row is in [procedure endings](procedure-endings.md#the-question-log-entry). | record |
 | Find what a past review or run found | [Records](records/README.md) | One folder per record type. Instruction reviews have their own index there. | reference |
 | Close a milestone | [Milestone record template](templates/milestone-record.md) | Numbers come from records and commands, never from memory. | template |
 

@@ -827,6 +827,16 @@ The order of lane B, given by the maintainer after the plan revisit, before the 
 
 Approved by: the maintainer, 2026-11-22
 
+Slice B3 stopped after its two opening changes under lane B's stop rule. The maintainer's answer to Q30 in the workspace queue settles how it resumes, and approves the revision B3 proposed under template rule 7. No criterion is dropped or weakened.
+
+**Procedure endings gets a second fix round first (Q30).** One more fix round on `docs/procedure-endings.md` only, on the items its re-check found. When main has moved and the main working copy holds uncommitted changes, the page pushes from a throwaway worktree of `origin/main` instead of pulling with rebase. A fresh re-check follows, then the reviews of batches 1 and 2 start. This is the page's second fix round on the same failure, which the stop rule's limit of two allows, with the maintainer's yes.
+
+**Lane B's stop rule: a blocking finding the re-check finds stops the slice.** A blocking finding that only the fresh re-check finds, one the first reading missed, stops the slice as one a fix creates does. It is never recorded as a known defect. This adds a trigger to lane B's rule in the revisit's entry above; the rule's other triggers are unchanged.
+
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
 One item for slice C5e, from the maintainer's answer to Q20 in the workspace queue. It adds to C5e's scope; no criterion is dropped or weakened.
 
 **The lease and discard refusals point to a worktree made from the remote's main (Q20).** Slice C5d's push guard tells a session to start its worktree from `origin/main` with `--no-track`, so the worktree holds none of the lease holder's commits. The refusals of the `lease` hook and of `no_discard` still advise a worktree made from the main copy's HEAD, which may hold them. Both change to the push guard's advice: `git worktree add --no-track -b BRANCH .claude/worktrees/NAME origin/main`. The two message edits and their cases join C5e's pull request.
@@ -1426,6 +1436,38 @@ Next: a B3 session builds B3's two opening changes; B2t follows once they merge.
 
 B7 starts after B2t merges, not on these reads alone.
 
+### B3, templates and records: stopped after its two opening changes
+
+Built at the worker tier on 2026-11-22, with its two checks at the driver tier, in the main working copy, which no other session held. The opening changes went straight to main as `a6159d7`. The slice's own session wrote them, since every later page links their rules; five worker-tier helpers wrote batches 1 and 2 from a shared-interface sheet; fresh driver-tier sessions reviewed and re-checked. No file the eval hashes was edited. The maintainer's order for lane B is recorded under "Changes after approval" as `0d7c926`.
+
+- **Verified, opening change 1:** [the instruction review](../playbooks/instruction-review.md#severity) now has the reviewer mark each finding blocking or not, in the Finding cell, and the author never lowers it. Its record gains a "Re-check" and a "Known defects" section and a known-defect disposition, and a rule restated instead of linked to procedure endings is a placement finding.
+- **Verified, opening change 2:** [procedure endings](../procedure-endings.md), a reference page, states once how a procedure ends: outward writes, the question-log entry, the commit, the push and the report. The question log's paragraph on adding an entry moved there, and [the how-to index](../how-tos.md#finishing) routes to it.
+- **Verified, the review, per page:** 16 findings in 3 records, 2 of them blocking. One fix round fixed 15; 1 not blocking was declined.
+
+| Page | Findings | Blocking | Fixed | Declined | At the re-check |
+|---|---|---|---|---|---|
+| Procedure endings | 11 | 2: committing another session's log rows; no path for a code change | 10 | 1: no eval case, since the plan sets the page as a reference | Both blocking fixes hold. Broke, blocking: the push step runs `git pull --rebase origin main` in the main copy, which fails while a tracked file holds uncommitted changes, as the page's own left-behind log row does. Broke, not blocking: four lines still say the log is always committed; a left-behind row is never committed by anyone; and the code row will point back at fix a bug once that page links here. Missed: none. |
+| The instruction review | 4 | 0 | 4 | 0 | Not re-checked: no blocking fix. |
+| The how-to index | 1 | 0 | 1 | 0 | Re-read beside procedure endings: no item. |
+
+- **Verified, the stop rule fired** under lane B's rule: a fix created a blocking finding. The breaks are recorded in [the page's review record](../records/instruction-reviews/2026-11-22-b3-procedure-endings.md#re-check) and are not fixed: a second fix round on the page is the next decision, not this run's.
+- **Built, not reviewed or committed:** batches 1 and 2, parked uncommitted in the worktree `.claude/worktrees/m3-b3` on branch `m3/b3-claim-marks`, so the main copy is clean. Batch 1: the hand-off plan template with the catalog's plan template merged in, its budgets and its "Decisions made without asking" section; the spec, with investigation, audit, retrospective and baseline variants; the project hub; unit docs for four kinds; the bug report template in two layers; the pull request template with its bookkeeping list and its "Decisions made without asking" section; the style guide (authoring conventions); and the reader standard. Batch 2: the fix record, the defect register and the lessons log, each a template with its record file; the epic folder; the fresh-session prompt; a templates index listing every template and the record shapes playbooks define; and handoff's keep mode, review orchestrator step 10 and the records README pointing at the new places. Each builder ran `ws.py check` and the review's six checks on its own pages (verified, by their reports, inferred for what they did not run).
+- **Verified, the two checks, on the branch, not yet a pull request:** `claim_marks`, 9 cases, fails a fix record whose report holds a claim line not marked verified or inferred and passes one whose lines all are (criterion 18). `plan_budgets`, 10 cases, fails a draft plan over 200 words of Key points or 60 words in a table cell, passes one at exactly 200 and 60, and skips approved, done and abandoned plans (criterion 68). The draft decision-queue plan is trimmed to pass it, its text moved under per-slice headings rather than cut. Committed as `8c08faf` and pushed; their `docs/parts.md` and README rows, and the fix record template their links need, are among the parked pages.
+- **Inferred, why the fix broke:** the fix to the first blocking finding left a row uncommitted by design, and the push step written in the same round assumed a clean working copy. As in B2, the break sits where one step hands off to the next.
+
+Decisions made in the slice:
+
+- **The severity mark is the Finding cell's first word,** `Blocking.` or `Not blocking.`, not a new column: a sixth column changes the header `review_index` parses, which is machinery the opening changes did not need.
+- **Record places,** fixed in the sheet: fix records in `docs/records/fixes/`, review records with no plan or fix record in `docs/records/reviews/`, the four spec variants in `docs/records/specs/`, keep-mode handoff notes in `docs/records/handoffs/`, and the defect register and lessons log as single files. An epic folder is `docs/plans/<slug>/`, with its README as the hub, since `page_kinds` holds every other page in `docs/plans/` to `kind: plan`.
+- **Formats a playbook already defines get no new template:** the interview summary, the red team review record, the handoff note and the review record. The templates index links them, so each is stated once.
+- **The reader standard is its own page,** as the change of 2026-11-21 asks, and the style guide holds the authoring conventions. Titles use standard terms, "Bug report template" and "Style guide"; the catalog's names wait for slice Z as search aliases.
+
+Proposed revision (template rule 7): lane B's stop rule names three triggers, but not where a blocking finding goes when the re-check finds the first reading missed it. It is not a known defect, and no fix round is left. The instruction review now sends it to the plan's owner in the report; the rule should say whether it stops the slice.
+
+Not done: batches 1 and 2's instruction reviews, fix round and re-check, and their commit; the `claim_marks` and `plan_budgets` pull request; the question log's gap kinds and the kickoff prompt; and the private ledger's moves for B3's rows, since none of their pages reached main.
+Parked: Q30.
+Next: the maintainer — answer Q30 in the workspace queue on how B3 resumes, then a B3 session resumes from the worktree.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -1468,3 +1510,4 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C5d, `wslib/shell.py`: `guarded_key`, or a list beside it for persistent `git config` writes only, names `core.hooksPath`, and the parser reports a renamed section's new name; remove `PERSISTENT_ONLY`, `_renamed_to` and the `core` removal rule from `wslib/gitrules.py`.
 - C5d, `INDEX.md`, Topics: a row "A force push or deletion of main refused; a push refused because its branch is a variable; a worktree's push of the main copy's branch refused" linking [decision 0004](../decisions/0004-the-hook-contract.md) and [decision 0005](../decisions/0005-concurrent-sessions-and-the-edit-ledger.md), and the row "A push to main refused" also routing a force push there.
 - C5b, `INDEX.md`, Topics: the row "Notices when a session starts" also names main's CI failing and a pending handoff note; and a row "Resume another session's work; a handoff note shown at session start; mark or clear a note with ws.py handoff" linking [handoff](../playbooks/handoff.md#the-marker-and-the-loader).
+- B3, `INDEX.md`, Topics: a row "How a procedure ends; commit, push, the question-log entry and the report" linking [procedure endings](../procedure-endings.md).
