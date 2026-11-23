@@ -176,6 +176,11 @@ class HookAndCommandAgreeTests(unittest.TestCase):
     def test_the_hook_refuses_reading_the_file_with_secrets_reads(self):
         self.assertIsNotNone(self.part.decide({"command": f"cat {entry('secrets_shell')['file']}"}))
 
+    def test_the_powershell_method_gets_the_dump_advice(self):
+        reason = self.part.decide({"command": "[Environment]::Get" + "EnvironmentVariables()"})
+        self.assertIn("echo it by name", reason or "")
+        self.assertIn("ask the person for a secret", reason or "")
+
     def test_the_command_and_the_hook_share_one_list(self):
         self.assertIs(secrets.REFUSED, secretrules.REFUSED)
         self.assertIs(secrets.refusal, secretrules.refusal)

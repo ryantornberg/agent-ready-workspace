@@ -7,7 +7,9 @@ It refuses:
 
 - an environment dump: `env` that runs no program, `printenv` in every form, `export`, `declare` or `typeset`
   with no name, `set` with no argument, a read of `/proc/<pid>/environ`, and PowerShell's `env:` drive and
-  `GetEnvironmentVariables`;
+  `GetEnvironmentVariables`. That method's name is refused in any word of a command and in the rest of the raw
+  line, which the parser cannot read as PowerShell; inside a message body, or a heredoc body fed to a program
+  that is not a shell, it is text and passes (M3 slice PSFIX);
 - a command that names a secrets file, in an argument or after `<`, unless its program only looks at the file's
   name (NAMES_ONLY, and the git subcommands in GIT_NAMES_ONLY). The files are the patterns in "secrets" and
   "home", the same lists `agent_settings` holds the tools' settings to. Each is matched against the end of a
@@ -50,6 +52,7 @@ PATTERN_OPTIONS = ("--regexp", "--file", "--expression", "--source")
 FILE_MESSAGES = ("-F", "--file", "--body-file", "--notes-file")   # message options that name a file to read
 PS_VALUES = {"-o", "-O", "-p", "-q", "-u", "-U", "-g", "-G", "-t", "-C", "-k", "-F", "-M", "-N"}
 DUMPERS = frozenset({"export", "declare", "typeset"})
+METHOD = "getenvironmentvariables"   # PowerShell's [Environment]::GetEnvironmentVariables(), matched in lower case
 ENVIRON = "proc/*/environ"
 SPLIT = re.compile(r"[\s'\"`()\[\]{}<>|;&=:,@$!]+")
 VARIABLE = re.compile(r"\$\{?([A-Za-z_]\w*)\}?")
@@ -270,12 +273,48 @@ def _shell_text(words):
     return None
 
 
+def _data(node, out):
+    """The text in a parsed line that no shell runs: each heredoc body fed to a program that is not a shell. A
+    shell's heredoc is kept, since PowerShell's and cmd's are not read as commands by the parser."""
+    if isinstance(node, (list, tuple)):
+        if len(node) == 3 and node[0] == "simple":
+            names = {secretrules.program_name(word.text) for word in node[1] if isinstance(word, shell.Word)}
+            if not names & secretrules.SHELLS:
+                out.extend(record["body"] for record in node[2]
+                           if isinstance(record, dict) and record.get("op") in ("<<", "<<-") and record.get("body"))
+        for item in node:
+            _data(item, out)
+    elif isinstance(node, dict):
+        for key in ("target", "body_subs"):
+            _data(node.get(key), out)
+    elif isinstance(node, shell.Word):
+        for sub in node.subs:
+            _data(sub, out)
+    return out
+
+
+def _runs_method(command, calls):
+    """True when a command the line runs names PowerShell's environment-variables method. Message bodies and
+    heredoc bodies that no shell reads are text, not commands, so the name there passes. The rest of the raw line
+    is still read, since the parser reads PowerShell's `[Environment]::Method()` as no command at all."""
+    for call in calls:
+        words = [call["program"] or ""] + [word for i, word in enumerate(call["args"]) if i not in call["message_args"]]
+        if any(METHOD in word.lower() for word in words):
+            return True
+    text = command
+    bodies = [call["args"][i] for call in calls for i in call["message_args"]] + _data(shell.parse(command), [])
+    for body in sorted(bodies, key=len, reverse=True):
+        text = text.replace(body, " ")
+    return METHOD in text.lower()
+
+
 def decide(event, config):
     command = event.get("command") or ""
-    if "getenvironmentvariables" in command.lower():   # PowerShell; the parser reads no command in it
-        return "GetEnvironmentVariables prints the whole environment, secrets included. Ask the person for the one value you need."
     patterns = _patterns(config)
     calls = shell.analyze(command)
+    if METHOD in command.lower() and _runs_method(command, calls):
+        return ("PowerShell's GetEnvironmentVariables method prints the whole environment, secrets included. To see "
+                "a variable that holds no secret, such as PATH, echo it by name; ask the person for a secret.")
     assigned = {}
     for call in calls:
         assigned.update({name: value for name, value in call["env"].items()
