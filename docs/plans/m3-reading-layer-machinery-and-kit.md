@@ -883,6 +883,16 @@ One item for slice B2t, from the maintainer's answer to Q31 in the workspace que
 
 **B2t updates the guard lines C5e left stale (Q31).** Three B2 pages still say the outward-write guard is planned in slice C5e, which has since built it: the review orchestrator's step 11, and the guard rows of tracker operations and git-host operations. B2t corrects the three in its fix round, under the instruction review it already runs.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+A new slice, KILLFIX, from main's red CI after B3's second resume: C6's kill test failed once on macOS with Python 3.9, and the maintainer had the failed job rerun. KILLFIX has no row in the slice tables; this entry is its scope. No criterion is dropped or weakened.
+
+**Lane C runs KILLFIX after PSFIX, then C8,** at the driver tier.
+
+**C6's kill test measures the check's run time instead of assuming it.** `test_a_killed_commit_check_leaves_nothing_behind` times one whole run of the commit check and places every kill point as a fraction of that one sample. When the sample runs slow, a later point falls after the check has ended, and the test fails though the check left nothing behind. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request, so that a kill point never falls after the check has ended. KILLFIX is done when the test holds under a slow sample that fails it today, and its report is under "Results".
+
 ## Results
 
 ### C1, launcher and baselines
@@ -1343,6 +1353,35 @@ Decisions made in the slice:
 Not done: nothing
 Parked: none
 Next: coordinator — build slice KILLFIX, which the maintainer put after PSFIX in lane C, then C8; slice Z takes the agent-settings and parts item queued below.
+
+### KILLFIX, the kill test's timing
+
+Pull request #45, on branch `m3/killfix` from main at `713fe88`, at the driver tier, following the fix-a-bug playbook. The maintainer's approval is recorded under "Changes after approval" as an entry of 2026-11-23, committed on the branch before the fix. This entry is committed on the branch, and the branch merges by `python3 ws.py merge 45` once CI passes on its head. It touches no file the eval hashes and no guidance page.
+
+```
+Fixed: C6's kill test placed its kill points by one timed run of the commit check, so a slow sample put a point after the check had ended; it now measures the run time and never kills a check that has already ended.
+```
+
+- **Verified, the failure on main:** attempt 1 of CI run 45174839367, on `df370a8`, failed only the macOS job with Python 3.9, at point 0.6: "the check ended before it was killed, so this kill tested nothing". The rerun passed.
+- **Verified, the cause, reproduced before the fix:** a scratch copy of the pre-commit hook that sleeps one second on its second run, the one main's test times, made main's test fail at point 0.6 with the same message. The test timed one whole run and placed every point as a fraction of that one sample.
+- **Verified, the fix:** `tests/test_not_inherited.py` now takes the run time as the shortest of three whole runs, each started exactly as a killed run is. `kill_inside` polls the run up to its kill point. A run that ends first is timed, its time becomes the new shortest, and the point is tried again on a new run, up to three times. Every point, not only those up to 0.6, must now kill a running check. The checks of the working copy, the git folder, the temporary folder and the worktree list are unchanged.
+- **Verified, the fix holds under a slow sample:** with the same scratch hook, the fixed test passes with the second run slowed, and with all three measured runs slowed, where it took one retry. Ten plain runs in a row passed, and five under eight busy processes.
+- **Verified, test first for the helper:** two new unit tests in `KillInsideTests`. A run of 0.4 seconds measured as 3 is killed while running on the second try, and a long run is killed on the first.
+- **Verified, the test still bites:** a scratch hook that holds a lock file while the check runs, and removes it at the end, failed the test from the first point.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` (735 tests, 3 skipped) pass locally; `python3 tests/hook_cases.py` passes 93 of 93; `python3 evals/grade.py --recorded` finds no difference. CI passed all five check jobs on `2565c8e`, on Linux, macOS and Windows.
+- **Verified, impact check:** `kill_inside`, `start_check`, `run_time` and `sleeper` are new and used only in this test file. `kill_tree` and `listing` are unchanged, and only this file calls them.
+- **Inferred, stated limit:** the test can still fail if three runs in a row each end before their point, each faster than the one before. That needs the check to speed up sharply within one test, and it would then say so, with the three run times.
+- No fix round. Main moved during the slice, so the branch merged main once; the plan's "Changes after approval" was the one conflict. No instruction review: the slice changed no guidance page. No private ledger row maps to KILLFIX, which has no plan row, so none moved (verified, a search of the ledger; its check prints 0 unmapped). No question was queued.
+
+Decisions made in the slice:
+
+- **Measure and correct, not widen the margin.** Moving the asserted points lower, or timing more runs, would only make the flake rarer. Timing the run that ended early gives a real run time, so the next try's point falls inside the run.
+- **Every point must now kill a running check.** The old test let points 0.75 and 0.9 test nothing in silence. With retries, all seven points are real kills.
+- **No CHANGELOG entry,** as slices C1 to PSFIX.
+
+Not done: nothing
+Parked: none
+Next: coordinator — merge pull request #45 once CI passes on its head, then build slice C8, the next slice of lane C.
 
 ### Sub-batch A, 2026-11-18
 
