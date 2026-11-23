@@ -56,6 +56,19 @@ GUARDS = {
     "outward_write": ("before-shell", "outward_write: a gh write to a repository outside the list is refused"),
     "secrets_shell": ("before-shell", "secrets_shell: a read of the secrets file is refused"),
 }
+# The guards whose code reads a variable by name get a second call that reaches that code: git_folder_shell judges
+# ~/.gitconfig through HOME, and outward_write takes gh's repository from GH_REPO when the command names none.
+# Each case sets the variable it is about; removing it must still leave the call refused.
+READERS = {
+    "git_folder_shell": ("before-shell", "git_folder_shell: a redirect into the global git config is refused"),
+    "outward_write": ("before-shell", {
+        "name": "outward_write: a gh write whose repository comes from GH_REPO is refused", "tool": "claude-code",
+        "env": {"GH_REPO": "them/theirs"},
+        "setup": {"files": {"outward-repos.json": "{\"repositories\": [\"github.com/o/r\"]}\n"}},
+        "payload": {"hook_event_name": "PreToolUse", "tool_name": "Bash",
+                    "tool_input": {"command": "gh pr comment 5 --body 'Seen.'"}, "cwd": "{root}", "session_id": "me"},
+        "exit": 2, "output": ["Refused by outward_write"]}),
+}
 # Codex's wiring finds the launcher without a variable; one guard per event shows that through it.
 CODEX = {
     "before-edit": "codex: a patch into the shelved service is refused",
@@ -249,6 +262,7 @@ class ScanTests(unittest.TestCase):
             with self.subTest(event):
                 case = find_case(event, case_name)
                 self.assertEqual((case["exit"], case["tool"]), (2, "codex"))
+        self.assertEqual(set(READERS), {"git_folder_shell", "outward_write"})
 
 
 class HookGuardTests(unittest.TestCase):
@@ -292,6 +306,11 @@ class HookGuardTests(unittest.TestCase):
         for guard, (event, case_name) in GUARDS.items():
             with self.subTest(guard):
                 self.check(guard, event, find_case(event, case_name))
+
+    def test_the_guards_that_read_a_variable_still_refuse_where_they_read_it(self):
+        for guard, (event, case) in READERS.items():
+            with self.subTest(guard):
+                self.check(guard, event, case if isinstance(case, dict) else find_case(event, case))
 
     def test_codex_wiring_still_refuses_with_any_one_variable_removed(self):
         for event, case_name in CODEX.items():
