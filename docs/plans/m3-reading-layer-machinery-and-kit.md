@@ -1326,7 +1326,7 @@ Decisions made in the slice:
 
 Not done: nothing
 Parked: none
-Next: coordinator — build slice C8, the next slice of lane C, once pull request #43 is merged; slice Z takes the agent-settings and parts item queued below.
+Next: coordinator — build slice KILLFIX, which the maintainer put after PSFIX in lane C, then C8; slice Z takes the agent-settings and parts item queued below.
 
 ### Sub-batch A, 2026-11-18
 
