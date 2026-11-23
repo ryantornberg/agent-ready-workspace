@@ -18,6 +18,7 @@
     python3 ws.py handoff NOTE               # mark NOTE as this branch's handoff note, shown at the next session start
     python3 ws.py handoff --done             # clear this branch's handoff marker (--done BRANCH: another branch's)
     python3 ws.py handoff                    # list this working copy's handoff markers, pending or merged
+    python3 ws.py with-secrets NAME -- PROGRAM ...   # run PROGRAM with NAME from the secrets file, in its environment only
 
 The engine is the folder wslib/; this file only starts it. wslib/runner.py says how the commands work.
 """

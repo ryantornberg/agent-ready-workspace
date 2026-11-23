@@ -179,6 +179,13 @@
       "why": "Agents write on no repository other people own. Outside the instance's list only gh's reads run, and no agent approves a pull request anywhere, so a stray comment, push or approval cannot reach someone else's project."
     },
     {
+      "use": "secrets_shell",
+      "why": "A token an agent prints from its shell lands in its context and its transcript; the tools' read denies do not cover the shell, so this hook refuses environment dumps and shell reads of the secrets files.",
+      "secrets": [".env", ".env.*", "**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/secrets/**"],
+      "home": ["~/.ssh/**", "~/.aws/**", "~/.netrc", "~/.git-credentials", "~/.config/gh/hosts.yml", "~/.config/agent-ready-workspace/**"],
+      "file": ".env"
+    },
+    {
       "use": "browser_isolation",
       "why": "Two sessions that share one browser profile collide, and the second cannot open a browser; each session gets its own, and the agent tool's own plugin stays off.",
       "settings": ".claude/settings.json",
