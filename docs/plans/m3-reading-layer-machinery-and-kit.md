@@ -857,6 +857,24 @@ Slice B3 stopped a third time under lane B's stop rule: the second re-check foun
 
 **B3 reverts the commit steps, then merges (Q41).** The review orchestrator, escape analysis and handoff go back to main's wording for where and how they commit and push. Only their stale pointers to B3's new pages change. The orchestrator's step 2 clause, which counted a plan-only commit as reviewed, is removed. The fix record template loses its escape analysis section. One narrow fresh re-check of those pages follows, then the pull request. Where a review commits on a branch stays unsettled, for M4.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+A new slice, PSFIX, from the defect C5f found after its merge, and the order of lane C after C6. PSFIX has no row in the slice tables; this entry is its scope. The maintainer's answers to round 7 of the workspace queue settle both. No criterion is dropped or weakened.
+
+**Lane C runs PSFIX, then C8, then C9,** at the tiers the plan's rows name. PSFIX is driver tier.
+
+**The secrets hook stops refusing the name of PowerShell's environment-variables method where nothing runs it.** `secrets_shell` matches that name on the raw command line, so it refuses the name inside a heredoc or a commit message too. A driver-tier session follows the fix-a-bug playbook, on its own branch and pull request. The hook then matches the name only where the parser reads a command, and its refusal gives the advice of the dump message: echo by name a variable that holds no secret, and ask the person for a secret. PSFIX is done when a case shows each false refusal gone and each true one kept, and its report is under "Results".
+
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+C6's proposed revision, approved as proposed. It aligns the C6 row and criterion 46 with what C6 built and tested; no guard changes.
+
+**"No guard" means no guard on a tool call, a commit or a push.** The C6 row's first sentence and criterion 46's first sentence read: no guard on a tool call, a commit or a push turns off when one environment variable is unset. The stop gate keeps C1's choice: its wiring lets a session stop when the launcher fails, so it is not such a guard. The rest of the row and the criterion stand.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -1289,6 +1307,35 @@ Not done: nothing
 Parked: none
 Next: coordinator — build slice C8, the next slice of lane C; slice Z takes the INDEX row queued below; the maintainer decides the proposed revision of criterion 46's wording.
 
+### PSFIX, the PowerShell method's name
+
+Pull request #43, on branch `m3/psfix` from main at `8c4ccc7`, at the driver tier, following the fix-a-bug playbook. The approval, and the maintainer's approval of C6's proposed revision of criterion 46, are recorded under "Changes after approval" as two entries of 2026-11-23, committed on the branch before the fix. This entry is committed on the branch, and the branch merges by `python3 ws.py merge 43` once CI passes on its head. It touches no file the eval hashes and no guidance page.
+
+```
+Fixed: secrets_shell refused any command whose raw text held the name of PowerShell's environment-variables method, even in a heredoc or a commit message; it now reads the name only where a command can run it.
+```
+
+- **Verified, the bug, through the real wiring:** on main's tree, Claude Code's before-shell wiring refused `cat >> FILE <<'EOF'` with the name in the heredoc's text, and `git commit -m` with the name in the message, both with exit 2. On the branch's tree the same two calls pass, and `[Environment]::` with the method, piped to `Out-String`, is still refused, now with the dump message's advice.
+- **Verified, test first:** 20 new cases in `parts/secrets_shell.cases.json`. Before the fix, `ws.py selftest` failed 7 of 158: the name in a heredoc that writes a file, quoted or not, in a commit message, in a pull request body, in the heredoc commit idiom, in a heredoc git reads with `-F -`, and in a heredoc Python reads. The 13 refusals the fix must keep already held: the method followed by another command, piped on, in lower case, with an argument, inside parentheses, assigned to a variable, under `pwsh -c`, `powershell.exe -Command`, `cmd /c` and `sh -c`, in a heredoc fed to `pwsh`, and in a substitution inside a commit message or an unquoted heredoc. A new unit test, `test_the_powershell_method_gets_the_dump_advice` in `tests/test_secrets.py`, holds the refusal to the dump message's advice. After the fix, 158 of 158 pass.
+- **Verified, the fix:** `decide` refuses the name when it is in the program word or any argument of a command the parser reads, message bodies left out, and in what remains of the raw line once message bodies, and heredoc bodies fed to a program that is not a shell, are taken out. The raw line is still read because the parser reads PowerShell's `[Environment]::Method()` as no command at all. The parse runs only when the line holds the name, so other commands cost nothing more. The refusal says to echo by name a variable that holds no secret and to ask the person for a secret, as the dump message does.
+- **Verified:** `python3 ws.py selftest`, `python3 ws.py check` and `python3 -m unittest discover -b tests` (733 tests, 3 skipped) pass locally; `python3 tests/hook_cases.py` passes 93 of 93, before-shell's median 69 ms against 200; `python3 evals/grade.py --recorded` finds no difference. CI passed all five check jobs on `181151a`, on Linux, macOS and Windows. macOS 3.9 put before-shell at 134 ms, the `git push` row at 145 and `gh write` at 150; macOS 3.13 at 171, 177 and 178.
+- **Inferred:** the macOS 3.13 rows are runner noise, not the fix. The new code runs only on a line that holds the name, which no timed case does, and main's last runs put the same rows anywhere from 79 to 151 ms.
+- **Verified, impact check:** `decide` is called by the runner's before-shell path, by `ws.py selftest` and the hook case runner through both tools' wiring (`tests/hooks/before-shell.json`, five secrets rows, all passing), by `tests/test_secrets.py` and by `tests/test_not_inherited.py`, which uses the secrets-file row; all pass. The fix reads `shell.parse` and `secretrules.SHELLS` and changes neither. `_child_refusal` and the file and dump checks are unchanged.
+- **Inferred, stated limits:** the name is still refused where it is a plain word of a command that does not run it, such as `echo` or a `grep` pattern for the name, and in a message body whose quoting the line spells differently from the parsed text, such as escaped quotes inside double quotes. Both refuse too much, never too little. A heredoc fed to any shell keeps its text, so the name in a `bash` heredoc's text is refused.
+- No fix round: the cases passed on the first run of the fix, and CI on its first run. Main moved twice during CI, so the branch merged main twice; the milestone record's table and the plan's "Changes after approval" were the conflicts. No instruction review: the slice changed no guidance page. No private ledger row maps to PSFIX, which has no plan row, so none moved (verified, a search of the ledger; its check prints 0 unmapped). No question was queued.
+- **Verified, a side finding, queued for slice Z below:** `docs/agent-settings.md`'s dump bullet and the `secrets_shell` row of `docs/parts.md` name PowerShell's `env:` drive but not the method, which C5f's hook already refused.
+
+Decisions made in the slice:
+
+- **Read the name in a command's words and in the raw line's remainder, not in the words alone.** The parser reads `[Environment]::Method()` as a function definition and reports no command, so a words-only match would have let the plain PowerShell form through. Taking the text bodies out of the raw line keeps every refusal the old match made, except the ones in text no shell runs.
+- **A heredoc fed to a shell keeps its text,** PowerShell and `cmd` among them, since the parser reads neither's script. That refuses `bash <<EOF` text that names the method, which is rare and harmless.
+- **No change to the guidance pages.** The method was missing from them before this slice, and adding it needs an instruction review; it is queued for slice Z, which edits those pages anyway.
+- **No CHANGELOG entry,** as slices C1 to C6.
+
+Not done: nothing
+Parked: none
+Next: coordinator — build slice KILLFIX, which the maintainer put after PSFIX in lane C, then C8; slice Z takes the agent-settings and parts item queued below.
+
 ### Sub-batch A, 2026-11-18
 
 Built on `m3/a` in `.claude/worktrees/m3-a`, at the driver tier. Commits used `--no-verify` until R1's records were in; before each push of `m3/a`, every commit's message passed `ws.py check --message` and every commit's diff the deny-list scan. One departure from "one worktree": the shell parser was built by a driver-tier helper session in a second worktree, on a local branch `m3/a-shell`, merged into `m3/a` before R1. It was never pushed on its own.
@@ -1708,3 +1755,4 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C5f, `INDEX.md`, Topics: a row "A token a program needs; ws.py with-secrets; a shell read of .env or a key refused; an environment dump refused" linking [agent settings](../agent-settings.md#secrets-in-the-shell).
 - C5f, `wslib/shell.py`: report each command's input redirections, `<` and `<>`, as reads beside `writes`, inside a shell's `-c` text in every flag form; and read `ws.py with-secrets NAME ... -- PROGRAM` as a wrapper, so every shell guard judges PROGRAM. Then remove `_input_redirections`, `_inner_text` and `_shell_text` from `parts/secrets_shell.py`, and its refusal of git, gh and writes under `with-secrets`.
 - C6, `INDEX.md`, Topics: a row "A guard that may turn off when an environment variable is unset; the deny list's intended opt-out; what a killed commit check leaves" linking [the README's checks table](../../README.md#what-is-checked-and-by-what).
+- PSFIX, `docs/agent-settings.md` and `docs/parts.md`: the dump bullet and the `secrets_shell` row name PowerShell's environment-variables method beside its `env:` drive, and say the name passes in a message body or in a heredoc fed to a program that is not a shell.
