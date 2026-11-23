@@ -22,7 +22,7 @@ Test code is exempt from extraction: repeated setup in tests is not a finding.
 
 ## Where to search
 
-The rows run from cheapest to dearest, as in the [research ladder](../research-ladder.md). Start at the first row, since you always know the kind of change you are about to make. Move down only while a row comes back empty, and stop at the first row that finds code that fits. A claim that nothing fits needs every row run.
+The rows run from cheapest to dearest, as in the [research ladder](../research-ladder.md). Start at the first row, since you always know the kind of change you are about to make. Move down only while a row comes back empty, and stop at the first row that finds code that fits. A claim that nothing fits needs every row run. The searched line names the code found, so a reviewer can check a claim that existing code already covers the case; such a claim made from memory is often wrong.
 
 | Search | How | Finds |
 |---|---|---|

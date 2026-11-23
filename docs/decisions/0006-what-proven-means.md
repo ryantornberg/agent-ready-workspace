@@ -44,6 +44,8 @@ From then on the `eval_record` check holds it there. Each new recording's guided
 
 Amended 2026-11-21, M3 slice B1, after its instruction review; no rule changes, and each sentence states what the `proof` check already reads. The `milestone` key is optional, and M1's and M2's plans have none; the anchor and demotion lines count only in a plan whose `milestone` is being built. A failed proof attempt is the record that `python3 evals/run.py <case> --baseline --attempt M<n>` writes to `evals/runs/<case>/baseline/record.json`, holding `page`, `milestone` and the verdict `not proven`. For a marked section, the `<page>` in an `Anchor:` or `Demote:` line is the page's path, then `#`, then the heading in lower case, with every character but letters, digits, underscores, hyphens and spaces dropped and each space turned into a hyphen, such as `docs/playbooks/fix-a-bug.md#the-gates`.
 
+Amended 2026-11-23, M3 slice B5: the reason behind cutting. A procedure was once written, and kept, for a task the model without it already passed, because nobody had run the model alone first. That is why M3's proof attempts start with a baseline of the bare model, and why its slice B7 says when that baseline alone cuts a page. No rule here changes.
+
 ## What it gave up
 
 - **A reader must look at the mark.** An unproven page reads like any other. The README's table lists every page's state, and the check holds the table to the pages.

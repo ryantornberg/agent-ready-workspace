@@ -6,7 +6,7 @@ A record is a page directly in "folder" (default docs/decisions) whose name is n
   - its front matter has no "date" that is a calendar date, YYYY-MM-DD, or no "deciders";
   - its title, the first line that starts "# ", is not "# <number>: <the decision>", with the file's number;
   - it lacks one of the sections Context, Decision, What it gave up and Options rejected ("Rejected" is that
-    section's earlier name), or holds them out of that order; other sections may sit anywhere after Context;
+    section's earlier name), or holds them out of that order; it does not place any other section;
   - the word "Amended" or "amended", outside code and outside a pair of double quotes, is not followed by a space
     and a calendar date, or that date is before the record's own date: an amendment is a dated paragraph;
   - its status is superseded and "superseded-by" does not name another record, or no line starts

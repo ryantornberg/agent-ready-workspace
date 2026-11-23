@@ -49,7 +49,7 @@ Offer a [decision record](../decisions/) only when all three hold:
 2. **It would surprise a newcomer.** Someone reading the code without the context would ask why it was done this way.
 3. **It was a real trade-off.** At least one other option was workable, and the choice gave something up.
 
-Fewer than three, and the decision lives in the summary only. A record takes the next free number in `docs/decisions/`, follows the shape of the newest record there, and starts at `status: proposed` until the person accepts it. It is a guidance page, so its commit needs an instruction review, like a glossary row.
+Fewer than three, and the decision lives in the summary only. A record takes the next free number in `docs/decisions/`, follows the [decision record template](../templates/decision-record.md), and starts at `status: proposed` until the person accepts it. It is a guidance page, so its commit needs an instruction review, like a glossary row.
 
 ## The summary
 

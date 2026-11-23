@@ -47,7 +47,7 @@ A spec elsewhere often has sections this workspace keeps in other places:
 | Doc changes | Slices of the plan, like any other change |
 | Status | The plan's `status`, as [when reality diverges](../size-the-work.md#when-reality-diverges) says |
 
-Whether a spec is kept up to date after the work ships, or frozen as written, is not settled yet. [The spec process](../size-the-work.md#when-reality-diverges) says a decision record will settle it.
+What happens to a spec once its plan is done: [when reality diverges](../size-the-work.md#when-reality-diverges).
 
 ## The standalone specs
 

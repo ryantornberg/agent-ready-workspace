@@ -148,7 +148,7 @@ The graders for M3's proof attempts read more of the folder: `run.py` writes a s
 
 ## Rules that make this worth doing
 
-- When an agent goes wrong in real work, turn the failure into a case before you fix the guidance.
+- When an agent goes wrong in real work, turn the failure into a case before you fix the guidance. A guidance fix with no case to replay the failure has nothing to catch the failure's return. Until procedures have an eval system, planned for M4, [escape analysis](../docs/playbooks/escape-analysis.md) describes such a case in its report instead.
 - Run the cases on the smaller models you hand work to, not only the largest.
 - Write a new playbook only after a run without it shows the model failing at the task.
 - Never describe the graders in a page the agent reads.

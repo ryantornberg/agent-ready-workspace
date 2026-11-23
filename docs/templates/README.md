@@ -16,6 +16,7 @@ Every shape this workspace asks you to copy: the templates in this folder, and t
 | [Hand-off plan](hand-off-plan.md) | Work fails the [size gate](../size-the-work.md#the-gate) and needs a plan a person approves. | `docs/plans/<name>.md`, or inside an epic folder |
 | [Spec](spec.md) | The design spec of a plan, or a standalone investigation, audit, retrospective or baseline. | The design spec: inside the plan. The other four: `docs/records/specs/<YYYY-MM-DD>-<variant>-<topic>.md` |
 | [Epic folder](epic-folder.md) | Work needs three or more plans or specs, or is an epic in the tracker. | `docs/plans/<epic-slug>/`, with `README.md` as its hub |
+| [Decision record](decision-record.md) | A decision meets the three conditions in [when a decision gets a record](../playbooks/decision-interview.md#when-a-decision-gets-a-record) and the person says yes, or an approved plan asks for a record. | `docs/decisions/<NNNN>-<topic>.md`, with the next free number |
 | [Milestone record](milestone-record.md) | A milestone's slices are finishing and it needs its sign-off record. | `docs/milestones/m<n>.md` |
 | [Project hub](hub.md) | A project, one or more repositories that ship together, has more than one documentable unit, or a unit easy to mistake for another. | `docs/projects/<project>/README.md`, with its unit pages beside it, until an instance settles the [open question on where per-repository docs live](../adopt-the-workspace.md#open-question-where-per-repository-reference-docs-live) |
 | [Unit doc](unit-doc.md) | A service, library, client or piece of infrastructure needs its reference page. | Not settled: the same open question |
@@ -54,6 +55,5 @@ These have no page here. The page that holds or writes them defines the shape, s
 | Instruction review record | A guidance page is added or changed. | [Instruction review, "The record"](../playbooks/instruction-review.md#the-record) | `docs/records/instruction-reviews/`, with a row in [its index](../records/instruction-reviews/README.md) |
 | Question-log row | You had to ask a person something the workspace should have answered. | [Question log](../question-log.md): its table, and its kinds of gap | A row in [docs/question-log.md](../question-log.md), as [procedure endings](../procedure-endings.md#the-question-log-entry) says |
 | Kickoff prompt | A newcomer starts a first real task. | [Question log, "The kickoff prompt"](../question-log.md#the-kickoff-prompt) | Not saved: pasted into a new session, with the task filled in |
-| Decision record | A decision meets the three conditions in [when a decision gets a record](../playbooks/decision-interview.md#when-a-decision-gets-a-record), and the person says yes. | The newest record in [docs/decisions/](../decisions/), as [extend the workspace](../extend-the-workspace.md#steps) says | `docs/decisions/<NNNN>-<topic>.md`, with the next free number |
 
 Every records folder is listed in [records](../records/README.md).
