@@ -823,6 +823,14 @@ The order of lane B, given by the maintainer after the plan revisit, before the 
 
 **Lane B runs B3, then B2t, then B4, then B5.** B3 builds its two opening changes first, as the revisit's entry above orders, and then the rest of its row. B2t starts once B3 is done. This replaces the revisit's start condition for B2t, which was the merge of B3's two opening changes, and its note that B3's other pages may be built beside B2t.
 
+### 2026-11-22
+
+Approved by: the maintainer, 2026-11-22
+
+One item for slice C5e, from the maintainer's answer to Q20 in the workspace queue. It adds to C5e's scope; no criterion is dropped or weakened.
+
+**The lease and discard refusals point to a worktree made from the remote's main (Q20).** Slice C5d's push guard tells a session to start its worktree from `origin/main` with `--no-track`, so the worktree holds none of the lease holder's commits. The refusals of the `lease` hook and of `no_discard` still advise a worktree made from the main copy's HEAD, which may hold them. Both change to the push guard's advice: `git worktree add --no-track -b BRANCH .claude/worktrees/NAME origin/main`. The two message edits and their cases join C5e's pull request.
+
 ## Results
 
 ### C1, launcher and baselines
