@@ -27,6 +27,10 @@ git config core.hooksPath .githooks
 
 Then a person commits what the kit wrote, before changing anything. That commit brings pages the kit's own instruction reviews read, so its message carries the line `Instructions-review: skipped: as the kit wrote it`; the commit check accepts it only while every page is as `kit.lock.json` holds it. The first push creates main, so push it once with `--no-verify`, as [changing the machinery](docs/changing-the-machinery.md#the-path-for-a-machinery-change) says.
 
+## What is checked, and by what
+
+The checks and guards are parts, and `workspace.json` names the parts this workspace runs. The table of [the parts here](docs/parts.md#the-parts-here) lists each one, with what it fails or refuses and whether it reads the commit message too. `python3 ws.py list` prints the parts in use, with the phases each check runs in, and `python3 ws.py rules` prints every rule in the pages' rules tables with what enforces it. The runner itself also refuses a hook event it cannot read, and a manifest written for another engine version; [decision 0004](docs/decisions/0004-the-hook-contract.md) and [decision 0003](docs/decisions/0003-the-engine-in-one-folder.md) say how.
+
 ## Use it for your own team
 
 [Adopt the workspace](docs/adopt-the-workspace.md) runs these steps inside a plan a person approves, and says when the adoption is done.

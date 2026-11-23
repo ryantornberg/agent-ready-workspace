@@ -109,7 +109,7 @@ A plan may instead stop on blocking findings: one that survives the fix round, a
 | The index lists every record as it is, and each required page has one. | `review_index#a record with no row fails`, `review_index#a row whose classes differ from the record's findings fails`, `review_index#a required page with no record fails` |
 | A record covers exactly one page. | `review_index#a record that covers two pages fails` |
 | A skip reason is used only when it applies; for the first three, the check reads the reason, not the change. | `prose` |
-| The reason `as the kit wrote it` passes only when every guidance page the commit leaves in place, other than those a named record covers, is as the commit's lock holds it. | `review_trailer#as the kit wrote it fails a page that differs from the lock` |
+| The reason `as the kit wrote it` passes only when every guidance page the commit leaves in place, other than those a named record covers, is as the commit's lock holds it. | `review_trailer#as the kit wrote it fails a page that differs from the lock`, `review_trailer#an upgrade's commit may name a record for the README row it corrects beside the kit's reason` |
 | A fresh session at the driver tier runs the review, without the author's reasoning. | `prose` |
 | The author settles every finding before the commit. | `prose` |
 | The reviewer marks each finding blocking or not, and the author never lowers the mark. | `prose` |

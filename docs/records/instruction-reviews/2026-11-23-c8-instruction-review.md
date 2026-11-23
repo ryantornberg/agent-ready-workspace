@@ -35,3 +35,7 @@ Run, in a scratch instance adopted from that clone, with `core.hooksPath=.githoo
 - step: the row names `kit.lock.json`, which `ws.py adopt` writes and `ws.py upgrade` rewrites (verified, running both). The trailer line `Instructions-review: skipped: as the kit wrote it` is accepted as written (verified, running the commit hook). The link to decision 0007 resolves once the untracked page is committed. In the worktree as it stands, the `links` check fails it, because the page is untracked (verified, running `tests.test_kit`).
 - trigger: the reason fires where the row says. The first commit with no trailer is refused, and with the reason it passes. The upgrade commit with the reason passes. The reason is refused in the kit's own repository and on a new page of the instance's own (verified, running each).
 - eval-case: the page is marked `proof: unproven` with `prove-by: M4` (verified, reading its front matter), so new behavior needs no case yet. The new rules row's tag, `review_trailer#as the kit wrote it fails a page that differs from the lock`, names a case that exists and shows a changed `AGENTS.md` refused (verified, reading the case and running `ws.py selftest`).
+
+## Later change
+
+After this review, the page's rules row for `as the kit wrote it` also names the case `review_trailer#an upgrade's commit may name a record for the README row it corrects beside the kit's reason`, from item R4 of the second re-check in [decision 0007's record](2026-11-23-c8-decision-0007.md). The row's text says a page a named record covers is judged by that record.

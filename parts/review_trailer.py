@@ -172,7 +172,7 @@ def _as_the_kit_wrote_it(name, pages, files):
         elif not held or text is None or kitlock.digest(text) != entry.get("hash"):
             found.append(finding(page, 1, f"{name} skips the instruction review as the kit wrote it, but {page} is "
                                           f"not as {kitlock.LOCK} holds it, so the kit's reviews did not read this "
-                                          f"text. Review it in a commit of its own; see {PAGE}"))
+                                          f"text. Review it, and name the review's record in the same commit; see {PAGE}"))
     return found
 
 
