@@ -1593,7 +1593,7 @@ Next: a B3 session builds B3's two opening changes; B2t follows once they merge.
 
 B7 starts after B2t merges, not on these reads alone.
 
-### B3, templates and records: stopped at the batches' second re-check
+### B3, templates and records
 
 Built at the worker tier on 2026-11-22, with its two checks at the driver tier, in the main working copy, which no other session held. The opening changes went straight to main as `a6159d7`. The slice's own session wrote them, since every later page links their rules; five worker-tier helpers wrote batches 1 and 2 from a shared-interface sheet; fresh driver-tier sessions reviewed and re-checked. No file the eval hashes was edited. The maintainer's order for lane B is recorded under "Changes after approval" as `0d7c926`.
 
@@ -1707,6 +1707,27 @@ Not done: the 3 blocking items and the re-checks' non-blocking items; the claim_
 Parked: Q41.
 Next: the maintainer — answer Q41 in the workspace queue on how B3 finishes, then a B3 session resumes from branch `m3/b3-claim-marks` in `.claude/worktrees/m3-b3`.
 
+#### Finished, 2026-11-23
+
+Resumed unattended under the maintainer's answer to Q41, recorded under "Changes after approval" as `7ded68b` before any change. The slice's own session ran at the driver tier and made the revert itself; one fresh driver-tier session re-checked. No file the eval hashes was edited. The slice is finished.
+
+- **Verified, the revert:** the review orchestrator, escape analysis and handoff differ from main's text only in pointers to B3's pages: the defect register, the lessons log and its template, procedure endings' question-log entry, and keep mode waiting for M4. The orchestrator's step 2 clause is gone, its step 10 commits the plan as main says, and its closing paragraph names no push. Escape analysis's step 9 is main's text, without its line on the planned fix record. The fix record template has no escape analysis section, and "Committing it" no longer points at the step 2 clause.
+- **Verified, the narrow re-check:** all 21 dispositions in the four records' "Revert (Q41)" sections were upheld, and nothing blocking was found, so the stop rule did not fire. It found 6 non-blocking items. Four are in the records' "Known defects": three concern where a review or a record commits, for M4, and one is architecture review's step 9 still calling the fix record planned, for M6 or the docs audit. One was an error in a record, corrected. One, step 11's guard text, is B2t's under Q31.
+- **Verified, the branch was rebased onto main** and force-pushed, so `check --commits origin/main..HEAD` passes on all 5 commits; the earlier merges of main had tripped `review_trailer`. The rebased tree matched the tree of the branch merged with main, file for file.
+- **Verified, the pull request:** [#44](https://github.com/ryantornberg/agent-ready-workspace/pull/44), opened as a draft, passed CI on Linux, macOS and Windows, and merged with `python3 ws.py merge 44` as `3baaab1`. Before it, on the branch: `python3 ws.py check` passed with only the known warning on fix a bug's eval record, and `python3 -m unittest discover -b tests` ran 732 tests, 3 skipped, OK.
+- **Verified:** the private ledger's B3 rows move from slice B3 to their pages, and its check prints no unmapped item.
+- **Verified:** the slice Z lines the batches' records queued join "Queued for slice Z" below.
+
+Decisions made in this resume:
+
+- **Handoff's step 2 keeps one pointer change,** "as the contract says" for the question log now links procedure endings' question-log entry. Main's exact text was marked blocking in the first review, since it stages a log holding another session's rows. The re-check upheld it and left the unlabelled staging sentence as a known defect.
+- **Escape analysis keeps its lessons-log steps 7 and 8.** They replace main's "planned in slice B3" line with B3's lessons log, a pointer change. They say what a commit holds, not where it goes.
+- **The branch was rebased, not squashed,** so each commit keeps its own review trailers. Conflicts in the question log and the records index, neither a guidance page, took the merged tree's text.
+
+Not done: nothing
+Parked: none
+Next: the coordinator — start slice B2t, which lane B runs after B3, with Q31's answer on the three B2 pages that still call the outward-write guard planned.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -1755,4 +1776,11 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - C5f, `INDEX.md`, Topics: a row "A token a program needs; ws.py with-secrets; a shell read of .env or a key refused; an environment dump refused" linking [agent settings](../agent-settings.md#secrets-in-the-shell).
 - C5f, `wslib/shell.py`: report each command's input redirections, `<` and `<>`, as reads beside `writes`, inside a shell's `-c` text in every flag form; and read `ws.py with-secrets NAME ... -- PROGRAM` as a wrapper, so every shell guard judges PROGRAM. Then remove `_input_redirections`, `_inner_text` and `_shell_text` from `parts/secrets_shell.py`, and its refusal of git, gh and writes under `with-secrets`.
 - C6, `INDEX.md`, Topics: a row "A guard that may turn off when an environment variable is unset; the deny list's intended opt-out; what a killed commit check leaves" linking [the README's checks table](../../README.md#what-is-checked-and-by-what).
+- B3, `INDEX.md`, Topics: a row "Templates; which template for a plan, spec, bug report, pull request or record; the defect register; the lessons log" linking [the templates index](../templates/README.md).
+- B3, `INDEX.md`, Topics: a row "Write a bug report; rewrite a stale bug ticket; the bug ticket standard" linking [the bug report template](../templates/bug-ticket.md).
+- B3, `INDEX.md`, Topics: a row "Write a pull request description; what a pull request must say; the bookkeeping after a merge" linking [the pull request template](../templates/pull-request.md).
+- B3, `INDEX.md`, Topics: a row "A fix record; where a fix's report goes" linking [the fix record template](../templates/fix-record.md).
+- B3, `INDEX.md`, Topics: a row "An investigation, an audit report, a postmortem or a baseline; a standalone spec" linking [the spec template](../templates/spec.md).
+- B3, `INDEX.md`, Topics: a row "How to write a page; authoring conventions; who a page is for, its word budget and its fixed headings" linking [the style guide](../authoring.md) and [the reader standard](../reader-standard.md).
+- B3, `docs/playbooks/fix-a-bug.md`: step 2 names the [defect register](../records/defects.md) as where a finding outside the fix is written down; step 6 links the [fix record template](../templates/fix-record.md) for the fix's record and its report.
 - PSFIX, `docs/agent-settings.md` and `docs/parts.md`: the dump bullet and the `secrets_shell` row name PowerShell's environment-variables method beside its `env:` drive, and say the name passes in a message body or in a heredoc fed to a program that is not a shell.
