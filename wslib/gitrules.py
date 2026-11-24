@@ -170,47 +170,10 @@ def _config_file(absolute, files):
     return absolute in files or (".git" in parts and parts[-1] in ("config", "config.worktree"))
 
 
-# Keys a persistent `git config` write may not set, beyond A0's list in wslib/shell.py: core.hooksPath points git
-# at another hooks folder, which turns off every commit and push check (M3 slice C5d, the maintainer's answer to
-# Q16). submodule.recurse makes every later push send each submodule to its own remote, which the outward-write
-# guard does not work out (M3 slice C5e). Kept here, outside the eval's hash, until slice Z moves them into
-# `guarded_key`. A -c value lasts one call, like --no-verify, so it is not counted here; the guard it concerns
-# judges it.
-PERSISTENT_ONLY = {"core.hookspath", "submodule.recurse"}
-
-
-def _persistent_only(key):
-    parts = key.split(".")
-    return len(parts) == 2 and key.lower() in PERSISTENT_ONLY
-
-
-def _section_guarded(name):
-    """True when a section of that name holds a key the guards refuse, or may: `core` holds core.hooksPath."""
-    return shell.guarded_key(name + ".x") or shell.guarded_key(name) or name.lower() == "core"
-
-
-def _guarded(write, call=None):
-    key = write.get("key")
-    if key is None:
-        return True
-    if write.get("op") == "remove-section":
-        # Removing `core` removes core.hooksPath, which this workspace sets to its own hooks folder.
-        return shell.guarded_key(key + ".x") or shell.guarded_key(key) or key.lower() == "core"
-    if write.get("op") == "rename-section":
-        # The parser reports the old name only; the new one decides as much, since renaming a section to
-        # remote.x or core brings its keys in there. A parser gap handled here until slice Z.
-        new = _renamed_to(call, key)
-        return _section_guarded(key) or new is None or _section_guarded(new)
-    return shell.guarded_key(key) or _persistent_only(key)
-
-
-def _renamed_to(call, old):
-    """The new name a `git config --rename-section OLD NEW` gives, or None when it cannot be read."""
-    args = list(((call or {}).get("git") or {}).get("args") or [])
-    for index, word in enumerate(args):
-        if word in ("--rename-section", "rename-section") and index + 2 < len(args) and args[index + 1] == old:
-            return args[index + 2]
-    return None
+def _guarded(write):
+    """True for a persistent `git config` write the guards refuse, as the parser judges it: a key it lists, a
+    section that holds one, and a key or a name that cannot be read."""
+    return write.get("key") is None or bool(write.get("guarded"))
 
 
 DEVICES = {"/dev/null", "/dev/stdout", "/dev/stderr", "/dev/tty"}
@@ -282,7 +245,7 @@ def shell_refusals(event):
             if why:
                 reasons.append(why)
         for write in call.get("config_writes") or ():
-            if write.get("via") != "git config" or write.get("op") not in PERSISTENT_OPS or not _guarded(write, call):
+            if write.get("via") != "git config" or write.get("op") not in PERSISTENT_OPS or not _guarded(write):
                 continue
             scope = write.get("scope") or ""
             if scope.startswith("--file ") and "$" not in scope and \
@@ -290,7 +253,7 @@ def shell_refusals(event):
                 continue                  # a file git reads no config from
             key = write.get("key") or "a key it cannot read"
             if write.get("op") == "rename-section":
-                key = f"{key} to {_renamed_to(call, key) or 'a name it cannot read'}"
+                key = f"{key} to {write.get('new_key') or 'a name it cannot read'}"
             reasons.append(f"git config {write['op']} of {key} rewrites a git config file, and that key decides "
                            f"where a push goes, what a git command runs, or which folder git works on. Every guard "
                            f"reads it, so an agent does not change it; a person does, from their own terminal")

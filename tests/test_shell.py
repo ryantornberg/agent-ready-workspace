@@ -462,6 +462,43 @@ class ConfigWriteTests(unittest.TestCase):
     def test_an_environment_write_reaches_any_command(self):
         self.assertTrue(guarded_writes("GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=alias.p GIT_CONFIG_VALUE_0=push make"))
 
+    def test_keys_guarded_only_for_a_persistent_write(self):
+        """M3 slice Z, from C5d's and C5e's queues: core.hooksPath and submodule.recurse, which wslib/gitrules.py
+        listed itself until now."""
+        for line in ("git config core.hooksPath /tmp/x", "git config --global core.hookspath /tmp/x",
+                     "git config set CORE.HOOKSPATH /tmp/x", "git config --unset core.hooksPath",
+                     "git config submodule.recurse true", "git config --global submodule.recurse true"):
+            with self.subTest(line):
+                self.assertEqual(len(guarded_writes(line)), 1)
+        for line in ("git -c core.hooksPath=/tmp/x status", "git -c submodule.recurse=true status",
+                     "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=x git status",
+                     "git config core.hooksPath", "git config submodule.x.recurse true", "git config core.pager cat"):
+            with self.subTest(line):
+                self.assertEqual(guarded_writes(line), [])
+
+    def test_a_section_removed_or_renamed(self):
+        """M3 slice Z, from C5d's queue: the parser reports a renamed section's new name, and judges a rename or a
+        removal by the keys the section holds or will hold."""
+        def section_writes(line):
+            return [(w["op"], w["key"], w.get("new_key"), w["guarded"]) for c in commands(line)
+                    for w in c["config_writes"]]
+        cases = {
+            "git config --rename-section hooks core": [("rename-section", "hooks", "core", True)],
+            "git config rename-section staged remote.origin": [("rename-section", "staged", "remote.origin", True)],
+            "git config --rename-section x submodule": [("rename-section", "x", "submodule", True)],
+            "git config --rename-section remote.o remote.p": [("rename-section", "remote.o", "remote.p", True)],
+            "git config --rename-section old new": [("rename-section", "old", "new", False)],
+            'git config --rename-section old "$N"': [("rename-section", "old", None, True)],
+            "git config --rename-section old": [("rename-section", "old", None, True)],
+            "git config --remove-section core": [("remove-section", "core", None, True)],
+            "git config --remove-section alias": [("remove-section", "alias", None, True)],
+            "git config remove-section remote.origin": [("remove-section", "remote.origin", None, True)],
+            "git config --remove-section color": [("remove-section", "color", None, False)],
+        }
+        for line, expected in cases.items():
+            with self.subTest(line):
+                self.assertEqual(section_writes(line), expected)
+
 
 class EnvironmentTests(unittest.TestCase):
     """A0 and criterion 55: GIT_SSH, GIT_SSH_COMMAND; HOME and the config-file variables on a git command."""

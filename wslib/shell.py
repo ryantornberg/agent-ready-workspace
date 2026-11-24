@@ -45,7 +45,11 @@ so a guard learns everything it decides on without parsing again:
                     GIT_CONFIG_COUNT/KEY_n/VALUE_n or GIT_CONFIG_PARAMETERS. key is None when unknowable.
                     guarded is True for remote.*, url.*, push.*, branch.*.pushRemote, branch.*.merge,
                     remote.pushDefault, include.*, includeIf.*, alias.*, core.worktree and core.sshCommand,
-                    and for any key that cannot be known.
+                    and for any key that cannot be known (guarded_key). A persistent `git config` write is also
+                    guarded for the keys in PERSISTENT_GUARDED, such as core.hooksPath, and a rename or
+                    removal of a section is guarded when the section, or the new name, holds such a key
+                    (guarded_section). A rename's write also gives "new_key", the new name, None when it
+                    cannot be read.
     config_env      the config-affecting variables set on it: HOME, XDG_CONFIG_HOME, GIT_CONFIG_GLOBAL,
                     GIT_CONFIG_SYSTEM, GIT_CONFIG_NOSYSTEM (HOME too under env -i).
     ssh_env         GIT_SSH and GIT_SSH_COMMAND, when set.
@@ -940,6 +944,32 @@ def guarded_key(key):
     return section == "core" and variable in ("worktree", "sshcommand")
 
 
+# Keys only a persistent `git config` write is refused for, beyond guarded_key's: core.hooksPath points git at
+# another hooks folder, which turns off every commit and push check (M3 slice C5d, the maintainer's answer to Q16),
+# and submodule.recurse makes every later push send each submodule to its own remote, which the outward-write guard
+# does not work out (M3 slice C5e). A -c value lasts one call, as --no-verify does, so a -c write of one is not
+# guarded; the guard it concerns judges it.
+PERSISTENT_GUARDED = {"core.hookspath", "submodule.recurse"}
+
+
+def guarded_persistent_key(key):
+    """True for a key whose persistent `git config` write the guards refuse: guarded_key's, and PERSISTENT_GUARDED.
+    A key that cannot be known counts."""
+    if key is None:
+        return True
+    return guarded_key(key) or (len(key.split(".")) == 2 and key.lower() in PERSISTENT_GUARDED)
+
+
+def guarded_section(name):
+    """True when a config section of that name holds a key a persistent write may not set, or may: removing it
+    unsets those keys, and renaming another section to it sets them. `core` holds core.hooksPath. A name that
+    cannot be known counts."""
+    if name is None:
+        return True
+    return guarded_key(name + ".x") or guarded_key(name) or name.lower() in {
+        key.split(".")[0] for key in PERSISTENT_GUARDED}
+
+
 def _env_config(env):
     """[(key or None, value, via)] that GIT_CONFIG_COUNT/KEY_n/VALUE_n or GIT_CONFIG_PARAMETERS set."""
     found = []
@@ -1317,8 +1347,16 @@ def _git_config(opts, operands, action, file_writes):
         return [{"key": None, "value": None, "op": op, "via": "git config", "guarded": True, "scope": scope}]
     key, dynamic = values[0]
     value = values[1][0] if len(values) > 1 and op == "set" else None
-    return [{"key": None if dynamic else key, "value": value, "op": op, "via": "git config",
-             "guarded": dynamic or guarded_key(key), "scope": scope}]
+    write = {"key": None if dynamic else key, "value": value, "op": op, "via": "git config", "scope": scope}
+    if op == "rename-section":
+        new = values[1] if len(values) > 1 else None
+        write["new_key"] = None if new is None or new[1] else new[0]
+        write["guarded"] = dynamic or guarded_section(key) or guarded_section(write["new_key"])
+    elif op == "remove-section":
+        write["guarded"] = dynamic or guarded_section(key)
+    else:
+        write["guarded"] = dynamic or guarded_persistent_key(key)
+    return [write]
 
 
 def _git_remote(action, opts, operands):
