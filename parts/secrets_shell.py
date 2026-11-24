@@ -21,9 +21,8 @@ It refuses:
 - a variable the line itself sets is read with that value, so `F=.env; cat "$F"` is refused. Any other variable
   passes, as it does for `git_folder_shell`;
 - `ws.py with-secrets` whose program is one that command refuses itself (a shell, `env`, `printenv` or a program
-  that runs another), and one `with-secrets` inside another. The parser reads `ws.py with-secrets NAME ... --
-  PROGRAM` as a wrapper, so this hook and every other shell guard judge PROGRAM: a push or a gh write run through
-  it meets the push and outward-write guards as if run by its own name (M3 slice Z).
+  that runs another), or is a git or gh call or a write the parser reports. The other shell guards read only the
+  line's own program, which here is Python, so they would not judge a push or a gh write run through it.
 
 The first word after `grep`, `rg`, `sed`, `awk` and their kin, and after `git grep`, is a pattern, not a file,
 unless `-e` or `-f` gives one. Message bodies, such as `git commit -m`, are not read.
@@ -34,6 +33,7 @@ set, a write to a secrets file, and a program that passes a value on. See docs/a
 """
 import posixpath
 import re
+import shlex
 
 from wslib import secretrules
 from wslib import shell
@@ -57,6 +57,7 @@ METHOD = "getenvironmentvariables"   # PowerShell's [Environment]::GetEnvironmen
 ENVIRON = "proc/*/environ"
 SPLIT = re.compile(r"[\s'\"`()\[\]{}<>|;&=:,@$!]+")
 VARIABLE = re.compile(r"\$\{?([A-Za-z_]\w*)\}?")
+STARTERS = ("ws.py", "launch.sh", "start.py")   # ws.py, and the launcher that starts it
 
 
 def _glob(pattern):
@@ -197,22 +198,31 @@ def _dump(program, args):
     return None
 
 
-def _with_secrets_refusal(call):
-    """Why `ws.py with-secrets` may not start this call, or None. The parser reads `ws.py with-secrets NAME ... --
-    PROGRAM` as a wrapper, so the call is PROGRAM, and every other shell guard judges it as such."""
-    via = list(call["wrappers"])
-    if shell.WITH_SECRETS not in via:
+def _with_secrets_child(command):
+    """The program and arguments `ws.py with-secrets` would start, or None when the command is not that. ws.py is
+    found by name wherever it stands, so `python3 -X utf8 ws.py`, `./ws.py` and the launcher all count."""
+    words = [command["program"] or ""] + list(command["args"])
+    at = next((i for i, word in enumerate(words) if secretrules.program_name(word) in STARTERS), None)
+    if at is None or "with-secrets" not in words[at + 1:]:
         return None
-    after = via[via.index(shell.WITH_SECRETS) + 1:]
-    if shell.WITH_SECRETS in after:
-        return "`ws.py with-secrets` inside another is refused: its program would go unjudged"
-    program = call["program"] or ""
-    reason = secretrules.refusal(program)
+    rest = words[words.index("with-secrets", at + 1) + 1:]
+    return rest[rest.index("--") + 1:] if "--" in rest else None
+
+
+def _child_refusal(child):
+    reason = secretrules.refusal(child[0])
     if reason:
         return f"`ws.py with-secrets` refuses this program itself: {reason}"
-    if after or call["unresolved"]:
-        return (f"`ws.py with-secrets` may not run a program that runs another or prints the environment: "
-                f"{after[0] if after else program}")
+    for inner in shell.analyze(shlex.join(child)):
+        reason = secretrules.refusal(inner["program"] or "") or _dump(inner["program"], inner["args"])
+        if reason or inner["wrappers"] or inner["unresolved"]:
+            return f"`ws.py with-secrets` may not run a program that runs another or prints the environment: {child[0]}"
+        if _with_secrets_child(inner) is not None:
+            return "`ws.py with-secrets` inside another is refused: its program would go unjudged"
+        if inner["git"] or inner["gh"] or inner["writes"]:
+            return ("`ws.py with-secrets` may not run git, gh or a program that writes a file the shell guards "
+                    "judge, since they would not see it: run git and gh by their own names, which sign in "
+                    "on their own")
     return None
 
 
@@ -272,9 +282,11 @@ def decide(event, config):
         if reason:
             return (f"{reason}, secrets included. To see a variable that holds no secret, such as PATH, echo it "
                     f"by name; ask the person for a secret.")
-        reason = _with_secrets_refusal(call)
-        if reason:
-            return reason
+        child = _with_secrets_child(call)
+        if child:
+            reason = _child_refusal(child)
+            if reason:
+                return reason
         env = {**assigned, **{name: value for name, value in call["env"].items() if isinstance(value, str)}}
         skip = {i for i in call["message_args"] if not _names_a_file(call["args"], i)}
         args = [word for i, word in enumerate(call["args"]) if i not in skip]

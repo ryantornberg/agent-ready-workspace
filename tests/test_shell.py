@@ -903,68 +903,18 @@ class ReadTests(unittest.TestCase):
 
 
 class WithSecretsTests(unittest.TestCase):
-    """M3 slice Z, from C5f's queue: `ws.py with-secrets NAME ... -- PROGRAM` is read as a wrapper, so every shell
-    guard judges PROGRAM."""
+    """M3 slice Z, from the maintainer's answer to Q53: the parser does not read `ws.py with-secrets NAME ... --
+    PROGRAM` as a wrapper. The line's program is Python, and `secrets_shell` reads the child itself and refuses git,
+    gh and a write under it. Reading the wrapper here waits for M4."""
 
-    def test_the_program_is_the_child(self):
+    def test_the_line_s_program_is_the_one_that_starts_ws_py(self):
         for line in ("python3 ws.py with-secrets T -- git push --force origin main",
-                     "python3 -X utf8 ws.py with-secrets T U -- git push --force origin main",
-                     "./ws.py --root . with-secrets T -- git push --force origin main",
-                     "wslib/launch.sh with-secrets T -- git push --force origin main",
-                     "py 'C:\\w\\ws.py' with-secrets T -- git push --force origin main",
-                     "sudo python3 ws.py with-secrets T -- git push --force origin main"):
+                     "sh wslib/launch.sh ws.py with-secrets T -- git push --force origin main",
+                     "env GH_REPO=them/theirs python3 ws.py with-secrets T -- gh pr create --fill"):
             with self.subTest(line):
-                found = [c for c in commands(line) if c["program"] == "git"]
-                self.assertEqual(len(found), 1)
-                self.assertIn("ws.py with-secrets", found[0]["wrappers"])
-                self.assertTrue(found[0]["git"]["push"]["force"])
-
-    def test_the_launcher_forms_are_read_too(self):
-        for line in ("sh wslib/launch.sh ws.py with-secrets T -- git push --force origin main",
-                     "python3 wslib/start.py . ws.py with-secrets T -- git push --force origin main"):
-            with self.subTest(line):
-                found = [c for c in commands(line) if c["program"] == "git"]
-                self.assertEqual(len(found), 1)
-                self.assertTrue(found[0]["git"]["push"]["force"])
-
-    def test_the_outer_command_is_judged_as_itself_too(self):
-        # A word that only looks like the wrapper hides nothing before it.
-        for line, program in (("cat .env ws.py with-secrets -- true", "cat"),
-                              ("rm .git/config ws.py with-secrets -- true", "rm")):
-            with self.subTest(line):
-                outer = [c for c in commands(line) if c["program"] == program]
-                self.assertEqual(len(outer), 1)
-                self.assertEqual(outer[0]["wrappers"], [])
-
-    def test_a_name_given_by_a_variable_leaves_the_child_unresolved(self):
-        for line in ('N=GH_REPO; python3 ws.py with-secrets "$N" -- gh pr create --fill',
-                     "python3 ws.py with-secrets $(echo GH_REPO) -- gh pr create --fill"):
-            with self.subTest(line):
-                found = find(line, "gh")
-                self.assertIn("a variable or substitution", found["unresolved"])
-
-    def test_the_line_s_assignments_and_redirections_reach_the_child(self):
-        found = find("WS_SECRETS_FILE=/tmp/x python3 ws.py with-secrets T -- cat < .env", "cat")
-        self.assertEqual((found["env"], found["reads"][0]["path"]), ({"WS_SECRETS_FILE": "/tmp/x", "T": "$T"}, ".env"))
-
-    def test_each_name_reaches_the_child_as_a_value_the_line_does_not_show(self):
-        found = find("python3 ws.py with-secrets GH_REPO GH_TOKEN -- gh pr create --fill", "gh")
-        self.assertEqual(found["env_dynamic"], ["GH_REPO", "GH_TOKEN"])
-        found = find("python3 ws.py with-secrets GIT_CONFIG_COUNT -- git status", "git")
-        self.assertIn("GIT_CONFIG_COUNT", found["env_dynamic"])
-
-    def test_a_child_that_runs_another_is_unwrapped_in_turn(self):
-        found = find("python3 ws.py with-secrets T -- sh -c 'gh pr merge 1 --admin'", "gh")
-        self.assertEqual(found["wrappers"], ["ws.py with-secrets", "sh -c"])
-        found = find("python3 ws.py with-secrets T -- python3 ws.py with-secrets U -- git push", "git")
-        self.assertEqual(found["wrappers"], ["ws.py with-secrets", "ws.py with-secrets"])
-
-    def test_not_a_wrapper(self):
-        for line in ("python3 ws.py with-secrets T", "python3 ws.py with-secrets T --", "python3 ws.py check",
-                     "python3 tools/other.py with-secrets T -- git push"):
-            with self.subTest(line):
-                self.assertNotIn("git", [c["program"] for c in commands(line)])
-                self.assertEqual([c["wrappers"] for c in commands(line)], [[]])
+                found = commands(line)
+                self.assertEqual([c["git"] or c["gh"] for c in found], [None])
+                self.assertNotIn("ws.py with-secrets", found[0]["wrappers"])
 
 
 class OldParserTests(unittest.TestCase):

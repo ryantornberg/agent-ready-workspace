@@ -2157,24 +2157,6 @@
     "allow": true
   },
   {
-    "name": "a write into the git folder through ws.py with-secrets is refused: the parser reads it as a wrapper (M3 slice Z)",
-    "event": {
-      "command": "./ws.py --root . with-secrets T -- cp x .git/config",
-      "session": "s-this",
-      "pid": 7,
-      "cwd": "/m",
-      "git_config": {
-        "home": "/home/a",
-        "files": [
-          "/home/a/.gitconfig",
-          "/home/a/.config/git/config"
-        ],
-        "unresolved": null
-      }
-    },
-    "allow": false
-  },
-  {
     "name": "a word named ws.py later on the line is no with-secrets wrapper: rm .git/config is still judged (M3 slice Z)",
     "event": {
       "command": "rm .git/config ws.py with-secrets -- true",

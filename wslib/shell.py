@@ -25,9 +25,7 @@ so a guard learns everything it decides on without parsing again:
     env_dynamic     the names in env whose value holds a variable or substitution.
     env_cleared     True under env -i.
     wrappers        how the command was reached, outermost first: "sudo", "env", "timeout", "xargs",
-                    "find -exec", "sh -c", "eval", "git rebase --exec", "ws.py with-secrets", ... A line that runs
-                    `ws.py with-secrets NAME ... -- PROGRAM ...` (by python, the launcher or ws.py itself) is
-                    read as that wrapper, so the command is PROGRAM.
+                    "find -exec", "sh -c", "eval", "git rebase --exec", ...
     in_substitution True inside $(...), backticks or <(...).
     in_subshell     True inside ( ) or a substitution.
     unresolved      None, or why no guard can know what runs: the program word is a variable or substitution,
@@ -1744,34 +1742,6 @@ def _redirect_reads(records):
             for record in records if record["op"] in ("<", "<>") and record["target"] is not None]
 
 
-# The words that start ws.py: the script, and the launcher that starts it.
-WITH_SECRETS_STARTERS = ("ws.py", "launch.sh", "start.py")
-WITH_SECRETS = "ws.py with-secrets"
-
-
-def _with_secrets_child(words):
-    """(the words `ws.py with-secrets NAME ... -- PROGRAM ...` starts, its NAME words, the index of `with-secrets`),
-    or None when the command holds no such form. A word named ws.py, launch.sh or start.py anywhere on the line
-    counts, followed later by `with-secrets` and then `--`, so `sh wslib/launch.sh ws.py with-secrets` and `python3 -X utf8 ws.py` both count.
-    The caller judges the child and the outer command both, so a word that only looks like the wrapper, as in a
-    line that reads a file and then names ws.py, hides nothing."""
-    def name(word):
-        text = re.split(r"[\\/]", word.text)[-1].lower()
-        for suffix in (".exe", ".cmd", ".bat", ".com"):
-            if text.endswith(suffix):
-                return text[:-len(suffix)]
-        return text
-    at = next((i for i, word in enumerate(words) if name(word) in WITH_SECRETS_STARTERS), None)
-    if at is None:
-        return None
-    marker = next((i for i in range(at + 1, len(words)) if words[i].text == "with-secrets"), None)
-    if marker is None:
-        return None
-    dashes = next((i for i in range(marker + 1, len(words)) if words[i].text == "--"), None)
-    if dashes is None or dashes + 1 >= len(words):
-        return None
-    return words[dashes + 1:], [w for w in words[marker + 1:dashes] if not w.text.startswith("-")], marker
-
 def _redirect_writes(records):
     writes = []
     for record in records:
@@ -1945,29 +1915,6 @@ class _Walker:
             name = name[:-4]
         deep = ctx.depth >= MAX_DEPTH
 
-        found = None if deep else _with_secrets_child(words)
-        if found is not None:
-            # Each NAME reaches the child set to a value from the secrets file, which no command line shows, so
-            # it is a value the guards cannot know: GH_REPO or a GIT_CONFIG_* name is then unresolved, as when the
-            # line sets it from a variable. The child must not pass as if it ran with none of them set.
-            # A NAME given by a variable or a substitution may be any name, so every command the child holds is
-            # unresolved. The outer command is then judged as itself too, below, so a line where a word only looks
-            # like the wrapper hides nothing before it.
-            child, names, marker = found
-            own2 = dict(own)
-            for word in names:
-                if not word.dynamic:
-                    own2[word.text] = ("$" + word.text, True)
-            start = len(self.out)
-            self.dispatch(child, own2, writes, records, ctx, via + [WITH_SECRETS], piped_in, runtime, cwd,
-                          cwd_reason, cleared)
-            if any(word.dynamic for word in names):
-                for entry in self.out[start:]:
-                    entry["unresolved"] = entry["unresolved"] or \
-                        "a name ws.py with-secrets hands in is a variable or substitution"
-            # The outer command, up to `with-secrets`, is judged as itself: `sudo python3 ws.py` or `cat .env ws.py`.
-            return self.dispatch(words[:marker], own, writes, records, ctx, via, piped_in, runtime, cwd, cwd_reason,
-                                 cleared)
         if name in WRAPPER_OPTIONS and not deep:
             unwrapped = self._unwrap(name, args)
             if unwrapped is not None:
