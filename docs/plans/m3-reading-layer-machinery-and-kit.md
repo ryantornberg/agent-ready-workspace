@@ -931,6 +931,18 @@ The order of lane B after B6 stopped, from the maintainer's answers in round 9 o
 
 **Lane B runs B7, then B6.** B7 builds its cases and two-line texts, and stops before its paid baseline. B6 resumes after B7, as the answer to Q46 will say. Slice Z still waits for both.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+How slice B6 resumes after its re-check stopped it, from the maintainer's answers to Q45 and Q46 in the workspace queue and the yes to B6's selection run in round 9. It gives the eval pages a second fix round; no criterion is dropped or weakened.
+
+**An agent runs the selection cases, on the maintainer's yes per batch with a run count (Q46).** The agent adds `--trust-plugin` to `claude plugin eval`, which otherwise exits 1 in a folder not yet trusted when no terminal can answer. It stops before it would pass the count it was given. One more fix round makes both eval pages, the workspace's and the seed's, say so. The seed pages' open first-reading findings take their one fix round in the same round. A narrow re-check follows, then pull request #50 merges. This is the eval page's second fix round, which the stop rule's limit of two allows, and lane B's stop rule applies to it unchanged.
+
+**B6's first selection run has its yes: 174 runs (criterion 22).** It starts after pull request #50 merges and runs unattended, under the plan's cap of 300 selection runs. A rerun of a rewritten wrapper is a new batch and needs its own yes.
+
+**Codex CLI does not load the wrappers in M3 (Q45).** M4 decides whether the second tool takes them up.
+
 ## Results
 
 ### C1, launcher and baselines
