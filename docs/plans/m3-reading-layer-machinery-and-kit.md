@@ -943,6 +943,14 @@ How slice B6 resumes after its re-check stopped it, from the maintainer's answer
 
 **Codex CLI does not load the wrappers in M3 (Q45).** M4 decides whether the second tool takes them up.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+The rerun of B6's eight rewritten wrappers, from the maintainer's answer to Q48 in the workspace queue. It adds a batch under criterion 22; no criterion is dropped or weakened.
+
+**The rewrites' rerun has its yes: 75 runs (Q48).** An agent runs it unattended with `--trust-plugin`, as Q46 set. The batch is the eight rewritten wrappers' fire and quiet cases, and the fire cases of the neighbours their descriptions name, three runs each. The agent stops before it would pass 75. With the first run's 174, the plan's selection runs reach 249 of the cap of 300.
+
 ## Results
 
 ### C1, launcher and baselines
