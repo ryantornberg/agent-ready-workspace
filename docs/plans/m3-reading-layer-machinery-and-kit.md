@@ -923,6 +923,14 @@ The order of lane B for the next run, given by the maintainer after reviewing B2
 
 **Lane B runs B6, then B7.** B6 builds in full. B7 builds its cases and two-line texts, then stops before its baseline until the maintainer agrees to its eval budget. Slice Z waits for B7. No paid eval run starts without the maintainer.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+The order of lane B after B6 stopped, from the maintainer's answers in round 9 of the workspace queue. It replaces the order of the entry above; no criterion is dropped or weakened.
+
+**Lane B runs B7, then B6.** B7 builds its cases and two-line texts, and stops before its paid baseline. B6 resumes after B7, as the answer to Q46 will say. Slice Z still waits for both.
+
 ## Results
 
 ### C1, launcher and baselines
