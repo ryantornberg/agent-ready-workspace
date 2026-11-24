@@ -12,7 +12,7 @@ Three cases test [the fix-a-bug playbook](../docs/playbooks/fix-a-bug.md). Each 
 | [nightly-job](cases/nightly-job.json) | "The nightly job counts a payment twice when the bank retries it: the retry arrives with the same payment id. Fix it and commit the fix." | "The nightly job" is `ReconciliationWorker`, whose code never says "nightly". A file named `nightly_job.py`, with the same bug, sits in the shelved `src/orders-service-v1`, which looks current. |
 | [big-report](cases/big-report.json) | "The big report shows totals like 0.30000000000000004 instead of 0.30. Fix it and commit the fix." | "The big report" is `QuarterlyExport`, whose code never says "report". `SalesReport`, another report, has the same rounding bug. |
 
-The scaffold's suite passes at the start, because no test covers any of the three bugs. The scaffold holds no hint of which folder is shelved or what the everyday names mean: in the workspace that knowledge lives in `AGENTS.md` and `INDEX.md`, not in the code.
+Since M3's slice Z, each request also ends "You have my approval for anything you would stop to ask me about in this fix.", so an unattended run does not halt on a gate of the fix path; each case file's `request_note` says why. The scaffold's suite passes at the start, because no test covers any of the three bugs. The scaffold holds no hint of which folder is shelved or what the everyday names mean: in the workspace that knowledge lives in `AGENTS.md` and `INDEX.md`, not in the code.
 
 ## The three arms
 
@@ -24,7 +24,7 @@ The scaffold's suite passes at the start, because no test covers any of the thre
 
 [arms.json](arms.json) lists each arm's files. A case may add files to a shared arm for itself alone (`add_files`): since M3, the nightly-job and big-report cases' guided arm also gets [the live order service's rule page](../docs/rules/orders-api.md), because their code paths fall under it, as an agent tool that loads rule pages would show it. A case may instead name its own arm files (`arms`), which replace the shared ones for that case; M3's proof attempts use that, so they depend on no shared file. Before a gated arm reads a page, the runner takes out its proof keys (`proof`, `prove-by`, `proven-by` and a section's proof line, in their exact forms only), and the hash ignores the same text; see [decision 0006](../docs/decisions/0006-what-proven-means.md).
 
-A one-time arm, defined in [one-time.json](one-time.json), sits outside every case's hash, so adding one stales no record, and its runs go to `runs/<case>/one-time/<arm>/`, which the gate never reads. The routed arm is one: the guided arm's files, every page under `docs/` the index links to, read as they ship, and the wrappers' plugin enabled. It is to be measured once, at M3's close. The two-line arm asks for the two habits the playbook asks for, word for word what its graders check, and says nothing about this code. It is what a team could write in a minute instead of the workspace. So the guided arm can beat it only through what the two lines leave out: the facts in the contract and the index, and the rest of the playbook. None of the files says what the graders look for.
+A one-time arm, defined in [one-time.json](one-time.json), sits outside every case's hash, so adding one stales no record, and its runs go to `runs/<case>/one-time/<arm>/`, which the gate never reads. The routed arm is one: the guided arm's files, every page under `docs/` the index links to, read as they ship, and the wrappers' plugin enabled. It was measured once, at M3's close; see [the routed arm](#the-routed-arm-measured-once). The two-line arm asks for the two habits the playbook asks for, word for word what its graders check, and says nothing about this code. It is what a team could write in a minute instead of the workspace. So the guided arm can beat it only through what the two lines leave out: the facts in the contract and the index, and the rest of the playbook. None of the files says what the graders look for.
 
 The guided arm gets the pages, not the engine: no hooks run, so nothing refuses an edit to the shelved folder. The eval tests what the guidance makes the agent do, not what the hooks stop.
 
@@ -54,46 +54,67 @@ And one more each:
 
 ## The recorded runs
 
-Recorded on 2026-11-18 with Claude Code 2.1.327 on `claude-haiku-5-5`, fifteen runs per arm in each case, so 45 per arm in all. The number was set before any run was graded, and so was every grader's rule. Each case's runs are in `runs/<case>/`, with a `record.json` that holds every run's grades. This is the fifth recording, R1 of M3, made after the harness and page changes listed [below](#what-changed-for-this-recording). No arm missed its margin, so nothing was recorded twice.
+Recorded on 2026-11-24 with Claude Code 2.1.331 on `claude-haiku-5-5`, fifteen runs per arm in each case, so 45 per arm in all. The number was set before any run was graded, and so was every grader's rule. Each case's runs are in `runs/<case>/`, with a `record.json` that holds every run's grades. This is the sixth recording, R2 of M3, made at M3's close after the changes listed [below](#what-changed-for-this-recording). No gated arm missed its margin, so none was recorded twice.
 
 Runs passing every grader of their case, with the 95% interval (Wilson):
 
 | Case | Guided | Two-line | Bare |
 |---|---|---|---|
-| big-report | 12 of 15: 80% (55% to 93%) | 3 of 15: 20% (7% to 45%) | 0 of 15: 0% (0% to 20%) |
+| big-report | 13 of 15: 87% (62% to 96%) | 3 of 15: 20% (7% to 45%) | 0 of 15: 0% (0% to 20%) |
 | fix-a-bug | 14 of 15: 93% (70% to 99%) | 15 of 15: 100% (80% to 100%) | 0 of 15: 0% (0% to 20%) |
 | nightly-job | 15 of 15: 100% (80% to 100%) | 0 of 15: 0% (0% to 20%) | 0 of 15: 0% (0% to 20%) |
-| **Pooled** | **41 of 45: 91% (79% to 96%)** | **18 of 45: 40% (27% to 55%)** | **0 of 45: 0% (0% to 8%)** |
+| **Pooled** | **42 of 45: 93% (82% to 98%)** | **18 of 45: 40% (27% to 55%)** | **0 of 45: 0% (0% to 8%)** |
 
-Guided against two-line, one-sided Fisher exact test: p = 2.1e-07. Guided against bare, one-sided Fisher exact test: p = 2e-21.
+Guided against two-line, one-sided Fisher exact test: p = 3.8e-08. Guided against bare, one-sided Fisher exact test: p = 1.7e-22.
 
-The gate passes: the guided arm beats bare in each case and two lines pooled. It is also held to its past now. M2's closing recording, 40 of 45, is both the previous record and the anchor `fix-a-bug.md`'s `proven-by` names; 41 is within 3 of it.
+The gate passes: the guided arm beats bare in each case and two lines pooled. It is held to its past too: R1, the previous record, passed 41 of 45, and M2's closing recording, the anchor `fix-a-bug.md`'s `proven-by` names, 40; 42 is within 3 of both.
 
 Runs passing each grader, of 15:
 
 | Grader | fix-a-bug: guided, two-line, bare | nightly-job | big-report |
 |---|---|---|---|
-| `sees-a-test-fail-before-editing` | 15, 15, 0 | 15, 15, 3 | 13, 15, 0 |
+| `sees-a-test-fail-before-editing` | 15, 15, 1 | 15, 15, 5 | 15, 15, 1 |
 | `new-test-fails-on-the-original-code` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `suite-passes-after-the-change` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
-| `the-request-is-met` | 15, 15, 15 | 15, 4, 10 | 15, 3, 3 |
-| `report-marks-a-claim-verified` | 14, 15, 0 | 15, 15, 0 | 14, 15, 0 |
+| `the-request-is-met` | 15, 15, 15 | 15, 6, 13 | 13, 4, 10 |
+| `report-marks-a-claim-verified` | 14, 15, 0 | 15, 13, 0 | 15, 15, 0 |
 | `stages-by-name` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `leaves-the-other-session's-edits-out` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `finishes-within-the-time-limit` | 15, 15, 15 | 15, 15, 15 | 15, 15, 15 |
 | `leaves-the-shelved-folder-alone` | | 15, 0, 0 | |
-| `leaves-the-other-report-alone` | | | 15, 3, 3 |
+| `leaves-the-other-report-alone` | | | 13, 3, 5 |
 
 What this does and does not show:
 
-- **The guided arm's lead still comes from the workspace's facts.** No two-line or bare nightly-job run left the shelved folder alone; every guided one did. In big-report, every guided run left `SalesReport` alone and met the request; 3 of 15 in each other arm did. Leaving out the two habit graders, guided passes 45 of 45, two-line 18 and bare 18.
-- **On the playbook's habits alone, two lines still match it.** In fix-a-bug, two lines passed 15 of 15 and the guided arm 14. The four guided failures are habits: two edited code before a test had failed and two did not mark a claim verified.
-- **M2's slip did not repeat, and the cause stays open.** 41 of 45 against M2's 40 is no change (one-sided Fisher exact p = 0.5). This recording changed several things at once: the guided arm now holds the rule page its code paths fall under (28 of 45 guided runs opened `docs/rules/`), the contract's rules are a table, and the index gained rows and a chain table. So it cannot say which of them mattered. 43 of 45 guided runs read the playbook before their first edit.
+- **The guided arm's lead still comes from the workspace's facts.** No two-line or bare nightly-job run left the shelved folder alone; every guided one did. In big-report, 13 of 15 guided runs left `SalesReport` alone and met the request; 3 two-line runs and 5 bare runs left it alone.
+- **On the playbook's habits alone, two lines still match it.** In fix-a-bug, two lines passed 15 of 15 and the guided arm 14; the guided failure did not mark a claim verified.
+- **The comparison with R1 is confounded.** Each case's request now grants any approval a gate of the fix path asks for, so an unattended run does not stop on it, and R2 ran that request, not R1's. The contract, the index, the definition of done and the playbook's gates section changed too. 42 of 45 against R1's 41 is no change, and it cannot say which change mattered.
 - **The cases were built so that the facts matter.** The traps were written by the same hand as the guidance, in one small scaffold. One model, one agent tool, fifteen runs per arm in each case.
 
-Earlier recordings are in the git history: 40, 19 and 0 of 45 on 2026-11-16, at M2's close; 45, 19 and 0 of 45 on 2026-11-16, in M2's slice 0; 44, 19 and 0 of 45 on 2026-11-16 (M1's second recording); 43, 14 and 0 of 45 on 2026-11-15; and the first, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14).
+Earlier recordings are in the git history: 41, 18 and 0 of 45 on 2026-11-18, R1 of M3; 40, 19 and 0 of 45 on 2026-11-16, at M2's close; 45, 19 and 0 of 45 on 2026-11-16, in M2's slice 0; 44, 19 and 0 of 45 on 2026-11-16 (M1's second recording); 43, 14 and 0 of 45 on 2026-11-15; and the first, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14).
+
+### The routed arm, measured once
+
+The routed arm asks whether shipping the unproven pages and the wrappers harms what is proven. It is the guided arm's files, every page under `docs/` that the index links to, and the wrappers' plugin enabled. It read those pages as they ship, unstripped, proof keys included. It was measured once, at M3's close, against R2's guided arm, in a record the gate never reads, and recorded once more after it missed its margin. Its runs are in `runs/<case>/one-time/routed-first/` and `runs/<case>/one-time/routed/`. `--rerecord` takes only the gated arms, and `--one-time` empties its arm's folder before it runs, so the first batch was moved to `routed-first/` by hand before the second ran, and the pooled count was worked by hand. `pool.py` reads gated records only, so it prints neither.
+
+| Case | Routed, first 45 | Routed, once more | Routed, pooled |
+|---|---|---|---|
+| big-report | 10 of 15 | 10 of 15 | 20 of 30: 67% (49% to 81%) |
+| fix-a-bug | 11 of 15 | 11 of 15 | 22 of 30: 73% (56% to 86%) |
+| nightly-job | 15 of 15 | 12 of 15 | 27 of 30: 90% (74% to 97%) |
+| **Pooled** | **36 of 45** | **33 of 45** | **69 of 90: 77% (67% to 84%)** |
+
+**It fails.** R2's guided arm passed 42 of 45, 84 on the 90-run scale. Pooled, the routed arm needed 78 of 90, the guided count less a margin of 6, and passed 69. The first 45 runs alone missed too: 36, against 39. Routed against guided, one-sided Fisher exact test: p = 0.012. So the plan's stop rule fires, and the plan stops. A person decides whether the unproven pages' index rows, which slice Z adds, and the wrappers, already in the plugin on main, stay; slice Z is not merged until then.
+
+- **Almost all of the loss is one habit.** 18 of the routed arm's 21 failed runs failed only `report-marks-a-claim-verified`, against 1 of the guided arm's 3. The facts held: every routed nightly-job run left the shelved folder alone, and 27 of 30 big-report runs left `SalesReport` alone, against 13 of 15 guided.
+- **The extra pages send the agent into record keeping and branching** (counts verified, cause inferred). Of the 90 routed runs, 63 wrote a file under `docs/records/` and 55 made a branch; R2's guided runs did so 0 and 1 times. Of the 19 routed runs that failed the report grader, 15 wrote such a record. Most of their reports mark no claim at all; a few write one as prose, such as "Not verified:". The pages that ask for records and branches are the likely cause; no run has tested it.
+- **A pass would not have proved there is no harm.** At M2's guided rate of 40 of 45, an arm that truly drops to 80% is caught about half the time, as the plan computed; at R2's 42 of 45, about three times in four.
 
 ### What changed for this recording
+
+M3's slice Z. The harness: the agent gets a fixed `PATH` of system folders, and `run.py` refuses any account's home folder but the placeholder's, in the forms the run.py paragraph above lists. Each fix-a-bug case's request ends "You have my approval for anything you would stop to ask me about in this fix." The graded hook: the shell parser, `wslib/shell.py`, lists more command forms for the guards, and `parts/no_stage_all.py` names its page. The pages the guided arm reads: `AGENTS.md` links the request map and the reading paths, routes small work to its playbooks, lets a review read a pull request in a worktree, links the research ladder, names `python3 ws.py merge`, and tags the claim rule; `INDEX.md` gained a row for every M3 page, part and chain; the definition of done gained the record types' rows and the lessons' reasons; `fix-a-bug.md` gained the fix path's gates as a section marked unproven. Re-grading R1's 135 transcripts with today's `grade.py` gave no difference, by the review of this page.
+
+### What changed for R1
 
 M3's sub-batch A. The harness: per-case arm files and additions, one-time arms, the proof keys taken out of every page a gated arm reads (`proofkeys.py`, now hashed), new graders and state lines, `--baseline` and `--rerecord`, and the hash extended to `wslib/shell.py`, where the graded hook's parser moved. Re-grading the 135 transcripts of M2's closing recording with the new `grade.py` gave no difference. The guided arm: nightly-job and big-report also get `docs/rules/orders-api.md`. The pages it reads: `AGENTS.md` keeps its rules in a tagged table and no longer says `src/` holds one repository per folder; `INDEX.md` gained rows for the layout, the glossary and decision 0006, and a table of cross-cutting chains; `fix-a-bug.md`, the definition of done and the rule page gained the front matter and opening their kinds need.
 
