@@ -2233,25 +2233,27 @@ class EvalThatCanLoseTests(Folder):
         elif isinstance(value, str):
             yield value
 
-    # Stored before Q55 made run.py refuse every lookalike of a case's own name. In this run the agent wrote
-    # "/home/d\u00e4n\u0430", a lookalike of the fixture's owner, as test data of its own; it names no real account.
-    # Debugging's cases record again in M4 (Q51), and that record replaces this one.
-    WRITTEN_BEFORE_Q55 = {"debug-leak-check/two-line-18.json": ["/home/d", "/home/d"]}
+    # Stored before Q73 made run.py refuse every home folder but the placeholder's. The debugging fixture's invented
+    # owner, "dana", is in these cases' request and scaffold, so their agents wrote /home/dana and C:\Users\dana;
+    # they name no real account. They are stale until M4, which points the fixture at /home/user when it records
+    # debugging again (Q51, Q73), and that record replaces these. In debug-leak-check's two-line-18 the agent also
+    # wrote "/home/d\u00e4n\u0430", a lookalike, as test data of its own.
+    STALE_UNTIL_M4 = {"debug-leak-check", "debug-staging-reminder"}
+    FIXTURE_OWNER = re.compile(r"(?:/(?:users|home)/|[a-z]:\\+users\\+)dana(?:[\s.].*)?", re.I)
+    LOOKALIKES = {"debug-leak-check/two-line-18.json": ["/home/d", "/home/d\u00e4n\u0430"]}
 
     def test_the_recorded_transcripts_hold_nothing_of_the_operators_environment(self):
         stored = list((ROOT / "evals/runs").glob("*/*.json"))
         self.assertGreaterEqual(len(stored), 120)
-        # The harness's own rule (run.home_folders): any account's home folder, but the placeholder "user" and the
-        # names the case's request or scaffold holds, such as "dana", the debugging fixture's invented owner.
-        accounts = {}
+        # The harness's own rule (run.home_folders): any account's home folder but the placeholder "user".
         email = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
         for path in stored:
             text = "\n".join(str(value) for value in self._strings(json.loads(path.read_text(encoding="utf-8"))))
             case = path.parent.name
-            if case not in accounts:
-                accounts[case] = self.harness.case_accounts(self.harness.load_case(case))
-            known = self.WRITTEN_BEFORE_Q55.get(f"{case}/{path.name}", [])
-            self.assertEqual(self.harness.home_folders(text, accounts[case]), known, path.name)
+            found = self.harness.home_folders(text)
+            if case in self.STALE_UNTIL_M4:
+                found = [folder for folder in found if not self.FIXTURE_OWNER.fullmatch(folder)]
+            self.assertEqual(sorted(set(found)), self.LOOKALIKES.get(f"{case}/{path.name}", []), path.name)
             for address in email.finditer(text):   # the eval identity, or the agent tool's own commit trailer
                 self.assertTrue(address.group(0).endswith(".invalid") or address.group(0) == "noreply@anthropic.com",
                                 (path.name, address.group(0)))
@@ -2568,18 +2570,19 @@ class EvalHarnessApartTests(Folder):
                            "PATH=/a:/Users/bob.smith/bin", "cat /home/jos\u00e9/x", "GET /api/users/42"):
                 with self.subTest(target):   # the last errs toward refusing: a run lost, not a leak
                     self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
-            for target in ("ls /home/user/x", "ls /Users/Shared/x", "cat ~/x", "ls /usr/home"):
+            for target in ("ls /home/user/x", "ls /Users/Shared/x", "cat ~/x", "ls /usr/home", "echo /Users/user",
+                           "cd /home/user && ls", r'type "C:\Users\user\x"', "ls /home/user.", "ls /Users/Public/x",
+                           "echo /home/$USER/x"):
                 with self.subTest(target):
                     self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
-            for target in ("cat /home/d\u00e4na/x", "cat /home/d\u0430na/x", "cat /home/dan\u00e4/x",
-                           r"cat /home/d\u00e4na/x"):   # lookalikes of the fixture's owner are refused too (Q55)
+            # No case's own name passes, and a name that goes on past an ASCII part is read whole (Q73).
+            for target in ("cat /home/dana/notes.txt", r"type C:\Users\dana.", "cat /home/dana\u00eb/x",
+                           r"type C:\Users\Dana Smith\x", "cat /home/d\u00e4na/x", "cat /home/d\u0430na/x",
+                           "ls /home/user\u00eb/x", r"dir C:\Users\user Smith\x", "ls /Users/Shared\u200b/x",
+                           "ls /home/user\u0301/x", "ls /home/useR2/x", "ls /Users/Publicity"):
                 with self.subTest(target):
-                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}], ["dana"]))
-            fixture = [{"kind": "run", "target": r"cat /home/dana/notes.txt C:\Users\dana.", "ok": True}]
-            self.assertTrue(self.harness.leaks(fixture))
-            self.assertFalse(self.harness.leaks(fixture, ["dana"]))
-        self.assertEqual(self.harness.case_accounts(self.harness.load_case("debug-leak-check")), ["dana"])
-        self.assertEqual(self.harness.case_accounts(self.harness.load_case("fix-a-bug")), [])
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+        self.assertFalse(hasattr(self.harness, "case_accounts"))
 
     def test_the_agent_s_path_holds_what_its_cases_run(self):
         self.assertIn("a-program-nobody-has", self.harness.missing_on_agent_path(("a-program-nobody-has",)))

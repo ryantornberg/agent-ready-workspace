@@ -71,7 +71,10 @@ def decide(event, config):
     own = event.get("own_working_copy")
     who = _holder(lease)
     calls, why_aliases = gitrules.read(event)
-    expanded = gitrules.expanded_program(event.get("command"))   # {git,} reset: the git goes unjudged (Q54)
+    expanded = gitrules.unreadable(event.get("command"))   # {git,} reset: the git goes unjudged (Q54, Q74)
+    if expanded and not calls:   # ((git reset --hard) ): the parser reads no command, so the loop sees none (Q74)
+        return (f"another live agent session ({who}) holds the main working copy, and this command cannot be "
+                f"judged: {expanded}. Write it with literal words, or run it in a worktree of your own. See {PAGE}")
     for call in calls:
         why = gitrules.unresolved(call, why_aliases) or expanded
         if why:

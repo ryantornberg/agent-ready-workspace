@@ -118,10 +118,12 @@ AGENT_NEEDS = ("python3", "git")    # what every case's agent runs; run.py refus
 # A home folder on any system, as a transcript may write it: /Users/NAME or /home/NAME anywhere in a path (so
 # file:///Users/NAME, /mnt/c/Users/NAME and /var/home/NAME count too), or C:\Users\NAME with any number of
 # backslashes. It errs toward refusing: a route such as /api/users/42 counts too, which costs a run, not a leak.
-# "user" is what the user name becomes in a transcript; Shared and Public belong to no account. A case's own name
-# passes only as written: a lookalike, such as "d" then a letter outside ASCII where "dana" is allowed, is refused
-# (Q55). tests/test_core.py reads the stored transcripts with this same rule (home_folders).
-HOME_FOLDER = re.compile(r"(?:/(?:users|home)/|[a-z]:\\+users\\+)([a-z0-9._-]+)", re.I)
+# The folder's name runs to the next separator, quote or shell character, so a name that goes on past an ASCII
+# part, such as "useré" or "user Smith", is read whole. "user" is what the user name becomes in a transcript;
+# Shared and Public belong to no account. Nothing else passes, in any case: no case's request or scaffold makes a
+# name pass (M3 slice Z, the maintainer's answer to Q73). tests/test_core.py reads the stored transcripts with this
+# same rule (home_folders).
+HOME_FOLDER = re.compile(r"(?:/(?:users|home)/|[a-z]:\\+users\\+)([^/\\\r\n\t\"'`<>|;&(){}\[\],:*?$=]+)", re.I)
 NOT_AN_ACCOUNT = {"user", "shared", "public"}
 REQUIRED_ARMS = ("guided", "two-line", "bare")
 # Paths that name this machine without naming its user: its temporary folders, and the agent tool's own.
@@ -433,29 +435,22 @@ def _strings(value):
             yield from _strings(item)
 
 
-def home_folders(text, allowed=()):
-    """The account names of the home folders the text names, other than the placeholder and those in allowed."""
-    skip = NOT_AN_ACCOUNT | {name.lower() for name in allowed}
-    return [match.group(0) for match in HOME_FOLDER.finditer(text) if match.group(1).rstrip(".").lower() not in skip]
+def home_folders(text):
+    """The home folders the text names, other than the placeholder's and those that belong to no account."""
+    found = []
+    for match in HOME_FOLDER.finditer(text):
+        name = match.group(1).rstrip(" .")
+        if name and name.lower() not in NOT_AN_ACCOUNT:
+            found.append(match.group(0))
+    return found
 
 
-def leaks(actions, allowed=()):
+def leaks(actions):
     """What in a transcript would identify the operator, another account or this machine. Empty when it is safe to
-    write. allowed: account names whose home folders are the case's own text, such as a fixture's invented owner."""
+    write."""
     text = "\n".join(_strings(actions)).lower()
     return ([secret for secret in operator_identity() if secret.lower() in text] + MACHINE_PATHS.findall(text)
-            + home_folders(text, allowed))
-
-
-def case_accounts(case, root=ROOT):
-    """The account names of the home folders the case's request or its scaffold names, such as a fixture's invented
-    owner: the case's own text, not the operator's."""
-    texts = [case.get("request", "")]
-    if case.get("scaffold_dir"):
-        scaffold = pathlib.Path(root) / case["scaffold_dir"].strip("/")
-        texts += [path.read_text(encoding="utf-8", errors="replace") for path in sorted(scaffold.rglob("*"))
-                  if path.is_file() and "__pycache__" not in path.parts]
-    return sorted({match.group(1).rstrip(".") for text in texts for match in HOME_FOLDER.finditer(text)})
+            + home_folders(text))
 
 
 def suite_passes(folder):
@@ -568,7 +563,7 @@ def run_once(case, model, files, timeout, plugins=(), stripped=True, root=ROOT):
             raise NotATrial(error or "the agent printed nothing")
         actions.extend(inspect(folder, start, case))
         actions.append({"kind": "state", "target": "the agent finished within the time limit", "ok": finished})
-    if leaks(actions, case_accounts(case)):
+    if leaks(actions):
         raise RuntimeError("a transcript holds the operator's identity or a home folder; nothing was written")
     return actions, used_model, version
 
