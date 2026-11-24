@@ -2398,5 +2398,41 @@
       "targets": {}
     },
     "allow": true
+  },
+  {
+    "name": "a force push whose program folder is braces, which become two words (Q54)",
+    "event": {
+      "command": "{/usr/bin,-C/tmp/x}/git push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose program word is a zsh extended glob (Q54)",
+    "event": {
+      "command": "git# push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a program word that starts with the home folder is not a pattern (Q54)",
+    "event": {
+      "command": "~/bin/git push origin HEAD",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "a line too deep to walk for its program words is refused (Q54)",
+    "event": {
+      "command": "command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command command {git,} push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
   }
 ]

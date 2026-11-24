@@ -216,11 +216,11 @@ def _child_refusal(child):
         return f"`ws.py with-secrets` refuses this program itself: {reason}"
     if re.search(r"[$`]", child[0]):   # G=git; ... -- $G push: the shell picks the program, which no guard sees
         return f"`ws.py with-secrets` may not run a program given by a variable or substitution: {child[0]}"
-    if gitrules.expanded_program({"program": posixpath.basename(child[0])}):   # -- {git,} push (Q54)
+    if gitrules.expands(child[0]):   # -- {git,} push: the shell expands it before with-secrets starts it (Q54)
         return f"`ws.py with-secrets` may not run a program word the shell expands (a glob or braces): {child[0]}"
     for inner in shell.analyze(shlex.join(child)):
         reason = secretrules.refusal(inner["program"] or "") or _dump(inner["program"], inner["args"])
-        if reason or inner["wrappers"] or inner["unresolved"] or gitrules.expanded_program(inner):
+        if reason or inner["wrappers"] or inner["unresolved"]:
             return f"`ws.py with-secrets` may not run a program that runs another or prints the environment: {child[0]}"
         if _with_secrets_child(inner) is not None:
             return "`ws.py with-secrets` inside another is refused: its program would go unjudged"
@@ -269,6 +269,10 @@ def _runs_method(command, calls):
 def decide(event, config):
     command = event.get("command") or ""
     patterns = _patterns(config)
+    expanded = gitrules.expanded_program(command)   # {env,} or {cat,} .env: the program goes unjudged (Q54)
+    if expanded:
+        return (f"this command cannot be judged: {expanded}, so it may print the environment or read a secrets "
+                f"file. Write it with literal words. See {PAGE}")
     calls = shell.analyze(command)
     if METHOD in command.lower() and _runs_method(command, calls):
         return ("PowerShell's GetEnvironmentVariables method prints the whole environment, secrets included. To see "
@@ -283,10 +287,6 @@ def decide(event, config):
                 word.split("=")[0] == "WS_SECRETS_FILE" for word in call["args"])):
             return ("WS_SECRETS_FILE names the file ws.py with-secrets reads; a person sets it in their own shell, "
                     "never an agent's command. Leave it out, or ask the person.")
-        expanded = gitrules.expanded_program(call)   # {env,} or {cat,} .env: the program goes unjudged (Q54)
-        if expanded:
-            return (f"this command cannot be judged: {expanded}, so it may print the environment or read a secrets "
-                    f"file. Write it with literal words. See {PAGE}")
         reason = _dump(program, call["args"])
         if reason:
             return (f"{reason}, secrets included. To see a variable that holds no secret, such as PATH, echo it "

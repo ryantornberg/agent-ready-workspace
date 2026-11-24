@@ -2218,5 +2218,26 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "a config write whose program word is a zsh extended glob (Q54)",
+    "event": {
+      "command": "g~x config --global core.hooksPath /tmp/h",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
   }
 ]

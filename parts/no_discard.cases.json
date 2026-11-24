@@ -2763,5 +2763,31 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "while another live session holds the lease, a hard reset whose program folder is braces is refused (Q54)",
+    "event": {
+      "command": "{/usr/bin,-C/tmp/z}/git reset --hard",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
   }
 ]

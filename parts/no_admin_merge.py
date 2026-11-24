@@ -37,9 +37,9 @@ SHORT_VALUES = set("AbFtR")
 REWRITES = {"--squash": "--squash", "--rebase": "--rebase", "s": "--squash", "r": "--rebase"}
 MERGE_ENDPOINT = re.compile(r"^repos/[^/]+/[^/]+/pulls/[^/]+/merge$")
 GRAPHQL_MERGES = ("mergePullRequest", "enablePullRequestAutoMerge")
-# A program word the shell expands into another name, such as {gh,} or g? (Q54): wslib/gitrules.py's
-# expanded_program rule, copied, since a grader loads this hook with the shell parser alone.
-EXPANDED_PROGRAM = re.compile(r"[*?\[{}]|^=")
+# A program word the shell expands into other words, such as {gh,}, g? or {/usr/bin,-R/x}/gh (Q54): wslib/gitrules.py's
+# expands and expanded_program, copied, since a grader loads this hook with the shell parser alone.
+EXPANDING = re.compile(r"[*?\[{}#^]|.~|^=")
 
 
 def _on(argument):
@@ -113,10 +113,6 @@ def _unresolved(call):
     """Why this hook cannot tell whether the call merges past CI or rewrites a branch, or None."""
     if call.get("unresolved"):
         return call["unresolved"]
-    program = call.get("program") or ""
-    if program != "[" and EXPANDED_PROGRAM.search(program):   # {gh,} pr merge --admin: the gh goes unjudged (Q54)
-        return (f"its program word `{program}` is a pattern the shell expands (a glob, braces or zsh's `=`), so no "
-                f"guard can tell which program runs")
     gh = call.get("gh")
     if not gh:
         return None
@@ -134,7 +130,34 @@ def _unresolved(call):
     return None
 
 
+class _ProgramWords(shell._Walker):
+    """The parser's own walk, noting each program word as written, before the parser keeps only its last part."""
+
+    def dispatch(self, words, *rest):
+        self.words.append(words[0])
+        return super().dispatch(words, *rest)
+
+
+def _expanded(command):
+    """Why a program word of the command is one the shell expands into other words, or None (Q54)."""
+    walker = _ProgramWords(None, ("github.com",))
+    walker.words = []
+    try:
+        walker.walk_list(shell.parse(command), shell._Context(), [], True)
+    except RecursionError:   # this walk adds a frame per wrapper, so it can run out before the parser does
+        return "the line nests too deeply to read each program word"
+    for word in walker.words:
+        if not word.dynamic and word.text not in ("[", "[[") and EXPANDING.search(word.text):
+            return (f"its program word `{word.text}` is a pattern the shell expands (a glob, braces or a zsh "
+                    f"pattern), so no guard can tell which program runs")
+    return None
+
+
 def decide(event, config):
+    expanded = _expanded(event.get("command") or "")   # {gh,} pr merge --admin: the gh goes unjudged (Q54)
+    if expanded:
+        return (f"this command cannot be judged: {expanded}, so it may merge past CI or rewrite a branch's commits. "
+                f"Write it with literal words; to merge, run python3 ws.py merge NUMBER. See {PAGE}")
     for call in shell.analyze(event.get("command") or ""):
         why = _unresolved(call)
         if why:

@@ -460,6 +460,9 @@ def _push(call, calls, index, event, repos):
 
 def decide(event, config):
     name = config.get("list", "outward-repos.json")
+    expanded = gitrules.expanded_program(event.get("command"))   # {gh,} pr create: the gh it becomes goes unjudged (Q54)
+    if expanded:
+        return _cannot_judge(expanded)
     calls, why_aliases = gitrules.read(event)
     repos = _List(event)
     for index, call in enumerate(calls):
@@ -468,9 +471,6 @@ def decide(event, config):
             return why
         if call.get("unresolved"):
             return _cannot_judge(call["unresolved"])
-        expanded = gitrules.expanded_program(call)   # {gh,} pr create: no guard sees the gh it becomes (Q54)
-        if expanded:
-            return _cannot_judge(expanded)
         if call.get("gh"):
             why = _gh_unresolved(call)
             if why:

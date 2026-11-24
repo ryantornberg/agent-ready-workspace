@@ -9111,5 +9111,25 @@
       "targets": {}
     },
     "allow": true
+  },
+  {
+    "name": "a push whose program folder is braces (Q54)",
+    "event": {
+      "command": "{/usr/bin,-C/tmp/x}/git push -u origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": false
   }
 ]

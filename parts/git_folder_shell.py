@@ -38,10 +38,9 @@ PAGE = "docs/decisions/0004-the-hook-contract.md"
 
 
 def decide(event, config):
-    for call in gitrules.read(event)[0]:
-        why = gitrules.expanded_program(call)   # {git,} config --global ...: the git it becomes goes unjudged (Q54)
-        if why:
-            return (f"this command cannot be judged: {why}, so it may write a git folder or a git config file. "
-                    f"Write it with literal words. See {PAGE}")
+    why = gitrules.expanded_program(event.get("command"))   # {git,} config --global: the git goes unjudged (Q54)
+    if why:
+        return (f"this command cannot be judged: {why}, so it may write a git folder or a git config file. "
+                f"Write it with literal words. See {PAGE}")
     reasons = gitrules.shell_refusals(event)
     return reasons[0] if reasons else None
