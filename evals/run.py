@@ -44,8 +44,8 @@ The agent gets project settings only, an empty git configuration and a minimal
 environment with a fixed PATH of system folders, so the operator's instructions,
 identity, shell aliases, variables and PATH reach no arm. A transcript that still
 holds the operator's user name, git identity, the machine's temporary folder or
-any account's home folder is refused, and nothing is written; a home folder the
-case's own request or scaffold names, such as a fixture's invented owner, is the case's text. The harness's own git calls read none of the operator's git
+any account's home folder but the placeholder's is refused, and nothing is
+written. The harness's own git calls read none of the operator's git
 config, so a global ignore file cannot hide a change from the graders.
 
 Each finished run is written at once, as evals/runs/<case>/<arm>-<n>.json. A
@@ -116,14 +116,17 @@ KEPT_ENVIRONMENT = ("HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "TERM", "TMPDIR
 AGENT_PATH = ("/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin")
 AGENT_NEEDS = ("python3", "git")    # what every case's agent runs; run.py refuses to start without them on AGENT_PATH
 # A home folder on any system, as a transcript may write it: /Users/NAME or /home/NAME anywhere in a path (so
-# file:///Users/NAME, /mnt/c/Users/NAME and /var/home/NAME count too), or C:\Users\NAME with any number of
-# backslashes. It errs toward refusing: a route such as /api/users/42 counts too, which costs a run, not a leak.
-# The folder's name runs to the next separator, quote or shell character, so a name that goes on past an ASCII
-# part, such as "useré" or "user Smith", is read whole. "user" is what the user name becomes in a transcript;
-# Shared and Public belong to no account. Nothing else passes, in any case: no case's request or scaffold makes a
-# name pass (M3 slice Z, the maintainer's answer to Q73). tests/test_core.py reads the stored transcripts with this
-# same rule (home_folders).
-HOME_FOLDER = re.compile(r"(?:/(?:users|home)/|[a-z]:\\+users\\+)([^/\\\r\n\t\"'`<>|;&(){}\[\],:*?$=]+)", re.I)
+# file:///Users/NAME, /mnt/c/Users/NAME and /var/home/NAME count too), C:\Users\NAME, or Windows' older
+# "Documents and Settings". Before matching, every run of backslashes becomes a slash, and // and /./ become /, so
+# \home\bob, C:/Users\bob, \\wsl$\Ubuntu\home\bob and /home/./bob are read as /home/bob (M3 slice Z, the
+# maintainer's answer to Q76). It errs toward refusing: a route such as /api/users/42 counts too, which costs a run,
+# not a leak. The folder's name runs to the next separator, quote or shell character, so a name that goes on past an
+# ASCII part, such as "useré" or "user Smith", is read whole. "user" is what the user name becomes in a transcript;
+# Shared and Public belong to no account. Each of them passes only when a slash, a line break or the end of the text
+# follows it, so a Windows name such as "User (2)" is refused (Q76). Nothing else passes, in any case: no case's
+# request or scaffold makes a name pass (Q73). tests/test_core.py reads the stored transcripts with this same rule
+# (home_folders).
+HOME_FOLDER = re.compile(r"/(?:users|home|documents and settings)/([^/\r\n\t\"'`<>|;&(){}\[\],:*?$=]+)", re.I)
 NOT_AN_ACCOUNT = {"user", "shared", "public"}
 REQUIRED_ARMS = ("guided", "two-line", "bare")
 # Paths that name this machine without naming its user: its temporary folders, and the agent tool's own.
@@ -435,12 +438,26 @@ def _strings(value):
             yield from _strings(item)
 
 
+def _one_separator(text):
+    """The text with each run of backslashes as a slash, and // and /./ as / (Q76)."""
+    text = re.sub(r"\\+", "/", text)
+    while True:
+        shorter = re.sub(r"/\.(?=/)", "", re.sub(r"/{2,}", "/", text))
+        if shorter == text:
+            return text
+        text = shorter
+
+
 def home_folders(text):
     """The home folders the text names, other than the placeholder's and those that belong to no account."""
+    text = _one_separator(text)
     found = []
     for match in HOME_FOLDER.finditer(text):
         name = match.group(1).rstrip(" .")
-        if name and name.lower() not in NOT_AN_ACCOUNT:
+        if not name:
+            continue
+        ends = match.end(1) == len(text) or text[match.end(1)] in "/\r\n"
+        if name.lower() not in NOT_AN_ACCOUNT or not ends:
             found.append(match.group(0))
     return found
 

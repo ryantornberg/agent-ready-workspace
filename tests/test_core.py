@@ -2571,8 +2571,8 @@ class EvalHarnessApartTests(Folder):
                 with self.subTest(target):   # the last errs toward refusing: a run lost, not a leak
                     self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
             for target in ("ls /home/user/x", "ls /Users/Shared/x", "cat ~/x", "ls /usr/home", "echo /Users/user",
-                           "cd /home/user && ls", r'type "C:\Users\user\x"', "ls /home/user.", "ls /Users/Public/x",
-                           "echo /home/$USER/x"):
+                           r'type "C:\Users\user\x"', "ls /home/user.", "ls /Users/Public/x", "echo /home/$USER/x",
+                           r"dir \Users\user\x", r"dir C:/Users\user\x", "ls /home//user/x"):
                 with self.subTest(target):
                     self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
             # No case's own name passes, and a name that goes on past an ASCII part is read whole (Q73).
@@ -2580,6 +2580,16 @@ class EvalHarnessApartTests(Folder):
                            r"type C:\Users\Dana Smith\x", "cat /home/d\u00e4na/x", "cat /home/d\u0430na/x",
                            "ls /home/user\u00eb/x", r"dir C:\Users\user Smith\x", "ls /Users/Shared\u200b/x",
                            "ls /home/user\u0301/x", "ls /home/useR2/x", "ls /Users/Publicity"):
+                with self.subTest(target):
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            # Backslashes, mixed separators, // and /./ are read as one slash, and the placeholder passes only before
+            # a slash, a line break or the end (Q76).
+            for target in (r"cd \Users\bob", r"type \home\bob\x", r"type \\wsl$\Ubuntu\home\bob\x",
+                           r"type \\wsl.localhost\Ubuntu\home\bob\x", r"type C:/Users\bob\x", r"type C:\Users/bob/x",
+                           r"type \\host\c$\Users\bob\x", "ls /home//bob/x", "ls /home/./bob/x", "ls /Users/./bob/x",
+                           r"type C:\Documents and Settings\bob\x", r"type C:\Users\User (2)\x", r"type C:\Users\user(2)\x",
+                           r"type C:\Users\user&co\x", r"type C:\Users\user$\x", r"type C:\Users\user'x\x",
+                           r"type C:\Users\user{1}\x", "ls /home/user$", "cd /home/user && ls"):
                 with self.subTest(target):
                     self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
         self.assertFalse(hasattr(self.harness, "case_accounts"))
