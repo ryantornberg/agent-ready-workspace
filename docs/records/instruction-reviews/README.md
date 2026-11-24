@@ -295,3 +295,5 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b6-wrapper-throwaway-prototype.md](2026-11-23-b6-wrapper-throwaway-prototype.md) | `plugin/skills/throwaway-prototype/SKILL.md` | none |
 | [2026-11-23-b6-seed-evals-readme.md](2026-11-23-b6-seed-evals-readme.md) | `kit/seed/evals-README.md` | step, enforcement, contradiction |
 | [2026-11-23-b6-seed-readme.md](2026-11-23-b6-seed-readme.md) | `kit/seed/README.md` | contradiction |
+| [2026-11-24-lifecycle-map.md](2026-11-24-lifecycle-map.md) | `docs/lifecycle-map.md` | contradiction, placement, trigger, eval-case |
+| [2026-11-24-how-tos-lifecycle-row.md](2026-11-24-how-tos-lifecycle-row.md) | `docs/how-tos.md` | trigger |
