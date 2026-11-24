@@ -70,7 +70,10 @@ so a guard learns everything it decides on without parsing again:
     discard         canonical names of the forms that drop work: "switch --force", "checkout --force",
                     "read-tree --reset -u", "reset --hard", "reset --keep", "reset --merge", "autostash",
                     "stash drop", "stash pop", "stash clear", "worktree remove", "worktree remove --force",
-                    "worktree prune", "clean --force".
+                    "worktree prune", "clean --force", "whole-tree checkout" and "whole-tree restore" (a pathspec
+                    of ".", ":/", "*" or only "." and "..", or --pathspec-from-file; a restore of --staged alone
+                    is not one), "stash write" (push, save, store and a plain stash), "rebase" and
+                    "cherry-pick".
     pull_rebase     True for a pull that rebases (-r, --rebase, -c pull.rebase).
     tracking        True for -t/--track, -u/--set-upstream(-to), push -u.
     remote          None, or {"action", "name", "url", "push", "dynamic"} for git remote add / set-url / ...
@@ -976,7 +979,7 @@ PUSH_FLAGS = ("all", "branches", "mirror", "tags", "follow-tags", "no-follow-tag
 SUBCOMMAND_SHORT_VALUES = {
     "push": "o", "commit": "mFCct", "tag": "mFu", "merge": "mFsX", "switch": "cC", "checkout": "bB",
     "rebase": "xsX", "pull": "sX", "stash": "m", "branch": "u", "notes": "mFcC", "clean": "e", "worktree": "b",
-    "remote": "tm", "config": "f", "cherry-pick": "mX", "commit-tree": "mFp",
+    "remote": "tm", "config": "f", "cherry-pick": "mX", "commit-tree": "mFp", "restore": "s",
 }
 SUBCOMMAND_LONG_VALUES = {
     "push": ("repo", "receive-pack", "exec", "push-option", "recurse-submodules"),
@@ -990,11 +993,27 @@ SUBCOMMAND_LONG_VALUES = {
     "stash": ("message", "pathspec-from-file"),
     "switch": ("create", "force-create", "orphan", "conflict"),
     "checkout": ("orphan", "conflict", "pathspec-from-file"),
+    "restore": ("source", "conflict", "pathspec-from-file"),
     "branch": ("set-upstream-to", "format", "sort", "contains", "no-contains", "merged", "no-merged", "points-at"),
     "worktree": ("reason",),
     "config": ("file", "blob", "type", "default", "comment", "value", "url"),
     "notes": ("message", "file", "reuse-message", "reedit-message", "ref"),
 }
+
+
+# A pathspec that names the whole tree: a checkout or restore of it overwrites every changed file.
+WHOLE_TREE = {".", "./", ":/", ":/.", ":/*", ":(top)", ":(top).", "*", "**"}
+# The stash actions that write a stash entry, and so take the working tree's changes away: a plain `git stash` is
+# a push.
+STASH_WRITES = {"push", "save", "store"}
+
+
+def _whole_tree(text):
+    """True for a pathspec of the whole tree: one in WHOLE_TREE, or a path of only "." and ".." segments."""
+    if text in WHOLE_TREE:
+        return True
+    parts = [part for part in text.split("/") if part]
+    return bool(parts) and all(part in (".", "..") for part in parts)
 
 
 def _git(args, env, cwd, cwd_reason, ctx, aliases):
@@ -1195,6 +1214,16 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
         discard.append("worktree remove --force" if {"-f", "--force"} & set(names) else "worktree remove")
     if subcommand == "worktree" and facts["action"] == "prune":
         discard.append("worktree prune")
+    if subcommand in ("checkout", "restore"):
+        whole = any(_whole_tree(word.text) for _, word in operands) or any(
+            name.startswith("--pathspec-from") for name in names)
+        staged_only = {"-S", "--staged"} & set(names) and not {"-W", "--worktree"} & set(names)
+        if whole and not (subcommand == "restore" and staged_only):
+            discard.append("whole-tree " + subcommand)
+    if subcommand == "stash" and facts["action"] in STASH_WRITES:
+        discard.append("stash write")
+    if subcommand in ("rebase", "cherry-pick"):
+        discard.append(subcommand)
     if subcommand == "pull":
         rebase = None
         if config("pull.rebase") is not None:

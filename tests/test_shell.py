@@ -505,17 +505,31 @@ class DiscardTests(unittest.TestCase):
         "git stash drop": "stash drop", "git stash pop": "stash pop", "git stash clear": "stash clear",
         "git worktree remove ../wt": "worktree remove", "git worktree remove --force ../wt": "worktree remove --force",
         "git worktree prune": "worktree prune", "git clean -fd": "clean --force",
+        # M3 slice Z, from C3a's queue: the forms the discard guard handled in its own file until now.
+        "git checkout .": "whole-tree checkout", "git checkout -- .": "whole-tree checkout",
+        "git checkout HEAD -- :/": "whole-tree checkout", "git checkout main -- '*'": "whole-tree checkout",
+        "git checkout ../..": "whole-tree checkout", "git checkout --pathspec-from-file=list": "whole-tree checkout",
+        "git checkout --pathspec-from-file list main": "whole-tree checkout",
+        "git restore .": "whole-tree restore", "git restore --source=HEAD~1 :/": "whole-tree restore",
+        "git restore -s HEAD ./": "whole-tree restore", "git restore --staged --worktree .": "whole-tree restore",
+        "git restore -SW .": "whole-tree restore", "git restore --pathspec-from-file=list": "whole-tree restore",
+        "git stash": "stash write", "git stash -m wip": "stash write", "git stash push -u": "stash write",
+        "git stash save wip": "stash write", "git stash store abc123": "stash write",
+        "git rebase main": "rebase", "git rebase --autostash --no-autostash main": "rebase",
+        "git cherry-pick abc123": "cherry-pick", "git cp x": "cherry-pick",
     }
 
     def test_each_form(self):
         for line, expected in self.CASES.items():
             with self.subTest(line):
-                self.assertIn(expected, git(line)["discard"])
+                self.assertIn(expected, git(line, aliases={"cp": "cherry-pick"})["discard"])
 
     def test_safe_forms_drop_nothing(self):
-        for line in ("git switch main", "git checkout main", "git reset HEAD a.py", "git rebase main",
-                     "git rebase --autostash --no-autostash main", "git stash list", "git stash", "git worktree list",
-                     "git read-tree HEAD"):
+        for line in ("git switch main", "git checkout main", "git reset HEAD a.py", "git stash list",
+                     "git stash show", "git stash apply abc123", "git worktree list", "git read-tree HEAD",
+                     "git checkout -- a.py", "git checkout main -- src/", "git checkout -b . main",
+                     "git restore a.py", "git restore --staged .", "git restore -S :/", "git restore -s . a.py",
+                     "git checkout ./a", "git rebase-x"):
             with self.subTest(line):
                 self.assertEqual(git(line)["discard"], [])
 
