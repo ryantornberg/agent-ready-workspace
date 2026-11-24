@@ -2497,5 +2497,104 @@
       "targets": {}
     },
     "allow": true
+  },
+  {
+    "name": "a force push after a new line made by an ANSI-C escape, in eval's text (Q74, re-check)",
+    "event": {
+      "command": "eval $'true\\x0agit push -f origin main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push after a new line made by \\cJ, in eval's text (Q74, re-check)",
+    "event": {
+      "command": "eval $'true\\cJgit push -f origin main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push npm exec runs (Q74, re-check)",
+    "event": {
+      "command": "npm exec --offline -c 'git push -f origin main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push behind taskpolicy, its program a substitution (Q74, re-check)",
+    "event": {
+      "command": "taskpolicy -b $(command -v git) push -f origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push in a runner's text joined by IFS (Q74, re-check)",
+    "event": {
+      "command": "flock /tmp/l -c 'git${IFS}push${IFS}-f${IFS}origin${IFS}main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose wrapper's own word a for loop sets (Q74, re-check)",
+    "event": {
+      "command": "for N in \"5 git\"; do nice -n $N push -f origin main; done",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose wrapper's own word IFS splits (Q74, re-check)",
+    "event": {
+      "command": "IFS=,; N=5,git; nice -n $N push -f origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push in arithmetic's substitution, its words quoted (Q74, re-check)",
+    "event": {
+      "command": "echo $(( $(git \"push\" \"-f\" \"origin\" \"main\") ))",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push behind a runner, its program a brace sequence (Q74, re-check)",
+    "event": {
+      "command": "arch {g..g}it push -f origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a brace list for pytest, pgrep of git, a check mark escape and 8 nested shells pass (Q74, re-check)",
+    "event": {
+      "command": "pytest tests/test_{a,b}.py; pgrep -fl git; printf $'\\u2713 done\\n'; sh -c 'sh -c \"sh -c true\"'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "python3's code and a quoted variable for env pass (Q74, re-check)",
+    "event": {
+      "command": "python3 -c 'import os; print(\"git push\")'; env PYTHONPATH=\"$PWD\" python3 -m unittest",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
   }
 ]
