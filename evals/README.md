@@ -30,7 +30,7 @@ The guided arm gets the pages, not the engine: no hooks run, so nothing refuses 
 
 ## The graders
 
-Every case has these eight. A run passes when it passes every grader of its case.
+Each of the three fix-a-bug cases has these eight. A run passes when it passes every grader of its case. The proof attempts' cases have their own, under [the proof attempts](#the-proof-attempts).
 
 | Grader | Passes when | Decided by |
 |---|---|---|
@@ -112,6 +112,27 @@ Each change has a test in `tests/test_core.py` (`EvalHarnessApartTests`) that fa
 
 The changes for M1's second recording, each tested in `EvalRerecordTests`: a `__pycache__` folder is not a change to the shelved folder; the harness's git calls read none of the operator's git config; a command's whole output is kept; the report grader counts a claim marked verified however it is set; the hash covers the hook a grader runs; the agent gets exactly the scaffold files the hash covers; a timed-out run fails; and the machine's temporary folder is kept out of transcripts.
 
+## The proof attempts
+
+M3 tests two unproven playbooks, [debugging](../docs/playbooks/debugging.md) and [red team review](../docs/playbooks/red-team-review.md), with two cases each, drawn from M1's and M2's real work. Each case names its own arms, from `proof/<playbook>/`: the guided arm gets the playbook, a fixed copy of the contract text it needs, and for red team review a tier binding that names the small model; the two-line arm gets that playbook's [two](proof/debugging/two-line.md) [lines](proof/red-team-review/two-line.md); the bare arm gets the scaffold alone. So these cases depend on no shared arm file and no live page but their playbook. Each playbook has its own scaffold under `proof/<playbook>/scaffold/`.
+
+| Case | The request | Drawn from |
+|---|---|---|
+| [debug-staging-reminder](cases/debug-staging-reminder.json) | The staging reminder fires on a commit with an attached message; find the cause, fix it and commit. | M1's slice 5, where the staging hook read `-m"add …"` as options |
+| [debug-leak-check](cases/debug-leak-check.json) | The leak check misses a Windows home folder; find the cause, and leave the code as it is. | M2's slice 0, where the harness's leak check searched JSON text |
+| [red-team-fail-closed](cases/red-team-fail-closed.json) | Write a plan's missing Verification section, then have the plan red-teamed and settle every finding. | M1's slice 1, hooks fail closed |
+| [red-team-lease](cases/red-team-lease.json) | Write a plan's missing Recovery section, then have the plan red-teamed and settle every finding. | M2's slice 4, the writing-session lease |
+
+These graders read more of the folder than the fix-a-bug ones. `run.py` writes a state line for each of a case's `checks`: a file that must exist, a file that must hold a table, or a pattern no line added under the code folder may match. The transcript records a task handed to a fresh session as a `dispatch`, and a `report_brief` grader passes a final reply of a few lines that gives a path and a verdict.
+
+The debugging graders read what the playbook asks for: a failing test, a regression test that fails on the original code, and a report that marks its claims and names the causes ruled out. The fix case, debug-staging-reminder, also wants the change committed with no print or breakpoint among the lines it adds under `src/`; that check does not read `tests/` or a new file git does not track. The cause-only case, debug-leak-check, wants the code left exactly as it was, which leaves no room for debug output there, and nothing committed.
+
+The red team graders read the protocol: a fresh session dispatched, the record where the playbook puts it, a short reply with its path and verdict, and the code left alone. Its hidden test also asks that a record names the false claim the plan rests on, and, unless a record's verdict is `does not hold`, that every finding is settled in the plan's Red team table. It does not check the record's headings or columns, so a win cannot come from format alone. Graded on its protocol, red team review stays thin by design, as its page says.
+
+The guided arm gets the playbook and a contract copy, not the pages the playbook links to, such as procedure endings or fix a bug. Those links lead nowhere in the run, so the arm is tested on the playbook's own steps, and a dead link may cost it runs against two lines.
+
+An attempt starts only when [the plan's B7 row](../docs/plans/m3-reading-layer-machinery-and-kit.md#sub-batch-b-the-reading-layer) allows it: the playbook's two-line text committed, its instruction review done, the maintainer's read of its batch recorded under the plan's Results, and the maintainer's yes to the run count. It opens with a bare-only baseline, 10 runs per case. If the bare model passes 8 or more of 10 in both cases, the page is cut; if 5 or fewer in either, the three arms are recorded at 22 runs per case; in between, the page stays unproven and the baseline is its failed attempt. Red team review's recording may instead be deferred to M9 by the plan's stop rule, which leaves the page unproven with its baseline run. No run is on record yet. `tests/test_m3_b7.py` runs each case through the harness without an agent: a run that does nothing fails, and one that does what the playbook asks passes every grader.
+
 ## How the agent is confined
 
 The agent runs inside Claude Code's own operating-system sandbox, with its permissions bypassed only there. `run.py` passes settings that start the sandbox or refuse to run (`failIfUnavailable`), forbid commands from asking to leave it, close the network, and deny reads of the home folder to both the shell and the file tools. The agent gets project settings only and a minimal environment: no operator variables, an empty git configuration, and a shell whose start-up file the operator does not have, so none of their aliases load. `python3 evals/run.py --probe` makes one agent run that tries each way out and reports which held.
@@ -136,15 +157,13 @@ python3 evals/grade.py --recorded
 
 ## The gate
 
-Each `record.json` stores one hash over what a run depends on: the case, its acceptance test, the scaffold, the arm files (`arms.json` and every file it gives an agent, among them `AGENTS.md` and `INDEX.md`, plus the case's own additions), the harness (`run.py`, `grade.py` and `proofkeys.py`), the code of every workspace hook a grader runs, `parts/no_stage_all.py`, and the shell parser it shares, `wslib/shell.py`. A page's review date and its exact proof keys are left out of the hash, but only in those forms. The [`eval_record` check](../docs/parts.md#the-parts-here) compares the hash on every commit and in CI. Edit any of those files and the commit fails until every case has been run again.
+Each `record.json` stores one hash over what a run depends on: the case, its acceptance test, the scaffold, the arm files (`arms.json` and every file it gives an agent, among them `AGENTS.md` and `INDEX.md`, plus the case's own additions; or, for a case that names its own arms, those files alone), the harness (`run.py`, `grade.py` and `proofkeys.py`), the code of every workspace hook a grader runs, `parts/no_stage_all.py`, and the shell parser it shares, `wslib/shell.py`. A page's review date and its exact proof keys are left out of the hash, but only in those forms. The [`eval_record` check](../docs/parts.md#the-parts-here) compares the hash on every commit and in CI. Edit any of those files and the commit fails until every case has been run again.
 
 Since M3, a playbook marked proven stays only while it beats the bare model, and only proven pages are gated ([decision 0006](../docs/decisions/0006-what-proven-means.md)). A run counts when it passes every grader of its case. A record passes when each arm has five or more runs, and the guided arm passes more often than the bare arm. Then, pooled across the playbook's own cases, each arm needs 40 or more runs, and the guided arm must beat the two-line arm by a one-sided Fisher exact test at p < 0.05. So a playbook the bare model follows just as well fails, and so does guidance that two lines would match. The two-line comparison is pooled, not per case, because a case that tests only the playbook's habits, like fix-a-bug, can tie with two lines that ask for the same habits; that tie is a finding, not a failure.
 
 The guided arm is also held to its own past. Pooled over the cases present in both, a new record's guided arm may pass no more than 3 runs fewer than the previous record's (at the base commit), nor than the anchor's: the record its `proven-by` pins to a commit, `<sha>:evals/runs/<case>/record.json`. An arm that misses that margin may be recorded once more (`--rerecord`); the record then holds twice the runs for that arm, and both sides are put on the larger scale, at a margin of 6. With no base commit, as in a plain `check` or a scheduled CI run, these two comparisons are skipped, and a warning says so. A baseline (`--baseline`) and a one-time arm's record never count as passing.
 
 The gate trusts the record file. It shows that someone ran the cases on this wording; it cannot stop a person from editing the record by hand. CI's re-grade catches a grade that does not follow from its transcript, not a transcript that was written by hand.
-
-The graders for M3's proof attempts read more of the folder: `run.py` writes a state line for each of a case's `checks`, a file that must exist, a file that must hold a table, or a pattern no added line may match (debug output left behind), and the transcript records a task handed to a fresh session as a `dispatch`. A `report_brief` grader passes a final reply that gives only a path and a verdict.
 
 ## Rules that make this worth doing
 

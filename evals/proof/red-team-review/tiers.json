@@ -1,0 +1,7 @@
+{
+  "tiers": {
+    "driver": {"model": "haiku", "effort": "high"},
+    "worker": {"model": "haiku", "effort": "medium"},
+    "mechanical": {"model": "haiku", "effort": "low"}
+  }
+}

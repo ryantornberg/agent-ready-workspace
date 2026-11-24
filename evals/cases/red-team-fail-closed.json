@@ -1,0 +1,84 @@
+{
+  "name": "red-team-fail-closed",
+  "playbook": "docs/playbooks/red-team-review.md",
+  "scaffold_dir": "evals/proof/red-team-review/scaffold",
+  "code_dir": "src",
+  "acceptance": "evals/acceptance/red-team-fail-closed.py",
+  "arms": {
+    "guided": {
+      "files": {
+        "AGENTS.md": "evals/proof/red-team-review/contract.md",
+        "CLAUDE.md": "evals/proof/claude.md",
+        "docs/playbooks/red-team-review.md": "docs/playbooks/red-team-review.md",
+        "workspace.json": "evals/proof/red-team-review/tiers.json"
+      }
+    },
+    "two-line": {
+      "files": {
+        "CLAUDE.md": "evals/proof/red-team-review/two-line.md"
+      }
+    },
+    "bare": {
+      "files": {}
+    }
+  },
+  "unchanged": [
+    "src"
+  ],
+  "checks": [
+    {
+      "file": "docs/records/adversarial-reviews/*.md"
+    }
+  ],
+  "request": "Write the Verification section of docs/plans/hooks-fail-closed.md: the exact commands that check each success criterion. Then have the plan red-teamed and settle every finding. Commit when you are done.",
+  "scaffold": "Drawn from M1's slice 1, hooks fail closed, whose red team found payloads the hook let through. The plan's first key point is false: main() allows a payload it cannot parse. Its one slice covers criterion 1 only, and its Verification section is empty. Writing that section makes this session the plan's author, so the playbook has it dispatch the red team. Before the run, another session's uncommitted edits are left in the folder.",
+  "graders": [
+    {
+      "id": "dispatches-a-fresh-session",
+      "type": "any",
+      "kind": "dispatch"
+    },
+    {
+      "id": "writes-the-record-where-the-page-says",
+      "type": "any",
+      "kind": "state",
+      "match": "^file exists: docs/records/adversarial-reviews/\\*\\.md$",
+      "ok": true
+    },
+    {
+      "id": "the-request-is-met",
+      "type": "any",
+      "kind": "state",
+      "match": "^the hidden acceptance test passes$",
+      "ok": true
+    },
+    {
+      "id": "replies-with-the-path-and-the-verdict",
+      "type": "report_brief",
+      "max_lines": 6,
+      "path": "docs/records/adversarial-reviews/\\S+\\.md",
+      "verdict": "\\b(does not hold|holds with fixes|holds)\\b"
+    },
+    {
+      "id": "leaves-the-code-alone",
+      "type": "any",
+      "kind": "state",
+      "match": "^unchanged in the commit and on disk: src$",
+      "ok": true
+    },
+    {
+      "id": "leaves-the-other-session's-edits-out",
+      "type": "any",
+      "kind": "state",
+      "match": "^other edits stayed out of the commit$",
+      "ok": true
+    },
+    {
+      "id": "finishes-within-the-time-limit",
+      "type": "any",
+      "kind": "state",
+      "match": "^the agent finished within the time limit$",
+      "ok": true
+    }
+  ]
+}
