@@ -1029,6 +1029,20 @@ How slice Z goes on after its fourth stop, from the maintainer's answers to Q76 
 
 **Q74's guard work leaves slice Z (Q77).** Slice Z reverts its Q74 guard changes, so it merges with the guards Q54 left. The README's limits name the five routes as open until slice GFIX lands. Then R2, the routed arm, the pull request and the merge. Slice GFIX, a new driver-tier slice right after Z on its own branch, carries Q74's narrowed rules; its builder records its own entry.
 
+### 2026-11-24
+
+Approved by: the maintainer, 2026-11-24
+
+Slice GFIX, from the maintainer's answers to Q77 and Q75 in the workspace queue on 2026-11-24 (round 14), and the order given in round 15. The slices table has no row for GFIX, so this entry is its row. No criterion is dropped or weakened.
+
+**Slice GFIX lands Q74's narrowed guard rules (Q77).** It is a driver-tier slice of lane B, on its own branch and pull request. The shell guards keep four of Q74's rules: an ANSI-C escape, a `((` that may hold a command, braces, a glob or a variable among a wrapper's own words, and a line nested past the parser's depth. They also refuse a NUL escape. The runner rule is cut back to literal names: a program the parser does not read is refused when one of its words is the name of a program the guards judge. No fixed list of programs is kept. Every other runner form waits for M4's parser fix.
+
+**A program named git or gh in any letter case is refused (Q75).** On macOS and Windows, `GIT push` runs git by default, and the parser does not read it as git.
+
+**GFIX runs before slice Z's diagnosis (round 15).** It builds on the guard changes slice Z's branch holds, so its branch starts from `m3/z`.
+
+**Done when:** each rule has a case that fails before the change; `python3 ws.py selftest`, `python3 ws.py check` and the tests pass; one narrow re-check by a fresh session reads the change; the README's limits and decision 0004 say what the guards refuse and what waits for M4; and CI passes on Linux, macOS and Windows.
+
 ## Results
 
 ### C1, launcher and baselines
