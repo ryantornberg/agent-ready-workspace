@@ -46,3 +46,13 @@ What the first reading missed: Nothing.
 | # | Kind | Finding | Disposition |
 |---|---|---|---|
 | R1 | broke | Not blocking. A trigger finding. Before the fix the description excluded, under `docs/`, a plan, a milestone record, a record and the question log, matching the entry's `except` list; the first reading checked that (verified, its "Checked with no finding"). The fixed list says only "a page under docs/ other than a plan or a record", so the question log, `docs/question-log.md`, and the milestone records under `docs/milestones/` now read as guidance (verified, reading the `except` list). The contract asks any session that had to ask a person something to add to the question log, so such a commit can fire this wrapper and a review no check requires (inferred). Put back "a milestone record" and "the question log", as the catalog's row has them. | fixed (second round): "other than a plan, a milestone record, a record or the question log". |
+
+## Second re-check
+
+A fresh session re-read the wrapper's description on 2026-11-23, after the second fix round, at commit c44cbee, using `git diff ec6562b c44cbee` and, for the pages main also changed, `git diff origin/main c44cbee`. On macOS, `python3 ws.py check` exits 0, with only `eval_record`'s usual no-base warning; `python3 ws.py selftest` exits 0, with `wrappers: 18 of 18 cases` and `loaded_size: 4 of 4 cases`; `python3 -m unittest tests.test_kit tests.test_instruction_review -b` runs 48 tests, OK; and `python3 ws.py check --commits origin/main..c44cbee` exits 0 (verified).
+
+| # | Verdict | Evidence |
+|---|---|---|
+| R1 | fixed | The description says "a page under docs/ other than a plan, a milestone record, a record or the question log", the four paths of the `review_trailer` entry's `except` list in `workspace.json` (verified, reading). |
+
+What the first readings missed: nothing.

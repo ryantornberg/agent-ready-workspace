@@ -46,3 +46,13 @@ What the first reading missed: the rows marked missed below.
 | # | Kind | Finding | Disposition |
 |---|---|---|---|
 | R1 | missed | Not blocking. A trigger finding. The feedback walk-through's page takes "The author names one comment and asks only for its fix", and says it wins over fix a bug there because it asks before committing (verified, reading its "When to use it"). Its fixed description now claims that request, but this description still takes "a small change in one repository" with no exception for it, so a request like "fix the comment Dana left on pull request 42" matches both (inferred: no case tests it). Add "or the fix of one named review comment (workspace:feedback-walkthrough)" to the "Not" clause. | fixed (second round): the "Not" clause gains "or for the fix of one named review comment (workspace:feedback-walkthrough)". |
+
+## Second re-check
+
+A fresh session re-read the wrapper's description on 2026-11-23, after the second fix round, at commit c44cbee, using `git diff ec6562b c44cbee` and, for the pages main also changed, `git diff origin/main c44cbee`. On macOS, `python3 ws.py check` exits 0, with only `eval_record`'s usual no-base warning; `python3 ws.py selftest` exits 0, with `wrappers: 18 of 18 cases` and `loaded_size: 4 of 4 cases`; `python3 -m unittest tests.test_kit tests.test_instruction_review -b` runs 48 tests, OK; and `python3 ws.py check --commits origin/main..c44cbee` exits 0 (verified).
+
+| # | Verdict | Evidence |
+|---|---|---|
+| R1 | fixed | The "Not" clause ends "or for the fix of one named review comment (workspace:feedback-walkthrough)". The feedback walk-through's description takes "asks for the fix of one named review comment", and its page's "When to use it" says it wins there (verified, reading). The `wrappers` check passes, so the name is a real wrapper (verified). |
+
+What the first readings missed: nothing.

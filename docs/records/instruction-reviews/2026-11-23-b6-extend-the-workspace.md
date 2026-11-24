@@ -47,3 +47,13 @@ A fresh session re-read the page on 2026-11-23, after the fix round, at a2d6a59 
 | R1 | broke | Not blocking. contradiction. The new rules row says "A core playbook or how-to lands with its wrapper and two selection cases ...; a lane draft gets none." A core page on the `wrappers` waiting list lands with no wrapper, and the check refuses one ("a waiting page with a wrapper fails") (verified, reading `run` and the case). Step 5's bullet and the catalog's rules row state that exception; this row does not label it. Add "unless the `wrappers` entry's waiting list names it". | fixed (second round): "unless the `wrappers` entry's waiting list names it". |
 
 What the first reading missed: nothing.
+
+## Second re-check
+
+A fresh session re-read the page's changed rules row on 2026-11-23, after the second fix round, at commit c44cbee, using `git diff ec6562b c44cbee` and, for the pages main also changed, `git diff origin/main c44cbee`. On macOS, `python3 ws.py check` exits 0, with only `eval_record`'s usual no-base warning; `python3 ws.py selftest` exits 0, with `wrappers: 18 of 18 cases` and `loaded_size: 4 of 4 cases`; `python3 -m unittest tests.test_kit tests.test_instruction_review -b` runs 48 tests, OK; and `python3 ws.py check --commits origin/main..c44cbee` exits 0 (verified).
+
+| # | Verdict | Evidence |
+|---|---|---|
+| R1 | fixed | The row reads "... one that should leave it quiet, unless the `wrappers` entry's waiting list names it; a lane draft gets none." That labels the exception step 5's bullet and the check hold (`run` in `parts/wrappers.py`, case "a waiting page with a wrapper fails") (verified, reading). The `rules` check passes, so the row's three tags still name real cases (verified, `python3 ws.py check`). |
+
+What the first readings missed: nothing.

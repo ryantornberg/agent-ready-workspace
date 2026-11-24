@@ -33,3 +33,14 @@ Run: a clone outside the worktree, at a2d6a59 with B6's staged change applied an
 - enforcement: the block says a person runs the commands, as a description, and claims no guard. The instance's `before-shell` hook passes both commands from an agent (verified, `python3 ws.py hook before-shell` with each command), and the page does not say otherwise.
 - placement: the block belongs with the other per-machine setup under "Try it". It restates no rule that procedure endings states (verified, reading).
 - eval-case: the page is a README with no proof mark, and the block asks a person, not an agent, to act. The wrappers' own selection is tested by their cases under `plugin/evals/` (verified, reading).
+
+## Second re-check
+
+A fresh session re-read the page's changed paragraph, as an instance's `README.md`, on 2026-11-23, after the second fix round, at commit c44cbee, using `git diff ec6562b c44cbee` and, for the pages main also changed, `git diff origin/main c44cbee`. On macOS, `python3 ws.py check` exits 0, with only `eval_record`'s usual no-base warning; `python3 ws.py selftest` exits 0, with `wrappers: 18 of 18 cases` and `loaded_size: 4 of 4 cases`; `python3 -m unittest tests.test_kit tests.test_instruction_review -b` runs 48 tests, OK; and `python3 ws.py check --commits origin/main..c44cbee` exits 0 (verified). Commands that write outside the repository ran only in scratch folders: a copy of c44cbee with `CLAUDE_CONFIG_DIR` set to a scratch folder, where `claude plugin eval` (Claude Code 2.1.331) ran only with a `--case` glob that matched no case, from a shell with no terminal, so no agent started; and an instance adopted with `python3 ws.py adopt` from a clone at c44cbee.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed | The paragraph says one marketplace name serves one folder on a machine, that the kit's clone and every workspace made from it declare `agent-ready-workspace`, that the folder that ran the first command last serves the wrappers to all of them, worktrees included, and to run the first command again in the folder you work in. The scratch instance's `.claude-plugin/marketplace.json` is named `agent-ready-workspace`, and its lock classes the file `synced` (verified). The "now points at" behaviour rests on the first reading's scratch-config run, not run again here. |
+| 2 | fixed | The paragraph says "The block carries no `<!-- setup -->` mark, so no reader of the setup blocks runs it." In the scratch instance, `python3 tools/setup_steps.py README.md` prints no `claude plugin` line, and the README holds no "nightly" (verified). |
+
+What the first readings missed: nothing.

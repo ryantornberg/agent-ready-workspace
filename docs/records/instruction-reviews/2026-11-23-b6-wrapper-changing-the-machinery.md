@@ -49,3 +49,14 @@ What the first reading missed: Nothing.
 |---|---|---|---|
 | R1 | broke | Not blocking. A trigger finding. Finding 2's fix, "With workspace:parts for a check or hook", sends any hook to parts, a git hook included. Parts' fixed description says the opposite: a git hook in `.githooks/` is "changing-the-machinery's alone" (verified, reading both). This wrapper's fires case, which is also `parts-quiet`, asks to change the pre-push hook; this description now points an agent that loads it at parts for that request, so the parts quiet case sits inside this description's pointer (inferred: no case has run). Say "With workspace:parts for a check, or a hook on an agent tool's event". | fixed (second round): "With workspace:parts for a check, or a hook on an agent tool's event." |
 | R2 | broke | Not blocking. A trigger finding. Finding 1's fix names "eval cases" among the machinery. The workspace now has two kinds: the eval harness's cases in `evals/cases/`, which are machinery, and the wrappers' selection cases in `plugin/evals/`, which are not on the table or the `direct_push` list (verified, reading `workspace.json`). A request to add a wrapper's selection cases, which extend the workspace's step 5 asks for with a new page, can fire this description and take a branch it does not need (inferred). Say "the eval harness's cases", or leave the qualifier "any path the page's machinery table lists" to carry it. | fixed (second round): "the eval harness's cases". |
+
+## Second re-check
+
+A fresh session re-read the wrapper's description on 2026-11-23, after the second fix round, at commit c44cbee, using `git diff ec6562b c44cbee` and, for the pages main also changed, `git diff origin/main c44cbee`. On macOS, `python3 ws.py check` exits 0, with only `eval_record`'s usual no-base warning; `python3 ws.py selftest` exits 0, with `wrappers: 18 of 18 cases` and `loaded_size: 4 of 4 cases`; `python3 -m unittest tests.test_kit tests.test_instruction_review -b` runs 48 tests, OK; and `python3 ws.py check --commits origin/main..c44cbee` exits 0 (verified).
+
+| # | Verdict | Evidence |
+|---|---|---|
+| R1 | fixed | The description says "With workspace:parts for a check, or a hook on an agent tool's event." Parts' description takes the same pair and says changing-the-machinery "alone owns a git hook in .githooks/" (verified, reading both). The fires case, a change to the pre-push hook and the CI workflow, now sits outside the pointer to parts. |
+| R2 | fixed | The description says "the eval harness's cases", which leaves out the selection cases in `plugin/evals/`; the `direct_push` entry's `machinery` list names `evals/cases/` and not `plugin/` (verified, reading). `loaded_size` passes (verified, `selftest`). |
+
+What the first readings missed: nothing.
