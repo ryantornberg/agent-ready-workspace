@@ -100,3 +100,39 @@ Six checks on the changed text. contradiction: the page's "A home folder the cas
 ### Disposition after the re-check of fix round 2
 
 - The blocking item, the lookalike exception passing an account named `d`, `da` or `dan` in the two debugging cases: open. Fixing it would be a third fix round on the same failure, which the plan's stop rule forbids, so slice Z stops and the question is queued as Q55. R2's three cases allow no name, so the item does not reach them (verified, by the re-check).
+
+## Re-check after Q55, 2026-11-24
+
+A fresh session re-read the leak rule at 778ee31, which holds 8c7fa9c, with the builder's uncommitted edit to the page. It read `git show 8c7fa9c`, `git diff evals/README.md`, and `HOME_FOLDER`, `NOT_AN_ACCOUNT`, `home_folders`, `leaks` and `case_accounts` in `evals/run.py`. It ran `leaks`, with `operator_identity` mocked to return nothing, on every line of this record's lookalike table, with no allowed name and with `dana`. It swept 40 names, from prefixes and case variants of `dana` to trailing dots and separators, in eight home-folder forms with 29 followers. It also tried every name up to five characters over `d`, `a`, `.`, `_`, `-`, `x` and `1`. It ran `case_accounts` for all seven cases, and `home_folders` over all 271 stored transcripts. It ran the two named tests, both test classes, and the transcript test on two changed copies of the folder. No agent run and no probe was started.
+
+| # | Class | Where | Finding | Disposition |
+|---|---|---|---|---|
+| 1 | contradiction | The `run.py` requirements paragraph, "only as the case spells it: a lookalike, such as the name with a letter outside ASCII in it, is refused"; the comment above `HOME_FOLDER`; the plan's Q55 entry, "exactly one the case's request or scaffold holds" | Blocking. In the two debugging cases, a name that starts with `dana` and runs on past the pattern's ASCII name characters passes. `home_folders` compares only the part `HOME_FOLDER` captures, which stops at the first character outside `[a-z0-9._-]`. So these pass with `dana` and are refused with no allowed name: `/home/danaë/x`, `C:\Users\Danaë\x`, `/home/dana\u00e4/x`, `C:\Users\Dana Smith\Documents`, `C:\Users\Dana (2)\x`, `C:\Users\DANA~1\x` and `/home/dana$/x`. 5,751 letters from U+0080 to U+2FFF pass after `dana`. Windows allows spaces and letters outside ASCII in a profile folder's name, so these can be real accounts. The page says such a lookalike is refused; it is refused only when the letter sits inside the name, as in `/home/danä/x`. 8c7fa9c did not add this: the exception it dropped never covered it. R2's three cases allow no name, so it does not reach them. Verified: `leaks` on each line, and the count over U+0080 to U+2FFF. Inferred: that an operator's machine holds such an account; it is unlikely, as in the item before. Suggested fix, tried on a copy of the rule: an allowed name passes only when the character after it is ASCII and starts no `\u`, `\x` or `\N{` escape. In a drive-letter path, a space then a letter or `(` also refuses it. That refuses every line above, passes `/home/dana/x` and `C:\Users\dana.`, and refuses no stored transcript but `two-line-18`. It also refuses `C:\Users\dana\x64`, which costs a run and leaks nothing. Verified: that run. | open |
+| 2 | contradiction | The same paragraph, and `home_folders`'s `rstrip(".")` | Not blocking. A name that ends in dots passes when the rest is allowed: `/home/dana./x`, `/home/dana../x`, `/Users/Shared./x` and `/home/User./x`. Windows drops trailing dots from a folder name, so `C:\Users\dana.` is the fixture's own folder; the strip is there for a sentence that ends on a path. Verified: `leaks` on each line. Inferred: a Unix account whose name ends in a dot is rare, though some `useradd` builds allow one. | open |
+
+The lookalike lines this record's last table listed, each checked again. The last column is that table's. Verified: `leaks` on each line.
+
+| Line | allowed: none | allowed: `dana` | Before 8c7fa9c, `dana` |
+|---|---|---|---|
+| `/home/danaxyz`, `/home/dan/x`, `/home/da/x`, `/home/d/x`, `/home/dana.smith/x` | refused | refused | refused |
+| `/home/däna/x`, `/home/dаna/x` (Cyrillic a), `/home/d\u00e4na/x` | refused | refused | passed |
+| `/home/dänа/x`, `/home/danä/x`, not in the last table | refused | refused | not run |
+| `C:\Users\dan\x64\tools`, `C:\\Users\\dan\\x86_tools`, `/home/dan\u001b[0m`, `/Users/da\x1b[0m` | refused | refused | passed |
+| `/home/dörte/x`, `/home/danéel/x`, `C:\Users\Dámaso`, `/home/josé/x`, `C:\Users\bob\x41` | refused | refused | passed, but `josé` and `bob\x41` were refused |
+| `/home/dana/x`, `C:\Users\dana.`, `cat /home/dana/notes.txt C:\Users\dana.` | refused | passed | passed |
+
+Checks on the brief's five points.
+
+- Lookalike exception gone: `RUNS_ON` and its branch are removed, and every line in the table's second to fourth rows is refused with `dana` (verified, the table).
+- No new route: with `dana` allowed, the sweep passes only `dana` in any case, `user`, `shared`, `public`, an empty name, and names that finding 1 or 2 covers. No prefix of `dana`, and no name over the seven-character alphabet, passes (verified, the sweep).
+- The `WRITTEN_BEFORE_Q55` exemption is exact. `home_folders` finds only `two-line-18`, with `['/home/d', '/home/d']`, both from `/home/d\u00e4n\u0430` in the agent's own test code. A copy that adds `cat /home/däna/x` to `two-line-17` fails the transcript test, `['/home/d'] != []`. A copy that adds it to `two-line-18` fails with three matches against two. Verified: the sweep and both copies.
+- The page matches the code except for finding 1. No other page or comment describes the dropped exception: `grep` for "lookalike", "RUNS_ON" and "outside ASCII" finds the page, the `HOME_FOLDER` comment, the test's comments and the plan. The plan's matches at its results section are dated entries of earlier rounds (verified, `grep`).
+- R2's cases allow no name: `case_accounts` gives `[]` for big-report, fix-a-bug and nightly-job, and `['dana']` only for the two debugging cases (verified).
+- Tests: `test_the_recorded_transcripts_hold_nothing_of_the_operators_environment` and `test_any_accounts_home_folder_is_refused_but_the_case_s_own` pass. `EvalThatCanLoseTests` and `EvalHarnessApartTests` run 25 tests with 1 failure. It is `eval_record`'s three stale records for big-report, fix-a-bug and nightly-job, which the brief expects until R2 (verified, the test run).
+
+**Verdict:** one blocking finding remains. In the debugging cases, `dana` plus a space or a letter outside ASCII passes, against the page. R2's cases are unaffected.
+
+### Disposition after the re-check after Q55
+
+- 1, blocking, a home folder that runs on past an allowed name: open. Q55's answer was the approved step past the leak rule's two fix rounds. A further fix would be another round on the same failure, which the plan's stop rule forbids, so slice Z stops before R2 and the question is queued as Q73. R2's three cases allow no name, so the item does not reach them (verified, by the re-check).
+- 2, a name ending in dots: open, with Q73. Its first two options refuse `/home/dana./x`. `Shared.` and `User.` still pass, as names Windows drops the dot from (inferred).

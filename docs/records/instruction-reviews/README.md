@@ -312,3 +312,4 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-24-z-agent-settings.md](2026-11-24-z-agent-settings.md) | `docs/agent-settings.md` | enforcement, step |
 | [2026-11-24-z-git-host-operations.md](2026-11-24-z-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | placement |
 | [2026-11-24-z-evals-readme.md](2026-11-24-z-evals-readme.md) | `evals/README.md` | contradiction, step |
+| [2026-11-24-z-q54-guards.md](2026-11-24-z-q54-guards.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
