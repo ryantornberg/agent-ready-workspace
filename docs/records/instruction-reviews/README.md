@@ -313,6 +313,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-24-z-git-host-operations.md](2026-11-24-z-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | placement |
 | [2026-11-24-z-evals-readme.md](2026-11-24-z-evals-readme.md) | `evals/README.md` | contradiction, step |
 | [2026-11-24-z-q54-guards.md](2026-11-24-z-q54-guards.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
+| [2026-11-24-z-q74-guards.md](2026-11-24-z-q74-guards.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
 | [2026-11-24-lifecycle-map.md](2026-11-24-lifecycle-map.md) | `docs/lifecycle-map.md` | contradiction, placement, trigger, eval-case |
 | [2026-11-24-how-tos-lifecycle-row.md](2026-11-24-how-tos-lifecycle-row.md) | `docs/how-tos.md` | trigger |
 | [2026-11-24-lifecycle-map-support-row.md](2026-11-24-lifecycle-map-support-row.md) | `docs/lifecycle-map.md` | contradiction |
