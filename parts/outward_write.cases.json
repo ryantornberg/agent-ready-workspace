@@ -8994,5 +8994,62 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "git -C into a folder, then rm of the list, is refused, as the parser reports the path (M3 slice Z)",
+    "event": {
+      "command": "git -C sub rm --cached outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git restore of the list through a git alias is refused, as the parser expands it and reports the path (M3 slice Z)",
+    "event": {
+      "command": "git -c alias.rs=restore rs outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git rm of another file passes",
+    "event": {
+      "command": "git rm old.txt",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
   }
 ]

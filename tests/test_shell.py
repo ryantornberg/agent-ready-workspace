@@ -808,6 +808,16 @@ class WriteTargetTests(unittest.TestCase):
             "find .git -name '*.lock' -delete": [(".git", "find -delete")],
             "find -L a b -type f -delete": [("a", "find -delete"), ("b", "find -delete")],
             "find -delete": [(".", "find -delete")],
+            # M3 slice Z, from C5e's queue: the paths git mv, rm, checkout and restore write, which
+            # parts/outward_write.py read itself until now.
+            "git mv a.txt b.txt": [("a.txt", "git mv"), ("b.txt", "git mv")],
+            "git rm -r --cached docs": [("docs", "git rm")],
+            "git checkout HEAD~1 -- a.txt": [("HEAD~1", "git checkout"), ("a.txt", "git checkout")],
+            "git checkout -b feature": [],
+            "git restore --source=HEAD~1 -W a.txt": [("a.txt", "git restore")],
+            "git restore -s HEAD a.txt": [("a.txt", "git restore")],
+            "git -C sub -C deeper rm x": [("sub/deeper/x", "git rm")],
+            "git -C sub rm /abs/x": [("/abs/x", "git rm")],
         }
         for line, expected in cases.items():
             with self.subTest(line):
@@ -818,6 +828,10 @@ class WriteTargetTests(unittest.TestCase):
                      "cp a", "find .git -name '*.lock'"):
             with self.subTest(line):
                 self.assertEqual(writes(line), [])
+
+    def test_a_git_write_after_a_variable_dash_C_is_dynamic(self):
+        found = [w for c in commands('git -C "$D" rm x') for w in c["writes"]]
+        self.assertEqual([(w["path"], w["dynamic"]) for w in found], [("x", True)])
 
     def test_a_dynamic_target(self):
         found = [w for c in commands('echo x > "$F"') for w in c["writes"]]

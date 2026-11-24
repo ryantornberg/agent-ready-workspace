@@ -39,8 +39,10 @@ so a guard learns everything it decides on without parsing again:
                     cwd is known.
     writes          [{"path", "dynamic", "via"}]: >, >>, >|, &>, <>, tee, cp (target), mv (source and target),
                     sed -i, dd of=, rm, unlink, rmdir, shred, ln, truncate, install, rsync, touch,
-                    git config --file, and find -delete, whose path is each folder it starts from ("." when it
-                    names none), since the files it removes are known only when it runs.
+                    git config --file, the operands of git mv, rm, checkout and restore (after any -C folder;
+                    a checkout's branch too, since the words cannot tell it from a path), and find -delete, whose
+                    path is each folder it starts from ("." when it names none), since the files it removes are
+                    known only when it runs.
     config_writes   [{"key", "value", "op", "via", "guarded"}]: git config written by git -c, git config,
                     GIT_CONFIG_COUNT/KEY_n/VALUE_n or GIT_CONFIG_PARAMETERS. key is None when unknowable.
                     guarded is True for remote.*, url.*, push.*, branch.*.pushRemote, branch.*.merge,
@@ -1062,6 +1064,7 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
     config_writes, file_writes, nested, messages = [], [], [], []
     folder, folder_reason = cwd, cwd_reason
     git_dir = work_tree = None
+    prefix, prefix_dynamic = "", False         # the -C folders as written, for the paths a git call writes
     i = 0
     while i < len(args):
         text = args[i].text
@@ -1086,6 +1089,10 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
                     git_dir = folder
                 continue
         if name == "-C":
+            if dynamic:
+                prefix_dynamic = True
+            elif value:
+                prefix = value if _absolute(value) or not prefix else posixpath.join(prefix, value)
             if dynamic:
                 folder, folder_reason = None, "-C names a variable or substitution"
             elif value and folder is not None:
@@ -1285,6 +1292,13 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
     if subcommand in ("switch", "checkout", "branch") and (
             {"-t", "--track", "-u", "--set-upstream-to", "--set-upstream"} & set(names)):
         facts["tracking"] = True
+
+    if subcommand in ("mv", "rm", "checkout", "restore"):
+        # Each operand may be a path git rewrites or removes. A checkout's first operand may be a branch instead;
+        # it is reported too, since the words alone cannot tell them apart.
+        for _, word in operands:
+            path = word.text if not prefix or _absolute(word.text) else posixpath.join(prefix, word.text)
+            file_writes.append({"path": path, "dynamic": word.dynamic or prefix_dynamic, "via": "git " + subcommand})
 
     if subcommand == "rebase":
         for name, value in opts:

@@ -74,8 +74,6 @@ READS = {
 NEW_REPOSITORY = {("repo", "create"), ("repo", "fork")}
 OWNER_WRITES = {"project"}
 OWNER_FLAGS = {"--org", "-o", "--user", "-u"}
-# git subcommands that rewrite or remove the files they name: the parser does not report them as writes.
-GIT_FILE_WRITERS = {"mv", "rm", "checkout", "restore"}
 # git subcommands that push without `git push`: each names its destination as its first operand.
 PLUMBING_PUSHES = {"send-pack", "http-push"}
 # Their options that take the next word as a value, when not written with "=".
@@ -110,12 +108,7 @@ def _list_write(call, name):
     """Why a shell write in this call lands on the list of repositories, or None. The list is matched by its file
     name in any folder, so a write to it from a worktree, or through a folder the parser cannot place, is seen."""
     wanted = gitrules.fold(posixpath.basename(name.replace("\\", "/")))
-    writes = list(call.get("writes") or ())
-    git = call.get("git") or {}
-    if git.get("subcommand") in GIT_FILE_WRITERS:
-        writes += [{"path": word, "dynamic": _dynamic(word)} for word in git.get("args") or []
-                   if not word.startswith("-")]
-    for write in writes:
+    for write in call.get("writes") or ():
         path = write.get("path") or ""
         if gitrules.fold(path).split("/")[-1] == wanted or (write.get("dynamic") and wanted in gitrules.fold(path)):
             return (f"{path} is the list of repositories agents may write to. Only a person adds a repository to "
