@@ -41,10 +41,11 @@ The agent is Claude Code, inside its own operating-system sandbox. Its
 permissions are bypassed only there: the sandbox must start, or the run does not
 (failIfUnavailable), commands cannot ask to leave it, and they reach no network.
 The agent gets project settings only, an empty git configuration and a minimal
-environment, so the operator's instructions, identity, shell aliases and
-variables reach no arm. A transcript that still holds the operator's user name,
-home folder, git identity or the machine's temporary folder is refused, and
-nothing is written. The harness's own git calls read none of the operator's git
+environment with a fixed PATH of system folders, so the operator's instructions,
+identity, shell aliases, variables and PATH reach no arm. A transcript that still
+holds the operator's user name, git identity, the machine's temporary folder or
+any account's home folder is refused, and nothing is written; a home folder the
+case's own request names, such as a fixture's invented owner, is the case's text. The harness's own git calls read none of the operator's git
 config, so a global ignore file cannot hide a change from the graders.
 
 Each finished run is written at once, as evals/runs/<case>/<arm>-<n>.json. A
@@ -108,7 +109,16 @@ SETTINGS = {
 }
 # HOME and USER stay because the agent tool finds its sign-in through them; the user name is
 # taken out of every transcript, and a transcript that still holds it is refused.
-KEPT_ENVIRONMENT = ("PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "TERM", "TMPDIR")
+KEPT_ENVIRONMENT = ("HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "TERM", "TMPDIR")
+# The agent's PATH: system folders only, the same on every machine and every run. The operator's own PATH can name
+# other accounts' home folders and tools of their own, and an agent that prints it puts them in a transcript (M3
+# slice Z, the maintainer's answer to Q52). The agent tool itself is found on the operator's PATH (agent_program).
+AGENT_PATH = ("/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin")
+AGENT_NEEDS = ("python3", "git")    # what every case's agent runs; run.py refuses to start without them on AGENT_PATH
+# A home folder on any system, as a transcript may write it: /Users/NAME, /home/NAME or C:\Users\NAME, with one or
+# two backslashes. "user" is what the user name becomes in a transcript; Shared and Public belong to no account.
+HOME_FOLDER = re.compile(r"(?:/(?:users|home)/|\b[a-z]:\\{1,2}users\\{1,2})([a-z0-9._-]+)", re.I)
+NOT_AN_ACCOUNT = {"user", "shared", "public"}
 REQUIRED_ARMS = ("guided", "two-line", "bare")
 # Paths that name this machine without naming its user: its temporary folders, and the agent tool's own.
 MACHINE_PATHS = re.compile(r"/(?:private/)?var/folders/|/(?:private/)?tmp/claude-\d")
@@ -264,12 +274,22 @@ def prepare(folder, case, files, root=ROOT, stripped=True):
 def agent_command(request, model, plugins=()):
     """Claude Code, headless, with its permissions bypassed only inside its sandbox. plugins: local plugin
     folders to enable, copied outside the home folder first (run_once), so the sandbox's rules still hold."""
-    command = ["claude", "-p", request, "--model", model, "--output-format", "stream-json", "--verbose",
+    command = [agent_program(), "-p", request, "--model", model, "--output-format", "stream-json", "--verbose",
                "--setting-sources", "project", "--settings", json.dumps(SETTINGS), "--strict-mcp-config",
                "--no-session-persistence", "--permission-mode", "bypassPermissions"]
     for plugin in plugins:
         command += ["--plugin-dir", str(plugin)]
     return command
+
+
+def agent_program():
+    """The agent tool's full path, found on the operator's PATH, since the agent's own PATH holds system folders only."""
+    return shutil.which("claude") or "claude"
+
+
+def missing_on_agent_path(names=AGENT_NEEDS, path=AGENT_PATH):
+    """The programs a case's agent runs that its fixed PATH does not hold; run.py refuses to start without them."""
+    return [name for name in names if not shutil.which(name, path=os.pathsep.join(path))]
 
 
 SHELLS = ("/opt/homebrew/bin/bash", "/usr/local/bin/bash", "/bin/bash", "/usr/bin/bash", "/bin/zsh", "/usr/bin/zsh")
@@ -303,6 +323,7 @@ def agent_env(scratch, home=None):
     env = {key: os.environ[key] for key in KEPT_ENVIRONMENT if key in os.environ}
     shell = choose_shell(home)
     env.update({
+        "PATH": os.pathsep.join(AGENT_PATH),
         "SHELL": shell,
         "CLAUDE_CODE_SHELL": shell,
         "GIT_CONFIG_GLOBAL": str(gitconfig),
@@ -408,10 +429,23 @@ def _strings(value):
             yield from _strings(item)
 
 
-def leaks(actions):
-    """What in a transcript would identify the operator or this machine. Empty when it is safe to write."""
+def home_folders(text, allowed=()):
+    """The account names of the home folders the text names, other than the placeholder and those in allowed."""
+    skip = NOT_AN_ACCOUNT | {name.lower() for name in allowed}
+    return [match.group(0) for match in HOME_FOLDER.finditer(text) if match.group(1).rstrip(".").lower() not in skip]
+
+
+def leaks(actions, allowed=()):
+    """What in a transcript would identify the operator, another account or this machine. Empty when it is safe to
+    write. allowed: account names whose home folders are the case's own text, such as a fixture's invented owner."""
     text = "\n".join(_strings(actions)).lower()
-    return [secret for secret in operator_identity() if secret.lower() in text] + MACHINE_PATHS.findall(text)
+    return ([secret for secret in operator_identity() if secret.lower() in text] + MACHINE_PATHS.findall(text)
+            + home_folders(text, allowed))
+
+
+def case_accounts(case):
+    """The account names of the home folders the case's request names: its own text, not the operator's."""
+    return sorted({match.group(1).rstrip(".") for match in HOME_FOLDER.finditer(case.get("request", ""))})
 
 
 def suite_passes(folder):
@@ -524,8 +558,8 @@ def run_once(case, model, files, timeout, plugins=(), stripped=True, root=ROOT):
             raise NotATrial(error or "the agent printed nothing")
         actions.extend(inspect(folder, start, case))
         actions.append({"kind": "state", "target": "the agent finished within the time limit", "ok": finished})
-    if leaks(actions):
-        raise RuntimeError("a transcript holds the operator's identity; nothing was written")
+    if leaks(actions, case_accounts(case)):
+        raise RuntimeError("a transcript holds the operator's identity or a home folder; nothing was written")
     return actions, used_model, version
 
 
@@ -698,6 +732,11 @@ def main(argv=None):
     if args.runs < eval_record.MIN_RUNS:
         parser.error(f"the gate needs {eval_record.MIN_RUNS} or more runs per arm")
 
+    missing = [] if args.finish else missing_on_agent_path()
+    if missing:
+        print(f"run.py: the agent's PATH ({os.pathsep.join(AGENT_PATH)}) holds no {', '.join(missing)}, which every "
+              "case's agent runs; install it in one of those folders", file=sys.stderr)
+        return 2
     case = load_case(args.case)
     files, digest = covered(args.case)
     try:

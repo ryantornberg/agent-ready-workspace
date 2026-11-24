@@ -2198,10 +2198,12 @@ class EvalThatCanLoseTests(Folder):
     def test_the_agent_gets_none_of_the_operators_environment(self):
         home = self.root / "home"   # a home folder with no shell start-up file, unlike a CI runner's
         home.mkdir()
-        with mock.patch.dict(os.environ, {"WS_OPERATOR_SECRET": "x", "ZDOTDIR": "/operator/zsh", "GIT_AUTHOR_EMAIL": "me@example.com"}):
+        with mock.patch.dict(os.environ, {"WS_OPERATOR_SECRET": "x", "ZDOTDIR": "/operator/zsh", "GIT_AUTHOR_EMAIL": "me@example.com",
+                                          "PATH": "/Users/someone-else/bin" + os.pathsep + os.environ.get("PATH", "")}):
             env = self.harness.agent_env(self.root, home)
         self.assertEqual(set(env) - set(self.harness.KEPT_ENVIRONMENT),
-                         {"SHELL", "CLAUDE_CODE_SHELL", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "XDG_CONFIG_HOME"})
+                         {"PATH", "SHELL", "CLAUDE_CODE_SHELL", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "XDG_CONFIG_HOME"})
+        self.assertEqual(env["PATH"], os.pathsep.join(self.harness.AGENT_PATH))   # fixed, not the operator's (Q52)
         self.assertFalse(self.harness.start_up_file(env["CLAUDE_CODE_SHELL"], home).exists())   # so none of the operator's aliases load
         self.assertEqual(pathlib.Path(env["GIT_CONFIG_GLOBAL"]).read_text(encoding="utf-8"), "")
         self.assertNotIn("WS_OPERATOR_SECRET", env)
@@ -2546,6 +2548,27 @@ class EvalHarnessApartTests(Folder):
                 files = eval_record.covered_files(case_path, self.harness.load_case(name), list(tree.paths()), arms)
                 self.assertEqual(self.harness.covered(name),
                                  (files, eval_record.guidance_hash({f: tree.read(f) for f in files}, PROOF_KEYS.strip)))
+
+    def test_any_accounts_home_folder_is_refused_but_the_case_s_own(self):
+        """M3 slice Z (Q52): a run printed the operator's PATH, which named another account's home folder."""
+        with mock.patch.object(self.harness, "operator_identity", return_value=[]):
+            for target in ("echo $PATH: /Users/someone-else/.local/bin", "ls /home/someone-else/", r"dir C:\Users\someone-else",
+                           r"dir c:\\users\\someone-else\\x"):
+                with self.subTest(target):
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            for target in ("ls /home/user/x", "ls /Users/Shared/x", "cat ~/x", "ls /usr/home"):
+                with self.subTest(target):
+                    self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            fixture = [{"kind": "run", "target": r"cat /home/dana/notes.txt C:\Users\dana.", "ok": True}]
+            self.assertTrue(self.harness.leaks(fixture))
+            self.assertFalse(self.harness.leaks(fixture, ["dana"]))
+        self.assertEqual(self.harness.case_accounts(self.harness.load_case("debug-leak-check")), ["dana"])
+        self.assertEqual(self.harness.case_accounts(self.harness.load_case("fix-a-bug")), [])
+
+    def test_the_agent_s_path_holds_what_its_cases_run(self):
+        self.assertIn("a-program-nobody-has", self.harness.missing_on_agent_path(("a-program-nobody-has",)))
+        self.assertEqual(self.harness.missing_on_agent_path(("sh",)), [] if os.name != "nt" else ["sh"])
+        self.assertTrue(os.path.isabs(self.harness.agent_command("go", "haiku")[0]) or not shutil.which("claude"))
 
     def test_a_windows_path_written_with_backslashes_is_found(self):
         """Criterion 27. Runs on every system: the identity is given, not read from this machine."""
