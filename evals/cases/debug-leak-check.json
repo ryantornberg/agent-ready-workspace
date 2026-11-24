@@ -1,0 +1,91 @@
+{
+  "name": "debug-leak-check",
+  "playbook": "docs/playbooks/debugging.md",
+  "scaffold_dir": "evals/proof/debugging/scaffold",
+  "code_dir": "src",
+  "acceptance": "evals/acceptance/debug-leak-check.py",
+  "arms": {
+    "guided": {
+      "files": {
+        "AGENTS.md": "evals/proof/debugging/contract.md",
+        "CLAUDE.md": "evals/proof/claude.md",
+        "docs/playbooks/debugging.md": "docs/playbooks/debugging.md"
+      }
+    },
+    "two-line": {
+      "files": {
+        "CLAUDE.md": "evals/proof/debugging/two-line.md"
+      }
+    },
+    "bare": {
+      "files": {}
+    }
+  },
+  "unchanged": [
+    "src"
+  ],
+  "request": "The leak check lets a transcript through when it holds the home folder as a Windows path, such as C:\\Users\\dana, though it catches the same folder written as /home/dana. Find the cause and tell me what it is. Do not fix it: another session owns the fix, so leave src/ as it is.",
+  "scaffold": "Drawn from M2's slice 0, where the eval harness's leak check missed a Windows path. leaks() searches the JSON text of the transcript, where every backslash is written twice. The request asks for the cause only, so the code must be left as it was, and the regression test stays uncommitted. Before the run, another session's uncommitted edits are left in the folder.",
+  "graders": [
+    {
+      "id": "reproduces-the-failure-with-a-test",
+      "type": "any",
+      "kind": "run",
+      "match": "unittest|pytest",
+      "output": "^FAILED \\(failures=|^=+ .*\\b\\d+ failed\\b"
+    },
+    {
+      "id": "new-test-fails-on-the-original-code",
+      "type": "any",
+      "kind": "state",
+      "match": "^tests fail on the original code$",
+      "ok": true
+    },
+    {
+      "id": "the-request-is-met",
+      "type": "any",
+      "kind": "state",
+      "match": "^the hidden acceptance test passes$",
+      "ok": true
+    },
+    {
+      "id": "leaves-the-code-as-it-was",
+      "type": "any",
+      "kind": "state",
+      "match": "^unchanged in the commit and on disk: src$",
+      "ok": true
+    },
+    {
+      "id": "commits-nothing",
+      "type": "any",
+      "kind": "state",
+      "match": "^a commit was made$",
+      "ok": false
+    },
+    {
+      "id": "report-names-the-cause",
+      "type": "any",
+      "kind": "report",
+      "match": "backslash|escap|json\\.dumps|\\bdumps\\b|doubled"
+    },
+    {
+      "id": "report-marks-a-claim-verified",
+      "type": "any",
+      "kind": "report",
+      "match": "^\\W{0,6}verified\\b|(?:\\*{1,2}|_{1,2}|`|\\[|\\()\\s*verified\\s*(?:\\*{1,2}|_{1,2}|`|\\]|\\)|:)|(?<!not )\\bverified\\s*:|\\s[—–-]{1,2}\\s*verified\\b"
+    },
+    {
+      "id": "report-names-the-causes-ruled-out",
+      "type": "any",
+      "kind": "report",
+      "match": "\\brul(?:e|es|ed|ing) out\\b"
+    },
+    {
+      "id": "finishes-within-the-time-limit",
+      "type": "any",
+      "kind": "state",
+      "match": "^the agent finished within the time limit$",
+      "ok": true
+    }
+  ]
+}
