@@ -2056,12 +2056,34 @@ class EvalThatCanLoseTests(Folder):
         names = sorted(p.stem for p in (ROOT / "evals/cases").glob("*.json")
                        if json.loads(p.read_text(encoding="utf-8"))["playbook"] == "docs/playbooks/fix-a-bug.md")
         self.assertEqual(names, ["big-report", "fix-a-bug", "nightly-job"])
-        cases, pooled = self.pool.pool()
+        cases, pooled = self.pool.pool(self.pool.FIX_A_BUG)
         self.assertEqual(sorted(cases), names)
         for arm in ("guided", "two-line", "bare"):
             self.assertGreaterEqual(pooled[arm][1], 40, arm)
         readme = (ROOT / "evals/README.md").read_text(encoding="utf-8")
-        self.assertIn(self.pool.table(), readme)
+        self.assertIn(self.pool.table(self.pool.FIX_A_BUG), readme)
+
+    def test_each_playbook_is_pooled_on_its_own(self):
+        """M3's B7: a second playbook's records stay out of fix-a-bug's table, as the gate pools them."""
+        def record(case, playbook, passes):
+            runs = lambda n: [{"passed": i < n} for i in range(10)]
+            folder = self.root / "evals/runs" / case
+            folder.mkdir(parents=True)
+            (folder / "record.json").write_text(json.dumps({"case": case, "playbook": playbook, "arms": {
+                "guided": {"runs": runs(passes)}, "two-line": {"runs": runs(2)}, "bare": {"runs": runs(0)}}}),
+                encoding="utf-8")
+        record("fix", self.pool.FIX_A_BUG, 9)
+        record("debug-one", "docs/playbooks/debugging.md", 3)
+        record("debug-two", "docs/playbooks/debugging.md", 5)
+        (self.root / "evals/runs/debug-one/baseline").mkdir()
+        (self.root / "evals/runs/debug-one/baseline/record.json").write_text("not read", encoding="utf-8")
+        self.assertEqual(self.pool.playbooks(self.root), ["docs/playbooks/debugging.md", self.pool.FIX_A_BUG])
+        cases, pooled = self.pool.pool(self.pool.FIX_A_BUG, self.root)
+        self.assertEqual((list(cases), pooled["guided"]), (["fix"], (9, 10)))
+        cases, pooled = self.pool.pool("docs/playbooks/debugging.md", self.root)
+        self.assertEqual((sorted(cases), pooled["guided"], pooled["two-line"]), (["debug-one", "debug-two"], (8, 20), (4, 20)))
+        self.assertNotIn("debug-one", self.pool.table(self.pool.FIX_A_BUG, self.root))
+        self.assertIn("| **Pooled** | **8 of 20", self.pool.table("docs/playbooks/debugging.md", self.root))
 
     def test_the_pooled_statistics(self):
         low, high = self.pool.wilson(30, 40)
