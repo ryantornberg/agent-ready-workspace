@@ -317,3 +317,5 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-24-lifecycle-map.md](2026-11-24-lifecycle-map.md) | `docs/lifecycle-map.md` | contradiction, placement, trigger, eval-case |
 | [2026-11-24-how-tos-lifecycle-row.md](2026-11-24-how-tos-lifecycle-row.md) | `docs/how-tos.md` | trigger |
 | [2026-11-24-lifecycle-map-support-row.md](2026-11-24-lifecycle-map-support-row.md) | `docs/lifecycle-map.md` | contradiction |
+| [2026-11-24-gfix-0004.md](2026-11-24-gfix-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
+| [2026-11-24-gfix-readme.md](2026-11-24-gfix-readme.md) | `README.md` | contradiction, eval-case |
