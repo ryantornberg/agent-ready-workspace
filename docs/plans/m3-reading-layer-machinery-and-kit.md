@@ -2064,7 +2064,7 @@ Not done: nothing.
 Parked: none
 Next: the coordinator — B5 is the last slice of lane B; B6 and B7 may start. Slice Z adds the queued lines below. The docs audit takes the known defects in B5's records.
 
-### B6, wrappers: stopped after its fix round
+### B6, wrappers: merged; stopped before the rewrites' rerun
 
 Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b6`, on branch `m3/b6`, at the driver tier, since the slice adds a check. The maintainer's approval of lane B's order, which names B6, was recorded under "Changes after approval" and pushed to main before building. Fresh driver-tier sessions wrote the reviews and the re-checks; the slice's session wrote everything else. No file the eval hashes was edited. The work is committed on the branch, in draft pull request #50, and is not merged: the stop rule fired, as the last item below says.
 
@@ -2091,9 +2091,28 @@ Decisions made in the slice:
 
 Queued for slice Z, in the list below: the `INDEX.md` row for wrappers.
 
-Not done: the review's second fix round and re-check, which Q46 decides; then the merge of pull request #50; and the selection run with its recorded results, criterion 22's second half, which waits for the maintainer's yes to its 174 runs.
-Parked: Q45, Q46
-Next: the maintainer — answer Q46 on how B6 resumes, and say whether the first selection run may start; B7 does not wait for B6.
+At that first stop, Q45 and Q46 were parked, and the second fix round, the merge and the selection run were not done.
+
+**Resumed on 2026-11-23, after Q45 and Q46.** Built unattended at the driver tier, in the worktree `.claude/worktrees/m3-b6` until the merge, then in `.claude/worktrees/m3-b6-selection`, made from `origin/main`. The maintainer's answers to Q45 and Q46, and the yes to the 174-run selection run, were recorded under "Changes after approval" and pushed to main before building, as `4eb20ef`. Fresh driver-tier sessions wrote the reviews and the re-checks; the slice's session wrote everything else. No file the eval hashes was edited.
+
+- **Verified, the eval pages' second fix round (Q46):** both eval pages, the workspace's and the seed's, now say that an agent runs a batch of selection cases on the maintainer's yes with a run count, adds `--trust-plugin`, and stops before it would pass the count. They say no check holds the yes or the count, and the command carries the flag. The same round fixed the seed pages' 8 first-reading findings and the re-check's 9 non-blocking items on 7 other pages, as lane B's rule fixes each non-blocking finding once: 22 fixes in all. The branch first merged main, taking B7's eval page and README edits; the three conflicts kept both sides.
+- **Verified, the narrow re-check:** a fresh session upheld all 22 fixes and found 5 more items on the two eval pages, none blocking, so the stop rule did not fire. The eval pages may take no further fix round, so the 5 are in their records' "Known defects", for the docs audit. Two matter to every batch: a finished batch exits 1 when any case scores below 1, and a second batch on one date writes to the same date's folder. In a scratch copy with no terminal, the page's command exited 1 on the trust question without `--trust-plugin`, and got past it with the flag.
+- **Verified, merged:** pull request #50 merged as `ecfe725` through `python3 ws.py merge 50`, after CI passed on Linux, macOS and Windows at its head, `b476fc1`.
+- **Verified, criterion 22's first run:** 174 runs, the approved count and no more: 58 cases, three runs each, on Claude Code 2.1.331 and the small model, with the plugin only, four at a time, in 6 minutes. 152 of 174 runs passed, and 50 of 58 cases passed all three. Every quiet case passed every run. 21 of 29 wrappers fired in all three runs of their fire case. Eight missed in most: debugging, fix-a-bug, parts, research-ladder, reuse-checklist and safe-refactor fired in 0 of 3, extend-the-workspace and instruction-review in 1 of 3. In each missed run no skill loaded at all; no other wrapper fired in its place. The command exited 1, as the known defect says. The result is `evals/selection/2026-11-23/aggregate-result.json`, committed to main as `1a276e9`, after the user name, the home folder, the temporary folders and a certificate warning that named the home folder were replaced with placeholders.
+- **Inferred, what the quiet cases show:** a quiet case passes when no wrapper loads, and in every missed run none did. So their clean sheet shows no wrapper took a neighbour's request; it does not show the model told the two apart. 159 of the 174 runs ended at the three-turn limit, passing runs among them, so a model that searches the scratch folder first may run out of turns before it loads a skill.
+- **Verified, the rewrite (criterion 22):** the 8 descriptions were rewritten once. Each now names itself as this workspace's procedure and says when to load it, in its page's terms, keeping its neighbours. A fresh review found 9 trigger findings, none blocking: five descriptions had taken their own case's words, and two had lost a limit their page sets. One fix round fixed all 9. The re-check upheld them and found 5 more, none blocking; a second round fixed those, and a narrow re-check upheld them and found nothing new. The descriptions total 8,542 of the 9,000 bytes `loaded_size` holds. The rewrite went to main as pages, as `46c921e`, since `plugin/` is not machinery.
+- **Not run, the rewrites' rerun:** a rerun is a new batch with its own yes, as Q46's rule says, so criterion 22's rewrite result is not recorded yet. Q48 asks for 75 runs: the 8 rewritten wrappers' fire and quiet cases, and the fire cases of their 9 neighbours, which would show a rewrite taking a neighbour's request. That brings the plan's selection runs to 249 of the 300 cap.
+- **Verified, kept to the rules:** on the branch before the merge, `python3 ws.py selftest` passed, `python3 -m unittest discover -b tests` ran 785 tests, 3 skipped, OK, and `python3 tests/hook_cases.py` passed 93 of 93. `python3 ws.py check` passes on main after the rewrite, with only the known warning on fix a bug's eval record. The private ledger's check prints 0 unmapped items.
+
+Decisions made on resuming:
+
+- **The seed pages and the re-check's non-blocking items took their one fix round with Q46's round,** since lane B's rule fixes each non-blocking finding once and the round was being run anyway.
+- **The rewrite ran before its rerun's yes,** as the slice prompt asks a builder to do everything before a run it may not start.
+- **The rerun asks for the neighbours' fire cases too,** since the rewrites push harder and a neighbour losing its request is the likeliest break.
+
+Not done: the rewrites' rerun and its recorded result, criterion 22's last sentence, which waits for the maintainer's yes to a run count (Q48).
+Parked: Q48
+Next: the maintainer — answer Q48 with a run count for the rewrites' rerun; the coordinator then resumes B6 for that run alone, and slice Z waits for B6.
 
 ### B7, proof attempts: stopped before the baseline
 
