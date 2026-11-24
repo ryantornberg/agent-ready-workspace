@@ -987,6 +987,18 @@ Slice Z's recordings, from the maintainer's yes given before the unattended run,
 
 **`check --commits` also scans each commit's diff for deny-listed terms (Q8).** The machinery page's trap asks for that scan before every push of a branch committed with `--no-verify`, and no command does it today. Slice Z builds it on its own branch, before its recordings: `python3 ws.py check --commits BASE..HEAD` runs the `deny_list` check on the lines each commit adds, beside the message checks it runs now.
 
+### 2026-11-24
+
+Approved by: the maintainer, 2026-11-24
+
+Slice Z's way past its stop, from the maintainer's answers to Q53 and Q52 in the workspace queue on 2026-11-24. Q53 narrows one queued edit. Q52 adds a harness change before R2, and so weakens criterion 61, as stated below. No other criterion changes.
+
+**The `with-secrets` wrapper reading waits for M4 (Q53).** C5f's queued edit to `wslib/shell.py` is made only in part. The parser reports each command's input redirections as reads, and `secrets_shell` uses them. The parser does not read `ws.py with-secrets NAME ... -- PROGRAM` as a wrapper. `secrets_shell` again refuses git, gh and a write under `with-secrets`, as main does, and keeps its own reading of the child. Each route past the guards that slice Z's re-checks found is closed that way. The cases slice Z moved to the other guards move back to `secrets_shell`. A narrow re-check by a fresh session reads the result before R2.
+
+**The harness gives the agent a fixed PATH and refuses any home folder (Q52).** Before R2, `evals/run.py` gives the agent a fixed list of system folders as its PATH, not the operator's. Its leak check refuses a transcript that names any account's home folder, not only the operator's. A home folder named in the case's own request, such as the debugging fixture's invented owner, passes. This edits the harness, which every case's hash covers, against the Z row's "slice Z changes no harness file".
+
+**Criterion 61 now reads:** "Each B7 case's hash holds only the case file, its own arm files, its acceptance tests and scaffold, the harness and the graders, and A0's test checks that list. No file slice Z edits is in it, except the harness file `evals/run.py`, which slice Z changes for Q52. B7's records were current until that change, including after a pass flips a page's proof keys. After it, they are stale at sign-off. Debugging's cases are recorded again in M4 (Q51), and red team review's page is tested in M9 (Q50). Both pages are unproven, and `eval_record` gates only proven pages, so no check fails on the stale records." The B7 row's sentence that no slice after A changes the harness no longer holds for `evals/run.py`.
+
 ## Results
 
 ### C1, launcher and baselines
