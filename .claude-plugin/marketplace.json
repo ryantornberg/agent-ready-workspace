@@ -1,0 +1,12 @@
+{
+  "name": "agent-ready-workspace",
+  "owner": {"name": "agent-ready-workspace"},
+  "description": "The workspace's own wrappers, read in place from this working copy.",
+  "plugins": [
+    {
+      "name": "workspace",
+      "source": "./plugin",
+      "description": "Thin wrappers that route a request to the workspace procedure that owns it."
+    }
+  ]
+}

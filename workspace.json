@@ -296,6 +296,32 @@
       ]
     },
     {
+      "use": "wrappers",
+      "why": "A wrapper's description loads into every session, so one that routes to a procedure that cannot run yet, or to a lane draft nobody has run on real work, sends agents to work they cannot finish. Pages once named a command that no wrapper backed, and catalog rows went missing unnoticed, so the check ties each wrapper to its page both ways and to its selection cases.",
+      "skills": "plugin/skills",
+      "cases": "plugin/evals",
+      "plugin": "plugin",
+      "marketplace": ".claude-plugin/marketplace.json",
+      "settings": ".claude/settings.json",
+      "waiting": [
+        {
+          "page": "docs/playbooks/review-orchestrator.md",
+          "for": "M4",
+          "why": "it runs by hand today, as its page says; its wrapper waits for M4, which builds its dispatch, its completion reading, its findings manifest and its review mark, so that a plain review request is not routed to a procedure whose machinery is missing"
+        },
+        {
+          "page": "docs/playbooks/tracker-operations.md",
+          "for": "M8",
+          "why": "the tracker spine needs the tracker provider and the per-team trap tables M8 builds"
+        },
+        {
+          "page": "docs/playbooks/git-host-operations.md",
+          "for": "M8",
+          "why": "the git-host spine needs the git-host provider and the per-team trap tables M8 builds"
+        }
+      ]
+    },
+    {
       "use": "review_trailer",
       "why": "Guidance is a program with no compiler: an edit can contradict another page or ask for a step nobody can run, so each change to a guidance page names the review that read it.",
       "guidance": [
@@ -307,7 +333,7 @@
         "opencode.json",
         "docs/",
         "evals/README.md",
-        "plugin/",
+        "plugin/skills/",
         "kit/seed/README.md",
         "kit/seed/evals-README.md"
       ],

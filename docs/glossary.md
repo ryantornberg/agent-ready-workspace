@@ -40,5 +40,5 @@ The words this workspace uses in its own sense. For anyone reading its pages for
 | Tier | Driver, worker or mechanical: the model and effort a task runs at. See [orchestration](orchestration.md). |
 | Unproven | A playbook or how-to shipped without that proof yet. It names the milestone that is to prove it in `prove-by`. |
 | Work item | A ticket on a tracker, or one of its sub-tasks. See [tracker operations](playbooks/tracker-operations.md). |
-| Wrapper | A skill an agent tool loads: its description says when it fires, and its body points at a procedure page, a playbook or a how-to, which stays canonical. Slice B6 of M3 adds them; see the [playbook catalog](playbooks/README.md). |
+| Wrapper | A skill an agent tool loads: its description says when it fires, and its body points at a procedure page, a playbook or a how-to, which stays canonical. They are in `plugin/skills/`; see the [playbook catalog](playbooks/README.md#three-ways-to-follow-a-playbook). |
 | Worktree | A second working copy of the repository, under `.claude/worktrees/`, where a session works apart from others. |

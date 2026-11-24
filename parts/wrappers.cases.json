@@ -1,0 +1,739 @@
+[
+ {
+  "name": "every core procedure wrapped with its cases passes",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": []
+ },
+ {
+  "name": "a core procedure with no wrapper fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:debugging-other.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n"
+  },
+  "expect": [
+   "is a core procedure with no wrapper",
+   "names workspace:debugging-other, which is no wrapper"
+  ]
+ },
+ {
+  "name": "a wrapper whose page is missing fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/gone.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "routes to docs/playbooks/gone.md, which does not exist",
+   "is a core procedure with no wrapper"
+  ]
+ },
+ {
+  "name": "a lane draft with a wrapper fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n",
+   "plugin/skills/lane/SKILL.md": "---\nname: lane\ndescription: Use for QA. Not for debugging: use workspace:debugging.\n---\n\nOpen `docs/playbooks/lane.md` and follow it.\n",
+   "plugin/evals/lane-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/lane-fires/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:lane\"'\nmin: 1\narm: both\n---\nThe lane wrapper fires.\n",
+   "plugin/evals/lane-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/lane-quiet/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:lane\"'\nmin: 0\nmax: 0\narm: both\n---\nThe lane wrapper stays quiet.\n"
+  },
+  "expect": [
+   "routes to the lane draft docs/playbooks/lane.md"
+  ]
+ },
+ {
+  "name": "a waiting page with a wrapper fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n",
+   "plugin/skills/wait/SKILL.md": "---\nname: wait\ndescription: Use for reviews. Not for debugging: use workspace:debugging.\n---\n\nOpen `docs/playbooks/wait.md` and follow it.\n",
+   "plugin/evals/wait-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/wait-fires/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:wait\"'\nmin: 1\narm: both\n---\nThe wait wrapper fires.\n",
+   "plugin/evals/wait-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/wait-quiet/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:wait\"'\nmin: 0\nmax: 0\narm: both\n---\nThe wait wrapper stays quiet.\n"
+  },
+  "expect": [
+   "routes to docs/playbooks/wait.md, which waits for M4"
+  ]
+ },
+ {
+  "name": "a page off the waiting list needs a wrapper",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": []
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "is a core procedure with no wrapper"
+  ]
+ },
+ {
+  "name": "a waiting entry for another milestone or a lane page fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M6",
+     "why": "x"
+    },
+    {
+     "page": "docs/playbooks/lane.md",
+     "for": "M8",
+     "why": "x"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "a waiting entry needs a \"page\", \"for\" (one of M4, M8)",
+   "the waiting list names docs/playbooks/lane.md, which is not a core procedure here",
+   "is a core procedure with no wrapper"
+  ]
+ },
+ {
+  "name": "a proven lane page needs a wrapper",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\nproof: proven\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "is a core procedure with no wrapper"
+  ]
+ },
+ {
+  "name": "a wrapper for a reference page fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n",
+   "plugin/skills/glossary/SKILL.md": "---\nname: glossary\ndescription: Use for words. Not for debugging: use workspace:debugging.\n---\n\nOpen `docs/glossary.md` and follow it.\n",
+   "plugin/evals/glossary-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/glossary-fires/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:glossary\"'\nmin: 1\narm: both\n---\nThe glossary wrapper fires.\n",
+   "plugin/evals/glossary-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/glossary-quiet/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:glossary\"'\nmin: 0\nmax: 0\narm: both\n---\nThe glossary wrapper stays quiet.\n"
+  },
+  "expect": [
+   "routes to docs/glossary.md, which is not a playbook or how-to"
+  ]
+ },
+ {
+  "name": "a wrapper named for another page fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n",
+   "plugin/skills/refactor/SKILL.md": "---\nname: refactor\ndescription: Use for shape. Not for debugging: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/refactor-fires/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:refactor\"'\nmin: 1\narm: both\n---\nThe refactor wrapper fires.\n",
+   "plugin/evals/refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/refactor-quiet/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "routes to docs/safe-refactor.md but is named refactor"
+  ]
+ },
+ {
+  "name": "a body naming no page or two pages fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when stuck. Not for a refactor: use workspace:safe-refactor.\n---\n\nFollow the page.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use for shape. Not for debugging: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` or `docs/playbooks/debugging.md`.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "its body names 0 pages",
+   "its body names 2 pages",
+   "is a core procedure with no wrapper",
+   "is a core procedure with no wrapper"
+  ]
+ },
+ {
+  "name": "a wrong name or no description fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debug\n---\n\nOpen `docs/playbooks/debugging.md`.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "its name is 'debug'; set it to its folder's name, debugging",
+   "its description has 0 characters",
+   "its description names no wrapper next to it"
+  ]
+ },
+ {
+  "name": "a wrapper missing a selection case fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "has no selection case that should leave it quiet",
+   "has no selection case that should fire it"
+  ]
+ },
+ {
+  "name": "a stray or malformed selection case fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n",
+   "plugin/evals/gone/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/gone/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:gone\"'\nmin: 1\narm: both\n---\nThe gone wrapper fires.\n",
+   "plugin/evals/loose/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/loose/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\\\s*:\\\\s*\"(?:[\\\\w-]+:)?debugging\"'\nmin: 1\n---\nx\n",
+   "plugin/evals/x/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/both/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/both/graders/s.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\nmax: 0\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/llm/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/llm/graders/c.md": "---\ntype: llm\n---\nAnything.\n"
+  },
+  "expect": [
+   "names no wrapper there is",
+   "names no wrapper there is",
+   "the selection case plugin/evals/x has no prompt.md",
+   "is neither a case that fires debugging"
+  ]
+ },
+ {
+  "name": "the plugin with no manifest fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "the wrappers' plugin has no manifest naming it"
+  ]
+ },
+ {
+  "name": "a marketplace that does not list the plugin fails",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"plugins\": [{\"name\": \"other\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "no marketplace lists the plugin workspace"
+  ]
+ },
+ {
+  "name": "a wrong source and a plugin left off fail",
+  "config": {
+   "skills": "plugin/skills",
+   "cases": "plugin/evals",
+   "plugin": "plugin",
+   "marketplace": ".claude-plugin/marketplace.json",
+   "settings": ".claude/settings.json",
+   "waiting": [
+    {
+     "page": "docs/playbooks/wait.md",
+     "for": "M4",
+     "why": "its machinery is M4"
+    }
+   ]
+  },
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"plugins\": [{\"name\": \"workspace\", \"source\": \"./skills\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": false}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "the marketplace's entry for workspace has the source './skills'",
+   "the project settings do not enable workspace@ws"
+  ]
+ },
+ {
+  "name": "a manifest entry with no folders fails",
+  "config": {},
+  "files": {
+   "plugin/.claude-plugin/plugin.json": "{\"name\": \"workspace\"}",
+   ".claude-plugin/marketplace.json": "{\"name\": \"ws\", \"owner\": {\"name\": \"x\"}, \"plugins\": [{\"name\": \"workspace\", \"source\": \"./plugin\"}]}",
+   ".claude/settings.json": "{\"enabledPlugins\": {\"workspace@ws\": true}}",
+   "docs/playbooks/debugging.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/safe-refactor.md": "---\nkind: how-to\n---\n\n# P\n",
+   "docs/playbooks/wait.md": "---\nkind: playbook\n---\n\n# P\n",
+   "docs/playbooks/lane.md": "---\nkind: playbook\nlane: qa\n---\n\n# P\n",
+   "docs/glossary.md": "---\nkind: reference\n---\n\n# P\n",
+   "plugin/skills/debugging/SKILL.md": "---\nname: debugging\ndescription: Use when a failure's cause is unknown. Not for a refactor: use workspace:safe-refactor.\n---\n\nOpen `docs/playbooks/debugging.md` and follow it.\n",
+   "plugin/skills/safe-refactor/SKILL.md": "---\nname: safe-refactor\ndescription: Use when code changes shape only. Not for an unknown failure: use workspace:debugging.\n---\n\nOpen `docs/safe-refactor.md` and follow it.\n",
+   "plugin/evals/debugging-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 1\narm: both\n---\nThe debugging wrapper fires.\n",
+   "plugin/evals/debugging-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/debugging-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:debugging\"'\nmin: 0\nmax: 0\narm: both\n---\nThe debugging wrapper stays quiet.\n",
+   "plugin/evals/safe-refactor-fires/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-fires/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 1\narm: both\n---\nThe safe-refactor wrapper fires.\n",
+   "plugin/evals/safe-refactor-quiet/prompt.md": "---\nruns: 3\nmax_turns: 3\nallowed_tools: [Skill, Read, Glob, Grep]\n---\n\ngo\n",
+   "plugin/evals/safe-refactor-quiet/graders/selected.md": "---\ntype: tool_used\ntool: Skill\ninput_match: '\"skill\"\\s*:\\s*\"workspace:safe-refactor\"'\nmin: 0\nmax: 0\narm: both\n---\nThe safe-refactor wrapper stays quiet.\n"
+  },
+  "expect": [
+   "wrappers needs \"skills\" in its manifest entry"
+  ]
+ }
+]

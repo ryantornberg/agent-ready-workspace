@@ -44,6 +44,13 @@ To run the checks before every commit, and on every commit message, a person run
 git config core.hooksPath .githooks
 ```
 
+To load the [wrappers](docs/playbooks/README.md#three-ways-to-follow-a-playbook) in Claude Code, a person runs these once on each machine, from the top of the workspace. The first makes the folder a plugin marketplace on this machine; the second installs the plugin for this folder only, in the ignored local settings, so the shared settings file stays as committed. The block carries no `<!-- setup -->` mark, so the cold-clone job does not run it; that job has no Claude Code. One marketplace name serves one folder on a machine: the kit and every workspace made from it declare `agent-ready-workspace`, so the folder that ran the first command last serves the wrappers to all of them, worktrees included. Run the first command again in the folder you work in.
+
+```
+claude plugin marketplace add ./
+claude plugin install workspace@agent-ready-workspace --scope local
+```
+
 ## What is here
 
 | Path | What it is |
@@ -55,6 +62,7 @@ git config core.hooksPath .githooks
 | [parts/](docs/parts.md) | The checks and hooks, each one file plus its cases. `python3 ws.py list` names them. |
 | [docs/](docs/layout.md) | The pages: the [layout](docs/layout.md) of folders and page kinds, the definition of done, the playbooks, the how-tos, the decision records, the question log, the glossary, the templates, and the plans and records of each milestone. [Reading paths by role](docs/reading-paths.md) says what to read first for development, QA, product, automation or DevOps work. |
 | [evals/](evals/README.md) | Three eval cases of the fix-a-bug playbook in a small sample order system, and 45 recorded runs per arm of a real model: with the workspace's guidance, with a two-line instruction instead, and with neither. Four more cases, for debugging and red team review, wait for their first runs. |
+| `plugin/` | The wrappers: one skill per procedure that can run today, each pointing at its page, with the cases that test when each fires. See the [playbook catalog](docs/playbooks/README.md#three-ways-to-follow-a-playbook). |
 | `tools/symbols.py` | Returns the file and line where a name is defined. |
 | [EVIDENCE.md](EVIDENCE.md), [CHANGELOG.md](CHANGELOG.md) | What each claim rests on and how to re-run it; what changed in each version. |
 | [src/](src/README.md) | A few sample code files for the checks and hooks to act on. |
@@ -68,6 +76,7 @@ git config core.hooksPath .githooks
 | A fresh clone works by following the README's marked setup steps alone: the checks and the tests pass on it. An instance adopted from that clone works by following its own README's marked steps alone. | The `cold-clone` job, on Linux and macOS | Nightly; a pull request or a push to main that changes a setup page (the README or the kit's seed README), the script that reads them, or the job |
 | Whoever edits a page past its review date reviews it. `AGENTS.md`, `INDEX.md` and every page under `docs/` carry a date. Every page under `docs/` names its kind, carries the front matter its kind needs, and opens with its title, a purpose sentence of 25 words or fewer and its **In short** line. | `page_kinds` check | Commit, CI |
 | Every path in the index's cross-cutting chains exists; the Copilot and opencode pointer files name the contract and the rule pages; the always-loaded layer stays under its ceilings. | `chains`, `pointers` and `loaded_size` checks | Commit, CI |
+| Every core playbook and how-to that can run today has a wrapper pointing at it, with a case that should fire it and one that should not; a lane draft or a page waiting for M4 or M8 has none. | `wrappers` check | Commit, CI |
 | Every rule in a rules table is tagged with how it is enforced, and a tag that names a part or case is true. `python3 ws.py rules` prints the register. | `rules` check | Commit, CI |
 | An alias in the index, and a code name in backticks in `AGENTS.md`, name something the code still defines. | `aliases` check | Commit, CI |
 | A playbook marked proven stays only while it beats the bare model: it, `AGENTS.md`, `INDEX.md`, the eval harness and anything else its eval cases cover change only with a new eval run on record. In it, counting runs that pass every grader, the guidance beats the bare model in each case, beats a two-line instruction across the playbook's cases by a one-sided Fisher exact test, and passes no more than 3 runs fewer than the previous record and the anchor its `proven-by` names. A stored grade that does not follow from its transcript fails. | `eval_record` check; `evals/grade.py --recorded` | Commit, CI; CI |

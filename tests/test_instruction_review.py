@@ -223,6 +223,19 @@ class ThisWorkspaceTests(unittest.TestCase):
         for page in ("AGENTS.md", "CLAUDE.md", "INDEX.md", "README.md", ".github/copilot-instructions.md"):
             self.assertTrue(any(g.fullmatch(page) for g in guidance), page)
 
+    def test_the_wrappers_are_guidance_and_their_selection_cases_are_not(self):
+        """B6: a wrapper's description decides when guidance fires, so it takes the review; a selection case is
+        a test input, as an eval case is, and the plugin's manifest is wiring."""
+        entry = config("review_trailer")
+        module = partlib.load(ROOT, entry, run_cases=False).module
+        guidance = [module._pattern(p) for p in entry["guidance"]]
+        listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "plugin"], capture_output=True, text=True).stdout
+        paths = [p for p in listed.split("\n") if p]
+        wrappers = [p for p in paths if p.startswith("plugin/skills/")]
+        self.assertTrue(wrappers)
+        for path in paths:
+            self.assertEqual(any(g.fullmatch(path) for g in guidance), path in wrappers, path)
+
     def test_the_required_records_are_criterion_62_s_pages(self):
         self.assertEqual(sorted(config("review_index")["required"]), sorted([
             "AGENTS.md", "INDEX.md", "docs/layout.md", "docs/glossary.md", "docs/decisions/0006-what-proven-means.md",

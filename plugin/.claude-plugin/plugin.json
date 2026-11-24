@@ -1,0 +1,4 @@
+{
+  "name": "workspace",
+  "description": "Thin wrappers that route a request to the workspace procedure that owns it. Each page under docs/ is canonical; a wrapper only points at it."
+}

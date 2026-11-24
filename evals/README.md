@@ -165,6 +165,20 @@ The guided arm is also held to its own past. Pooled over the cases present in bo
 
 The gate trusts the record file. It shows that someone ran the cases on this wording; it cannot stop a person from editing the record by hand. CI's re-grade catches a grade that does not follow from its transcript, not a transcript that was written by hand.
 
+## The wrappers' selection cases
+
+Each [wrapper](../docs/playbooks/README.md#three-ways-to-follow-a-playbook) has two or more selection cases: a request that should fire it, and a nearby request, one a wrapper next to it owns, that should leave it quiet. They test only whether the right wrapper loads, not what the agent then does. They sit with the plugin, one folder per case in `plugin/evals/`, in the format `claude plugin eval` reads. `prompt.md` holds the request and its settings: three runs of at most three turns each. `graders/selected.md` is a `tool_used` grader on the Skill tool, whose `input_match` names the plugin and the one wrapper, as `'"skill"\s*:\s*"workspace:<name>"'`. A case that fires sets `min: 1` and no `max`; a quiet one sets `min: 0`, `max: 0` and `arm: both`. To add a pair, copy an existing one and change the request and the name. The `wrappers` check fails a wrapper that lacks either kind, and a Skill grader in any other form; it does not read a grader of another type.
+
+This is the format M4's eval system adopts for selection cases, so M4 builds on these cases rather than replacing them.
+
+A run costs real agent time, so it runs in batches, and each batch needs the maintainer's yes with a run count. A batch's count is its cases times their runs: all 58 cases at three runs each are 174. A rerun after a rewrite is a new batch with its own yes. An agent with that yes runs the batch itself, and adds `--trust-plugin`: in a folder not yet trusted, `claude plugin eval` otherwise asks for a confirmation, and with no terminal to answer it the command exits 1. The agent stops before it would pass the count, and narrows a batch with `--case` or `--runs` to stay under it. No check holds the yes or the count; they rest on the agent's word. A person at a terminal may leave `--trust-plugin` out and answer the question there. Run them from the top of the workspace, on the small model the recordings use. Leave out the run without the plugin, since a case that fires cannot pass there.
+
+```
+claude plugin eval plugin --model haiku --ablation none --no-publish --trust-plugin --output-dir evals/selection/YYYY-MM-DD
+```
+
+Its results go to `evals/selection/YYYY-MM-DD/aggregate-result.json`. Commit that file and nothing else from the run. Before you commit it, search it for your user name, your home folder and your git identity, as `run.py` does for its transcripts, and replace each with a placeholder; the commit check's secret and deny-list scans read it as they read any file. A wrapper that fails its case that fires in most of its runs is rewritten once, and the result is recorded either way.
+
 ## Rules that make this worth doing
 
 - When an agent goes wrong in real work, turn the failure into a case before you fix the guidance. A guidance fix with no case to replay the failure has nothing to catch the failure's return. Until procedures have an eval system, planned for M4, [escape analysis](../docs/playbooks/escape-analysis.md) describes such a case in its report instead.

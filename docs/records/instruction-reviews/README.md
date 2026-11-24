@@ -246,3 +246,44 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b5-templates-index.md](2026-11-23-b5-templates-index.md) | `docs/templates/README.md` | none |
 | [2026-11-23-b7-evals-readme.md](2026-11-23-b7-evals-readme.md) | `evals/README.md` | contradiction, placement |
 | [2026-11-23-b7-readme.md](2026-11-23-b7-readme.md) | `README.md` | contradiction |
+| [2026-11-23-b6-evals-readme.md](2026-11-23-b6-evals-readme.md) | `evals/README.md` | contradiction, step, placement |
+| [2026-11-23-b6-extend-the-workspace.md](2026-11-23-b6-extend-the-workspace.md) | `docs/extend-the-workspace.md` | step, enforcement |
+| [2026-11-23-b6-glossary.md](2026-11-23-b6-glossary.md) | `docs/glossary.md` | none |
+| [2026-11-23-b6-how-tos.md](2026-11-23-b6-how-tos.md) | `docs/how-tos.md` | none |
+| [2026-11-23-b6-instruction-review.md](2026-11-23-b6-instruction-review.md) | `docs/playbooks/instruction-review.md` | step |
+| [2026-11-23-b6-layout.md](2026-11-23-b6-layout.md) | `docs/layout.md` | step |
+| [2026-11-23-b6-maintain-the-workspace.md](2026-11-23-b6-maintain-the-workspace.md) | `docs/maintain-the-workspace.md` | step |
+| [2026-11-23-b6-parts.md](2026-11-23-b6-parts.md) | `docs/parts.md` | contradiction |
+| [2026-11-23-b6-playbook-catalog.md](2026-11-23-b6-playbook-catalog.md) | `docs/playbooks/README.md` | placement, trigger, step, enforcement |
+| [2026-11-23-b6-readme.md](2026-11-23-b6-readme.md) | `README.md` | none |
+| [2026-11-23-b6-saved-workflows.md](2026-11-23-b6-saved-workflows.md) | `docs/saved-workflows.md` | none |
+| [2026-11-23-b6-wrapper-adopt-the-workspace.md](2026-11-23-b6-wrapper-adopt-the-workspace.md) | `plugin/skills/adopt-the-workspace/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-architecture-review.md](2026-11-23-b6-wrapper-architecture-review.md) | `plugin/skills/architecture-review/SKILL.md` | trigger, contradiction |
+| [2026-11-23-b6-wrapper-browsers.md](2026-11-23-b6-wrapper-browsers.md) | `plugin/skills/browsers/SKILL.md` | step |
+| [2026-11-23-b6-wrapper-changing-the-machinery.md](2026-11-23-b6-wrapper-changing-the-machinery.md) | `plugin/skills/changing-the-machinery/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-debugging.md](2026-11-23-b6-wrapper-debugging.md) | `plugin/skills/debugging/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-decision-interview.md](2026-11-23-b6-wrapper-decision-interview.md) | `plugin/skills/decision-interview/SKILL.md` | none |
+| [2026-11-23-b6-wrapper-docs-audit.md](2026-11-23-b6-wrapper-docs-audit.md) | `plugin/skills/docs-audit/SKILL.md` | contradiction |
+| [2026-11-23-b6-wrapper-escape-analysis.md](2026-11-23-b6-wrapper-escape-analysis.md) | `plugin/skills/escape-analysis/SKILL.md` | none |
+| [2026-11-23-b6-wrapper-extend-the-workspace.md](2026-11-23-b6-wrapper-extend-the-workspace.md) | `plugin/skills/extend-the-workspace/SKILL.md` | none |
+| [2026-11-23-b6-wrapper-feedback-walkthrough.md](2026-11-23-b6-wrapper-feedback-walkthrough.md) | `plugin/skills/feedback-walkthrough/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-fix-a-bug.md](2026-11-23-b6-wrapper-fix-a-bug.md) | `plugin/skills/fix-a-bug/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-handoff.md](2026-11-23-b6-wrapper-handoff.md) | `plugin/skills/handoff/SKILL.md` | eval-case |
+| [2026-11-23-b6-wrapper-impact-analysis.md](2026-11-23-b6-wrapper-impact-analysis.md) | `plugin/skills/impact-analysis/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-instruction-review.md](2026-11-23-b6-wrapper-instruction-review.md) | `plugin/skills/instruction-review/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-machine-self-check.md](2026-11-23-b6-wrapper-machine-self-check.md) | `plugin/skills/machine-self-check/SKILL.md` | contradiction |
+| [2026-11-23-b6-wrapper-maintain-the-workspace.md](2026-11-23-b6-wrapper-maintain-the-workspace.md) | `plugin/skills/maintain-the-workspace/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-orchestration.md](2026-11-23-b6-wrapper-orchestration.md) | `plugin/skills/orchestration/SKILL.md` | none |
+| [2026-11-23-b6-wrapper-parts.md](2026-11-23-b6-wrapper-parts.md) | `plugin/skills/parts/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-prompt-retrospective.md](2026-11-23-b6-wrapper-prompt-retrospective.md) | `plugin/skills/prompt-retrospective/SKILL.md` | none |
+| [2026-11-23-b6-wrapper-red-team-review.md](2026-11-23-b6-wrapper-red-team-review.md) | `plugin/skills/red-team-review/SKILL.md` | contradiction, trigger |
+| [2026-11-23-b6-wrapper-research-ladder.md](2026-11-23-b6-wrapper-research-ladder.md) | `plugin/skills/research-ladder/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-reuse-checklist.md](2026-11-23-b6-wrapper-reuse-checklist.md) | `plugin/skills/reuse-checklist/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-review-in-a-worktree.md](2026-11-23-b6-wrapper-review-in-a-worktree.md) | `plugin/skills/review-in-a-worktree/SKILL.md` | contradiction |
+| [2026-11-23-b6-wrapper-safe-refactor.md](2026-11-23-b6-wrapper-safe-refactor.md) | `plugin/skills/safe-refactor/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-search-every-source.md](2026-11-23-b6-wrapper-search-every-source.md) | `plugin/skills/search-every-source/SKILL.md` | trigger |
+| [2026-11-23-b6-wrapper-size-the-work.md](2026-11-23-b6-wrapper-size-the-work.md) | `plugin/skills/size-the-work/SKILL.md` | contradiction, trigger |
+| [2026-11-23-b6-wrapper-test-first.md](2026-11-23-b6-wrapper-test-first.md) | `plugin/skills/test-first/SKILL.md` | none |
+| [2026-11-23-b6-wrapper-throwaway-prototype.md](2026-11-23-b6-wrapper-throwaway-prototype.md) | `plugin/skills/throwaway-prototype/SKILL.md` | none |
+| [2026-11-23-b6-seed-evals-readme.md](2026-11-23-b6-seed-evals-readme.md) | `kit/seed/evals-README.md` | step, enforcement, contradiction |
+| [2026-11-23-b6-seed-readme.md](2026-11-23-b6-seed-readme.md) | `kit/seed/README.md` | contradiction |

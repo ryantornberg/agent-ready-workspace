@@ -24,7 +24,7 @@ Use it when the same dispatch repeats in the same shape. Examples are the [revie
 |---|---|
 | A saved workflow | None in this repository. An instance writes its own. |
 | The agent tool that runs one | Differs between tools, and some cannot run one at all. The instance names its tool and that tool's run command in its own docs. This repository names neither. |
-| A wrapper that starts a playbook | Planned for slice B6 of M3. Lane drafts get none. |
+| A wrapper that starts a playbook | Each core playbook and how-to that can run today has one; see the [playbook catalog](playbooks/README.md#three-ways-to-follow-a-playbook). Lane drafts get none, this page included. |
 
 ## The two shapes
 
