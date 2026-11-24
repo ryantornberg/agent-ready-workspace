@@ -460,7 +460,7 @@ def _push(call, calls, index, event, repos):
 
 def decide(event, config):
     name = config.get("list", "outward-repos.json")
-    expanded = gitrules.expanded_program(event.get("command"))   # {gh,} pr create: the gh it becomes goes unjudged (Q54)
+    expanded = gitrules.unreadable(event.get("command"))   # {gh,} pr create: the gh it becomes goes unjudged (Q54, Q74)
     if expanded:
         return _cannot_judge(expanded)
     calls, why_aliases = gitrules.read(event)
