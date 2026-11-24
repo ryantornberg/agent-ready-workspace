@@ -999,6 +999,16 @@ Slice Z's way past its stop, from the maintainer's answers to Q53 and Q52 in the
 
 **Criterion 61 now reads:** "Each B7 case's hash holds only the case file, its own arm files, its acceptance tests and scaffold, the harness and the graders, and A0's test checks that list. No file slice Z edits is in it, except the harness file `evals/run.py`, which slice Z changes for Q52. B7's records were current until that change, including after a pass flips a page's proof keys. After it, they are stale at sign-off. Debugging's cases are recorded again in M4 (Q51), and red team review's page is tested in M9 (Q50). Both pages are unproven, and `eval_record` gates only proven pages, so no check fails on the stale records." The B7 row's sentence that no slice after A changes the harness no longer holds for `evals/run.py`.
 
+### 2026-11-24
+
+Approved by: the maintainer, 2026-11-24
+
+How slice Z goes on after its second stop, from the maintainer's answers to Q55 and Q54 in the workspace queue on 2026-11-24 (round 12). Q55 narrows the leak rule of the previous entry. Q54 adds a guard change to slice Z's scope. No criterion is dropped or weakened.
+
+**The leak check refuses every lookalike of an allowed home folder (Q55).** `evals/run.py` drops the exception that let a name close to an allowed one pass. A transcript that names a home folder is refused unless the folder's name is exactly one the case's request or scaffold holds. A narrow re-check by a fresh session reads the change, then R2 starts.
+
+**Each guard refuses a program word the shell expands from a glob or braces (Q54).** The parser reads a word such as `{git,} push` or `/usr/bin/gi? push` as a literal program, so it passes every guard, on main too. Each guard that judges a command by its program refuses such a word, in its own part file, outside the eval's hash, so R2 stays current. A narrow re-check by a fresh session reads the change. The parser fix waits for M4.
+
 ## Results
 
 ### C1, launcher and baselines
