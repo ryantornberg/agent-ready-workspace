@@ -27,6 +27,7 @@ The Proof column copies each page's front matter, or the proof line under a sect
 | Decide whether work needs a spec, then write it, gate it and keep it true | [The spec process](size-the-work.md#the-spec-process) | Every success criterion names the command that checks it. No plan is written before the person agrees to the spec. | unproven, M9 |
 | Check that your machine runs the workspace's hooks, checks and tools: after setup, after a machine change, or when a guard seems not to run | [Machine self-check](machine-self-check.md) | Paste its prompt. Nothing changes until the report, then each fix only on your yes. | unproven, M5 |
 | Find the pages to read first for your role: development, QA, product, automation or DevOps | [Reading paths by role](reading-paths.md) | Everyone reads the same six pages first; then each role has its own short path. | reference |
+| See which stages of delivery the workspace guides, and which topics across them, such as security or dependency updates, and which have no page yet | [Lifecycle map](lifecycle-map.md) | A stage or topic with no page says so, with the milestone that builds it or the reason it is left out. | reference |
 | Follow a procedure, such as fixing a bug, debugging or a review | [Playbook catalog](playbooks/README.md) | The playbook page is canonical; follow its steps, not a summary of them. | reference; each playbook's state is in its row there |
 
 ## Planning
