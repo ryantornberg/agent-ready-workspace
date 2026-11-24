@@ -2353,5 +2353,50 @@
       "targets": {}
     },
     "allow": true
+  },
+  {
+    "name": "a force push whose program word is braces (Q54)",
+    "event": {
+      "command": "{git,} push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose program word is a glob (Q54)",
+    "event": {
+      "command": "/usr/bin/gi? push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose program path is braces (Q54)",
+    "event": {
+      "command": "/{usr/bin/git,x} push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push through zsh's =git (Q54)",
+    "event": {
+      "command": "=git push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "the test command [ is not a glob (Q54)",
+    "event": {
+      "command": "[ -f x ] && echo ok",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
   }
 ]

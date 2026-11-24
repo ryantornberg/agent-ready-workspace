@@ -72,7 +72,7 @@ def decide(event, config):
     who = _holder(lease)
     calls, why_aliases = gitrules.read(event)
     for call in calls:
-        why = gitrules.unresolved(call, why_aliases)
+        why = gitrules.unresolved(call, why_aliases) or gitrules.expanded_program(call)   # Q54
         if why:
             return (f"another live agent session ({who}) holds the main working copy, and this command cannot be "
                     f"judged: {why}. Write it with literal words, or run it in a worktree of your own. See {PAGE}")

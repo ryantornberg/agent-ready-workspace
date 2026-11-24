@@ -30,6 +30,8 @@ runner reads what it needs from git (decision 0004, "Shell events": the `aliases
                               moved from wslib/shellfacts.py, which still offers it).
     listed(destination, repositories)
                            -> True when a destination is one of the repositories in the outward-write list.
+    expanded_program(call) -> why the call's program word is one the shell expands into another name, or None:
+                              a glob, braces or zsh's leading `=` (M3 slice Z, the maintainer's answer to Q54).
 
 A git config file is one of the files the runner lists in `git_config`: the global ones (`~/.gitconfig`,
 `$XDG_CONFIG_HOME/git/config`, `~/.config/git/config`, `GIT_CONFIG_GLOBAL`) and every file an `include.path` or
@@ -53,6 +55,12 @@ PERSISTENT_OPS = {"set", "unset", "edit", "rename-section", "remove-section"}
 # a way to ask git for its folder.
 GIT_FOLDER_HINTS = re.compile(r"GIT_DIR|GIT_COMMON_DIR|rev-parse|--git-path|--git-dir|--git-common-dir")
 VARIABLE = re.compile(r"\$(?:\{(\w+)\}|(\w+))")
+# A program word the shell expands before it runs: a glob (*, ? or [), braces ({git,} or /{usr/bin/git,x}, whose
+# last part keeps only one brace), or zsh's =NAME, which becomes the program's full path. The parser reads such a
+# word as a literal program, so it would pass every guard (Q54). A quoted word does not expand, and the parser does
+# not say which words were quoted, so a quoted one is refused too: no program a person runs has such a name. The
+# test command `[` is the one exception. The parser fix waits for M4.
+EXPANDED_PROGRAM = re.compile(r"[*?\[{}]|^=")
 
 
 def fold(path):
@@ -571,3 +579,12 @@ def listed(destination, repositories):
         return False
     key = ((destination.get("host") or "").lower(), _path(destination))
     return any(key == ((entry.get("host") or "").lower(), _path(entry)) for entry in repositories or ())
+
+
+def expanded_program(call):
+    """Why the call's program word is one the shell expands into another name before it runs, or None (Q54)."""
+    program = call.get("program") or ""
+    if program != "[" and EXPANDED_PROGRAM.search(program):
+        return (f"its program word `{program}` is a pattern the shell expands (a glob, braces or zsh's `=`), so no "
+                f"guard can tell which program runs")
+    return None

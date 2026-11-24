@@ -468,6 +468,9 @@ def decide(event, config):
             return why
         if call.get("unresolved"):
             return _cannot_judge(call["unresolved"])
+        expanded = gitrules.expanded_program(call)   # {gh,} pr create: no guard sees the gh it becomes (Q54)
+        if expanded:
+            return _cannot_judge(expanded)
         if call.get("gh"):
             why = _gh_unresolved(call)
             if why:

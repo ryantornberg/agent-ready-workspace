@@ -9051,5 +9051,65 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "a gh write whose program word is braces (Q54)",
+    "event": {
+      "command": "{gh,} pr create --fill",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a push whose program word is a glob (Q54)",
+    "event": {
+      "command": "g?t push origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a glob in an argument, not the program word, passes (Q54)",
+    "event": {
+      "command": "ls *.md",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": true
   }
 ]

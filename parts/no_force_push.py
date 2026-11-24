@@ -51,6 +51,9 @@ def _may_push(call, why_aliases):
     """Why a call that may be a push cannot be judged, or None. Only a git push, or a call that may be one."""
     if call.get("unresolved"):
         return call["unresolved"]
+    expanded = gitrules.expanded_program(call)   # {git,} push: no guard sees the git it becomes (Q54)
+    if expanded:
+        return expanded
     git = call.get("git")
     if not git:
         return None

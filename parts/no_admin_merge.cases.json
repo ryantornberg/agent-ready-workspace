@@ -453,5 +453,19 @@
       "command": "gh pr view 12 -R \"$REPO\""
     },
     "allow": true
+  },
+  {
+    "name": "an admin merge whose program word is braces (Q54)",
+    "event": {
+      "command": "{gh,} pr merge 5 --admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "an admin merge through zsh's =gh (Q54)",
+    "event": {
+      "command": "=gh pr merge 5 --admin"
+    },
+    "allow": false
   }
 ]

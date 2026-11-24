@@ -37,6 +37,9 @@ SHORT_VALUES = set("AbFtR")
 REWRITES = {"--squash": "--squash", "--rebase": "--rebase", "s": "--squash", "r": "--rebase"}
 MERGE_ENDPOINT = re.compile(r"^repos/[^/]+/[^/]+/pulls/[^/]+/merge$")
 GRAPHQL_MERGES = ("mergePullRequest", "enablePullRequestAutoMerge")
+# A program word the shell expands into another name, such as {gh,} or g? (Q54): wslib/gitrules.py's
+# expanded_program rule, copied, since a grader loads this hook with the shell parser alone.
+EXPANDED_PROGRAM = re.compile(r"[*?\[{}]|^=")
 
 
 def _on(argument):
@@ -110,6 +113,10 @@ def _unresolved(call):
     """Why this hook cannot tell whether the call merges past CI or rewrites a branch, or None."""
     if call.get("unresolved"):
         return call["unresolved"]
+    program = call.get("program") or ""
+    if program != "[" and EXPANDED_PROGRAM.search(program):   # {gh,} pr merge --admin: the gh goes unjudged (Q54)
+        return (f"its program word `{program}` is a pattern the shell expands (a glob, braces or zsh's `=`), so no "
+                f"guard can tell which program runs")
     gh = call.get("gh")
     if not gh:
         return None
