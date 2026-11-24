@@ -1,7 +1,7 @@
 [
   {
     "kind": "run",
-    "target": "git status --short && git ls-files && grep -rni \"export\" --include=* -l . | grep -v \"^./.git/\" | head -50",
+    "target": "git status --short && git ls-files && grep -rni \"export\" --include=* -l . --exclude-dir=.git | head -50",
     "ok": true,
     "output": " M README.md\n?? notes/\nREADME.md\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-web/csv_export.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\n./tests/test_orders_web.py\n./README.md\n./src/orders-web/orders_page.py\n./src/orders-web/quarterly_export.py"
   },
@@ -22,20 +22,14 @@
   },
   {
     "kind": "run",
-    "target": "git diff README.md && grep -rn \"export\\|button\" README.md; cd src/orders-web && python3 -m unittest ../../tests/test_orders_web.py 2>&1 | tail -3",
+    "target": "git diff README.md && ls -la notes/ && cd src/orders-web && python3 -m unittest ../../tests/test_orders_web.py 2>&1 | tail -5; cd ../.. && PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web 2>&1 | tail -15",
     "ok": true,
-    "output": "diff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 154, in loadTestsFromName\n    module = __import__(module_name)\nValueError: Empty module name"
+    "output": "diff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 24 11:38 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 24 11:38 ..\n-rw-r--r--@ 1 user  staff   28 Nov 24 11:38 todo.txt\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 220, in <listcomp>\n    suites = [self.loadTestsFromName(name, module) for name in names]\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 154, in loadTestsFromName\n    module = __import__(module_name)\nValueError: Empty module name\n....\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK"
   },
   {
     "kind": "edit",
     "target": "src/orders-web/orders_page.py",
     "ok": true
-  },
-  {
-    "kind": "run",
-    "target": "cd . && PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web -v 2>&1 | tail -12; PYTHONPATH=src/orders-web python3 -c \"\nfrom orders_page import OrdersPage\np=OrdersPage([{'id':1,'customer':'A','total':2.0}]); p.click('export'); print(len(p.downloads), repr(p.downloads[0]))\"",
-    "ok": true,
-    "output": "test_csv_has_a_header_and_a_row_per_order (tests.test_orders_web.OrdersPageTests) ... ok\ntest_export_writes_one_download (tests.test_orders_web.OrdersPageTests) ... ok\ntest_refresh_button_sorts_the_table (tests.test_orders_web.OrdersPageTests) ... ok\ntest_one_line_per_order_after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n1 'id,customer,total\\n1,A,2.00\\n'"
   },
   {
     "kind": "edit",
@@ -44,19 +38,19 @@
   },
   {
     "kind": "run",
-    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web 2>&1 | tail -3 && git stash push -q -- src/orders-web/orders_page.py && PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web 2>&1 | tail -3; git stash pop -q && git diff --stat",
+    "target": "python3 -m unittest 2>&1 | tail -4; git stash push -q -- src/orders-web/orders_page.py && python3 -m unittest 2>&1 | tail -3; git stash pop -q && git status --short",
     "ok": true,
-    "output": "Ran 5 tests in 0.000s\n\nOK\nRan 5 tests in 0.000s\n\nFAILED (failures=1)\n README.md                     | 2 ++\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 3 files changed, 8 insertions(+)"
+    "output": "----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\nRan 9 tests in 0.000s\n\nFAILED (failures=1)\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/"
   },
   {
     "kind": "run",
-    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage only registered the refresh handler, so clicking Export\nfound no handler and did nothing. Register export alongside refresh,\nand add a test that clicks the button rather than calling export()\ndirectly.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -1 && git status --short",
+    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage registered a handler only for \"refresh\", so clicking\n\"export\" hit the no-op branch in click(). Register export in\n__init__ and add a test that clicks the button rather than calling\nexport() directly.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
     "ok": true,
-    "output": "c6800ca Wire the Export button to its handler\n M README.md\n?? notes/"
+    "output": "741f4d2 Wire the Export button to its handler\n8049a4b Orders\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 6 ++++++\n 2 files changed, 7 insertions(+)\n M README.md\n?? notes/"
   },
   {
     "kind": "report",
-    "target": "The Export button now works, and the fix is committed as `c6800ca` on `main`.\n\n**Cause:** `OrdersPage.__init__` in `src/orders-web/orders_page.py` registered only the `refresh` handler. Clicking `export` found no handler, so nothing happened. The existing test called `page.export()` directly, so it never exercised the button and didn't catch this.\n\n**Fix:**\n- `src/orders-web/orders_page.py`: register `export` alongside `refresh`.\n- `tests/test_orders_web.py`: add a test that clicks `\"export\"` and checks that one download is produced. It passes with the fix and fails without it.\n\nAll 5 web tests pass. I ran them with `PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web`, because the README's `python3 -m unittest` command doesn't find the `src/orders-web` modules from the repo root.\n\nI left your uncommitted README edit (the \"ask whether Export should include cancelled orders\" note) and the untracked `notes/` directory out of the commit. Export still includes every order, cancelled ones too, so that question remains open.",
+    "target": "The Export button now works, and the fix is committed as `741f4d2`.\n\n**Cause:** `OrdersPage.__init__` registered a handler only for \"refresh\". Clicking \"export\" fell into the no-op branch of `click()`. The existing export test called `export()` directly, so it never exercised the button and still passed.\n\n**Fix:**\n- `src/orders-web/orders_page.py`: one line registers `self._on(\"export\", self.export)`.\n- `tests/test_orders_web.py`: a new test clicks `\"export\"` and checks that one download is produced with the expected CSV. It fails without the fix and passes with it.\n\nAll 9 tests pass with `python3 -m unittest` from the repo root.\n\n**Not committed:** your uncommitted README edit and the `notes/` directory. The README note asks whether Export should include cancelled orders. The code currently exports every order on the page, and I didn't change that. Deciding it is your call.",
     "ok": true
   },
   {

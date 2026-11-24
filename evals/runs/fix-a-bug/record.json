@@ -1,6 +1,6 @@
 {
   "case": "fix-a-bug",
-  "date": "2026-11-18",
+  "date": "2026-11-24",
   "playbook": "docs/playbooks/fix-a-bug.md",
   "covers": [
     "evals/cases/fix-a-bug.json",
@@ -29,9 +29,9 @@
     "evals/scaffold/tests/test_orders_service_v1.py",
     "evals/scaffold/tests/test_orders_web.py"
   ],
-  "guidance_sha256": "0c3fa30beeaea05c28f56ac5b4b220a0a5d5d8eb98b4a55cc17653d200d1a40e",
+  "guidance_sha256": "bcb7b72f225035b9dd221a0fc4fcbb53fe34b022afd69e2aeb25691e8eae5145",
   "runs_per_arm": 15,
-  "agent": "Claude Code 2.1.327",
+  "agent": "Claude Code 2.1.331",
   "model": "claude-haiku-5-5",
   "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
   "arms": {
@@ -78,20 +78,6 @@
         },
         {
           "transcript": "guided-3.json",
-          "passed": true,
-          "graders": {
-            "sees-a-test-fail-before-editing": true,
-            "new-test-fails-on-the-original-code": true,
-            "suite-passes-after-the-change": true,
-            "the-request-is-met": true,
-            "report-marks-a-claim-verified": true,
-            "stages-by-name": true,
-            "leaves-the-other-session's-edits-out": true,
-            "finishes-within-the-time-limit": true
-          }
-        },
-        {
-          "transcript": "guided-4.json",
           "passed": false,
           "graders": {
             "sees-a-test-fail-before-editing": true,
@@ -99,6 +85,20 @@
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
             "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "guided-4.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
             "stages-by-name": true,
             "leaves-the-other-session's-edits-out": true,
             "finishes-within-the-time-limit": true
@@ -488,7 +488,7 @@
     "bare": {
       "runs_passing_every_grader": 0,
       "runs_passing_each_grader": {
-        "sees-a-test-fail-before-editing": 0,
+        "sees-a-test-fail-before-editing": 1,
         "new-test-fails-on-the-original-code": 15,
         "suite-passes-after-the-change": 15,
         "the-request-is-met": 15,
@@ -530,7 +530,7 @@
           "transcript": "bare-3.json",
           "passed": false,
           "graders": {
-            "sees-a-test-fail-before-editing": false,
+            "sees-a-test-fail-before-editing": true,
             "new-test-fails-on-the-original-code": true,
             "suite-passes-after-the-change": true,
             "the-request-is-met": true,
