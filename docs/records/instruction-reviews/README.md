@@ -297,3 +297,4 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b6-seed-readme.md](2026-11-23-b6-seed-readme.md) | `kit/seed/README.md` | contradiction |
 | [2026-11-24-lifecycle-map.md](2026-11-24-lifecycle-map.md) | `docs/lifecycle-map.md` | contradiction, placement, trigger, eval-case |
 | [2026-11-24-how-tos-lifecycle-row.md](2026-11-24-how-tos-lifecycle-row.md) | `docs/how-tos.md` | trigger |
+| [2026-11-24-lifecycle-map-support-row.md](2026-11-24-lifecycle-map-support-row.md) | `docs/lifecycle-map.md` | contradiction |
