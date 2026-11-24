@@ -572,5 +572,12 @@
       "command": "NOHUP gh pr merge 5 --admin"
     },
     "allow": false
+  },
+  {
+    "name": "an admin merge whose program is octal escapes past 377 is refused (GFIX, fix round 2)",
+    "event": {
+      "command": "$'\\547\\550' pr merge 5 --admin"
+    },
+    "allow": false
   }
 ]

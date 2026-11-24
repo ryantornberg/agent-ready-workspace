@@ -2830,5 +2830,50 @@
       "targets": {}
     },
     "allow": false
+  },
+  {
+    "name": "a force push whose program is an octal escape past 377 is refused (GFIX, fix round 2)",
+    "event": {
+      "command": "$'\\547it' push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose program starts with an octal NUL past 377 is refused (GFIX, fix round 2)",
+    "event": {
+      "command": "$'\\400'git push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose flag is octal escapes past 377 is refused (GFIX, fix round 2)",
+    "event": {
+      "command": "git push $'\\455\\455force' origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push eval runs after a word of only a NUL escape is refused (GFIX, fix round 2)",
+    "event": {
+      "command": "eval $'\\0' '${G:-git}' push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a NUL-only word read gets still passes (GFIX, fix round 2)",
+    "event": {
+      "command": "find . -print0 | while IFS= read -r -d $'\\0' f; do wc -l \"$f\"; done",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
   }
 ]

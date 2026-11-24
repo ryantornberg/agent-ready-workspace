@@ -138,8 +138,9 @@ def _unresolved(call):
 #   $'\146', $'f', $'\x0a', bash's $'\cJ' or zsh's $'\C-j', where the parser keeps the letters after the
 #   backslash; and a NUL escape in a word that holds anything else, such as git$'\0' or $'\0'git, since bash cuts
 #   the quoted text at a NUL and keeps the rest of the word, and zsh hands the program the word up to it. A word
-#   that is only NUL escapes, after an optional NAME= or --option=, such as read -d $'\0', passes (Q74, slice
-#   GFIX);
+#   that is only NUL escapes, after an optional NAME= or --option=, such as read -d $'\0', passes, except among
+#   the words of eval or watch, which join them into a line where the parser misreads it. An octal escape counts
+#   by its low eight bits, as both shells read it, so \547 is g and \400 a NUL (Q74, slice GFIX);
 # - a (( that the parser reads as arithmetic and that may hold a command: ((git push) ), which the shell runs as
 #   two subshells, or any substitution inside one, such as $(( $(git push) )), whose command the parser never
 #   reads (Q74);
@@ -172,6 +173,8 @@ CASED = frozenset({"git", "gh"})
 # them but git and gh.
 READ = frozenset({"git", "gh", "find", "eval", "watch"}) | shell.SHELL_PROGRAMS | frozenset(shell.WRAPPER_OPTIONS)
 UNWRAPPED = READ - {"git", "gh"}
+# The programs the parser reads that join their words into a line, so a word of only NUL escapes changes it.
+JOINING = frozenset({"eval", "watch"})
 
 
 def expands(text):
@@ -237,10 +240,13 @@ def _ansi_c(raw):
                     code = ord(control) & 0x1F                 # bash's \cJ, zsh's \C-j: here a new line
                 else:
                     code = int(next(group for group in match.groups() if group), 8 if match.group(1) else 16)
+                    code = code & 0xFF if match.group(1) else code   # \547 is g, \400 a NUL: the low 8 bits
                 if code in (0x09, 0x0A) or 0x20 <= code <= 0x7E:
                     return (f"its word `{raw}` holds the ANSI-C escape `{match.group(0)}`, which the shell makes a "
                             f"character the parser does not read")
-                if code == 0 and not ONLY_NUL.fullmatch(raw):
+                if code == 0 and ONLY_NUL.fullmatch(raw):
+                    _Parser.nul.add(raw)               # judged by the program that gets it: eval or watch
+                elif code == 0:
                     return (f"its word `{raw}` holds the NUL escape `{match.group(0)}` beside other text, and the "
                             f"shell drops part of the word at a NUL, which the parser does not read")
             i = end
@@ -264,7 +270,7 @@ def _arithmetic(text):
 class _Parser(shell._Parser):
     """The parser, noting each word's source and what it misreads (Q74). It stands in for shell._Parser while
     unreadable walks a line, so the text of sh -c, eval and substitutions is read by it too."""
-    found, raw = [], {}
+    found, raw, nul = [], {}, set()
 
     def _read_word(self):
         start = self.i
@@ -325,6 +331,9 @@ class _Reader(shell._Walker):
                             f"one of them the program, so no guard can tell which runs. Quote it, or write it "
                             f"literally")
             return None
+        if name in JOINING and any(_Parser.raw.get(id(word)) in _Parser.nul for word in words[1:]):
+            return (f"`{words[0].text}` joins its words into a line, and a word of only NUL escapes there makes "
+                    f"another word the program, which the parser does not read")
         if name in READ:
             return None
         for word in words[1:]:
@@ -342,14 +351,14 @@ def unreadable(command):
     walker = _Reader(None, ("github.com",))
     walker.words, walker.found = [], []
     saved, shell._Parser = shell._Parser, _Parser
-    _Parser.found, _Parser.raw = walker.found, {}
+    _Parser.found, _Parser.raw, _Parser.nul = walker.found, {}, set()
     try:
         walker.walk_list(shell.parse(command or ""), shell._Context(), [], True)
     except RecursionError:   # this walk adds a frame per wrapper, so it can run out before the parser does
         return "the line nests too deeply to read each program word"
     finally:
         shell._Parser = saved
-        _Parser.found, _Parser.raw = [], {}
+        _Parser.found, _Parser.raw, _Parser.nul = [], {}, set()
     for word in walker.words:
         if not word.dynamic and expands(word.text):
             return (f"its program word `{word.text}` is a pattern the shell expands (a glob, braces or a zsh "
