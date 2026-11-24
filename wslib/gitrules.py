@@ -45,12 +45,9 @@ from . import shell
 
 PAGE = "docs/decisions/0004-the-hook-contract.md"
 
-# Programs whose operands the parser does not report as writes, though each removes or changes the file it names.
-# A parser gap handled here, until slice Z moves it into wslib/shell.py.
-REMOVERS = {"unlink", "rmdir", "shred"}
 # Programs that write the files they are given. When xargs or find -exec supplies those files at run time, no guard
 # can know which they are.
-WRITERS = {"rm", "cp", "mv", "ln", "truncate", "install", "rsync", "touch", "tee", "dd"} | REMOVERS
+WRITERS = {"rm", "cp", "mv", "ln", "truncate", "install", "rsync", "touch", "tee", "dd", "unlink", "rmdir", "shred"}
 PERSISTENT_OPS = {"set", "unset", "edit", "rename-section", "remove-section"}
 # The text of a write target that is a variable, read for what it shows: a .git segment, a config file's name, or
 # a way to ask git for its folder.
@@ -165,18 +162,6 @@ def _dynamic_refusal(path, call, home, files, cwd):
     return None
 
 
-def _find_deletes(call):
-    """True for a find that deletes what it finds: a parser gap handled here."""
-    return call.get("program") == "find" and "-delete" in (call.get("args") or [])
-
-
-def _remover_writes(call):
-    if call.get("program") not in REMOVERS:
-        return []
-    return [{"path": word, "dynamic": index in set(call.get("dynamic_args") or ()), "via": call["program"]}
-            for index, word in enumerate(call.get("args") or []) if not word.startswith("-")]
-
-
 def _config_file(absolute, files):
     """True for a git config file: one the runner listed, or a repository's own config under its git folder."""
     if absolute is None:
@@ -257,10 +242,6 @@ def shell_refusals(event):
     writes to the keys the guards read. Each is a reason, in the order the shell would run them."""
     facts, cwd = _Facts(event), event.get("cwd")
     calls, why_aliases = read(event)
-    # A cd the parser cannot follow (one that is not the leading command, or one in a subshell) leaves a later
-    # command's folder unknown. If any cd in the line enters a git folder, a relative write after it may land there.
-    enters = next((arg for call in calls if call.get("program") in ("cd", "pushd") for arg in call.get("args") or []
-                   if git_segment(arg) or GIT_FOLDER_HINTS.search(arg)), None)
     reasons = []
     for call in calls:
         alias_why = _alias_config_refusal(call, why_aliases)
@@ -274,11 +255,16 @@ def shell_refusals(event):
                            f"tell whether one is in a git folder or a git config file. Name the files on the command "
                            f"line, or edit them with the edit tool")
             continue
-        if _find_deletes(call):
+        if any(write.get("via") == "find -delete" for write in call.get("writes") or ()):
             reasons.append("find -delete removes whatever it finds when it runs, so no guard can tell whether that is "
                            "in a git folder. Remove named files with rm, or ask the person")
             continue
-        for write in list(call.get("writes") or ()) + _remover_writes(call):
+        # A cd the parser cannot follow (one that is not the leading command, or one in a subshell) leaves this
+        # command's folder unknown, and the parser names the folders the cds before it entered. If one is a git
+        # folder, a relative write here may land there.
+        enters = next((folder for folder in call.get("cd_folders") or ()
+                       if git_segment(folder) or GIT_FOLDER_HINTS.search(folder)), None)
+        for write in call.get("writes") or ():
             path = write.get("path") or ""
             if path in DEVICES:
                 continue

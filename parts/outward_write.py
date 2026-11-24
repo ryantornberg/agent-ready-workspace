@@ -111,9 +111,6 @@ def _list_write(call, name):
     name in any folder, so a write to it from a worktree, or through a folder the parser cannot place, is seen."""
     wanted = gitrules.fold(posixpath.basename(name.replace("\\", "/")))
     writes = list(call.get("writes") or ())
-    if call.get("program") in gitrules.REMOVERS:
-        writes += [{"path": word, "dynamic": _dynamic(word)} for word in call.get("args") or []
-                   if not word.startswith("-")]
     git = call.get("git") or {}
     if git.get("subcommand") in GIT_FILE_WRITERS:
         writes += [{"path": word, "dynamic": _dynamic(word)} for word in git.get("args") or []

@@ -2,8 +2,8 @@
 key the guards read.
 
 The shell half of `git_folder`. It reads the command with the shared parser and judges every write the parser
-reports (`>`, `>>`, `tee`, `cp`, `mv` and its source, `sed -i`, `dd of=`, `rm`, `ln`, `truncate`, `install`,
-`rsync`, `touch`, `git config --file`), and `unlink`, `rmdir` and `shred`, which the parser does not report yet.
+reports (`>`, `>>`, `tee`, `cp`, `mv` and its source, `sed -i`, `dd of=`, `rm`, `unlink`, `rmdir`, `shred`, `ln`,
+`truncate`, `install`, `rsync`, `touch`, `git config --file` and `find -delete`).
 It refuses:
 
 - a write under any `.git` segment, a linked worktree's `.git` file and `src/*/.git/` included, and to a git config

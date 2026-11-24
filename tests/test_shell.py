@@ -763,6 +763,14 @@ class WriteTargetTests(unittest.TestCase):
             "install -m 644 a /usr/local/b": [("/usr/local/b", "install")],
             "rsync -av --delete src/ dest/": [("dest/", "rsync")],
             "touch .git/index.lock": [(".git/index.lock", "touch")],
+            # M3 slice Z, from C5c's queue: the removers and find -delete, which wslib/gitrules.py read itself.
+            "unlink .git/HEAD": [(".git/HEAD", "unlink")],
+            "rmdir -p .git/refs/x": [(".git/refs/x", "rmdir")],
+            "shred -n 3 -u .git/config": [(".git/config", "shred")],
+            "shred --iterations 3 a b": [("a", "shred"), ("b", "shred")],
+            "find .git -name '*.lock' -delete": [(".git", "find -delete")],
+            "find -L a b -type f -delete": [("a", "find -delete"), ("b", "find -delete")],
+            "find -delete": [(".", "find -delete")],
         }
         for line, expected in cases.items():
             with self.subTest(line):
@@ -770,7 +778,7 @@ class WriteTargetTests(unittest.TestCase):
 
     def test_reads_are_not_writes(self):
         for line in ("sed 's/a/b/' f.txt", "cat a", "echo x 2>&1", "grep x < in.txt",
-                     "cp a"):
+                     "cp a", "find .git -name '*.lock'"):
             with self.subTest(line):
                 self.assertEqual(writes(line), [])
 
@@ -780,6 +788,27 @@ class WriteTargetTests(unittest.TestCase):
 
     def test_a_redirect_on_a_group(self):
         self.assertEqual(writes("{ echo a; echo b; } > out.txt"), [("out.txt", ">")])
+
+    def test_the_folders_a_cd_it_cannot_follow_may_have_entered(self):
+        """M3 slice Z, from C5c's queue: a relative write after a cd the parser cannot follow names that cd's
+        folder, so a guard can tell it may land in a git folder."""
+        cases = {
+            "true; cd .git; touch config": [".git"],
+            "(cd .git && touch config)": [".git"],
+            "true; cd .git && git status; touch config": [".git"],
+            'x=1; cd "$(git rev-parse --git-dir)"; touch config': ["$(git rev-parse --git-dir)"],
+            "true; cd a; pushd .git/hooks; touch pre-commit": ["a", ".git/hooks"],
+        }
+        for line, expected in cases.items():
+            with self.subTest(line):
+                found = find(line, "touch")
+                self.assertIsNone(found["cwd"])
+                self.assertEqual(found["cd_folders"], expected)
+
+    def test_no_folders_when_the_folder_is_known(self):
+        for line in ("cd .git && touch config", "touch config", "(cd .git); touch config", "bash -c 'cd .git'; touch c"):
+            with self.subTest(line):
+                self.assertEqual(find(line, "touch")["cd_folders"], [])
 
 
 class OldParserTests(unittest.TestCase):

@@ -34,8 +34,13 @@ so a guard learns everything it decides on without parsing again:
     cwd             the folder the command runs in, relative to the session's folder ("." when unchanged), or
                     None when it cannot be known.
     cwd_unresolved  why cwd is None.
+    cd_folders      when cwd is None, the folder each cd or pushd earlier in this shell named, as written, so a
+                    guard can tell where a relative write after a cd the parser cannot follow may land; [] when
+                    cwd is known.
     writes          [{"path", "dynamic", "via"}]: >, >>, >|, &>, <>, tee, cp (target), mv (source and target),
-                    sed -i, dd of=, rm, ln, truncate, install, rsync, touch, git config --file.
+                    sed -i, dd of=, rm, unlink, rmdir, shred, ln, truncate, install, rsync, touch,
+                    git config --file, and find -delete, whose path is each folder it starts from ("." when it
+                    names none), since the files it removes are known only when it runs.
     config_writes   [{"key", "value", "op", "via", "guarded"}]: git config written by git -c, git config,
                     GIT_CONFIG_COUNT/KEY_n/VALUE_n or GIT_CONFIG_PARAMETERS. key is None when unknowable.
                     guarded is True for remote.*, url.*, push.*, branch.*.pushRemote, branch.*.merge,
@@ -826,14 +831,15 @@ class _Context:
     """What the shell knows at one point of the line: its folder, its exported variables, whether it is a subshell."""
 
     def __init__(self, cwd=".", cwd_reason=None, env=None, subshell=False, in_sub=False, depth=0,
-                 worktree_reason=None):
+                 worktree_reason=None, cd_folders=()):
         self.cwd, self.cwd_reason, self.env = cwd, cwd_reason, dict(env or {})
         self.subshell, self.in_sub, self.depth = subshell, in_sub, depth
         self.worktree_reason = worktree_reason
+        self.cd_folders = list(cd_folders)      # every cd or pushd folder this shell has seen, as written
 
     def copy(self, **changes):
         clone = _Context(self.cwd, self.cwd_reason, self.env, self.subshell, self.in_sub, self.depth,
-                         self.worktree_reason)
+                         self.worktree_reason, self.cd_folders)
         for key, value in changes.items():
             setattr(clone, key, value)
         return clone
@@ -1565,6 +1571,7 @@ WRITE_OPTIONS = {   # program: (short options that take a value, long ones that 
                         "min-size", "remote-option", "suffix", "out-format", "info", "debug", "usermap",
                         "groupmap", "rsync-path")),
     "tee": ("", ()), "touch": ("rdt", ("reference", "date")),
+    "unlink": ("", ()), "rmdir": ("", ()), "shred": ("ns", ("iterations", "size", "random-source")),
 }
 
 
@@ -1587,7 +1594,7 @@ def _program_writes(program, args):
     opts, operands = _scan(args, short_values, long_values)
     words = [word for _, word in operands]
     target = next((value for name, value in opts if name in ("-t", "--target-directory") and value), None)
-    if program in ("rm", "tee", "truncate", "touch"):
+    if program in ("rm", "tee", "truncate", "touch", "unlink", "rmdir", "shred"):
         for word in words:
             add(word, program)
     elif program in ("cp", "mv", "install", "rsync"):
@@ -1658,6 +1665,23 @@ def _sed_writes(args):
     return [{"path": word.text, "dynamic": word.dynamic, "via": "sed -i"} for word in files]
 
 
+def _find_deletes(args):
+    """A find that deletes what it finds writes under each folder it starts from: "." when it names none. The files
+    it removes are known only when it runs, so a guard judges the folder, not a file."""
+    if not any(word.literal and word.text == "-delete" for word in args):
+        return []
+    i = 0
+    while i < len(args) and args[i].text in ("-H", "-L", "-P", "-E", "-X", "-d", "-s", "-x"):
+        i += 1
+    starts = []
+    while i < len(args) and not (args[i].literal and (args[i].text.startswith("-") or args[i].text in ("(", "!", ","))):
+        starts.append(args[i])
+        i += 1
+    if not starts:
+        return [{"path": ".", "dynamic": False, "via": "find -delete"}]
+    return [{"path": word.text, "dynamic": word.dynamic, "via": "find -delete"} for word in starts]
+
+
 def _redirect_writes(records):
     writes = []
     for record in records:
@@ -1690,6 +1714,8 @@ class _Walker:
             target = self._cd_target(pipeline)
             if target is not False:
                 self.walk_command(pipeline[0], ctx, via, piped_in=False)
+                if target is not None:
+                    ctx.cd_folders.append(target.text)
                 leading = (k == 0 and not ctx.subshell and (first_of_line or (ops and ops[0] == "&&")))
                 if not leading:
                     ctx.cwd, ctx.cwd_reason = None, ("a cd inside a subshell" if ctx.subshell else
@@ -1794,6 +1820,7 @@ class _Walker:
             "wrappers": list(via), "in_substitution": ctx.in_sub, "in_subshell": ctx.subshell,
             "unresolved": unresolved, "runtime_args": runtime,
             "cwd": ctx.cwd if use_ctx_cwd else cwd, "cwd_unresolved": ctx.cwd_reason if use_ctx_cwd else cwd_reason,
+            "cd_folders": list(ctx.cd_folders) if (ctx.cwd if use_ctx_cwd else cwd) is None else [],
             "writes": list(writes), "config_writes": [],
             "config_env": sorted({k for k in CONFIG_ENV if k in env} | ({"HOME"} if cleared else set())),
             "ssh_env": sorted(k for k in SSH_ENV if env.get(k) is not None),
@@ -1873,6 +1900,7 @@ class _Walker:
                     ctx.env[word.text] = None
         if name == "find" and not deep:
             entry = emit("find")
+            entry["writes"] = list(writes) + _find_deletes(args)
             self._find(args, own, writes, ctx, via, cwd, cwd_reason, cleared)
             return entry
 

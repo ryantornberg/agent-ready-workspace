@@ -8975,5 +8975,24 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "shred of the list of repositories is refused, as the parser reports it (M3 slice Z)",
+    "event": {
+      "command": "shred -u outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
   }
 ]
