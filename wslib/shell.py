@@ -25,7 +25,9 @@ so a guard learns everything it decides on without parsing again:
     env_dynamic     the names in env whose value holds a variable or substitution.
     env_cleared     True under env -i.
     wrappers        how the command was reached, outermost first: "sudo", "env", "timeout", "xargs",
-                    "find -exec", "sh -c", "eval", "git rebase --exec", ...
+                    "find -exec", "sh -c", "eval", "git rebase --exec", "ws.py with-secrets", ... A line that runs
+                    `ws.py with-secrets NAME ... -- PROGRAM ...` (by python, the launcher or ws.py itself) is
+                    read as that wrapper, so the command is PROGRAM.
     in_substitution True inside $(...), backticks or <(...).
     in_subshell     True inside ( ) or a substitution.
     unresolved      None, or why no guard can know what runs: the program word is a variable or substitution,
@@ -54,6 +56,8 @@ so a guard learns everything it decides on without parsing again:
                     cannot be read.
     config_env      the config-affecting variables set on it: HOME, XDG_CONFIG_HOME, GIT_CONFIG_GLOBAL,
                     GIT_CONFIG_SYSTEM, GIT_CONFIG_NOSYSTEM (HOME too under env -i).
+    reads           [{"path", "dynamic", "via"}]: the command's input redirections, < and <>, as writes are given,
+                    inside substitutions, eval and a shell's -c text in every flag form too.
     ssh_env         GIT_SSH and GIT_SSH_COMMAND, when set.
     git             None, or the git facts below.
     gh              None, or the gh facts below.
@@ -1734,6 +1738,38 @@ def _find_deletes(args):
     return [{"path": word.text, "dynamic": word.dynamic, "via": "find -delete"} for word in starts]
 
 
+def _redirect_reads(records):
+    """The files a command reads by < or <>, as writes are given."""
+    return [{"path": record["target"].text, "dynamic": record["target"].dynamic, "via": record["op"]}
+            for record in records if record["op"] in ("<", "<>") and record["target"] is not None]
+
+
+# The words that start ws.py: the script, and the launcher that starts it.
+WITH_SECRETS_STARTERS = ("ws.py", "launch.sh", "start.py")
+WITH_SECRETS = "ws.py with-secrets"
+
+
+def _with_secrets_child(words):
+    """The words `ws.py with-secrets NAME ... -- PROGRAM ...` starts, or None when the command is not that. ws.py is
+    found by name wherever it stands, so `python3 -X utf8 ws.py`, `./ws.py --root .` and the launcher all count."""
+    def name(word):
+        text = re.split(r"[\\/]", word.text)[-1].lower()
+        for suffix in (".exe", ".cmd", ".bat", ".com"):
+            if text.endswith(suffix):
+                return text[:-len(suffix)]
+        return text
+    at = next((i for i, word in enumerate(words) if name(word) in WITH_SECRETS_STARTERS), None)
+    if at is None:
+        return None
+    marker = next((i for i in range(at + 1, len(words)) if words[i].text == "with-secrets"), None)
+    if marker is None:
+        return None
+    dashes = next((i for i in range(marker + 1, len(words)) if words[i].text == "--"), None)
+    if dashes is None or dashes + 1 >= len(words):
+        return None
+    return words[dashes + 1:]
+
+
 def _redirect_writes(records):
     writes = []
     for record in records:
@@ -1838,9 +1874,9 @@ class _Walker:
 
     def _redirect_only(self, records, ctx, via):
         self.walk_records(records, ctx, via)
-        writes = _redirect_writes(records)
-        if writes:
-            self.out.append(self._dict(None, [], {}, ctx, via, writes=writes))
+        writes, reads = _redirect_writes(records), _redirect_reads(records)
+        if writes or reads:
+            self.out.append(self._dict(None, [], {}, ctx, via, writes=writes, reads=reads))
 
     def simple(self, words, records, ctx, via, piped_in):
         self.walk_subs(words, ctx, via)
@@ -1850,16 +1886,16 @@ class _Walker:
             name, value = words[i].assign
             own[name] = (value, words[i].dynamic)
             i += 1
-        writes = _redirect_writes(records)
+        writes, reads = _redirect_writes(records), _redirect_reads(records)
         if i == len(words):
             ctx.env.update(own)               # NAME=value alone: it stays for the rest of this shell
-            if writes:
-                self.out.append(self._dict(None, [], own, ctx, via, writes=writes))
+            if writes or reads:
+                self.out.append(self._dict(None, [], own, ctx, via, writes=writes, reads=reads))
             return
         self.dispatch(words[i:], own, writes, records, ctx, via, piped_in, None, ctx.cwd, ctx.cwd_reason, False)
 
     def _dict(self, program, args, own, ctx, via, writes=(), cwd=None, cwd_reason=None, cleared=False,
-              unresolved=None, runtime=None, use_ctx_cwd=True):
+              unresolved=None, runtime=None, use_ctx_cwd=True, reads=()):
         env = {} if cleared else {k: v for k, v in ctx.env.items()}
         env.update(own)
         return {
@@ -1873,7 +1909,7 @@ class _Walker:
             "unresolved": unresolved, "runtime_args": runtime,
             "cwd": ctx.cwd if use_ctx_cwd else cwd, "cwd_unresolved": ctx.cwd_reason if use_ctx_cwd else cwd_reason,
             "cd_folders": list(ctx.cd_folders) if (ctx.cwd if use_ctx_cwd else cwd) is None else [],
-            "writes": list(writes), "config_writes": [],
+            "writes": list(writes), "reads": list(reads), "config_writes": [],
             "config_env": sorted({k for k in CONFIG_ENV if k in env} | ({"HOME"} if cleared else set())),
             "ssh_env": sorted(k for k in SSH_ENV if env.get(k) is not None),
             "git": None, "gh": None,
@@ -1884,10 +1920,11 @@ class _Walker:
         args = words[1:]
         env = {} if cleared else dict(ctx.env)
         env.update(own)
+        reads = _redirect_reads(records)
 
         def emit(program, unresolved=None, **extra):
             entry = self._dict(program, args, own, ctx, via, writes, cwd, cwd_reason, cleared, unresolved, runtime,
-                               use_ctx_cwd=False)
+                               use_ctx_cwd=False, reads=reads)
             entry["env"] = {k: (v[0] if v is not None else None) for k, v in env.items()}
             entry["env_dynamic"] = sorted(k for k, v in env.items() if v is not None and v[1])
             entry["config_env"] = sorted({k for k in CONFIG_ENV if k in env} | ({"HOME"} if cleared else set()))
@@ -1906,6 +1943,10 @@ class _Walker:
             name = name[:-4]
         deep = ctx.depth >= MAX_DEPTH
 
+        child = None if deep else _with_secrets_child(words)
+        if child is not None:
+            return self.dispatch(child, own, writes, records, ctx, via + [WITH_SECRETS], piped_in, runtime, cwd,
+                                 cwd_reason, cleared)
         if name in WRAPPER_OPTIONS and not deep:
             unwrapped = self._unwrap(name, args)
             if unwrapped is not None:
@@ -1921,7 +1962,7 @@ class _Walker:
                 if split is not None:
                     text = split[0] + " " + " ".join(shlex.quote(w.text) for w in inner)
                     return self._run_text(text, split[1] or any(w.dynamic for w in inner), name + " -S", words,
-                                          own, writes, ctx, via, cwd, cwd_reason)
+                                          own, writes, ctx, via, cwd, cwd_reason, reads)
                 if inner:
                     if clear:
                         own2 = dict(extra)
@@ -1933,13 +1974,13 @@ class _Walker:
         if name == "eval" and not deep:
             dynamic = any(w.dynamic for w in args)
             text = " ".join(w.text for w in args)
-            return self._run_text(text, dynamic, "eval", words, own, writes, ctx, via, cwd, cwd_reason)
+            return self._run_text(text, dynamic, "eval", words, own, writes, ctx, via, cwd, cwd_reason, reads)
         if name == "watch" and not deep:
             _, operands = _scan(args, "nd", ("interval", "differences"))
             rest = [w for _, w in operands]
             if rest:
                 return self._run_text(" ".join(w.text for w in rest), any(w.dynamic for w in rest), "watch",
-                                      words, own, writes, ctx, via, cwd, cwd_reason)
+                                      words, own, writes, ctx, via, cwd, cwd_reason, reads)
         if name in SHELL_PROGRAMS and not deep:
             return self._shell(name, args, own, writes, records, ctx, via, piped_in, emit, cwd, cwd_reason)
         if name in ("export", "declare", "typeset", "readonly", "local") and not ctx.in_sub:
@@ -1987,7 +2028,7 @@ class _Walker:
             for entry in self.out[before:]:
                 entry["unresolved"] = entry["unresolved"] or f"{label} runs text that holds a variable or substitution"
 
-    def _run_text(self, text, dynamic, label, words, own, writes, ctx, via, cwd, cwd_reason):
+    def _run_text(self, text, dynamic, label, words, own, writes, ctx, via, cwd, cwd_reason, reads=()):
         """eval, sh -c, env -S, watch: the text is a command line of its own."""
         inner = ctx.copy(depth=ctx.depth + 1, cwd=cwd, cwd_reason=cwd_reason)
         inner.env = dict(ctx.env)
@@ -2008,9 +2049,9 @@ class _Walker:
                 entry = self._dict(words[0].text.rsplit("/", 1)[-1], words[1:], own, ctx, via, writes, cwd,
                                    cwd_reason, unresolved=reason, use_ctx_cwd=False)
                 self.out.append(entry)
-        if writes:
+        if writes or reads:
             self.out.append(self._dict(None, [], own, ctx, via, writes=writes, cwd=cwd, cwd_reason=cwd_reason,
-                                       use_ctx_cwd=False))
+                                       use_ctx_cwd=False, reads=reads))
         return None
 
     def _shell(self, name, args, own, writes, records, ctx, via, piped_in, emit, cwd, cwd_reason):
@@ -2032,20 +2073,22 @@ class _Walker:
                 i += 1
                 continue
             break
+        reads = _redirect_reads(records)
         if has_c:
             if i < len(args):
                 return self._run_text(args[i].text, args[i].dynamic, name + " -c", [_literal(name)] + args, own,
-                                      writes, ctx, via, cwd, cwd_reason)
+                                      writes, ctx, via, cwd, cwd_reason, reads)
             return emit(name)
         if i < len(args) and not reads_stdin:
             return emit(name)                  # a script: out of reach, and said so
         for record in records:
             if record["op"] in ("<<", "<<-") and record["body"] is not None:
                 return self._run_text(record["body"], record["body_dynamic"],
-                                      name + " <<", [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason)
+                                      name + " <<", [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason,
+                                      reads)
             if record["op"] == "<<<" and record["target"] is not None:
                 return self._run_text(record["target"].text, record["target"].dynamic, name + " <<<",
-                                      [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason)
+                                      [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason, reads)
             if record["op"] == "<":
                 return emit(name)              # a script read from a file
         if piped_in:

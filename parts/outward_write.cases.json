@@ -9051,5 +9051,43 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "gh pr review --approve through ws.py with-secrets is refused: the parser reads it as a wrapper (M3 slice Z)",
+    "event": {
+      "command": "python3 ws.py with-secrets GH_TOKEN -- gh pr review 5 --approve",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {
+        "[\".\", \"gh\", [\"pr\", \"review\", \"5\", \"--approve\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": null,
+          "refspecs": null,
+          "mirror": false,
+          "branch": null,
+          "main_branch": null
+        }
+      }
+    },
+    "allow": false
   }
 ]

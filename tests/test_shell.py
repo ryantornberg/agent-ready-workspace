@@ -862,6 +862,81 @@ class WriteTargetTests(unittest.TestCase):
                 self.assertEqual(find(line, "touch")["cd_folders"], [])
 
 
+def reads(line):
+    return [(r["path"], r["via"]) for c in commands(line) for r in c["reads"]]
+
+
+class ReadTests(unittest.TestCase):
+    """M3 slice Z, from C5f's queue: input redirections as reads, which parts/secrets_shell.py found itself."""
+
+    def test_each_form(self):
+        cases = {
+            "wc -l < .env": [(".env", "<")],
+            "exec 3<> .env": [(".env", "<>")],
+            "cat 0< a.txt": [("a.txt", "<")],
+            "while read -r l; do echo \"$l\"; done < .env": [(".env", "<")],
+            "{ cat; } < a.txt": [("a.txt", "<")],
+            "< .env": [(".env", "<")],
+            'echo "$(wc -l < .env)"': [(".env", "<")],
+            "sh -c 'wc -l < .env'": [(".env", "<")],
+            "eval 'wc -l < .env'": [(".env", "<")],
+            "bash -lc 'cat < .env'": [(".env", "<")],
+            "sh -xc 'cat < .env'": [(".env", "<")],
+            "bash -c -e 'cat < .env'": [(".env", "<")],
+            "bash -c -o pipefail 'cat < .env'": [(".env", "<")],
+            "bash -O extglob -c 'cat < .env'": [(".env", "<")],
+            "bash -c 'cat' < .env": [(".env", "<")],
+            "bash < script.sh": [("script.sh", "<")],
+            "sudo cat < .env": [(".env", "<")],
+        }
+        for line, expected in cases.items():
+            with self.subTest(line):
+                self.assertEqual(reads(line), expected)
+
+    def test_other_redirections_are_not_reads(self):
+        for line in ("cat > a", "cat << EOF\nx\nEOF", "cat <<< text", "cat <&3", "echo x 2>&1", "cat a"):
+            with self.subTest(line):
+                self.assertEqual(reads(line), [])
+
+    def test_a_dynamic_read(self):
+        self.assertEqual([r["dynamic"] for c in commands('F=.env; wc -l < "$F"') for r in c["reads"]], [True])
+
+
+class WithSecretsTests(unittest.TestCase):
+    """M3 slice Z, from C5f's queue: `ws.py with-secrets NAME ... -- PROGRAM` is read as a wrapper, so every shell
+    guard judges PROGRAM."""
+
+    def test_the_program_is_the_child(self):
+        for line in ("python3 ws.py with-secrets T -- git push --force origin main",
+                     "python3 -X utf8 ws.py with-secrets T U -- git push --force origin main",
+                     "./ws.py --root . with-secrets T -- git push --force origin main",
+                     "wslib/launch.sh with-secrets T -- git push --force origin main",
+                     "py 'C:\\w\\ws.py' with-secrets T -- git push --force origin main",
+                     "sudo python3 ws.py with-secrets T -- git push --force origin main"):
+            with self.subTest(line):
+                found = commands(line)
+                self.assertEqual([c["program"] for c in found], ["git"])
+                self.assertIn("ws.py with-secrets", found[0]["wrappers"])
+                self.assertTrue(found[0]["git"]["push"]["force"])
+
+    def test_the_line_s_assignments_and_redirections_reach_the_child(self):
+        found = find("WS_SECRETS_FILE=/tmp/x python3 ws.py with-secrets T -- cat < .env", "cat")
+        self.assertEqual((found["env"], found["reads"][0]["path"]), ({"WS_SECRETS_FILE": "/tmp/x"}, ".env"))
+
+    def test_a_child_that_runs_another_is_unwrapped_in_turn(self):
+        found = find("python3 ws.py with-secrets T -- sh -c 'gh pr merge 1 --admin'", "gh")
+        self.assertEqual(found["wrappers"], ["ws.py with-secrets", "sh -c"])
+        found = find("python3 ws.py with-secrets T -- python3 ws.py with-secrets U -- git push", "git")
+        self.assertEqual(found["wrappers"], ["ws.py with-secrets", "ws.py with-secrets"])
+
+    def test_not_a_wrapper(self):
+        for line in ("python3 ws.py with-secrets T", "python3 ws.py with-secrets T --", "python3 ws.py check",
+                     "python3 tools/other.py with-secrets T -- git push"):
+            with self.subTest(line):
+                self.assertNotIn("git", [c["program"] for c in commands(line)])
+                self.assertEqual([c["wrappers"] for c in commands(line)], [[]])
+
+
 class OldParserTests(unittest.TestCase):
     """The first layer moved from no_stage_all and no_admin_merge without a change: both hooks decide exactly as
     before on their cases, and load the parser from wslib.shell."""
