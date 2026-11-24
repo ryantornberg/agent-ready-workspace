@@ -1009,6 +1009,16 @@ How slice Z goes on after its second stop, from the maintainer's answers to Q55 
 
 **Each guard refuses a program word the shell expands from a glob or braces (Q54).** The parser reads a word such as `{git,} push` or `/usr/bin/gi? push` as a literal program, so it passes every guard, on main too. Each guard that judges a command by its program refuses such a word, in its own part file, outside the eval's hash, so R2 stays current. A narrow re-check by a fresh session reads the change. The parser fix waits for M4.
 
+### 2026-11-24
+
+Approved by: the maintainer, 2026-11-24
+
+How slice Z goes on after its third stop, from the maintainer's answers to Q73 and Q74 in the workspace queue on 2026-11-24 (round 13). Q73 replaces the leak rule of the Q55 entry. Q74 adds a guard change to slice Z's scope. No criterion is dropped or weakened.
+
+**The leak check allows no home folder but the placeholder (Q73).** `evals/run.py` refuses a transcript that names any account's home folder other than the placeholder `user`, in every case. No case's request or scaffold makes a name pass. The stored debugging transcripts that name the fixture's invented owner are named as stale until M4. M4 points the debugging fixture at `/home/user` when it records debugging again. A narrow re-check by a fresh session reads the change, then R2 starts.
+
+**Each guard refuses the five routes Q54's re-checks found (Q74).** They are ANSI-C quoting, a runner the parser does not know, braces or a glob in a wrapper's own arguments, a `((` that holds a command, and nesting past the parser's depth. Each passes every shell guard, on main too. Each guard refuses them in its own part file, outside the eval's hash, as Q54 did, so R2 stays current. A narrow re-check by a fresh session reads the change. The parser fixes follow early in M4: that is the maintainer's condition.
+
 ## Results
 
 ### C1, launcher and baselines
