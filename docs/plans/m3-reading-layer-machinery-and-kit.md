@@ -959,6 +959,24 @@ B7's bare-only baseline, from the maintainer's answer to Q47 in the workspace qu
 
 **B7's baseline has its yes: 60 counted runs (Q47).** An agent runs `evals/run.py --baseline` for each of the four cases, 10 runs each, in one session. The 40 agent runs and the sessions the red team runs dispatch count toward the 60, and the agent stops before it would pass that count. It records the baselines and applies B7's rule: cut, full recording or failed attempt. A full recording needs its own yes, up to 132 runs per playbook.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+B7's full recording of debugging, from the maintainer's answer to Q50 in the workspace queue. It lets B7 run the recording its rule already asks for; no criterion is dropped or weakened.
+
+**`evals/pool.py` pools by playbook first.** A small machinery pull request makes it pool each playbook's cases on their own, so debugging's records stay out of the fix-a-bug table that `evals/README.md` and a test hold. It merges before the recording starts.
+
+**Debugging's recording has its yes: 132 runs (Q50).** An agent runs `evals/run.py` for debug-staging-reminder and debug-leak-check, three arms at 22 runs per case, 132 runs in one session. It stops before it would pass 132, and the gate's per-playbook test then decides whether the page is proven.
+
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+Red team review's recording moves to M9, from the maintainer's answer to Q50 in the workspace queue. B7's row and criterion 25 allow that outcome only through the stop rule's projection on the retry path, and the plan is on its base path. This entry adds the maintainer's decision as a second way to reach the same outcome. The page loses nothing it had, and no other criterion changes.
+
+**Red team review stays unproven, its recording deferred to M9.** Its page keeps `proof: unproven` and `prove-by: M9`, so no proof key changes. Its baseline stays on record: red-team-fail-closed's 10 bare runs, none passing every grader. red-team-lease has no baseline; M9 tests the page on real work. For red team review, criterion 25 is met by "unproven, recording deferred to M9 by the maintainer's decision (Q50)". The 132 runs approved for its recording are not spent.
+
 ## Results
 
 ### C1, launcher and baselines
