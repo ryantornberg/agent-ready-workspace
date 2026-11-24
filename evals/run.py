@@ -118,12 +118,10 @@ AGENT_NEEDS = ("python3", "git")    # what every case's agent runs; run.py refus
 # A home folder on any system, as a transcript may write it: /Users/NAME or /home/NAME anywhere in a path (so
 # file:///Users/NAME, /mnt/c/Users/NAME and /var/home/NAME count too), or C:\Users\NAME with any number of
 # backslashes. It errs toward refusing: a route such as /api/users/42 counts too, which costs a run, not a leak.
-# "user" is what the user name becomes in a transcript; Shared and Public belong to no account. tests/test_core.py
-# reads the stored transcripts with this same rule (home_folders).
+# "user" is what the user name becomes in a transcript; Shared and Public belong to no account. A case's own name
+# passes only as written: a lookalike, such as "d" then a letter outside ASCII where "dana" is allowed, is refused
+# (Q55). tests/test_core.py reads the stored transcripts with this same rule (home_folders).
 HOME_FOLDER = re.compile(r"(?:/(?:users|home)/|[a-z]:\\+users\\+)([a-z0-9._-]+)", re.I)
-# A name that runs on in letters outside ASCII, written or escaped (\u00e4), is a lookalike an agent wrote of a
-# case's own name, such as the debugging fixture's "dana": it passes when the ASCII part starts that name.
-RUNS_ON = re.compile(r"[^\x00-\x7f]|\\+(?:u[0-9a-f]{4}|x[0-9a-f]{2}|N\{)", re.I)
 NOT_AN_ACCOUNT = {"user", "shared", "public"}
 REQUIRED_ARMS = ("guided", "two-line", "bare")
 # Paths that name this machine without naming its user: its temporary folders, and the agent tool's own.
@@ -437,16 +435,8 @@ def _strings(value):
 
 def home_folders(text, allowed=()):
     """The account names of the home folders the text names, other than the placeholder and those in allowed."""
-    allowed = {name.lower() for name in allowed}
-    found = []
-    for match in HOME_FOLDER.finditer(text):
-        name = match.group(1).rstrip(".").lower()
-        if name in NOT_AN_ACCOUNT | allowed:
-            continue
-        if RUNS_ON.match(text, match.end()) and any(known.startswith(name) for known in allowed):
-            continue
-        found.append(match.group(0))
-    return found
+    skip = NOT_AN_ACCOUNT | {name.lower() for name in allowed}
+    return [match.group(0) for match in HOME_FOLDER.finditer(text) if match.group(1).rstrip(".").lower() not in skip]
 
 
 def leaks(actions, allowed=()):

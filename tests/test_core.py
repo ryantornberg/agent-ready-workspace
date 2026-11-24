@@ -2233,6 +2233,11 @@ class EvalThatCanLoseTests(Folder):
         elif isinstance(value, str):
             yield value
 
+    # Stored before Q55 made run.py refuse every lookalike of a case's own name. In this run the agent wrote
+    # "/home/d\u00e4n\u0430", a lookalike of the fixture's owner, as test data of its own; it names no real account.
+    # Debugging's cases record again in M4 (Q51), and that record replaces this one.
+    WRITTEN_BEFORE_Q55 = {"debug-leak-check/two-line-18.json": ["/home/d", "/home/d"]}
+
     def test_the_recorded_transcripts_hold_nothing_of_the_operators_environment(self):
         stored = list((ROOT / "evals/runs").glob("*/*.json"))
         self.assertGreaterEqual(len(stored), 120)
@@ -2245,7 +2250,8 @@ class EvalThatCanLoseTests(Folder):
             case = path.parent.name
             if case not in accounts:
                 accounts[case] = self.harness.case_accounts(self.harness.load_case(case))
-            self.assertEqual(self.harness.home_folders(text, accounts[case]), [], path.name)
+            known = self.WRITTEN_BEFORE_Q55.get(f"{case}/{path.name}", [])
+            self.assertEqual(self.harness.home_folders(text, accounts[case]), known, path.name)
             for address in email.finditer(text):   # the eval identity, or the agent tool's own commit trailer
                 self.assertTrue(address.group(0).endswith(".invalid") or address.group(0) == "noreply@anthropic.com",
                                 (path.name, address.group(0)))
@@ -2565,9 +2571,10 @@ class EvalHarnessApartTests(Folder):
             for target in ("ls /home/user/x", "ls /Users/Shared/x", "cat ~/x", "ls /usr/home"):
                 with self.subTest(target):
                     self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
-            for target in ("cat /home/d\u00e4na/x", "cat /home/d\u0430na/x"):   # lookalikes of the fixture's owner
+            for target in ("cat /home/d\u00e4na/x", "cat /home/d\u0430na/x", "cat /home/dan\u00e4/x",
+                           r"cat /home/d\u00e4na/x"):   # lookalikes of the fixture's owner are refused too (Q55)
                 with self.subTest(target):
-                    self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}], ["dana"]))
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}], ["dana"]))
             fixture = [{"kind": "run", "target": r"cat /home/dana/notes.txt C:\Users\dana.", "ok": True}]
             self.assertTrue(self.harness.leaks(fixture))
             self.assertFalse(self.harness.leaks(fixture, ["dana"]))
