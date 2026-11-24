@@ -1,0 +1,5626 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.331",
+  "startedAt": "2026-11-24T02:54:23.523Z",
+  "durationSeconds": 362,
+  "costUsd": 0.46129847,
+  "partial": false,
+  "suite": {
+    "root": "<home>/dev/agent-ready-workspace/.claude/worktrees/m3-b6-selection/plugin",
+    "ablation": "none",
+    "modelOverride": "haiku",
+    "threshold": 1,
+    "concurrency": 4,
+    "plugins": [
+      {
+        "name": "workspace",
+        "path": "<home>/dev/agent-ready-workspace/.claude/worktrees/m3-b6-selection/plugin"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "adopt-the-workspace-fires",
+      "dir": "evals/adopt-the-workspace-fires",
+      "source": "prose",
+      "promptMarkdown": "My team wants to use this workspace for our own code. Set us up an instance of it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:adopt-the-workspace\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00247473,
+            "judgeCostUsd": 0,
+            "durationSeconds": 21,
+            "startedAt": "2026-11-24T02:54:23.868Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0023659,
+            "judgeCostUsd": 0,
+            "durationSeconds": 15,
+            "startedAt": "2026-11-24T02:54:23.868Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024352399999999995,
+            "judgeCostUsd": 0,
+            "durationSeconds": 97,
+            "startedAt": "2026-11-24T02:54:23.868Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "adopt-the-workspace-quiet",
+      "dir": "evals/adopt-the-workspace-quiet",
+      "source": "prose",
+      "promptMarkdown": "Check that my laptop runs this workspace's hooks, checks and tools properly.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:adopt-the-workspace\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026031900000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 15,
+            "startedAt": "2026-11-24T02:54:23.868Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024698100000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 42,
+            "startedAt": "2026-11-24T02:54:39.058Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024151100000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 63,
+            "startedAt": "2026-11-24T02:54:39.083Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "architecture-review-fires",
+      "dir": "evals/architecture-review-fires",
+      "source": "prose",
+      "promptMarkdown": "Check the diff on the branch feature/holds against the decisions this system has already made, and tell me whether it solves the right problem.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:architecture-review\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00255944,
+            "judgeCostUsd": 0,
+            "durationSeconds": 49,
+            "startedAt": "2026-11-24T02:54:44.776Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00267672,
+            "judgeCostUsd": 0,
+            "durationSeconds": 9,
+            "startedAt": "2026-11-24T02:55:20.941Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00252362,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:55:29.462Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "architecture-review-quiet",
+      "dir": "evals/architecture-review-quiet",
+      "source": "prose",
+      "promptMarkdown": "The hand-off plan for refunds is finished, in docs/plans/refunds.md. Get a fresh critic to attack it before anyone builds from it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:architecture-review\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025202600000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 44,
+            "startedAt": "2026-11-24T02:55:33.927Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026061500000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 53,
+            "startedAt": "2026-11-24T02:55:35.742Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026177600000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 36,
+            "startedAt": "2026-11-24T02:55:42.489Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "browsers-fires",
+      "dir": "evals/browsers-fires",
+      "source": "prose",
+      "promptMarkdown": "I need a browser in this session to click through the orders page, but another session already has one open.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:browsers\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00257543,
+            "judgeCostUsd": 0,
+            "durationSeconds": 23,
+            "startedAt": "2026-11-24T02:56:00.450Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026168400000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 39,
+            "startedAt": "2026-11-24T02:56:17.727Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00259579,
+            "judgeCostUsd": 0,
+            "durationSeconds": 45,
+            "startedAt": "2026-11-24T02:56:18.970Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "browsers-quiet",
+      "dir": "evals/browsers-quiet",
+      "source": "prose",
+      "promptMarkdown": "Check that my laptop runs this workspace's hooks, checks and tools properly.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:browsers\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00247948,
+            "judgeCostUsd": 0,
+            "durationSeconds": 11,
+            "startedAt": "2026-11-24T02:56:23.030Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025013100000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 16,
+            "startedAt": "2026-11-24T02:56:28.750Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024646100000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:56:33.669Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "changing-the-machinery-fires",
+      "dir": "evals/changing-the-machinery-fires",
+      "source": "prose",
+      "promptMarkdown": "I need to change the pre-push hook and the CI workflow. What path does that change take to get merged?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:changing-the-machinery\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00259609,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:56:39.519Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00279617,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:56:44.612Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00290746,
+            "judgeCostUsd": 0,
+            "durationSeconds": 16,
+            "startedAt": "2026-11-24T02:56:47.375Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "changing-the-machinery-quiet",
+      "dir": "evals/changing-the-machinery-quiet",
+      "source": "prose",
+      "promptMarkdown": "Add a how-to page on rotating the API keys, with its row in the how-to index.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:changing-the-machinery\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025314000000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 9,
+            "startedAt": "2026-11-24T02:56:52.131Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00262131,
+            "judgeCostUsd": 0,
+            "durationSeconds": 14,
+            "startedAt": "2026-11-24T02:56:56.259Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025617600000000006,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:00.817Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "debugging-fires",
+      "dir": "evals/debugging-fires",
+      "source": "prose",
+      "promptMarkdown": "The nightly reconciliation job started failing about one run in five last week, and nobody knows why. Can you work out what is going on?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:debugging\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00260448,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:57:03.585Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0027684600000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:57:03.640Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0024642500000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:06.784Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "debugging-quiet",
+      "dir": "evals/debugging-quiet",
+      "source": "prose",
+      "promptMarkdown": "Slice 2 of the approved plan adds a cancelled status to orders. Build it, one failing test at a time.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:debugging\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00273999,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:10.005Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026997099999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:10.955Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026682,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:11.170Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "decision-interview-fires",
+      "dir": "evals/decision-interview-fires",
+      "source": "prose",
+      "promptMarkdown": "We agreed the goal and non-goals of the refunds feature, but the design questions are still open. Interview me on them, one question at a time.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:decision-interview\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00273979,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:12.043Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025298000000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:15.354Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026910100000000006,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:16.125Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "decision-interview-quiet",
+      "dir": "evals/decision-interview-quiet",
+      "source": "prose",
+      "promptMarkdown": "The hand-off plan for refunds is finished, in docs/plans/refunds.md. Get a fresh critic to attack it before anyone builds from it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:decision-interview\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00247792,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:16.125Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00250126,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:17.667Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026385200000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:19.717Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "docs-audit-fires",
+      "dir": "evals/docs-audit-fires",
+      "source": "prose",
+      "promptMarkdown": "Before the milestone's sign-off, read the whole docs tree and tell me where pages have drifted apart.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:docs-audit\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026519000000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:20.221Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027123600000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-24T02:57:21.764Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026216,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:22.311Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "docs-audit-quiet",
+      "dir": "evals/docs-audit-quiet",
+      "source": "prose",
+      "promptMarkdown": "I edited docs/size-the-work.md and the glossary. They need their review before I commit them.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:docs-audit\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.0028284800000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-24T02:57:24.782Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026618,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:25.109Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00268452,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:28.022Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "escape-analysis-fires",
+      "dir": "evals/escape-analysis-fires",
+      "source": "prose",
+      "promptMarkdown": "We fixed the rounding defect in the sales report, and that code had been reviewed last month. Find out why the review missed it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:escape-analysis\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00271365,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:28.367Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026060500000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:30.240Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00278369,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:31.341Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "escape-analysis-quiet",
+      "dir": "evals/escape-analysis-quiet",
+      "source": "prose",
+      "promptMarkdown": "The totals in the sales report are off by a cent. Fix the rounding.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:escape-analysis\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00237239,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:33.263Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024031599999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:33.409Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025768500000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:34.813Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "extend-the-workspace-fires",
+      "dir": "evals/extend-the-workspace-fires",
+      "source": "prose",
+      "promptMarkdown": "Add a how-to page on rotating the API keys, with its row in the how-to index.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:extend-the-workspace\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00259529,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:37.217Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00265415,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:37.234Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0024653500000000007,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:37.273Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.3333333333333333,
+        "passRate": 0.3333333333333333
+      }
+    },
+    {
+      "name": "extend-the-workspace-quiet",
+      "dir": "evals/extend-the-workspace-quiet",
+      "source": "prose",
+      "promptMarkdown": "Add a check that fails when a page under docs/ is empty.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:extend-the-workspace\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027525799999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:39.669Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00263391,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:41.278Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024597800000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:42.315Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "feedback-walkthrough-fires",
+      "dir": "evals/feedback-walkthrough-fires",
+      "source": "prose",
+      "promptMarkdown": "My pull request #42 got a pile of review comments. Take me through them one at a time so I understand each before we change anything.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:feedback-walkthrough\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00273259,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-24T02:57:42.481Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00281625,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:44.953Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00276548,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:57:46.815Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "feedback-walkthrough-quiet",
+      "dir": "evals/feedback-walkthrough-quiet",
+      "source": "prose",
+      "promptMarkdown": "Review pull request #42 for me, without touching my main working copy.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:feedback-walkthrough\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.00289706,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:57:46.968Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.00292318,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-24T02:57:49.461Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026925600000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:50.887Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "fix-a-bug-fires",
+      "dir": "evals/fix-a-bug-fires",
+      "source": "prose",
+      "promptMarkdown": "The CSV export on the orders page puts each order's date in the wrong column. Please fix it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:fix-a-bug\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00254101,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:52.532Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0025433400000000007,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:54.944Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00245041,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:57:55.865Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "fix-a-bug-quiet",
+      "dir": "evals/fix-a-bug-quiet",
+      "source": "prose",
+      "promptMarkdown": "The nightly reconciliation job started failing about one run in five last week, and nobody knows why. Can you work out what is going on?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:fix-a-bug\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00264012,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:56.808Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00260081,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:57.003Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00268051,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:59.445Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "handoff-fires",
+      "dir": "evals/handoff-fires",
+      "source": "prose",
+      "promptMarkdown": "My context is nearly full and I have to stop here. Write down where this task stands so a fresh session can pick it up tomorrow.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:handoff\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026956600000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:57:59.764Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.00297181,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:58:01.781Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027999900000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:58:02.035Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "handoff-quiet",
+      "dir": "evals/handoff-quiet",
+      "source": "prose",
+      "promptMarkdown": "Which model and effort should a helper get for sweeping every caller of ReconciliationWorker, and how do I hand that sweep to it?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:handoff\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0029285300000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:58:04.795Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027163200000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:05.165Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00265874,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:07.913Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "impact-analysis-fires",
+      "dir": "evals/impact-analysis-fires",
+      "source": "prose",
+      "promptMarkdown": "We are planning slices that change how order_total is computed. List everything that change would reach: code, pages and work on other branches.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:impact-analysis\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00261104,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:09.988Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027928000000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:58:10.340Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026360100000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:12.832Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "impact-analysis-quiet",
+      "dir": "evals/impact-analysis-quiet",
+      "source": "prose",
+      "promptMarkdown": "Before I write a new date-formatting helper for the sales report, check whether the code already has something that does the job.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:impact-analysis\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00273287,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:58:13.227Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0029349600000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-24T02:58:14.866Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00286065,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:58:16.078Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "instruction-review-fires",
+      "dir": "evals/instruction-review-fires",
+      "source": "prose",
+      "promptMarkdown": "I edited docs/size-the-work.md and the glossary. They need their review before I commit them.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:instruction-review\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00263224,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:17.676Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0025740000000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:19.149Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00261166,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:21.469Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.3333333333333333,
+        "passRate": 0.3333333333333333
+      }
+    },
+    {
+      "name": "instruction-review-quiet",
+      "dir": "evals/instruction-review-quiet",
+      "source": "prose",
+      "promptMarkdown": "Before the milestone's sign-off, read the whole docs tree and tell me where pages have drifted apart.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:instruction-review\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00269985,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:22.063Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00261269,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:58:22.713Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025751800000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:23.797Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "machine-self-check-fires",
+      "dir": "evals/machine-self-check-fires",
+      "source": "prose",
+      "promptMarkdown": "Check that my laptop runs this workspace's hooks, checks and tools properly.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:machine-self-check\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00242794,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:26.304Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024173600000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:27.065Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00244787,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:28.297Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "machine-self-check-quiet",
+      "dir": "evals/machine-self-check-quiet",
+      "source": "prose",
+      "promptMarkdown": "My team wants to use this workspace for our own code. Set us up an instance of it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:machine-self-check\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00249189,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:29.005Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00249642,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:30.157Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024640100000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:30.709Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "maintain-the-workspace-fires",
+      "dir": "evals/maintain-the-workspace-fires",
+      "source": "prose",
+      "promptMarkdown": "We close the milestone this week. Which upkeep duties fall due, and who owns each one?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:maintain-the-workspace\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026195,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:32.075Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00272134,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:33.019Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024690500000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:34.460Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "maintain-the-workspace-quiet",
+      "dir": "evals/maintain-the-workspace-quiet",
+      "source": "prose",
+      "promptMarkdown": "Before the milestone's sign-off, read the whole docs tree and tell me where pages have drifted apart.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:maintain-the-workspace\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027215200000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:34.762Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025529000000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:36.848Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00257176,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:38.129Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "orchestration-fires",
+      "dir": "evals/orchestration-fires",
+      "source": "prose",
+      "promptMarkdown": "Which model and effort should a helper get for sweeping every caller of ReconciliationWorker, and how do I hand that sweep to it?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:orchestration\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00281526,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:58:38.501Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00268028,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:40.041Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025726300000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:41.309Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "orchestration-quiet",
+      "dir": "evals/orchestration-quiet",
+      "source": "prose",
+      "promptMarkdown": "My context is nearly full and I have to stop here. Write down where this task stands so a fresh session can pick it up tomorrow.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:orchestration\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00335088,
+            "judgeCostUsd": 0,
+            "durationSeconds": 11,
+            "startedAt": "2026-11-24T02:58:42.747Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0029832500000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:58:44.130Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.00271783,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:58:45.004Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "parts-fires",
+      "dir": "evals/parts-fires",
+      "source": "prose",
+      "promptMarkdown": "Add a check that fails when a page under docs/ is empty.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:parts\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00257179,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:45.745Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0026622600000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:50.578Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00253313,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:52.087Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "parts-quiet",
+      "dir": "evals/parts-quiet",
+      "source": "prose",
+      "promptMarkdown": "I need to change the pre-push hook and the CI workflow. What path does that change take to get merged?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:parts\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00257952,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:58:52.633Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00261453,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:54.060Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00258129,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:55.793Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "prompt-retrospective-fires",
+      "dir": "evals/prompt-retrospective-fires",
+      "source": "prose",
+      "promptMarkdown": "Here is the transcript of yesterday's session, which went sideways. Work out how my prompt shaped what it did, and rewrite the prompt.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:prompt-retrospective\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.0028997600000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:58:56.726Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.00293932,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-24T02:58:57.122Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00274046,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:58:58.844Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "prompt-retrospective-quiet",
+      "dir": "evals/prompt-retrospective-quiet",
+      "source": "prose",
+      "promptMarkdown": "We fixed the rounding defect in the sales report, and that code had been reviewed last month. Find out why the review missed it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:prompt-retrospective\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00257809,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:00.579Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024476700000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:59:04.242Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00274757,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:04.314Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "red-team-review-fires",
+      "dir": "evals/red-team-review-fires",
+      "source": "prose",
+      "promptMarkdown": "The hand-off plan for refunds is finished, in docs/plans/refunds.md. Get a fresh critic to attack it before anyone builds from it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:red-team-review\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00266704,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:04.583Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00255677,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:59:05.196Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025809799999999996,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:08.116Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "red-team-review-quiet",
+      "dir": "evals/red-team-review-quiet",
+      "source": "prose",
+      "promptMarkdown": "Check the diff on the branch feature/holds against the decisions this system has already made, and tell me whether it solves the right problem.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:red-team-review\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027839099999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:09.493Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00251283,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:59:09.722Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026858700000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:10.142Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "research-ladder-fires",
+      "dir": "evals/research-ladder-fires",
+      "source": "prose",
+      "promptMarkdown": "Where in this workspace is the nightly job defined?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:research-ladder\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 5,
+            "costUsd": 0.00301344,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-24T02:59:12.877Z",
+            "error": null,
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00274981,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:13.993Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0028387000000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:15.098Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "research-ladder-quiet",
+      "dir": "evals/research-ladder-quiet",
+      "source": "prose",
+      "promptMarkdown": "What have the tracker and the team wiki said about the refund limit decision? Pull everything from both into one report, with links.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:research-ladder\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027042200000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:15.203Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025308,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:19.302Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00268531,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:20.245Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "reuse-checklist-fires",
+      "dir": "evals/reuse-checklist-fires",
+      "source": "prose",
+      "promptMarkdown": "Before I write a new date-formatting helper for the sales report, check whether the code already has something that does the job.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:reuse-checklist\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0027099,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:20.695Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00270035,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:20.892Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00269799,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:23.929Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "reuse-checklist-quiet",
+      "dir": "evals/reuse-checklist-quiet",
+      "source": "prose",
+      "promptMarkdown": "We are planning slices that change how order_total is computed. List everything that change would reach: code, pages and work on other branches.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:reuse-checklist\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0028502799999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:25.136Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00250049,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:26.069Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025729999999999998,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:26.226Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "review-in-a-worktree-fires",
+      "dir": "evals/review-in-a-worktree-fires",
+      "source": "prose",
+      "promptMarkdown": "Review pull request #42 for me, without touching my main working copy.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:review-in-a-worktree\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024773800000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:59:29.473Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00276588,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:30.703Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00268722,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:31.334Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "review-in-a-worktree-quiet",
+      "dir": "evals/review-in-a-worktree-quiet",
+      "source": "prose",
+      "promptMarkdown": "My pull request #42 got a pile of review comments. Take me through them one at a time so I understand each before we change anything.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:review-in-a-worktree\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00243422,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:59:31.393Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027353000000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:33.392Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00269233,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:35.273Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "safe-refactor-fires",
+      "dir": "evals/safe-refactor-fires",
+      "source": "prose",
+      "promptMarkdown": "Rename SalesReport to RevenueReport everywhere, without changing anything it does.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:safe-refactor\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00263341,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:36.175Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.0028179200000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:36.234Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.00271501,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:38.687Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "safe-refactor-quiet",
+      "dir": "evals/safe-refactor-quiet",
+      "source": "prose",
+      "promptMarkdown": "Slice 2 of the approved plan adds a cancelled status to orders. Build it, one failing test at a time.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:safe-refactor\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00275728,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:40.379Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00285871,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:41.051Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027537100000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:41.733Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "search-every-source-fires-1",
+      "dir": "evals/search-every-source-fires-1",
+      "source": "prose",
+      "promptMarkdown": "What have the tracker and the team wiki said about the refund limit decision? Pull everything from both into one report, with links.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:search-every-source\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00269596,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:43.758Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00268227,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:45.570Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025127599999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:46.592Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "search-every-source-fires-2",
+      "dir": "evals/search-every-source-fires-2",
+      "source": "prose",
+      "promptMarkdown": "Search the tracker, the wiki and the team chat for anything about last week's checkout outage, and give me one merged report.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:search-every-source\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00257302,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:59:47.086Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00274682,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:48.637Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00248661,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T02:59:50.502Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "search-every-source-quiet-1",
+      "dir": "evals/search-every-source-quiet-1",
+      "source": "prose",
+      "promptMarkdown": "Where in this workspace is the nightly job defined?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:search-every-source\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0029096300000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:51.521Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0028127100000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:51.553Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0028227000000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:53.949Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "search-every-source-quiet-2",
+      "dir": "evals/search-every-source-quiet-2",
+      "source": "prose",
+      "promptMarkdown": "Update the glossary's row for 'hold' so it names AccountFreeze.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:search-every-source\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025601,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:54.568Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00268337,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:57.252Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026106299999999996,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:57.631Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "size-the-work-fires",
+      "dir": "evals/size-the-work-fires",
+      "source": "prose",
+      "promptMarkdown": "Someone asked for a new refunds feature. Before we start, how much process does it need?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:size-the-work\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025970900000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T02:59:59.229Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0028256400000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T02:59:59.562Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025898500000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:02.343Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "size-the-work-quiet",
+      "dir": "evals/size-the-work-quiet",
+      "source": "prose",
+      "promptMarkdown": "The CSV export on the orders page puts each order's date in the wrong column. Please fix it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:size-the-work\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024030500000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T03:00:02.518Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00248402,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T03:00:04.110Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0024052400000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T03:00:05.704Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "test-first-fires",
+      "dir": "evals/test-first-fires",
+      "source": "prose",
+      "promptMarkdown": "Slice 2 of the approved plan adds a cancelled status to orders. Build it, one failing test at a time.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:test-first\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00282956,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:06.412Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027600000000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:07.324Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0025580100000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:08.259Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "test-first-quiet",
+      "dir": "evals/test-first-quiet",
+      "source": "prose",
+      "promptMarkdown": "Rename SalesReport to RevenueReport everywhere, without changing anything it does.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:test-first\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026658100000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:09.905Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00273021,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:11.881Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.002678,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:12.609Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "throwaway-prototype-fires",
+      "dir": "evals/throwaway-prototype-fires",
+      "source": "prose",
+      "promptMarkdown": "Before we design the order editor, I want to see three rough versions of the screen side by side so I can pick one. Nothing we keep.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:throwaway-prototype\"",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00277492,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-24T03:00:12.882Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00249188,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-24T03:00:15.222Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.00264654,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:17.136Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "throwaway-prototype-quiet",
+      "dir": "evals/throwaway-prototype-quiet",
+      "source": "prose",
+      "promptMarkdown": "Slice 2 of the approved plan adds a cancelled status to orders. Build it, one failing test at a time.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 180,
+      "maxTurns": 3,
+      "graders": [
+        {
+          "name": "selected",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"workspace:throwaway-prototype\"",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027448000000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:18.016Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0026391500000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:18.949Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0027461800000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-24T03:00:19.565Z",
+            "error": "exit 1: Reached maximum number of turns (3) \u00b7 stderr: <a warning about the operator's certificate settings> ",
+            "tracePath": "<tmp>/<run>/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "selected",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 58,
+    "casesPassed": 50,
+    "overallScore": 0.8735632183908046,
+    "overallPassRate": 0.8735632183908046
+  }
+}
