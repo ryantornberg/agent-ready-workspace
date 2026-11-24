@@ -2083,6 +2083,33 @@ Not done: the review's second fix round and re-check, which Q46 decides; then th
 Parked: Q45, Q46
 Next: the maintainer — answer Q46 on how B6 resumes, and say whether the first selection run may start; B7 does not wait for B6.
 
+### B7, proof attempts: stopped before the baseline
+
+Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b7`, on branch `m3/b7`, at the driver tier, since it adds eval cases, which are machinery. The maintainer's order for lane B, B7 then B6, was recorded under "Changes after approval" and pushed to main before building, as `2cf1122`. Pull request #51 merged as `7721896` after CI passed on Linux, macOS and Windows. A fresh driver-tier session wrote the instruction reviews, and another the re-check; the slice's session wrote everything else. No paid run started: the maintainer's order stops B7 before its baseline, and no approval names a run count for it.
+
+- **Verified, B7's preconditions:** the maintainer's reads of batches 1 and 2 are dated lines under B2's results; batch 1 holds debugging and batch 2 red team review (then adversarial review). Both pages have instruction-review records, and B2t, whose names pass the row of 2026-11-22 requires first, is merged.
+- **Verified, four cases:** `debug-staging-reminder` (from M1's slice 5: the staging hook read `-m"add …"` as options; fix and commit), `debug-leak-check` (from M2's slice 0: the leak check searched JSON text and missed a Windows path; cause only, code left as it was), `red-team-fail-closed` (from M1's slice 1, hooks fail closed) and `red-team-lease` (from M2's slice 4, the writing-session lease). Each red team case asks the agent to write a plan's missing section first, which makes it the author, so the page has it dispatch the red team. Each playbook has its own scaffold under `evals/proof/`.
+- **Verified, criterion 61's half that can be shown now:** each case names its own arms: the playbook under test, a fixed contract copy and, for red team review, a tier binding naming the small model; its two-line text; and nothing for bare. A0's test now lists the four real cases' `covered_files` and passes. A new test fails any B7 case that hashes a file outside `evals/` other than its playbook, or that grades with a hook, since a hook grader hashes `parts/` and `wslib/shell.py`, which slice Z edits. The records' half waits for the recordings.
+- **Verified, the two-line texts** are written and committed, two lines each, before any baseline: `evals/proof/debugging/two-line.md` and `evals/proof/red-team-review/two-line.md`.
+- **Verified, the cases work without an agent:** `tests/test_m3_b7.py` runs each case through `prepare`, `inspect` and `grade`. A run that does nothing fails every case. A run that follows the playbook passes every grader. A left print, a fix in the cause-only case, a missed flaw, a missing triage, a long reply and an unwritten section each fail the grader meant for them. The test skips on Windows, where the eval does not run.
+- **Verified, red team review is graded on protocol and on what the review finds, not on format:** a fresh session dispatched, the record in the page's folder, a short reply with path and verdict, the code left alone, and a hidden test that a record names the plan's false key point and every finding is settled. A side review during the slice found that the first draft's hidden test also checked the record's headings and columns, which the two lines do not name, so a win there would have rested on format. The headings check was removed before anything ran. Inferred: the flaw check matches wording, so a record that names the flaw in other words fails it.
+- **Verified, kept to the rules:** `python3 ws.py selftest` and `python3 ws.py check` pass, the check with only the known warning on fix a bug's eval record; `python3 -m unittest discover -b tests` ran 784 tests, 3 skipped, OK; `python3 tests/hook_cases.py` passes 93 of 93; `python3 evals/grade.py --recorded` finds no difference. The private ledger's check prints 0 unmapped of 223.
+- **Verified, the review:** 9 findings in 2 records, 1 blocking: the eval page let an attempt start without the row's preconditions. One fix round fixed all 9. The fresh re-check upheld 8 and 1 in part, found nothing blocking, and found 2 small breaks the fixes made. The three open items are known defects in the records, for the docs audit.
+- **Verified, Q1's two fixes are made:** B7 had to edit `tests/test_core.py`, whose pooling test listed every case, so it made Q1's two Windows test fixes there. The Git bash lookup walks up from git, and the lease test keeps a dead process's handle open. CI passed on both Windows jobs.
+
+Decisions made in the slice:
+
+- **The dispatched red team runs on the small model** in every arm. The guided arm's fixed tier binding names it, so only the protocol differs between the arms, not the critic's model. The real binding's stronger model is M9's to test, on real requests.
+- **No B7 case uses a hook grader,** so none hashes a file slice Z edits. The red team cases check the commit through the other session's edits instead.
+- **The cause-only case grades the page's exception:** the regression test stays uncommitted and the code unchanged.
+- **The guided arm gets no copy of the pages its playbook links to.** Copies of live pages would stale B7's records when they change, so the arm is tested on the playbook's own steps, and the eval page says a dead link may cost it runs.
+
+Proposed for the recording, as template rule 7 asks: `evals/pool.py` pools every gated record into one table, so B7's full recordings would enter the fix-a-bug table that `evals/README.md` and a test hold. Before the first full B7 recording, it should pool by playbook. Baselines are stored apart and do not affect it.
+
+Not done: the baseline and what follows from it (cut, recording or failed attempt), and so criterion 25 and the records' half of criterion 61; these wait for the maintainer's run count, Q47.
+Parked: Q47
+Next: the maintainer — answer Q47 with a run count for B7's baseline, about 60 runs; the coordinator then resumes B6, as the order of round 9 says.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
