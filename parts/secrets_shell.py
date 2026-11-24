@@ -269,7 +269,7 @@ def _runs_method(command, calls):
 def decide(event, config):
     command = event.get("command") or ""
     patterns = _patterns(config)
-    expanded = gitrules.unreadable(command)   # {env,} or {cat,} .env: the program goes unjudged (Q54, Q74)
+    expanded = gitrules.expanded_program(command)   # {env,} or {cat,} .env: the program goes unjudged (Q54)
     if expanded:
         return (f"this command cannot be judged: {expanded}, so it may print the environment or read a secrets "
                 f"file. Write it with literal words. See {PAGE}")

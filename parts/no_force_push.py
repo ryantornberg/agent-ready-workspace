@@ -109,7 +109,7 @@ def _refusal(updates, branch):
 
 def decide(event, config):
     branch = config.get("branch", "main")
-    expanded = gitrules.unreadable(event.get("command"))   # {git,} push: the git it becomes goes unjudged (Q54, Q74)
+    expanded = gitrules.expanded_program(event.get("command"))   # {git,} push: the git it becomes goes unjudged (Q54)
     if expanded:
         return _cannot_judge(expanded)
     calls, why_aliases = gitrules.read(event)

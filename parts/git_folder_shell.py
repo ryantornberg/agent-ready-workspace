@@ -38,7 +38,7 @@ PAGE = "docs/decisions/0004-the-hook-contract.md"
 
 
 def decide(event, config):
-    why = gitrules.unreadable(event.get("command"))   # {git,} config --global: the git goes unjudged (Q54, Q74)
+    why = gitrules.expanded_program(event.get("command"))   # {git,} config --global: the git goes unjudged (Q54)
     if why:
         return (f"this command cannot be judged: {why}, so it may write a git folder or a git config file. "
                 f"Write it with literal words. See {PAGE}")

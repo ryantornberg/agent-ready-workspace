@@ -60,11 +60,7 @@ def decide(event, config):
     copies = event.get("working_copies") or {}
     who = _holder(lease)
     calls, why_aliases = gitrules.read(event)
-    expanded = gitrules.unreadable(event.get("command"))   # {git,} push: the git goes unjudged (Q54, Q74)
-    if expanded and not calls:   # ((git push) ): the parser reads no command, so the loop sees none (Q74)
-        return (f"another live agent session ({who}) holds the main working copy, and this command cannot be "
-                f"judged: {expanded}. A push from there would publish that session's commits. Write it with "
-                f"literal words, or run it in a worktree of your own. See {PAGE}")
+    expanded = gitrules.expanded_program(event.get("command"))   # {git,} push: the git goes unjudged (Q54)
     for index, call in enumerate(calls):
         why = gitrules.unresolved(call, why_aliases) or expanded
         if why:
