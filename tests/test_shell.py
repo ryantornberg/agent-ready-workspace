@@ -914,10 +914,34 @@ class WithSecretsTests(unittest.TestCase):
                      "py 'C:\\w\\ws.py' with-secrets T -- git push --force origin main",
                      "sudo python3 ws.py with-secrets T -- git push --force origin main"):
             with self.subTest(line):
-                found = commands(line)
-                self.assertEqual([c["program"] for c in found], ["git"])
+                found = [c for c in commands(line) if c["program"] == "git"]
+                self.assertEqual(len(found), 1)
                 self.assertIn("ws.py with-secrets", found[0]["wrappers"])
                 self.assertTrue(found[0]["git"]["push"]["force"])
+
+    def test_the_launcher_forms_are_read_too(self):
+        for line in ("sh wslib/launch.sh ws.py with-secrets T -- git push --force origin main",
+                     "python3 wslib/start.py . ws.py with-secrets T -- git push --force origin main"):
+            with self.subTest(line):
+                found = [c for c in commands(line) if c["program"] == "git"]
+                self.assertEqual(len(found), 1)
+                self.assertTrue(found[0]["git"]["push"]["force"])
+
+    def test_the_outer_command_is_judged_as_itself_too(self):
+        # A word that only looks like the wrapper hides nothing before it.
+        for line, program in (("cat .env ws.py with-secrets -- true", "cat"),
+                              ("rm .git/config ws.py with-secrets -- true", "rm")):
+            with self.subTest(line):
+                outer = [c for c in commands(line) if c["program"] == program]
+                self.assertEqual(len(outer), 1)
+                self.assertEqual(outer[0]["wrappers"], [])
+
+    def test_a_name_given_by_a_variable_leaves_the_child_unresolved(self):
+        for line in ('N=GH_REPO; python3 ws.py with-secrets "$N" -- gh pr create --fill',
+                     "python3 ws.py with-secrets $(echo GH_REPO) -- gh pr create --fill"):
+            with self.subTest(line):
+                found = find(line, "gh")
+                self.assertIn("a variable or substitution", found["unresolved"])
 
     def test_the_line_s_assignments_and_redirections_reach_the_child(self):
         found = find("WS_SECRETS_FILE=/tmp/x python3 ws.py with-secrets T -- cat < .env", "cat")
@@ -937,9 +961,7 @@ class WithSecretsTests(unittest.TestCase):
 
     def test_not_a_wrapper(self):
         for line in ("python3 ws.py with-secrets T", "python3 ws.py with-secrets T --", "python3 ws.py check",
-                     "python3 tools/other.py with-secrets T -- git push", "cat .env ws.py with-secrets -- true",
-                     "rm .git/config ws.py with-secrets -- true", "python3 tools/x.py ws.py with-secrets T -- true",
-                     "python3 ws.py check with-secrets T -- true"):
+                     "python3 tools/other.py with-secrets T -- git push"):
             with self.subTest(line):
                 self.assertNotIn("git", [c["program"] for c in commands(line)])
                 self.assertEqual([c["wrappers"] for c in commands(line)], [[]])

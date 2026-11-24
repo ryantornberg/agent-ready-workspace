@@ -9120,5 +9120,43 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "a name ws.py with-secrets hands in that is a variable leaves the gh write unresolved, and it is refused (M3 slice Z)",
+    "event": {
+      "command": "N=GH_REPO; python3 ws.py with-secrets \"$N\" -- gh pr create --fill",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {
+        "[\".\", \"gh\", [\"pr\", \"create\", \"--fill\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "me",
+              "name": "ours",
+              "url": null
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": null,
+          "refspecs": null,
+          "mirror": false,
+          "branch": null,
+          "main_branch": null
+        }
+      }
+    },
+    "allow": false
   }
 ]

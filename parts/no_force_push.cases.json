@@ -2380,5 +2380,32 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "--force naming main through the launcher form of with-secrets is refused: sh wslib/launch.sh ws.py with-secrets (M3 slice Z)",
+    "event": {
+      "command": "sh wslib/launch.sh ws.py with-secrets T -- git push --force origin main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"--force\", \"origin\", \"main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
   }
 ]
