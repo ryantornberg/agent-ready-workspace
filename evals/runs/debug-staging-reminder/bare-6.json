@@ -1,0 +1,97 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && echo \"--- hooks path:\" && git config --get core.hooksPath; echo \"--- .git/hooks:\" && ls -la .git/hooks | grep -v sample; echo \"--- .claude:\" && ls -la .claude 2>/dev/null; echo \"--- settings:\" && cat .claude/settings.json .claude/settings.local.json 2>/dev/null",
+    "ok": false,
+    "output": "Exit code 1\n M README.md\n?? notes/\n--- hooks path:\n--- .git/hooks:\ntotal 128\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:15 .\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:15 ..\n--- .claude:\ntotal 0\ndrwxr-xr-x@ 3 user  staff   96 Nov 23 23:15 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 23 23:15 ..\ndrwx------@ 2 user  staff   64 Nov 23 23:15 .cc-writes\n--- settings:"
+  },
+  {
+    "kind": "run",
+    "target": "grep -rn -i \"stag\" --exclude-dir=.git . 2>/dev/null | head -50; echo \"--- global hooks:\"; git config --global --list 2>/dev/null | grep -i hook; ls ~/.claude/hooks 2>/dev/null",
+    "ok": false,
+    "output": "Permission to use Bash with command grep -i hook; ls ~/.claude/hooks has been denied."
+  },
+  {
+    "kind": "run",
+    "target": "grep -rn -i \"staging\\|stage\" --exclude-dir=.git . ; echo \"exit=$?\"; ls -la .git/hooks | grep -v sample; git log --oneline -3",
+    "ok": true,
+    "output": "./tests/test_staging.py:3:from staging import stages_all\n./tests/test_staging.py:6:class StagingReminderTests(unittest.TestCase):\n./tests/test_staging.py:7:    def test_staging_everything_is_caught(self):\n./tests/test_staging.py:10:                self.assertTrue(stages_all(command))\n./tests/test_staging.py:13:        for command in (\"git add src/staging.py\", \"git commit -m 'fix the reminder'\", \"git status\", \"ls -A\"):\n./tests/test_staging.py:15:                self.assertFalse(stages_all(command))\n./README.md:3:Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n./src/staging.py:1:\"\"\"The staging reminder: does a git command stage every change in the folder, rather than files by name?\"\"\"\n./src/staging.py:4:# The options that stage everything, for each git subcommand that has them.\n./src/staging.py:5:STAGE_ALL = {\"add\": {\"-A\", \"--all\", \".\"}, \"commit\": {\"-a\", \"--all\"}}\n./src/staging.py:10:def stages_all(command):\n./src/staging.py:11:    \"\"\"True when the command stages every change: git add -A, git add ., git commit -a, git commit -am \"x\".\"\"\"\n./src/staging.py:16:    if len(words) < 2 or words[0] != \"git\" or words[1] not in STAGE_ALL:\n./src/staging.py:22:        if word in STAGE_ALL[subcommand]:\nexit=0\ntotal 128\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:15 .\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:15 ..\n2378c93 Orders"
+  },
+  {
+    "kind": "read",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -m unittest tests.test_staging -v 2>&1 | tail -15; echo \"--- direct check:\"; PYTHONPATH=src python3 -c 'from staging import stages_all; print(stages_all(\"git commit -m\\\"add export handler\\\"\"), stages_all(\"git commit -am \\\"x\\\"\"))'",
+    "ok": true,
+    "output": "test_files_named_one_by_one_pass (tests.test_staging.StagingReminderTests) ... ok\ntest_staging_everything_is_caught (tests.test_staging.StagingReminderTests) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n--- direct check:\nFalse True"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/staging.py tests/test_staging.py && git commit -q -F - <<'EOF'\nFix staging reminder firing on git commit -m\"message\"\n\nThe cluster check scanned every letter of a short-option word, so\n`-madd export handler` (from -m\"add export handler\") matched the\nstage-all flag `-a` inside the message text. Stop reading a cluster at\nan option that takes a value, so the rest of the word is treated as\nthat option's value. Add regression tests for -m\"...\" and -ma.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
+    "ok": true,
+    "output": "98187d2 Fix staging reminder firing on git commit -m\"message\"\n2378c93 Orders\n\n src/staging.py        | 10 ++++++++--\n tests/test_staging.py | 10 +++++++++-\n 2 files changed, 17 insertions(+), 3 deletions(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The reminder fired because the parser misread the message text as flags. I fixed it and committed the fix as `98187d2`.\n\n**Cause:** `src/staging.py` checks each short-option word for the stage-all letter (`a` for `commit`). `git commit -m\"add export handler\"` reaches the parser as one word, `-madd export handler`. The check scanned the whole word, so the `a` inside \"add\" in the message matched as `-a`.\n\n**Fix:** The scan now stops at an option that takes a value (`m`, `F`, `C`, `c`, `t`, `S` for commit). Whatever follows such an option in the same word is its value, not flags. So `-am` still counts as stage-all, and `-madd` and `-ma` don't.\n\n**Tests:** I added `git commit -m\"add export handler\"`, `git commit -madd` and `git commit -ma 'fix'` to the \"passes\" cases in `tests/test_staging.py`. The suite passes (2 tests, `PYTHONPATH=src python3 -m unittest tests.test_staging`), and the reported command now returns `False`. I didn't run the new cases against the old code; by reading it, the old check returns `True` for the first one, so the test would have failed before the fix.\n\nThe commit touches only `src/staging.py` and `tests/test_staging.py`. Your pending `README.md` change and the untracked `notes/` directory are untouched. The commit message ends with the Haiku co-author line you specified.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "no debug output left in the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

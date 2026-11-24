@@ -1,0 +1,77 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && ls -la && find . -path ./.git -prune -o -type f -print | head -100 && grep -rniE \"leak|home|Users|C:\\\\\\\\\" --include=*.py --include=*.md . | grep -v \"^./.git/\" | head -80",
+    "ok": true,
+    "output": " M README.md\n?? notes/\ntotal 24\ndrwxr-xr-x@ 11 user  staff  352 Nov 23 23:24 .\ndrwx------@  5 user  staff  160 Nov 23 23:24 ..\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:24 .claude\ndrwxr-xr-x@ 16 user  staff  512 Nov 23 23:24 .git\n-rw-r--r--@  1 user  staff  837 Nov 23 23:24 AGENTS.md\n-rw-r--r--@  1 user  staff   11 Nov 23 23:24 CLAUDE.md\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:24 docs\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:24 notes\n-rw-r--r--@  1 user  staff  355 Nov 23 23:24 README.md\ndrwxr-xr-x@  4 user  staff  128 Nov 23 23:24 src\ndrwxr-xr-x@  5 user  staff  160 Nov 23 23:24 tests\n./tests/__init__.py\n./tests/test_staging.py\n./tests/test_leaks.py\n./docs/playbooks/debugging.md\n./README.md\n./notes/todo.txt\n./AGENTS.md\n./CLAUDE.md\n./src/leaks.py\n./src/staging.py\n./tests/test_leaks.py:3:from leaks import leaks\n./tests/test_leaks.py:6:class LeakCheckTests(unittest.TestCase):\n./tests/test_leaks.py:7:    def test_a_home_folder_in_a_command_is_found(self):\n./tests/test_leaks.py:8:        actions = [{\"kind\": \"run\", \"target\": \"cat /home/dana/notes.txt\", \"output\": \"\"}]\n./tests/test_leaks.py:9:        self.assertEqual(leaks(actions, [\"/home/dana\"]), [\"/home/dana\"])\n./tests/test_leaks.py:13:        self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n./tests/test_leaks.py:17:        self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])\n./README.md:3:Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n./src/leaks.py:1:\"\"\"The leak check: a transcript is saved only when it names nothing that identifies the person who ran it.\"\"\"\n./src/leaks.py:5:def leaks(actions, secrets):\n./src/leaks.py:7:    {\"kind\", \"target\", \"output\"} records. secrets: the user name, the home folder and the like.\"\"\""
+  },
+  {
+    "kind": "run",
+    "target": "cat -A src/leaks.py | head -80; echo ----; cat tests/test_leaks.py; echo ----; cat docs/playbooks/debugging.md; echo ----; cat notes/todo.txt; echo ----; git log --oneline -3; git diff --stat",
+    "ok": true,
+    "output": "cat: illegal option -- A\nusage: cat [-belnstuv] [file ...]\n----\nimport unittest\n\nfrom leaks import leaks\n\n\nclass LeakCheckTests(unittest.TestCase):\n    def test_a_home_folder_in_a_command_is_found(self):\n        actions = [{\"kind\": \"run\", \"target\": \"cat /home/dana/notes.txt\", \"output\": \"\"}]\n        self.assertEqual(leaks(actions, [\"/home/dana\"]), [\"/home/dana\"])\n\n    def test_a_user_name_in_output_is_found_whatever_its_case(self):\n        actions = [{\"kind\": \"run\", \"target\": \"whoami\", \"output\": \"Dana\"}]\n        self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n\n    def test_a_clean_transcript_passes(self):\n        actions = [{\"kind\": \"run\", \"target\": \"python3 -m unittest\", \"output\": \"OK\"}]\n        self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n----\n---\nkind: playbook\nlast-reviewed: 2026-11-23\n---\n\n# Debugging\n\nHow an agent finds the unknown cause of a failure before it changes code. For a bug report, a failing test or CI run, or a flaky test.\n\n**In short:** build a fast repro that shows the failure on demand, before any theory: every run, or at a measured rate for a flaky failure. List several causes that a run could rule out, rank them, and test one change at a time. Keep the repro as the regression test, remove your instrumentation, and halt and report when the loop stalls.\n\n## Steps\n\n1. **Build the repro loop first.** Input: the failure, as a bug report, a failing test, or a failed CI run, whose failing step's log `gh run view RUN --log-failed` prints. RUN is the run's number: the number right after `/runs/` in its link, which `gh run list --limit 5` also lists. A job's link goes on past it, `/runs/<run>/job/<job>`; the job's number is not RUN. Make one command that shows the failure, fails the same way every run, and takes seconds, not minutes. Prefer a test over a session in the running app; prefer a small input over a large one. Run it three times. A flaky failure, one that fails only on some runs, gets a loop instead: run the command 20 times and count the failures. With none, run it 100 times. Output: the command, and the failure it prints every time, or for a flaky failure its count out of the runs. Do not form a theory yet.\n2. **List the causes.** Input: the repro and the code it runs, found with `python3 tools/symbols.py NAME src` or [INDEX.md](../../INDEX.md). Write at least three possible causes. For each, write the run that would rule it out and the result that would. Rank them, most likely first. Output: the ranked list.\n3. **Test one cause per run.** Input: the top cause still standing. Change one thing only, such as one input, one line or one setting, and run the repro. Write down the change, the result, and which causes the result rules out. Output: an updated list. Repeat this step.\n4. **Confirm the cause.** A cause is confirmed when one change makes the repro pass and undoing that change makes it fail again. For a flaky failure, pass means no failure in 100 runs of the loop, and fail means failures return at about step 1's rate. Leave the change undone: it is evidence, not the fix. Output: the cause, and the two runs that show it.\n5. **Keep the repro as the regression test.** Turn the repro into a test in the repository's suite, if it is not one already. It must fail on the code before the fix. For a flaky failure, it fails at least once in step 1's loop on the code before the fix. Output: the test.\n6. **Remove your instrumentation.** Delete every print, log line, breakpoint, temporary flag and scratch file you added. Check with `git status --short`, which also lists new files, and `git diff`, that none is left. Output: a working copy whose only change is the regression test.\n7. **Fix or hand on.** If you were asked only for the cause, go to step 8. If you were asked to fix it, and the fix passes the gate in [size the work](../size-the-work.md#the-gate), continue with [fix a bug](fix-a-bug.md) from its second step; once that fix is committed, run [defect escape analysis](escape-analysis.md), which checks whether a review covered the faulty code and, if one did, why it missed it. Otherwise go to step 8, and let the work be sized.\n8. **Report.** Say what the cause is, list the causes you ruled out and the run that ruled out each, and name the regression test. Mark each claim verified or inferred, and log a question you had to ask a person, as [procedure endings](../procedure-endings.md) says. By exception to that page's commit step, a regression test from a run that asked only for the cause stays uncommitted: name it in the report, for whoever fixes the bug. On the fix path, [fix a bug](fix-a-bug.md) commits it with the fix.\n\n## Halt and report\n\nStop and report, rather than guess, when:\n\n| When | Report |\n|---|---|\n| You cannot make the failure happen on demand, or a flaky failure does not fail once in 100 runs of the loop. | What you tried, what each attempt showed, and what you would need, such as data, an environment or a log. |\n| Every cause on the list is ruled out. | The list, the run that ruled out each, and what the runs suggest to look at next. |\n| The cause is in a second repository, or in `src/orders-service-v1`, which is kept read-only. | The cause and the evidence. Do not edit there. |\n| The fix would undo a recorded decision. | The cause, the decision, and the conflict. |\n\nNever ship a fix for a cause you have not confirmed, and never change code on a hunch to see if the failure goes away.\n\n## Rules\n\n| Rule | Enforced by |\n|---|---|\n| Build a repro that shows the failure on demand, every run or at a measured rate, before you form any theory. | `prose` |\n| Change one thing per run. | `prose` |\n| A cause is confirmed only when a change flips the repro both ways. | `prose` |\n| The report and the question-log entry follow [procedure endings](../procedure-endings.md); a regression test from a cause-only run stays uncommitted, named in the report. | `prose` |\n| Keep the repro as a regression test that fails on the code before the fix. | `prose` |\n| Remove all instrumentation before you finish. | `prose` |\n| Mark every claim in the report verified or inferred. | `eval:fix-a-bug` |\n| Never edit `src/orders-service-v1` while debugging; report a cause found there. | `shelved#an edit inside the shelved folder` |\n| Never edit a second repository while debugging; report a cause found there. | `prose` |\n| When the loop stalls, halt and report; never guess at a fix. | `prose` |\n\n## References\n\n- Andreas Zeller, [Introduction to Debugging](https://www.debuggingbook.org/html/Intro_Debugging.html), in *The Debugging Book*. Credited for steps 2 to 4: debugging as the scientific method, which invents a hypothesis, derives a prediction from it, tests the prediction and repeats until one hypothesis stands.\n----\nDraft, not ready to commit.\n----\n7761af6 Orders\n README.md | 2 ++\n 1 file changed, 2 insertions(+)"
+  },
+  {
+    "kind": "read",
+    "target": "src/leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -5; python3 -I -c \"\nimport sys; sys.path.insert(0,'src')\nfrom leaks import leaks\nprint(leaks([{'kind':'run','target':r'type C:\\Users\\dana\\notes.txt','output':''}], ['C:\\\\Users\\\\dana']))\nprint(leaks([{'kind':'run','target':'cat /home/dana/notes.txt','output':''}], ['/home/dana']))\nprint(leaks([{'kind':'run','target':r'type C:\\Users\\dana\\notes.txt','output':''}], ['/home/dana','dana']))\n\"",
+    "ok": false,
+    "output": "Exit code 1\n.....\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n  File \"<string>\", line 4\n    print(leaks([{'kind':'run','target':r'type C:\\Users\\dana\\notes.txt','output':''}], ['C:\\Users\\dana']))\n                                                                                                       ^\nSyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 2-3: truncated \\UXXXXXXXX escape"
+  },
+  {
+    "kind": "run",
+    "target": "cat <<'PYEOF' | python3 -I - \nimport sys; sys.path.insert(0, 'src')\nfrom leaks import leaks\nimport json\nt = [{'kind': 'run', 'target': 'type C:\\\\Users\\\\dana\\\\notes.txt', 'output': ''}]\nprint(\"transcript target:\", t[0]['target'])\nprint(\"json text:        \", json.dumps(t))\nprint(\"1 single-backslash secret:\", leaks(t, ['C:\\\\Users\\\\dana']))\nprint(\"2 double-backslash secret:\", leaks(t, ['C:\\\\\\\\Users\\\\\\\\dana']))\nprint(\"3 forward-slash secret:   \", leaks(t, ['C:/Users/dana']))\nprint(\"4 /home secret, posix path:\", leaks([{'kind': 'run', 'target': 'cat /home/dana/notes.txt', 'output': ''}], ['/home/dana']))\nprint(\"5 Windows path in output, single-backslash secret:\", leaks([{'kind': 'run', 'target': 'x', 'output': 'C:\\\\Users\\\\dana'}], ['C:\\\\Users\\\\dana']))\nPYEOF",
+    "ok": true,
+    "output": "transcript target: type C:\\Users\\dana\\notes.txt\njson text:         [{\"kind\": \"run\", \"target\": \"type C:\\\\Users\\\\dana\\\\notes.txt\", \"output\": \"\"}]\n1 single-backslash secret: []\n2 double-backslash secret: ['C:\\\\\\\\Users\\\\\\\\dana']\n3 forward-slash secret:    []\n4 /home secret, posix path: ['/home/dana']\n5 Windows path in output, single-backslash secret: []"
+  },
+  {
+    "kind": "run",
+    "target": "git status --short --ignored",
+    "ok": true,
+    "output": " M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The cause is in `src/leaks.py`, line 8. The check serializes the transcript with `json.dumps` and then searches that text for each secret. `json.dumps` escapes every backslash, so a Windows path in the transcript is stored as `C:\\\\Users\\\\dana`. A secret written as `C:\\Users\\dana` never appears in that text, so it is never found.\n\n```python\ntext = json.dumps(actions).lower()\nreturn [secret for secret in secrets if secret.lower() in text]\n```\n\n**Verified**, by running `leaks()` on a transcript whose target is `type C:\\Users\\dana\\notes.txt`:\n\n- The JSON text the check searches is `\"type C:\\\\Users\\\\dana\\\\notes.txt\"`.\n- Secret `C:\\Users\\dana` (single backslashes, the real path): not found, `[]`.\n- Secret `C:/Users/dana` (forward slashes): not found, `[]`.\n- Windows path in the output field, secret `C:\\Users\\dana`: not found, `[]`.\n- Secret `C:\\\\Users\\\\dana` (doubled backslashes, which matches the escaped JSON): found, `['C:\\\\\\\\Users\\\\\\\\dana']`. The caller has to write the secret in its escaped form for the check to catch it.\n- The POSIX case, `cat /home/dana/notes.txt` with secret `/home/dana`: found, as expected. Slashes are not escaped by `json.dumps`, which is why `/home` works and Windows paths don't.\n\n**Verified**: `python3 -m unittest` passes all 5 tests. The leak tests in `tests/test_leaks.py` cover only `/home/dana` and the user name `dana`, so no test exercises a Windows path, and the suite cannot catch this.\n\n**Inferred**: the fix belongs in the matching step, not the test. Matching against the raw strings, or against the JSON with backslashes unescaped, or normalizing both sides to one separator style, would each close the gap. I have not checked which one the other session prefers. I can't see the caller that builds the `secrets` list, so I can't tell whether it passes `C:\\Users\\dana` with single backslashes; if it does, this is the path that leaks.\n\nI made no changes to `src/` or anywhere else. The only commands I ran were reads and the in-memory repro, and `git status` still shows only the existing `README.md` edit and the untracked `notes/` folder.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

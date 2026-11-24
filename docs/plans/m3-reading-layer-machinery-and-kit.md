@@ -2166,7 +2166,7 @@ Not done: nothing
 Parked: Q49
 Next: the coordinator — B6 is finished; run B7's baseline on Q47's yes of 60 runs, then slice Z. The maintainer — answer Q49 for M4.
 
-### B7, proof attempts: stopped after the baseline
+### B7, proof attempts
 
 Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b7`, on branch `m3/b7`, at the driver tier, since it adds eval cases, which are machinery. The maintainer's order for lane B, B7 then B6, was recorded under "Changes after approval" and pushed to main before building, as `2cf1122`. Pull request #51 merged as `7721896` after CI passed on Linux, macOS and Windows. A fresh driver-tier session wrote the instruction reviews, and another the re-check; the slice's session wrote everything else. No paid run started: the maintainer's order stops B7 before its baseline, and no approval names a run count for it.
 
@@ -2209,9 +2209,36 @@ At that first stop, Q47 was parked, and the baseline and what follows from it we
 
 Proposed for the recording, repeating the first stop's proposal: before the first full recording, `evals/pool.py` pools by playbook, so B7's records stay out of the fix-a-bug table. It is in Q50's first option. red-team-lease's bare arm in that recording, 22 runs, stands in for its missing baseline.
 
-Not done: the three arms' recordings, 22 runs per case, that B7's rule now asks for, red-team-lease's baseline, and so criterion 25 and the records' half of criterion 61; these wait for the maintainer's answer to Q50.
-Parked: Q50
-Next: the maintainer — answer Q50 on the full recordings; slice Z waits for B7.
+At that second stop, Q50 was parked, and the three arms' recordings, red-team-lease's baseline, criterion 25 and the records' half of criterion 61 were not done.
+
+**Resumed again on 2026-11-23, after Q50.** Run unattended at the driver tier. The maintainer's yes was recorded as two dated entries under "Changes after approval" and pushed to main before any work, as `7b95979`: debugging's 132-run recording, and red team review's recording moved to M9. No file the eval hashes was edited, and no helper session was used.
+
+- **Verified, `evals/pool.py` pools by playbook:** pull request #52, built in the worktree `.claude/worktrees/m3-b7-pool`, merged as `5e63dd8` after CI passed on Linux, macOS and Windows. A record joins the table of the playbook it names, as the `eval_record` gate already pools. With no argument it prints a table per playbook. A new test in `tests/test_core.py` shows a second playbook's records and a baseline stay out of fix-a-bug's table, and the README's fix-a-bug table is unchanged.
+- **Verified, debugging's three arms on record:** in the worktree `.claude/worktrees/m3-b7-record`, made from `5e63dd8`, `python3 evals/run.py CASE --model haiku --runs 22 --budget 66` wrote `evals/runs/CASE/record.json` for debug-staging-reminder and debug-leak-check, on `claude-haiku-5-5` with Claude Code 2.1.331. That is 132 agent runs in one session, the count approved: every run wrote its transcript, none was refused, and no probe ran. No arm passed every grader in any run.
+
+| Case | Guided | Two-line | Bare |
+|---|---|---|---|
+| debug-staging-reminder | 0 of 22 | 0 of 22 | 0 of 21 |
+| debug-leak-check | 0 of 22 | 0 of 22 | 0 of 22 |
+| **Pooled** | **0 of 44** | **0 of 44** | **0 of 43** |
+
+- **Verified, one run dropped for a leak:** debug-staging-reminder's bare run 21 printed the operator's `PATH`, which held another account's home folder. `run.py`'s leak check looks for the operator's own name and home, so it passed; the transcript test in `tests/test_core.py` failed on it. The transcript was deleted before any commit, and `run.py --finish` rebuilt the record from the 131 runs on disk, after its pending file was restored from the record's own fields. So bare holds 21 runs in that case, and the record shows it. A run again would have passed the 132 approved. Earlier recordings hold no such path. When `run.py` should stop passing the operator's `PATH` is parked as Q52, which also notes that agents name the operator's settings path in some transcripts, B7's committed baseline among them.
+- **Verified, the transcript test reads home folders more narrowly:** it also failed on `/home/dana`, the invented owner in the debugging scaffold's leak-check fixture, and on lookalike names agents wrote in that case. It now skips `dana` as it skips `user`, and reads a folder name only as a plain ASCII word ending at a separator. It still fails on the dropped run's path. Since it is a test change, the records reach main through pull request #53, not a straight push.
+- **Verified, where the runs failed:** `report-names-the-causes-ruled-out` passed in no guided or two-line run and in 1 bare run, so no arm could pass every grader. Leaving that grader out, guided passes 5 of 44, two-line 44 and bare 0. In debug-staging-reminder, guided saw a test fail before editing code in 5 of 22 runs and two-line in 22. In debug-leak-check, guided reproduced the failure with a test in 0 of 22 runs and two-line in 22. Guided marked a claim verified in all 44 runs; bare in none.
+- **Verified, the guided arm seldom read its playbook:** 3 of 22 runs opened it in debug-staging-reminder and 5 of 22 in debug-leak-check. Its contract copy says where playbooks live, but sends no failure to this one. The two lines sit in the file every run loads.
+- **Inferred, why two lines won:** first, the routing above. Second, the page's step 1 asks for one command that shows the failure and only prefers a test; two lines ask for a test outright. Even the five guided runs that read the page in debug-leak-check reproduced the failure without a test (verified). Third, the page lists ruled-out causes in step 8, which its fix path skips, so the fix case's grader asks for more than the page does there; in the cause-only case, none of the five runs that read the page listed them either (verified). So the result says more about the cases' routing and graders than about the page's method, which these runs mostly never reached.
+- **Verified, B7's outcome for debugging:** the records do not pass the gate, which needs the guided arm to beat bare in each case and two lines pooled (p = 1 on both). The page stays unproven with `prove-by: M4`, which its page says; no proof key changed, and no failed-attempt record is needed, since `prove-by` does not move. When to fix the cases and record again is parked as Q51, with M4 recommended.
+- **Verified, B7's outcome for red team review:** unproven, with `prove-by: M9`, its recording deferred to M9 by the maintainer's decision, as the dated entry says. Its baseline, red-team-fail-closed's 10 bare runs, stays on record. red-team-lease has no baseline or recording.
+- **Verified, criterion 25:** both pages have a baseline record (debugging in both cases, red team review in one) and an outcome the plan names: debugging unproven by B7's rule, red team review unproven with its recording deferred to M9.
+- **Verified, criterion 61's records' half:** each debugging record's `covers` list holds only its case, acceptance test, scaffold, own arm files, the harness and the playbook, and its hash matches those files today. Neither page is proven, so the gate holds neither.
+- **Verified, kept to the rules:** with the files staged, `python3 ws.py selftest` passes and `python3 ws.py check` exits 0, with only the known warning on fix a bug's eval record; `python3 -m unittest discover -b tests` ran 786 tests, 3 skipped, OK; `python3 tests/hook_cases.py` passes 93 of 93; `python3 evals/grade.py --recorded` finds no difference. The private ledger's check prints 0 unmapped of 223. The run-written files were added to the edit ledger with `python3 ws.py ledger --add`.
+- **Known defects, for the docs audit:** the eval page's proof-attempts section still says no run is on record, and the README's evals row says the four cases wait for their first runs. Both are guidance pages that need an instruction review, so this slice left them.
+
+Proposed for M4, as template rule 7 asks: before debugging is recorded again, its contract copy routes a failure to the playbook, as the real contract will once slice Z adds the queued links; the page's step 1 asks for the repro as a test; and the fix case either drops the ruled-out grader or the page's fix path keeps step 8's list. Each edit stales only B7's own records.
+
+Not done: nothing
+Parked: Q51, Q52
+Next: the maintainer — answer Q52 before slice Z's R2, since a run that leaks is lost; then the coordinator starts slice Z in lane B. Q51 and B7's two known defects can wait for M4 and the docs audit.
 
 ### Queued for slice Z
 

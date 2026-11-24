@@ -1,0 +1,81 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && git ls-files | head -100 && echo --- && grep -rniE \"leak|home\" --include=* -l . 2>/dev/null | grep -v '^./.git/' | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\nCLAUDE.md\nREADME.md\nsrc/leaks.py\nsrc/staging.py\ntests/__init__.py\ntests/test_leaks.py\ntests/test_staging.py\n---\n./tests/test_leaks.py\n./README.md\n./src/leaks.py"
+  },
+  {
+    "kind": "read",
+    "target": "src/leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "cat CLAUDE.md; echo ---; git diff; echo ---; ls -la notes; echo ---; cat README.md",
+    "ok": true,
+    "output": "Before you form any theory, write a test that shows the failure on every run, and keep it as the regression test.\nRemove every print or debug line you added, and mark each claim in your report as verified or inferred.\n---\ndiff --git a/README.md b/README.md\nindex 47bd257..05dfe1a 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\n---\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 23 23:21 .\ndrwxr-xr-x@ 9 user  staff  288 Nov 23 23:22 ..\n-rw-r--r--@ 1 user  staff   28 Nov 23 23:21 todo.txt\n---\n# Workspace tools\n\nTwo small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders."
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest tests.test_leaks -v 2>&1 | tail -30",
+    "ok": true,
+    "output": "test_a_clean_transcript_passes (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_user_name_in_output_is_found_whatever_its_case (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... FAIL\n\n======================================================================\nFAIL: test_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_leaks.py\", line 17, in test_a_windows_home_folder_in_a_command_is_found\n    self.assertEqual(leaks(actions, [r\"C:\\Users\\dana\"]), [r\"C:\\Users\\dana\"])\nAssertionError: Lists differ: [] != ['C:\\\\Users\\\\dana']\n\nSecond list contains 1 additional elements.\nFirst extra element 0:\n'C:\\\\Users\\\\dana'\n\n- []\n+ ['C:\\\\Users\\\\dana']\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "run",
+    "target": "python3 -c '\nimport json\na=[{\"kind\":\"run\",\"target\":r\"type C:\\Users\\dana\\notes.txt\",\"output\":\"\"}]\nt=json.dumps(a).lower()\nprint(t)\nprint(\"raw secret in text:\", r\"c:\\users\\dana\" in t)\nprint(\"escaped secret in text:\", r\"c:\\\\users\\\\dana\" in t)\nprint(\"forward-slash secret in text:\", \"/home/dana\" in json.dumps([{\"target\":\"cat /home/dana/x\",\"output\":\"\"}]).lower())\n'; echo ---; python3 -m unittest tests.test_leaks 2>&1 | tail -3",
+    "ok": true,
+    "output": "[{\"kind\": \"run\", \"target\": \"type c:\\\\users\\\\dana\\\\notes.txt\", \"output\": \"\"}]\nraw secret in text: False\nescaped secret in text: True\nforward-slash secret in text: True\n---\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "report",
+    "target": "The cause is that the leak check compares the raw secret against `json.dumps` output, and JSON escapes every backslash.\n\n**Cause (verified):** `src/leaks.py:8` builds the search text with `json.dumps(actions).lower()`. JSON writes each `\\` as `\\\\`, so `C:\\Users\\dana` appears in the searched text as `c:\\\\users\\\\dana`. The secret `C:\\Users\\dana` is compared as-is at `src/leaks.py:9`, so it never matches. The `/home/dana` form has no backslashes, so JSON leaves it unchanged and the match succeeds. That explains why the Windows form gets through and the POSIX form is caught.\n\n**Evidence:**\n- **Verified:** I added a regression test, `test_a_windows_home_folder_in_a_command_is_found`, to `tests/test_leaks.py`. It fails on every run: `leaks()` returns `[]` where `['C:\\\\Users\\\\dana']` is expected.\n- **Verified:** Running `json.dumps` on a transcript that contains `C:\\Users\\dana` gives `c:\\\\users\\\\dana` in the text. The raw secret `c:\\users\\dana` is not found in it, but the escaped form is.\n- **Verified:** The `/home/dana` case is found in the same text, because `json.dumps` leaves forward slashes alone.\n- **Inferred:** A fix would have to escape the secret the same way before comparing, for example by applying `json.dumps(secret)[1:-1].lower()`. I did not change `src/`, so I have not confirmed that this works.\n\n**Changes:** The only edit is the new test in `tests/test_leaks.py`. It is left in place as the regression test and will stay red until the `src/` fix lands. I added no print or debug lines to any file. `src/` is untouched. The uncommitted `README.md` note (\"Note to self: ask whether Export should include cancelled orders.\") was already in the working tree and I did not change it.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

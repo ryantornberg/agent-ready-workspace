@@ -1,0 +1,123 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && echo --- && ls -la && echo --- && ls -la .claude 2>/dev/null; echo ---; find . -path ./.git -prune -o -type f -print | head -100",
+    "ok": true,
+    "output": " M README.md\n?? notes/\n---\ntotal 16\ndrwxr-xr-x@  9 user  staff  288 Nov 23 23:17 .\ndrwx------@  5 user  staff  160 Nov 23 23:17 ..\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:17 .claude\ndrwxr-xr-x@ 16 user  staff  512 Nov 23 23:17 .git\n-rw-r--r--@  1 user  staff  218 Nov 23 23:17 CLAUDE.md\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:17 notes\n-rw-r--r--@  1 user  staff  355 Nov 23 23:17 README.md\ndrwxr-xr-x@  4 user  staff  128 Nov 23 23:17 src\ndrwxr-xr-x@  5 user  staff  160 Nov 23 23:17 tests\n---\ntotal 0\ndrwxr-xr-x@ 3 user  staff   96 Nov 23 23:17 .\ndrwxr-xr-x@ 9 user  staff  288 Nov 23 23:17 ..\ndrwx------@ 2 user  staff   64 Nov 23 23:17 .cc-writes\n---\n./tests/__init__.py\n./tests/test_staging.py\n./tests/test_leaks.py\n./README.md\n./notes/todo.txt\n./CLAUDE.md\n./src/leaks.py\n./src/staging.py"
+  },
+  {
+    "kind": "run",
+    "target": "grep -rIl -i \"stag\" --exclude-dir=.git . ; echo ---; grep -rIn -i \"git commit\" --exclude-dir=.git . 2>/dev/null | head -30; echo ---; ls -la ~/.claude/hooks 2>/dev/null | head; grep -n -i \"hook\" ~/.claude/settings.json 2>/dev/null | head -20",
+    "ok": false,
+    "output": "Permission to use Bash with command head -30; echo ---; ls -la ~/.claude/hooks has been denied."
+  },
+  {
+    "kind": "read",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "src/leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "notes/todo.txt",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "CLAUDE.md",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -m unittest discover -s tests -t . 2>&1 | tail -40",
+    "ok": true,
+    "output": ".....\n======================================================================\nFAIL: test_a_message_containing_a_flag_letter_is_not_a_flag (tests.test_staging.StagingReminderTests) [git commit -m\"add export handler\"]\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_staging.py\", line 20, in test_a_message_containing_a_flag_letter_is_not_a_flag\n    self.assertFalse(stages_all(command))\nAssertionError: True is not false\n\n======================================================================\nFAIL: test_a_message_containing_a_flag_letter_is_not_a_flag (tests.test_staging.StagingReminderTests) [git commit -m \"-a note\"]\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_staging.py\", line 20, in test_a_message_containing_a_flag_letter_is_not_a_flag\n    self.assertFalse(stages_all(command))\nAssertionError: True is not false\n\n----------------------------------------------------------------------\nRan 6 tests in 0.000s\n\nFAILED (failures=2)"
+  },
+  {
+    "kind": "run",
+    "target": "python3 -c 'import shlex; print(shlex.split(\"git commit -m\\\"add export handler\\\"\")); print(shlex.split(\"git commit -m \\\"-a note\\\"\"))'",
+    "ok": true,
+    "output": "['git', 'commit', '-madd export handler']\n['git', 'commit', '-m', '-a note']"
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -m unittest discover -s tests -t . -v 2>&1 | tail -15; echo ---; git diff --stat; git status --short",
+    "ok": true,
+    "output": "test_a_clean_transcript_passes (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_user_name_in_output_is_found_whatever_its_case (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_message_containing_a_flag_letter_is_not_a_flag (tests.test_staging.StagingReminderTests) ... ok\ntest_files_named_one_by_one_pass (tests.test_staging.StagingReminderTests) ... ok\ntest_staging_everything_is_caught (tests.test_staging.StagingReminderTests) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.000s\n\nOK\n---\n README.md             |  2 ++\n src/staging.py        | 15 +++++++++++++--\n tests/test_staging.py |  5 +++++\n 3 files changed, 20 insertions(+), 2 deletions(-)\n M README.md\n M src/staging.py\n M tests/test_staging.py\n?? notes/"
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -c '\nfrom staging import stages_all\ncases = {\"git commit -m\\\"x\\\" -a\": True, \"git commit -ma\\\"x\\\"\": False, \"git commit -m -a\": False, \"git commit -am\\\"x\\\"\": True, \"git add -A\": True, \"git add src/staging.py\": False}\nfor c, want in cases.items(): print(stages_all(c) == want, repr(c), stages_all(c))'; git add src/staging.py tests/test_staging.py && git commit -q -F - <<'EOF'\nFix staging reminder firing on -m messages containing flag letters\n\nshlex strips the quotes from git commit -m\"add export handler\", leaving\none word \"-madd export handler\". Every letter in a short-option cluster\nwas treated as a flag, so the \"a\" in the message matched commit's -a.\nA value-taking option (-m, -F, -C, -c, -t) now ends its cluster, and a\nstandalone value option consumes the next word.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git status --short",
+    "ok": true,
+    "output": "True 'git commit -m\"x\" -a' True\nTrue 'git commit -ma\"x\"' False\nTrue 'git commit -m -a' False\nTrue 'git commit -am\"x\"' True\nTrue 'git add -A' True\nTrue 'git add src/staging.py' False\n64958a0 Fix staging reminder firing on -m messages containing flag letters\n287d82d Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The reminder fired because of a false positive in `src/staging.py`, and it's fixed in commit `64958a0`.\n\n**Cause (verified):** The checker strips quotes with `shlex`, so `git commit -m\"add export handler\"` becomes the single word `-madd export handler`. The checker reads every letter in a short-option cluster as a flag, so the `a` in \"add\" matched commit's `-a` (stage all). The same bug hits `git commit -m \"-a note\"`, where the message is a separate word that starts with `-`.\n\n**Fix (verified by tests):**\n- Short-option parsing stops at a value-taking option (`m`, `F`, `C`, `c`, `t` for commit). Whatever follows it in the cluster is the value.\n- A value option that stands alone consumes the next word.\n- Real stage-all forms still match: `-a`, `-am \"x\"`, `-A`, `--all`, `.`.\n\n**Regression test:** `tests/test_staging.py::test_a_message_containing_a_flag_letter_is_not_a_flag`. I wrote it before the fix and it failed on the reported command and on `-m \"-a note\"`. It passes now, along with the other five tests. I also checked `git commit -m\"x\" -a` (true), `git commit -ma\"x\"` (false), and `git commit -m -a` (false), which are all as expected.\n\n**Commit:** only `src/staging.py` and `tests/test_staging.py`. I left the pre-existing `README.md` change and the untracked `notes/` alone.\n\n**Claims:**\n- Verified: the failing tokenization (`shlex.split` output shown above), the test failures before the fix, and the test results after it.\n- Inferred: that the live reminder runs this module. I found no hook in the repo that emits the reminder, and I couldn't read `~/.claude` to check. The module's docstring names the staging reminder, and its logic matches the command you described.\n- Not changed, inferred from reading the code: `git add -- .` returns false, because the loop stops at `--` before it sees `.`. It stages everything, so this is a possible false negative. I did not test or change it, since it's outside the reported bug.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "no debug output left in the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

@@ -1,0 +1,132 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && echo \"--- log\" && git log --oneline -5 && echo \"--- hooks dir\" && ls -la .git/hooks | grep -v sample; echo \"--- config\" && git config --list --show-origin | grep -v -i token; echo \"--- .claude\" && ls -la .claude 2>/dev/null; cat .claude/settings.json 2>/dev/null; echo \"--- user settings\" && cat ~/.claude/settings.json 2>/dev/null | head -100",
+    "ok": false,
+    "output": "Permission to use Bash with command grep -v -i token; echo \"--- .claude\" && ls -la .claude ; cat .claude/settings.json ; echo \"--- user settings\" && cat ~/.claude/settings.json has been denied."
+  },
+  {
+    "kind": "run",
+    "target": "git status --short && git log --oneline -5 && ls -la .git/hooks",
+    "ok": true,
+    "output": " M README.md\n?? notes/\nb05a2de Orders\ntotal 128\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:19 .\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:19 ..\n-rwxr-xr-x@  1 user  staff   478 Nov 23 23:19 applypatch-msg.sample\n-rwxr-xr-x@  1 user  staff   896 Nov 23 23:19 commit-msg.sample\n-rwxr-xr-x@  1 user  staff  4726 Nov 23 23:19 fsmonitor-watchman.sample\n-rwxr-xr-x@  1 user  staff   189 Nov 23 23:19 post-update.sample\n-rwxr-xr-x@  1 user  staff   424 Nov 23 23:19 pre-applypatch.sample\n-rwxr-xr-x@  1 user  staff  1649 Nov 23 23:19 pre-commit.sample\n-rwxr-xr-x@  1 user  staff   416 Nov 23 23:19 pre-merge-commit.sample\n-rwxr-xr-x@  1 user  staff  1374 Nov 23 23:19 pre-push.sample\n-rwxr-xr-x@  1 user  staff  4898 Nov 23 23:19 pre-rebase.sample\n-rwxr-xr-x@  1 user  staff   544 Nov 23 23:19 pre-receive.sample\n-rwxr-xr-x@  1 user  staff  1492 Nov 23 23:19 prepare-commit-msg.sample\n-rwxr-xr-x@  1 user  staff  2783 Nov 23 23:19 push-to-checkout.sample\n-rwxr-xr-x@  1 user  staff  2308 Nov 23 23:19 sendemail-validate.sample\n-rwxr-xr-x@  1 user  staff  3650 Nov 23 23:19 update.sample"
+  },
+  {
+    "kind": "run",
+    "target": "git config --list --show-origin && ls -la .claude",
+    "ok": true,
+    "output": "file:.git/config\tcore.repositoryformatversion=0\nfile:.git/config\tcore.filemode=true\nfile:.git/config\tcore.bare=false\nfile:.git/config\tcore.logallrefupdates=true\nfile:.git/config\tcore.ignorecase=true\nfile:.git/config\tcore.precomposeunicode=true\nfile:.git/config\tuser.name=eval\nfile:.git/config\tuser.email=eval@example.invalid\ncommand line:\tsafe.directory=.\ncommand line:\tsafe.directory=*\ncommand line:\thttp.proxyauthmethod=basic\ncommand line:\tcredential.http://127.0.0.1:55706.helper=\ntotal 0\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:19 .\ndrwxr-xr-x@ 11 user  staff  352 Nov 23 23:19 ..\ndrwx------@  2 user  staff   64 Nov 23 23:19 .cc-writes"
+  },
+  {
+    "kind": "read",
+    "target": "~/.claude/settings.json",
+    "ok": false
+  },
+  {
+    "kind": "run",
+    "target": "ls -la ~/.claude/hooks ~/.claude/skills 2>&1 | head -50; ls ~/dotfiles/claude/.claude 2>&1",
+    "ok": false,
+    "output": "Permission to use Bash with command ls -la ~/.claude/hooks ~/.claude/skills 2>&1 has been denied."
+  },
+  {
+    "kind": "run",
+    "target": "find . -path ./.git -prune -o -type f -print && echo \"--- grep\" && grep -rn -i \"git add\\|stage\\|commit\" --exclude-dir=.git . | head -40; echo \"--- which git\" && which -a git",
+    "ok": true,
+    "output": "./tests/__init__.py\n./tests/test_staging.py\n./tests/test_leaks.py\n./docs/playbooks/debugging.md\n./README.md\n./notes/todo.txt\n./AGENTS.md\n./CLAUDE.md\n./src/leaks.py\n./src/staging.py\n--- grep\n./tests/test_staging.py:3:from staging import stages_all\n./tests/test_staging.py:8:        for command in (\"git add -A\", \"git add --all\", \"git add .\", \"git commit -a -m 'fix'\", \"git commit -am 'fix'\"):\n./tests/test_staging.py:10:                self.assertTrue(stages_all(command))\n./tests/test_staging.py:13:        for command in (\"git add src/staging.py\", \"git commit -m 'fix the reminder'\", \"git status\", \"ls -A\"):\n./tests/test_staging.py:15:                self.assertFalse(stages_all(command))\n./docs/playbooks/debugging.md:20:7. **Fix or hand on.** If you were asked only for the cause, go to step 8. If you were asked to fix it, and the fix passes the gate in [size the work](../size-the-work.md#the-gate), continue with [fix a bug](fix-a-bug.md) from its second step; once that fix is committed, run [defect escape analysis](escape-analysis.md), which checks whether a review covered the faulty code and, if one did, why it missed it. Otherwise go to step 8, and let the work be sized.\n./docs/playbooks/debugging.md:21:8. **Report.** Say what the cause is, list the causes you ruled out and the run that ruled out each, and name the regression test. Mark each claim verified or inferred, and log a question you had to ask a person, as [procedure endings](../procedure-endings.md) says. By exception to that page's commit step, a regression test from a run that asked only for the cause stays uncommitted: name it in the report, for whoever fixes the bug. On the fix path, [fix a bug](fix-a-bug.md) commits it with the fix.\n./docs/playbooks/debugging.md:43:| The report and the question-log entry follow [procedure endings](../procedure-endings.md); a regression test from a cause-only run stays uncommitted, named in the report. | `prose` |\n./README.md:3:Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n./notes/todo.txt:1:Draft, not ready to commit.\n./AGENTS.md:12:- Uncommitted changes you did not make belong to another session. Leave them as they are, and keep them out of your commit.\n./AGENTS.md:13:- This copy has no remote. Where a procedure says to push, commit and stop there.\n./AGENTS.md:18:- Stage files by name. Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder.\n./src/staging.py:1:\"\"\"The staging reminder: does a git command stage every change in the folder, rather than files by name?\"\"\"\n./src/staging.py:4:# The options that stage everything, for each git subcommand that has them.\n./src/staging.py:5:STAGE_ALL = {\"add\": {\"-A\", \"--all\", \".\"}, \"commit\": {\"-a\", \"--all\"}}\n./src/staging.py:7:SHORT = {\"add\": \"A\", \"commit\": \"a\"}\n./src/staging.py:10:def stages_all(command):\n./src/staging.py:11:    \"\"\"True when the command stages every change: git add -A, git add ., git commit -a, git commit -am \"x\".\"\"\"\n./src/staging.py:16:    if len(words) < 2 or words[0] != \"git\" or words[1] not in STAGE_ALL:\n./src/staging.py:22:        if word in STAGE_ALL[subcommand]:\n--- which git\n/usr/bin/git"
+  },
+  {
+    "kind": "read",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "docs/playbooks/debugging.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -c '\nimport shlex\nfrom staging import stages_all\ncmd = \"git commit -m\\\"add export handler\\\"\"\nprint(\"shlex words:\", shlex.split(cmd))\nprint(\"stages_all:\", stages_all(cmd))\n' && echo \"--- existing tests\" && PYTHONPATH=src python3 -m unittest -v 2>&1 | tail -5",
+    "ok": true,
+    "output": "shlex words: ['git', 'commit', '-madd export handler']\nstages_all: True\n--- existing tests\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -m unittest 2>&1 | tail -25",
+    "ok": true,
+    "output": "Traceback (most recent call last):\n  File \"tests/test_staging.py\", line 22, in test_message_text_is_not_read_as_options\n    self.assertFalse(stages_all(command))\nAssertionError: True is not false\n\n======================================================================\nFAIL: test_message_text_is_not_read_as_options (tests.test_staging.StagingReminderTests) [git commit -m -a]\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_staging.py\", line 22, in test_message_text_is_not_read_as_options\n    self.assertFalse(stages_all(command))\nAssertionError: True is not false\n\n======================================================================\nFAIL: test_message_text_is_not_read_as_options (tests.test_staging.StagingReminderTests) [git commit -ma]\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_staging.py\", line 22, in test_message_text_is_not_read_as_options\n    self.assertFalse(stages_all(command))\nAssertionError: True is not false\n\n----------------------------------------------------------------------\nRan 7 tests in 0.001s\n\nFAILED (failures=3)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -m unittest -v 2>&1 | tail -15 && echo \"--- no PYTHONPATH check\" && python3 -m unittest 2>&1 | tail -3",
+    "ok": true,
+    "output": "test_a_clean_transcript_passes (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_user_name_in_output_is_found_whatever_its_case (tests.test_leaks.LeakCheckTests) ... ok\ntest_files_named_one_by_one_pass (tests.test_staging.StagingReminderTests) ... ok\ntest_message_text_is_not_read_as_options (tests.test_staging.StagingReminderTests) ... ok\ntest_short_option_cluster_before_a_value_still_stages (tests.test_staging.StagingReminderTests) ... ok\ntest_staging_everything_is_caught (tests.test_staging.StagingReminderTests) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.000s\n\nOK\n--- no PYTHONPATH check\nRan 7 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/staging.py tests/test_staging.py && echo \"--- staged\" && git diff --cached --name-only && echo \"--- unstaged/other\" && git status --short",
+    "ok": true,
+    "output": "--- staged\nsrc/staging.py\ntests/test_staging.py\n--- unstaged/other\n M README.md\nM  src/staging.py\nM  tests/test_staging.py\n?? notes/"
+  },
+  {
+    "kind": "run",
+    "target": "git commit -F - <<'EOF'\nFix staging reminder firing on -m message text\n\nshlex splits git commit -m\"add export handler\" into one word,\n-madd export handler. The cluster check read every letter after the\ndash, so the a in \"add\" was taken for the -a option and the reminder\nfired on a command that stages nothing.\n\nA short option that takes a value (m, F, c, C, t for commit) now ends\nthe cluster, and its value is skipped whether it is attached or in the\nnext word. Long options that take a value (--message, --file, ...) skip\nthe next word the same way.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2 && git show --stat HEAD | tail -4 && git status --short",
+    "ok": true,
+    "output": "[main 5713f66] Fix staging reminder firing on -m message text\n 2 files changed, 33 insertions(+), 2 deletions(-)\n5713f66 Fix staging reminder firing on -m message text\nb05a2de Orders\n\n src/staging.py        | 25 +++++++++++++++++++++++--\n tests/test_staging.py | 10 ++++++++++\n 2 files changed, 33 insertions(+), 2 deletions(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The false reminder came from a bug in `src/staging.py`, and the fix is committed as `5713f66` on `main`.\n\n**Cause (verified):** `shlex` reads `git commit -m\"add export handler\"` as one word, `-madd export handler`, because `-m` takes its message attached. The cluster check then scanned every letter after the dash, found the `a` in \"add\", and reported `-a`. A command that stages nothing was flagged.\n\n**Fix:** a short option that takes a value now ends the cluster, and its value is skipped whether it is attached or in the next word. For `git commit` that covers `m F c C t`. Long value options such as `--message` and `--file` skip the next word the same way. Real `-a` clusters such as `-am\"x\"` still count as staging everything.\n\n**Tests:** I added three cases to `tests/test_staging.py`. Message text is not read as options, a `-a` after `-m` is still treated as a value, and `-am\"...\"` still stages. Before the fix, three subtests failed, and after it all 7 tests pass with `python3 -m unittest`.\n\n**Commit:** only `src/staging.py` and `tests/test_staging.py` were staged, by name, with the Co-Authored-By line you specified. `README.md` (modified) and `notes/` (untracked) were left alone, since they belong to another session.\n\n**Not verified:** I could not read `~/.claude`, so I did not confirm which hook invokes `stages_all` on each Bash call. The link comes from the function's docstring and the README. Only the function's behaviour is verified; the hook wiring is inferred.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "no debug output left in the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

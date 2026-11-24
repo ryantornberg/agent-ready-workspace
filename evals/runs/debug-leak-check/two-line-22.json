@@ -1,0 +1,75 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && git ls-files | head -100 && grep -rniE \"leak|home|C:\\\\\\\\\\\\\\\\Users|/home/\" --include=* -l . --exclude-dir=.git | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\nCLAUDE.md\nREADME.md\nsrc/leaks.py\nsrc/staging.py\ntests/__init__.py\ntests/test_leaks.py\ntests/test_staging.py\n./tests/test_leaks.py\n./README.md\n./src/leaks.py"
+  },
+  {
+    "kind": "read",
+    "target": "src/leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "CLAUDE.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 - <<'EOF'\nimport re\np = \"tests/test_leaks.py\"\ns = open(p).read()\nnew = '''    def test_a_windows_home_folder_in_a_command_is_found(self):\n        actions = [{\"kind\": \"run\", \"target\": \"type C:\\\\\\\\Users\\\\\\\\dana\\\\\\\\notes.txt\", \"output\": \"\"}]\n        self.assertEqual(leaks(actions, [\"C:\\\\\\\\Users\\\\\\\\dana\"]), [\"C:\\\\\\\\Users\\\\\\\\dana\"])\n\n'''\ns = s.replace(\"    def test_a_clean_transcript_passes\", new + \"    def test_a_clean_transcript_passes\")\nopen(p, \"w\").write(s)\nEOF\nsed -n 15,20p tests/test_leaks.py; cd tests/.. && PYTHONPATH=src python3 -m unittest tests.test_leaks -v 2>&1 | tail -25",
+    "ok": true,
+    "output": "    def test_a_windows_home_folder_in_a_command_is_found(self):\n        actions = [{\"kind\": \"run\", \"target\": \"type C:\\\\Users\\\\dana\\\\notes.txt\", \"output\": \"\"}]\n        self.assertEqual(leaks(actions, [\"C:\\\\Users\\\\dana\"]), [\"C:\\\\Users\\\\dana\"])\n\n    def test_a_clean_transcript_passes(self):\n        actions = [{\"kind\": \"run\", \"target\": \"python3 -m unittest\", \"output\": \"OK\"}]\ntest_a_clean_transcript_passes (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_user_name_in_output_is_found_whatever_its_case (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... FAIL\n\n======================================================================\nFAIL: test_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_leaks.py\", line 17, in test_a_windows_home_folder_in_a_command_is_found\n    self.assertEqual(leaks(actions, [\"C:\\\\Users\\\\dana\"]), [\"C:\\\\Users\\\\dana\"])\nAssertionError: Lists differ: [] != ['C:\\\\Users\\\\dana']\n\nSecond list contains 1 additional elements.\nFirst extra element 0:\n'C:\\\\Users\\\\dana'\n\n- []\n+ ['C:\\\\Users\\\\dana']\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "run",
+    "target": "python3 -c '\nimport json\na=[{\"kind\":\"run\",\"target\":\"type C:\\\\Users\\\\dana\\\\notes.txt\",\"output\":\"\"}]\nt=json.dumps(a).lower()\nprint(\"serialized text contains:\", \"c:\\\\\\\\users\\\\\\\\dana\" in t)\nprint(\"secret as written contains:\", \"c:\\\\users\\\\dana\" in t)\nprint(\"posix secret contains:\", \"/home/dana\" in json.dumps([{\"target\":\"cat /home/dana/x\",\"output\":\"\"}]).lower())\n'; git status --short",
+    "ok": true,
+    "output": "serialized text contains: True\nsecret as written contains: False\nposix secret contains: True\n M README.md\n M tests/test_leaks.py\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "**Cause:** `leaks()` in `src/leaks.py:8` searches `json.dumps(actions)` rather than the raw text. `json.dumps` escapes each backslash, so `C:\\Users\\dana` appears in the searched text as `c:\\\\users\\\\dana` with doubled backslashes. The secret `C:\\Users\\dana` is lowercased but never escaped, so the substring test never matches. Forward-slash paths have no characters that JSON escapes, so `/home/dana` is found.\n\n**Verified:**\n- The new regression test fails on every run. Result: `AssertionError: Lists differ: [] != ['C:\\\\Users\\\\dana']`.\n- Running the serialization directly: the serialized transcript contains `c:\\\\users\\\\dana` (doubled) and does not contain `c:\\users\\dana`. The `/home/dana` check finds it.\n\n**Inferred (not tested):**\n- Any secret containing `\"`, a control character, or non-ASCII text would have the same mismatch, since `json.dumps` escapes those too. Non-ASCII user names would be written as `\\uXXXX`.\n\n**What I changed:**\n- Added `test_a_windows_home_folder_in_a_command_is_found` to `tests/test_leaks.py`. It is the regression test you asked for, and it stays in place. The CLAUDE.md asked for it before any theory, so I wrote it first.\n- I did not touch `src/`. I added no print or debug lines.\n\nThe fix belongs to the other session. The likely direction is to search the raw string values of the records rather than their JSON encoding, but I have not verified that.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

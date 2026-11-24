@@ -1,0 +1,77 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && find . -path ./.git -prune -o -type f -print | grep -v node_modules | head -100 && grep -rniE \"leak|home|/home/|Users\" --include=* -I . --exclude-dir=.git --exclude-dir=node_modules | head -60",
+    "ok": true,
+    "output": " M README.md\n?? notes/\n./tests/__init__.py\n./tests/test_staging.py\n./tests/test_leaks.py\n./README.md\n./notes/todo.txt\n./CLAUDE.md\n./src/leaks.py\n./src/staging.py\n./tests/test_leaks.py:3:from leaks import leaks\n./tests/test_leaks.py:6:class LeakCheckTests(unittest.TestCase):\n./tests/test_leaks.py:7:    def test_a_home_folder_in_a_command_is_found(self):\n./tests/test_leaks.py:8:        actions = [{\"kind\": \"run\", \"target\": \"cat /home/dana/notes.txt\", \"output\": \"\"}]\n./tests/test_leaks.py:9:        self.assertEqual(leaks(actions, [\"/home/dana\"]), [\"/home/dana\"])\n./tests/test_leaks.py:13:        self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n./tests/test_leaks.py:17:        self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])\n./README.md:3:Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n./src/leaks.py:1:\"\"\"The leak check: a transcript is saved only when it names nothing that identifies the person who ran it.\"\"\"\n./src/leaks.py:5:def leaks(actions, secrets):\n./src/leaks.py:7:    {\"kind\", \"target\", \"output\"} records. secrets: the user name, the home folder and the like.\"\"\""
+  },
+  {
+    "kind": "run",
+    "target": "cat src/leaks.py && echo ---TEST--- && cat tests/test_leaks.py && echo ---CLAUDE--- && cat CLAUDE.md && echo ---NOTES--- && cat notes/todo.txt && ls -la tests && cat tests/__init__.py",
+    "ok": true,
+    "output": "\"\"\"The leak check: a transcript is saved only when it names nothing that identifies the person who ran it.\"\"\"\nimport json\n\n\ndef leaks(actions, secrets):\n    \"\"\"The secrets that appear anywhere in the transcript, ignoring case. actions: the transcript, a list of\n    {\"kind\", \"target\", \"output\"} records. secrets: the user name, the home folder and the like.\"\"\"\n    text = json.dumps(actions).lower()\n    return [secret for secret in secrets if secret.lower() in text]\n---TEST---\nimport unittest\n\nfrom leaks import leaks\n\n\nclass LeakCheckTests(unittest.TestCase):\n    def test_a_home_folder_in_a_command_is_found(self):\n        actions = [{\"kind\": \"run\", \"target\": \"cat /home/dana/notes.txt\", \"output\": \"\"}]\n        self.assertEqual(leaks(actions, [\"/home/dana\"]), [\"/home/dana\"])\n\n    def test_a_user_name_in_output_is_found_whatever_its_case(self):\n        actions = [{\"kind\": \"run\", \"target\": \"whoami\", \"output\": \"Dana\"}]\n        self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n\n    def test_a_clean_transcript_passes(self):\n        actions = [{\"kind\": \"run\", \"target\": \"python3 -m unittest\", \"output\": \"OK\"}]\n        self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n---CLAUDE---\nBefore you form any theory, write a test that shows the failure on every run, and keep it as the regression test.\nRemove every print or debug line you added, and mark each claim in your report as verified or inferred.\n---NOTES---\nDraft, not ready to commit.\ntotal 24\n-rw-r--r--@ 1 user  staff  181 Nov 23 23:21 __init__.py\ndrwxr-xr-x@ 5 user  staff  160 Nov 23 23:21 .\ndrwxr-xr-x@ 9 user  staff  288 Nov 23 23:22 ..\n-rw-r--r--@ 1 user  staff  756 Nov 23 23:21 test_leaks.py\n-rw-r--r--@ 1 user  staff  660 Nov 23 23:21 test_staging.py\n\"\"\"Put src/ on the import path, so a test imports its modules by name.\"\"\"\nimport pathlib\nimport sys\n\nsys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / \"src\"))"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest tests.test_leaks -v 2>&1; echo \"exit=$?\"",
+    "ok": true,
+    "output": "test_a_clean_transcript_passes (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_user_name_in_output_is_found_whatever_its_case (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... FAIL\n\n======================================================================\nFAIL: test_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_leaks.py\", line 17, in test_a_windows_home_folder_in_a_command_is_found\n    self.assertEqual(leaks(actions, [\"C:\\\\Users\\\\dana\"]), [\"C:\\\\Users\\\\dana\"])\nAssertionError: Lists differ: [] != ['C:\\\\Users\\\\dana']\n\nSecond list contains 1 additional elements.\nFirst extra element 0:\n'C:\\\\Users\\\\dana'\n\n- []\n+ ['C:\\\\Users\\\\dana']\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)\nexit=1"
+  },
+  {
+    "kind": "run",
+    "target": "python3 -c \"\nimport json,sys\nsys.path.insert(0,'src')\nfrom leaks import leaks\na=[{'kind':'run','target':'type C:\\\\\\\\Users\\\\\\\\dana\\\\\\\\notes.txt','output':''}]\ntext=json.dumps(a).lower()\nprint('searched text:', text)\nprint('raw path in text:', 'c:\\\\\\\\users\\\\\\\\dana' in text)\nprint('escaped path in text:', 'c:\\\\\\\\\\\\\\\\users\\\\\\\\\\\\\\\\dana' in text)\nprint('user name alone in text:', 'dana' in text)\nprint('forward-slash secret:', leaks([{'kind':'run','target':'cat /home/dana/x','output':''}], ['/home/dana']))\nprint('windows secret, escaped form:', leaks(a, ['C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\dana']))\n\"",
+    "ok": true,
+    "output": "searched text: [{\"kind\": \"run\", \"target\": \"type c:\\\\users\\\\dana\\\\notes.txt\", \"output\": \"\"}]\nraw path in text: False\nescaped path in text: True\nuser name alone in text: True\nforward-slash secret: ['/home/dana']\nwindows secret, escaped form: ['C:\\\\\\\\Users\\\\\\\\dana']"
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest discover -s tests -t . 2>&1 | tail -4; git status --short; git diff --stat -- src/",
+    "ok": true,
+    "output": "----------------------------------------------------------------------\nRan 6 tests in 0.000s\n\nFAILED (failures=1)\n M README.md\n M tests/test_leaks.py\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The leak check misses Windows home folders because it compares the secret against the JSON-escaped transcript, where every backslash is doubled. I did not touch `src/`.\n\n**Cause (verified):** `leaks()` in `src/leaks.py:7` runs `json.dumps(actions).lower()` and then checks whether each secret is a substring. `json.dumps` escapes each backslash as `\\\\`. The transcript `type C:\\Users\\dana\\notes.txt` is searched as `c:\\\\users\\\\dana\\\\notes.txt`, so the secret `C:\\Users\\dana` never matches. `/home/dana` has no backslashes, so it survives serialization and matches, which is why the home-folder-as-Unix-path case is caught. The user name `dana` also matches, because it has no backslashes around it, so a Windows transcript is still caught if the user name is in the secrets list. The leak only happens when the full Windows home path is the only secret that identifies the person.\n\n**Evidence:**\n- I added `test_a_windows_home_folder_in_a_command_is_found` to `tests/test_leaks.py`. It fails on every run I made, with `[] != ['C:\\\\Users\\\\dana']`. Per the project's CLAUDE.md, I wrote it before forming the theory, and I'm keeping it as the regression test. (Verified)\n- Searching the serialized text showed the raw path `c:\\users\\dana` is absent and the doubled-backslash form is present. (Verified)\n- Passing the escaped form `C:\\\\\\\\Users\\\\\\\\dana` as the secret does match, which confirms the mismatch is the escaping. (Verified)\n- The full suite runs 6 tests with 1 failure, the new one. The other tests pass. (Verified)\n- The fix would be to compare against the escaped form of each secret, or to search the raw string values rather than the JSON encoding. (Inferred; not applied, since the fix belongs to the other session.)\n\n**Changes:** Only `tests/test_leaks.py` changed, by the one added test. I added no print or debug lines. `src/` is unchanged. `README.md` and `notes/` were already modified or untracked before I started.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]
