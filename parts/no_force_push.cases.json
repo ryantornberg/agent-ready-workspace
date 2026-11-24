@@ -2794,5 +2794,41 @@
       "targets": {}
     },
     "allow": true
+  },
+  {
+    "name": "a force push whose program starts with a NUL escape is refused (GFIX, re-check)",
+    "event": {
+      "command": "$'\\0'git push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a NUL escape as an option's value or a variable's passes (GFIX, re-check)",
+    "event": {
+      "command": "sort --field-separator=$'\\0' list; IFS=$'\\0' read -r x",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "a force push behind a wrapper named in capitals is refused (GFIX, re-check)",
+    "event": {
+      "command": "NICE -n 5 git push -f origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push behind env named in mixed case is refused (GFIX, re-check)",
+    "event": {
+      "command": "Env sh -c 'git push -f origin main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
   }
 ]

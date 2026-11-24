@@ -558,5 +558,19 @@
       "command": "script -q /dev/null gh pr merge 5 --admin"
     },
     "allow": false
+  },
+  {
+    "name": "an admin merge whose flag starts with a NUL escape is refused (GFIX, re-check)",
+    "event": {
+      "command": "gh pr merge 5 $'\\0'--admin"
+    },
+    "allow": false
+  },
+  {
+    "name": "an admin merge behind nohup named in capitals is refused (GFIX, re-check)",
+    "event": {
+      "command": "NOHUP gh pr merge 5 --admin"
+    },
+    "allow": false
   }
 ]

@@ -136,17 +136,20 @@ def _unresolved(call):
 # - a program word the shell expands: a glob, braces, zsh's extended glob or zsh's =NAME (Q54);
 # - an ANSI-C quoted escape that the shell makes a printable ASCII character, a tab or a new line, such as $'\x66',
 #   $'\146', $'f', $'\x0a', bash's $'\cJ' or zsh's $'\C-j', where the parser keeps the letters after the
-#   backslash; and a NUL escape after other text in its word, such as git$'\0', since a NUL ends the word the
-#   program is given (Q74, slice GFIX);
+#   backslash; and a NUL escape in a word that holds anything else, such as git$'\0' or $'\0'git, since bash cuts
+#   the quoted text at a NUL and keeps the rest of the word, and zsh hands the program the word up to it. A word
+#   that is only NUL escapes, after an optional NAME= or --option=, such as read -d $'\0', passes (Q74, slice
+#   GFIX);
 # - a (( that the parser reads as arithmetic and that may hold a command: ((git push) ), which the shell runs as
 #   two subshells, or any substitution inside one, such as $(( $(git push) )), whose command the parser never
 #   reads (Q74);
 # - braces, a glob, or an unquoted variable or substitution among a wrapper's or a shell's own words, before its
 #   program: nice -n {5,git} push becomes nice -n 5 git push (Q74);
-# - a program the parser does not read, such as arch, script or flock, one of whose words is, as written, the name
-#   of a program the guards judge: git, /usr/bin/git, 'gh', env or a shell. No list of such programs is kept, so every program
-#   the parser does not read is judged so. A variable, a substitution, braces or a glob among its words, and the
-#   text it may run, are not read: those wait for the parser's fix in M4 (Q74, narrowed by Q77, slice GFIX);
+# - a program the parser does not read, such as arch, script, flock or NICE, one of whose words is, as written,
+#   the name of a program the guards judge: git, /usr/bin/git, 'gh', env, printenv, pwsh, powershell or a shell
+#   the parser reads. No list of such programs is kept, so every program the parser does not read is judged so. A
+#   variable, a substitution, braces or a glob among its words, and the text it may run, are not read: those wait
+#   for the parser's fix in M4 (Q74, narrowed by Q77, slice GFIX);
 # - a wrapper, shell, eval, watch or find inside MAX_DEPTH nested shells or evals, which the parser does not
 #   unwrap there (Q74);
 # - git or gh named in another letter case, such as GIT or /usr/bin/Gh, which macOS and Windows run as git or gh
@@ -157,6 +160,9 @@ GLOB = re.compile(r"[*?\[]")
 ANSI_ESCAPE = re.compile(r"\\(?:([0-7]{1,3})|x([0-9a-fA-F]{1,2})|u([0-9a-fA-F]{1,4})|U([0-9a-fA-F]{1,8})|c(.)|C-(.))",
                          re.S)
 ARITH_WORDS = re.compile(r"[\w.'\"]\s+['\"A-Za-z_]|\$\(|`")
+# A word that is only NUL escapes in one $'...', after an optional NAME= or --option=: the program gets an empty word
+# or an empty value, as in read -d $'\0'.
+ONLY_NUL = re.compile(r"(?:-{0,2}[\w.-]+=)?\$'(?:\\(?:0{1,3}|x0{1,2}|u0{1,4}|U0{1,8}|c@|C-@))+'")
 # The programs the guards judge by name, or that run text, or that dump the environment. eval is left out: it is a
 # shell builtin, which a program that runs another cannot start, so `claude plugin eval` or `grep eval` passes.
 JUDGED = frozenset({"git", "gh", "env", "printenv", "pwsh", "powershell"}) | shell.SHELL_PROGRAMS
@@ -176,6 +182,13 @@ def expands(text):
 def _written(text):
     """A program word's name as written: its last part, without .exe in any case."""
     name = text.replace("\\", "/").rsplit("/", 1)[-1]
+    return name[:-4] if name.lower().endswith(".exe") else name
+
+
+def _parsed(text):
+    """A program word's name as the parser reads it: its last part after a slash, without .exe in any case, and
+    in its own letter case, so NICE is not the nice the parser unwraps (slice GFIX)."""
+    name = text.rsplit("/", 1)[-1]
     return name[:-4] if name.lower().endswith(".exe") else name
 
 
@@ -227,10 +240,9 @@ def _ansi_c(raw):
                 if code in (0x09, 0x0A) or 0x20 <= code <= 0x7E:
                     return (f"its word `{raw}` holds the ANSI-C escape `{match.group(0)}`, which the shell makes a "
                             f"character the parser does not read")
-                before = raw[:i] + raw[i + 2:match.start()]
-                if code == 0 and before and not before.endswith("="):
-                    return (f"its word `{raw}` holds the NUL escape `{match.group(0)}` after other text, and a NUL "
-                            f"ends the word the program is given, which the parser does not read")
+                if code == 0 and not ONLY_NUL.fullmatch(raw):
+                    return (f"its word `{raw}` holds the NUL escape `{match.group(0)}` beside other text, and the "
+                            f"shell drops part of the word at a NUL, which the parser does not read")
             i = end
         elif raw[i] == "\\":
             i += 2
@@ -289,10 +301,11 @@ class _Reader(shell._Walker):
         return super().dispatch(words, own, writes, records, ctx, *rest)
 
     def _unread(self, words, ctx):
-        written, name = _written(words[0].text), _base(words[0].text)
-        if name in CASED and written != name:
-            return (f"its program word `{words[0].text}` names {name} in another letter case, which macOS and "
-                    f"Windows run as {name}, and the parser does not read it as {name}. Write `{name}`")
+        written, lower = _written(words[0].text), _base(words[0].text)
+        if lower in CASED and written != lower:
+            return (f"its program word `{words[0].text}` names {lower} in another letter case, which macOS and "
+                    f"Windows run as {lower}, and the parser does not read it as {lower}. Write `{lower}`")
+        name = _parsed(words[0].text)   # the parser's own name: NICE or BASH is a program it does not read
         if ctx.depth >= shell.MAX_DEPTH and name in UNWRAPPED:
             return (f"the line nests shells, eval or sh -c text {shell.MAX_DEPTH} deep, and the parser does not "
                     f"read `{words[0].text}` there")
