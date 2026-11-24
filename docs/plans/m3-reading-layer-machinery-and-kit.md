@@ -2072,7 +2072,7 @@ Not done: nothing.
 Parked: none
 Next: the coordinator — B5 is the last slice of lane B; B6 and B7 may start. Slice Z adds the queued lines below. The docs audit takes the known defects in B5's records.
 
-### B6, wrappers: merged; stopped before the rewrites' rerun
+### B6, wrappers
 
 Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b6`, on branch `m3/b6`, at the driver tier, since the slice adds a check. The maintainer's approval of lane B's order, which names B6, was recorded under "Changes after approval" and pushed to main before building. Fresh driver-tier sessions wrote the reviews and the re-checks; the slice's session wrote everything else. No file the eval hashes was edited. The work is committed on the branch, in draft pull request #50, and is not merged: the stop rule fired, as the last item below says.
 
@@ -2118,9 +2118,27 @@ Decisions made on resuming:
 - **The rewrite ran before its rerun's yes,** as the slice prompt asks a builder to do everything before a run it may not start.
 - **The rerun asks for the neighbours' fire cases too,** since the rewrites push harder and a neighbour losing its request is the likeliest break.
 
-Not done: the rewrites' rerun and its recorded result, criterion 22's last sentence, which waits for the maintainer's yes to a run count (Q48).
-Parked: Q48
-Next: the maintainer — answer Q48 with a run count for the rewrites' rerun; the coordinator then resumes B6 for that run alone, and slice Z waits for B6.
+At that second stop, Q48 was parked, and the rewrites' rerun was not done.
+
+**Resumed on 2026-11-23, after Q48.** Run unattended at the driver tier, in the worktree `.claude/worktrees/m3-b6-selection`, brought up to `origin/main`. The maintainer's yes to 75 runs was recorded under "Changes after approval" and pushed to main before the run, as `ee8ecbc`. The slice's session ran the batch and wrote this entry; no other session was used. No file the eval hashes was edited, and no wrapper or case changed.
+
+- **Verified, the rewrites' rerun (criterion 22's last sentence):** 75 runs, the approved count and no more: 25 cases, three runs each, on Claude Code 2.1.331 and the small model, with the plugin only, four at a time, in 112 seconds. The cases were the 8 rewritten wrappers' fire and quiet cases, and the 9 fire cases of the 8 neighbours their descriptions name: changing the machinery, docs audit, feedback walkthrough, impact analysis, maintain the workspace, federated search's two, size the work and test first. 63 of 75 runs passed, and 19 of 25 cases passed all three.
+- **Verified, what the rewrite changed:** the 8 rewritten fire cases passed 12 of 24 runs, against 2 of 24 in the first run. Four now fire in most runs: extend-the-workspace and instruction-review in 3 of 3, up from 1, and debugging and reuse-checklist in 2 of 3, up from 0. Four still miss in most: research-ladder and safe-refactor fired in 1 of 3, and fix-a-bug and parts in 0 of 3. Criterion 22 allows one rewrite, so these four stay as rewritten, with this result on record.
+- **Verified, no neighbour lost its request:** all 9 neighbour fire cases passed 3 of 3, as in the first run, and all 8 quiet cases passed every run. In each of the 12 missed runs, the run's trace holds no Skill call at all, so no other wrapper fired in the rewritten one's place.
+- **Inferred, why four still miss:** 65 of 75 runs ended at the three-turn limit. The missed runs spent their turns on Grep, Glob and Bash in the scratch folder before any skill loaded. So the limit, not only the descriptions, may cause the misses; the traces show the order of calls, not the model's reason. Q49 asks whether M4 tests that before any further rewrite.
+- **Verified, how the batch was narrowed:** `--case` takes one name pattern with only `*` and `?`, read from the filter in the command line tool's code, so no single pattern selects these 25. The batch ran from a temporary copy of the 25 case folders under `plugin/`, with `--eval-dir`; `diff` found each copy identical to its case, and the copy was deleted afterwards. So each case's `dir` in the result names the temporary folder.
+- **Verified, the record:** the result is `evals/selection/2026-11-23-rewrites/aggregate-result.json`, beside the first run's folder, since a second batch on one date would write into it, the known defect. The home folder, the temporary folders and the certificate warning were replaced with the first run's placeholders; a search then found no user name, home folder, git identity or certificate path. The command exited 1, as the known defect says, since some cases scored below 1. The plan's selection runs now total 249 of the cap of 300.
+- **Verified, kept to the rules:** on main with this entry, `python3 ws.py check` passes, with only the known warning on fix a bug's eval record. `python3 ws.py selftest` passes, `python3 -m unittest discover -b tests` ran 785 tests, 3 skipped, OK, and `python3 tests/hook_cases.py` passes 93 of 93. The private ledger's check prints 0 unmapped items; its rows for B6 already name their pages.
+
+Decisions made on resuming after Q48:
+
+- **The batch ran from a temporary eval folder,** since the case filter cannot name 25 cases at once and 25 separate runs would leave 25 result files. The copies were checked identical, so the cases run are the committed ones.
+- **The result went to a dated folder with a suffix,** so the first run's committed result stays as it was.
+- **The four wrappers that still miss were not rewritten again,** since criterion 22 allows one rewrite and asks only that the result be recorded.
+
+Not done: nothing
+Parked: Q49
+Next: the coordinator — B6 is finished; run B7's baseline on Q47's yes of 60 runs, then slice Z. The maintainer — answer Q49 for M4.
 
 ### B7, proof attempts: stopped before the baseline
 
