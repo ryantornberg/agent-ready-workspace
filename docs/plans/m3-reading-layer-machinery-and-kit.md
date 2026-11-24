@@ -977,6 +977,16 @@ Red team review's recording moves to M9, from the maintainer's answer to Q50 in 
 
 **Red team review stays unproven, its recording deferred to M9.** Its page keeps `proof: unproven` and `prove-by: M9`, so no proof key changes. Its baseline stays on record: red-team-fail-closed's 10 bare runs, none passing every grader. red-team-lease has no baseline; M9 tests the page on real work. For red team review, criterion 25 is met by "unproven, recording deferred to M9 by the maintainer's decision (Q50)". The 132 runs approved for its recording are not spent.
 
+### 2026-11-24
+
+Approved by: the maintainer, 2026-11-23
+
+Slice Z's recordings, from the maintainer's yes given before the unattended run, and the per-commit deny-list scan, from the maintainer's answer to Q8 in the workspace queue on 2026-11-21. Both name slice Z. No criterion is dropped or weakened.
+
+**Slice Z's recordings have their yes: up to 225 runs.** That is R2's 135 runs, the routed arm's 45, and one 45-run re-record of an arm that misses its margin. An agent runs them, each in its own session as Z's row says, and stops before it would pass 225. Z joins lane B after B7, which has merged.
+
+**`check --commits` also scans each commit's diff for deny-listed terms (Q8).** The machinery page's trap asks for that scan before every push of a branch committed with `--no-verify`, and no command does it today. Slice Z builds it on its own branch, before its recordings: `python3 ws.py check --commits BASE..HEAD` runs the `deny_list` check on the lines each commit adds, beside the message checks it runs now.
+
 ## Results
 
 ### C1, launcher and baselines
