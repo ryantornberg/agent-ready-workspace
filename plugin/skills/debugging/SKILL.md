@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: "Use when something fails and nobody can yet say why: a bug report, a failing test or CI run, or a flaky test. It finds the cause before any fix. Not when the cause is already known (workspace:fix-a-bug), nor to read why a pull request's CI failed when its log already says."
+description: "This workspace's procedure for finding why something fails. Use it first, before reading or changing code, when a bug report, a failing or flaky test, or a failing build or CI run has no known cause. It finds the cause before any fix. Not when the cause is already known (workspace:fix-a-bug), nor to read why a pull request's CI failed when its log already says."
 ---
 
 # Debugging

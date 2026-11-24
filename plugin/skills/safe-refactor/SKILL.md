@@ -1,6 +1,6 @@
 ---
 name: safe-refactor
-description: "Use when changing the shape of code under src/ without changing what it does. Not when behavior should change (workspace:fix-a-bug, or workspace:test-first on a route already chosen), nor when a failure's cause is unknown (workspace:debugging)."
+description: "This workspace's procedure for refactoring. Use it first, before changing code, whenever a request asks to rename, move, split, merge or restructure code under src/ without changing what it does. Not when behavior should change (workspace:fix-a-bug, or workspace:test-first on a route already chosen), nor when a failure's cause is unknown (workspace:debugging)."
 ---
 
 # Safe refactor

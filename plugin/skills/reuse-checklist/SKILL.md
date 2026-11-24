@@ -1,6 +1,6 @@
 ---
 name: reuse-checklist
-description: "Use before writing new logic in code under src/, to find code that already does the job; or to review a diff for missed helpers and design debt when the request names reuse alone. Not for everything a change reaches: use workspace:impact-analysis."
+description: "This workspace's search for code that already exists. Use it before writing new logic under src/, such as a helper or a function, to find code that already does the job. Also to review a diff for missed helpers and design debt when the request names reuse alone. Not for everything a change reaches: use workspace:impact-analysis."
 ---
 
 # Reuse checklist

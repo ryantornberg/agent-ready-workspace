@@ -1,6 +1,6 @@
 ---
 name: instruction-review
-description: "Use when a commit adds, changes or deletes a guidance page, any path the review_trailer entry in workspace.json lists as guidance: the contract and pointer files, INDEX.md, the README, the eval page, a wrapper, or a page under docs/ other than a plan, a milestone record, a record or the question log. Not for a drift audit of the whole tree: use workspace:docs-audit."
+description: "This workspace's review of guidance pages. Use it before committing any change that adds, changes or deletes a guidance page: the contract and pointer files, INDEX.md, the README, the eval page, a wrapper, or a page under docs/ other than a plan, a milestone record, a record or the question log, as the review_trailer entry in workspace.json lists. Not for a drift audit of the whole tree: use workspace:docs-audit."
 ---
 
 # The instruction review

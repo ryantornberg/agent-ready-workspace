@@ -246,6 +246,14 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b5-templates-index.md](2026-11-23-b5-templates-index.md) | `docs/templates/README.md` | none |
 | [2026-11-23-b7-evals-readme.md](2026-11-23-b7-evals-readme.md) | `evals/README.md` | contradiction, placement |
 | [2026-11-23-b7-readme.md](2026-11-23-b7-readme.md) | `README.md` | contradiction |
+| [2026-11-23-b6-rewrite-debugging.md](2026-11-23-b6-rewrite-debugging.md) | `plugin/skills/debugging/SKILL.md` | trigger |
+| [2026-11-23-b6-rewrite-extend-the-workspace.md](2026-11-23-b6-rewrite-extend-the-workspace.md) | `plugin/skills/extend-the-workspace/SKILL.md` | trigger |
+| [2026-11-23-b6-rewrite-fix-a-bug.md](2026-11-23-b6-rewrite-fix-a-bug.md) | `plugin/skills/fix-a-bug/SKILL.md` | trigger |
+| [2026-11-23-b6-rewrite-instruction-review.md](2026-11-23-b6-rewrite-instruction-review.md) | `plugin/skills/instruction-review/SKILL.md` | trigger |
+| [2026-11-23-b6-rewrite-parts.md](2026-11-23-b6-rewrite-parts.md) | `plugin/skills/parts/SKILL.md` | trigger |
+| [2026-11-23-b6-rewrite-research-ladder.md](2026-11-23-b6-rewrite-research-ladder.md) | `plugin/skills/research-ladder/SKILL.md` | trigger |
+| [2026-11-23-b6-rewrite-reuse-checklist.md](2026-11-23-b6-rewrite-reuse-checklist.md) | `plugin/skills/reuse-checklist/SKILL.md` | trigger |
+| [2026-11-23-b6-rewrite-safe-refactor.md](2026-11-23-b6-rewrite-safe-refactor.md) | `plugin/skills/safe-refactor/SKILL.md` | none |
 | [2026-11-23-b6-evals-readme.md](2026-11-23-b6-evals-readme.md) | `evals/README.md` | contradiction, step, placement |
 | [2026-11-23-b6-extend-the-workspace.md](2026-11-23-b6-extend-the-workspace.md) | `docs/extend-the-workspace.md` | step, enforcement |
 | [2026-11-23-b6-glossary.md](2026-11-23-b6-glossary.md) | `docs/glossary.md` | none |
