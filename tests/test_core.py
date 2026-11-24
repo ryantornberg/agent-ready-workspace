@@ -3577,6 +3577,89 @@ class DenyListTests(Folder):
             self.assertIn("only its cases may", out, setting)
 
 
+class DenyListCommitsTests(Folder):
+    """M3 slice Z, Q8: `check --commits BASE..HEAD` runs deny_list on the lines each commit adds, beside the message
+    checks, so a branch committed with --no-verify is scanned before it is pushed."""
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "deny_list"})
+        self.list_file = self.root.parent / f"{self.root.name}-deny.txt"
+        self.list_file.write_text("# private\nglobex corp\nre:\\bGLX-\\d+\\b\n", encoding="utf-8")
+        self.addCleanup(self.list_file.unlink)
+        home = self.root.parent / f"{self.root.name}-home"   # so the default list path is never the real one
+        environment = mock.patch.dict(os.environ, {"WS_DENY_LIST": str(self.list_file), "HOME": str(home),
+                                                   "USERPROFILE": str(home)})
+        environment.start()
+        self.addCleanup(environment.stop)
+        self.git("init", "-q", "-b", "main")
+        self.write("old.md", "Globex Corp was here before the range.\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "--no-verify", "-m", "chore: start")
+        self.base = self.git("rev-parse", "HEAD").stdout.strip()
+
+    def commit(self, files, message):
+        for path, data in files.items():
+            if isinstance(data, bytes):
+                (self.root / path).parent.mkdir(parents=True, exist_ok=True)
+                (self.root / path).write_bytes(data)
+            else:
+                self.write(path, data)
+            self.git("add", "--", path)
+        self.git("commit", "-q", "--no-verify", "-m", message)
+        return self.git("rev-parse", "HEAD").stdout.strip()
+
+    def commits(self):
+        return self.ws("check", "--commits", f"{self.base}..HEAD")
+
+    def test_a_line_a_commit_adds_fails_naming_the_commit_and_line_never_the_term(self):
+        self.commit({"a.md": "fine\n"}, "docs: fine")
+        bad = self.commit({"a.md": "fine\nmore\nShips to globex-corp, see GLX-42.\n"}, "docs: more")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn(f"commit {bad[:7]} \"docs: more\"", out)
+        self.assertIn("a.md:3: matches line 2 of the private deny list", out)
+        self.assertIn("a.md:3: matches line 3 of the private deny list", out)
+        self.assertIn("[deny_list]", out)
+        self.assertNotIn("globex", out.lower())
+        self.assertIn("2 commit(s) checked", out)
+
+    def test_only_the_lines_the_range_adds_are_read(self):
+        self.commit({"old.md": "Globex Corp was here before the range.\nA new line.\n"}, "docs: a line")
+        code, out = self.commits()
+        self.assertEqual(code, 0, out)
+
+    def test_a_term_a_later_commit_removes_still_fails_on_the_commit_that_added_it(self):
+        bad = self.commit({"a.md": "globex corp\n"}, "docs: add")
+        self.commit({"a.md": "clean\n"}, "docs: remove")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn(f"commit {bad[:7]} ", out)
+
+    def test_a_new_file_s_name_and_a_utf16_file_are_read(self):
+        self.commit({"plans/globex-corp.md": ""}, "docs: an empty file")
+        self.commit({"u.txt": "globex corp\n".encode("utf-16")}, "docs: utf-16")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn("plans/<name ", out)
+        self.assertIn("u.txt:1:", out)
+        self.assertNotIn("globex", out.lower())
+
+    def test_the_message_checks_still_run(self):
+        self.commit({"a.md": "fine\n"}, "docs: globex corp")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn("commit message:1: matches line 2 of the private deny list", out)
+
+    def test_with_no_list_it_warns_once_per_commit_checks_nothing_and_passes(self):
+        del os.environ["WS_DENY_LIST"]
+        self.commit({"a.md": "globex corp\n"}, "docs: add")
+        code, out = self.commits()
+        self.assertEqual(code, 0, out)
+        self.assertEqual(out.count("warning: workspace.json:1: no private deny list"), 1, out)
+        self.assertIn("1 commit(s) checked", out)
+
+
 class RepositoryTests(unittest.TestCase):
     def test_every_part_passes_its_own_cases(self):
         for part in partlib.load_all(ROOT):

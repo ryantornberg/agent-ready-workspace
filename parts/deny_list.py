@@ -21,7 +21,9 @@ and lines starting "#" are ignored.
 
 The commit-msg hook runs it on the commit message, the author and the
 committer as well, so a private name or address cannot reach the history
-through them.
+through them. `ws.py check --commits BASE..HEAD` runs it on each commit's
+message and identities, and on the lines each commit adds, so a branch
+committed with --no-verify is scanned before it is pushed.
 
 Every file in the snapshot is read, whatever its encoding. Text is normalised
 (NFKC, zero-width characters removed) before matching, and a copy with NUL
@@ -49,6 +51,7 @@ from wslib.snapshot import Memory
 KIND = "check"
 PAGE = "docs/changing-the-machinery.md#traps"   # the rule's page, which every finding names (criterion 34)
 COMMIT_MESSAGE = True   # `ws.py check --message` runs it on the commit message and the author and committer too
+COMMIT_DIFF = True      # `ws.py check --commits` runs it on the lines each commit adds, too (M3 slice Z, Q8)
 VARIABLE = "WS_DENY_LIST"
 DEFAULT = "~/.config/agent-ready-workspace/deny-list.txt"
 CASE_ONLY = ("terms", "list")
