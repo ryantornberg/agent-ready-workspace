@@ -951,6 +951,14 @@ The rerun of B6's eight rewritten wrappers, from the maintainer's answer to Q48 
 
 **The rewrites' rerun has its yes: 75 runs (Q48).** An agent runs it unattended with `--trust-plugin`, as Q46 set. The batch is the eight rewritten wrappers' fire and quiet cases, and the fire cases of the neighbours their descriptions name, three runs each. The agent stops before it would pass 75. With the first run's 174, the plan's selection runs reach 249 of the cap of 300.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+B7's bare-only baseline, from the maintainer's answer to Q47 in the workspace queue. It lets B7 start the baseline its row already names; no criterion is dropped or weakened.
+
+**B7's baseline has its yes: 60 counted runs (Q47).** An agent runs `evals/run.py --baseline` for each of the four cases, 10 runs each, in one session. The 40 agent runs and the sessions the red team runs dispatch count toward the 60, and the agent stops before it would pass that count. It records the baselines and applies B7's rule: cut, full recording or failed attempt. A full recording needs its own yes, up to 132 runs per playbook.
+
 ## Results
 
 ### C1, launcher and baselines
