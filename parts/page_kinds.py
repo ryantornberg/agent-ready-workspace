@@ -19,7 +19,9 @@ or fewer (a decision record may open with its In short line instead), then the *
 but a playbook and a record, which may leave it out), and on a plan, "## Key points" as the first section.
 The 25-word limit does not apply to an approved or done plan, an accepted or superseded decision record or a
 signed-off milestone record: those are frozen. A plan changes by a dated entry under "Changes after approval"
-(template rule 6), a decision or milestone record by a dated "Amended" paragraph.
+(template rule 6), a decision or milestone record by a dated "Amended" paragraph, with the layout's two
+exceptions: an amendment may also edit a decision record's In short line, and a frozen page's front matter is
+not frozen.
 
 A page in a kind's own folder (docs/playbooks, docs/decisions, docs/plans, docs/milestones, docs/templates,
 docs/tutorials, docs/records) must be of that kind; a README there is a reference page.

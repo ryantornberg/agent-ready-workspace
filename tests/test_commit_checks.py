@@ -136,11 +136,10 @@ class CommitSubjectTests(Folder):
 
 class FindingsNameTheirPageTests(unittest.TestCase):
     """Criterion 34: every finding any part's cases produce names the file, the rule's page and a fix or a re-run
-    command; so does every refusal and reminder. One message waits for slice Z, named here."""
+    command; so does every refusal and reminder. One part is exempt, named here."""
 
-    # parts/no_stage_all.py is a file the eval hashes; slice Z adds its page (plan, change of 2026-11-21).
     # rule_pages's reminder is the rule pages themselves, shown before an edit, not a finding.
-    EXEMPT = {"no_stage_all", "rule_pages"}
+    EXEMPT = {"rule_pages"}
     COMMAND = re.compile(r"python3 ws\.py|\bgit |\bgh |`[^`]+`|\b(run|add|remove|delete|move|write|rename|"
                          r"record|reword|shorten|take|fix|edit|use|mark|give|name|link|review|wait|ask|work|"
                          r"leave|stage|set|list|replace|commit|cite|split|rerun|re-run|change|pin|check out|"
@@ -187,9 +186,14 @@ class FindingsNameTheirPageTests(unittest.TestCase):
             return []
         return [(partlib.with_page(reason, getattr(part.module, "PAGE", None)), None)] if reason else []
 
-    def test_the_exemption_is_still_needed(self):
-        source = (ROOT / "parts" / "no_stage_all.py").read_text(encoding="utf-8")   # rule_pages stays exempt
-        self.assertNotIn("PAGE", source, "no_stage_all names its page now: remove it from EXEMPT")
+    def test_no_stage_all_names_the_page_that_states_the_staging_rule(self):
+        """M3 slice Z, from C3d's queue: the page whose rules table names no_stage_all."""
+        part = partlib.load(ROOT, {"use": "no_stage_all", "why": "test"}, run_cases=False)
+        page, _, anchor = part.module.PAGE.partition("#")
+        text = (ROOT / page).read_text(encoding="utf-8")
+        self.assertIn("## The commit", text)
+        self.assertEqual(anchor, "the-commit")
+        self.assertIn("`no_stage_all#", text)
 
 
 if __name__ == "__main__":
