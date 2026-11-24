@@ -2236,15 +2236,16 @@ class EvalThatCanLoseTests(Folder):
     def test_the_recorded_transcripts_hold_nothing_of_the_operators_environment(self):
         stored = list((ROOT / "evals/runs").glob("*/*.json"))
         self.assertGreaterEqual(len(stored), 120)
-        # A home folder's name is a plain word ending at a separator. "user" is the sandbox's, and "dana" is the invented
-        # owner of the debugging scaffold's leak-check fixture, whose cases have agents write such paths; a lookalike
-        # name an agent invents, with letters outside ASCII, is not a plain word.
-        home = re.compile(r"""/(?:Users|home)/(?!(?:user|dana)\b)[A-Za-z0-9._-]+(?=[/\s"']|$)"""
-                          r"|[A-Za-z]:\\\\Users\\\\(?!(?:user|dana)\b)", re.I | re.M)
+        # The harness's own rule (run.home_folders): any account's home folder, but the placeholder "user" and the
+        # names the case's request or scaffold holds, such as "dana", the debugging fixture's invented owner.
+        accounts = {}
         email = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
         for path in stored:
             text = "\n".join(str(value) for value in self._strings(json.loads(path.read_text(encoding="utf-8"))))
-            self.assertIsNone(home.search(text), path.name)
+            case = path.parent.name
+            if case not in accounts:
+                accounts[case] = self.harness.case_accounts(self.harness.load_case(case))
+            self.assertEqual(self.harness.home_folders(text, accounts[case]), [], path.name)
             for address in email.finditer(text):   # the eval identity, or the agent tool's own commit trailer
                 self.assertTrue(address.group(0).endswith(".invalid") or address.group(0) == "noreply@anthropic.com",
                                 (path.name, address.group(0)))
@@ -2556,9 +2557,17 @@ class EvalHarnessApartTests(Folder):
                            r"dir c:\\users\\someone-else\\x"):
                 with self.subTest(target):
                     self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            for target in ("file:///Users/bob/x", "ls /mnt/c/Users/bob/x", "ls /var/home/bob", "echo ${X:-/home/bob}",
+                           "ls /home/bob?x", "ls /home/_bob/x", "cc -I/home/bob/inc", r"dir C:\Users\bob\x41",
+                           "PATH=/a:/Users/bob.smith/bin", "cat /home/jos\u00e9/x", "GET /api/users/42"):
+                with self.subTest(target):   # the last errs toward refusing: a run lost, not a leak
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
             for target in ("ls /home/user/x", "ls /Users/Shared/x", "cat ~/x", "ls /usr/home"):
                 with self.subTest(target):
                     self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            for target in ("cat /home/d\u00e4na/x", "cat /home/d\u0430na/x"):   # lookalikes of the fixture's owner
+                with self.subTest(target):
+                    self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}], ["dana"]))
             fixture = [{"kind": "run", "target": r"cat /home/dana/notes.txt C:\Users\dana.", "ok": True}]
             self.assertTrue(self.harness.leaks(fixture))
             self.assertFalse(self.harness.leaks(fixture, ["dana"]))

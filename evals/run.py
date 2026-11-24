@@ -45,7 +45,7 @@ environment with a fixed PATH of system folders, so the operator's instructions,
 identity, shell aliases, variables and PATH reach no arm. A transcript that still
 holds the operator's user name, git identity, the machine's temporary folder or
 any account's home folder is refused, and nothing is written; a home folder the
-case's own request names, such as a fixture's invented owner, is the case's text. The harness's own git calls read none of the operator's git
+case's own request or scaffold names, such as a fixture's invented owner, is the case's text. The harness's own git calls read none of the operator's git
 config, so a global ignore file cannot hide a change from the graders.
 
 Each finished run is written at once, as evals/runs/<case>/<arm>-<n>.json. A
@@ -115,9 +115,15 @@ KEPT_ENVIRONMENT = ("HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "TERM", "TMPDIR
 # slice Z, the maintainer's answer to Q52). The agent tool itself is found on the operator's PATH (agent_program).
 AGENT_PATH = ("/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin")
 AGENT_NEEDS = ("python3", "git")    # what every case's agent runs; run.py refuses to start without them on AGENT_PATH
-# A home folder on any system, as a transcript may write it: /Users/NAME, /home/NAME or C:\Users\NAME, with one or
-# two backslashes. "user" is what the user name becomes in a transcript; Shared and Public belong to no account.
-HOME_FOLDER = re.compile(r"(?:/(?:users|home)/|\b[a-z]:\\{1,2}users\\{1,2})([a-z0-9._-]+)", re.I)
+# A home folder on any system, as a transcript may write it: /Users/NAME or /home/NAME anywhere in a path (so
+# file:///Users/NAME, /mnt/c/Users/NAME and /var/home/NAME count too), or C:\Users\NAME with any number of
+# backslashes. It errs toward refusing: a route such as /api/users/42 counts too, which costs a run, not a leak.
+# "user" is what the user name becomes in a transcript; Shared and Public belong to no account. tests/test_core.py
+# reads the stored transcripts with this same rule (home_folders).
+HOME_FOLDER = re.compile(r"(?:/(?:users|home)/|[a-z]:\\+users\\+)([a-z0-9._-]+)", re.I)
+# A name that runs on in letters outside ASCII, written or escaped (\u00e4), is a lookalike an agent wrote of a
+# case's own name, such as the debugging fixture's "dana": it passes when the ASCII part starts that name.
+RUNS_ON = re.compile(r"[^\x00-\x7f]|\\+(?:u[0-9a-f]{4}|x[0-9a-f]{2}|N\{)", re.I)
 NOT_AN_ACCOUNT = {"user", "shared", "public"}
 REQUIRED_ARMS = ("guided", "two-line", "bare")
 # Paths that name this machine without naming its user: its temporary folders, and the agent tool's own.
@@ -431,8 +437,16 @@ def _strings(value):
 
 def home_folders(text, allowed=()):
     """The account names of the home folders the text names, other than the placeholder and those in allowed."""
-    skip = NOT_AN_ACCOUNT | {name.lower() for name in allowed}
-    return [match.group(0) for match in HOME_FOLDER.finditer(text) if match.group(1).rstrip(".").lower() not in skip]
+    allowed = {name.lower() for name in allowed}
+    found = []
+    for match in HOME_FOLDER.finditer(text):
+        name = match.group(1).rstrip(".").lower()
+        if name in NOT_AN_ACCOUNT | allowed:
+            continue
+        if RUNS_ON.match(text, match.end()) and any(known.startswith(name) for known in allowed):
+            continue
+        found.append(match.group(0))
+    return found
 
 
 def leaks(actions, allowed=()):
@@ -443,9 +457,15 @@ def leaks(actions, allowed=()):
             + home_folders(text, allowed))
 
 
-def case_accounts(case):
-    """The account names of the home folders the case's request names: its own text, not the operator's."""
-    return sorted({match.group(1).rstrip(".") for match in HOME_FOLDER.finditer(case.get("request", ""))})
+def case_accounts(case, root=ROOT):
+    """The account names of the home folders the case's request or its scaffold names, such as a fixture's invented
+    owner: the case's own text, not the operator's."""
+    texts = [case.get("request", "")]
+    if case.get("scaffold_dir"):
+        scaffold = pathlib.Path(root) / case["scaffold_dir"].strip("/")
+        texts += [path.read_text(encoding="utf-8", errors="replace") for path in sorted(scaffold.rglob("*"))
+                  if path.is_file() and "__pycache__" not in path.parts]
+    return sorted({match.group(1).rstrip(".") for text in texts for match in HOME_FOLDER.finditer(text)})
 
 
 def suite_passes(folder):

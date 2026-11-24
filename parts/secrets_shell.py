@@ -21,7 +21,7 @@ It refuses:
 - a variable the line itself sets is read with that value, so `F=.env; cat "$F"` is refused. Any other variable
   passes, as it does for `git_folder_shell`;
 - `ws.py with-secrets` whose program is one that command refuses itself (a shell, `env`, `printenv` or a program
-  that runs another), or is a git or gh call or a write the parser reports. The other shell guards read only the
+  that runs another), is given by a variable or substitution, or is a git or gh call or a write the parser reports. The other shell guards read only the
   line's own program, which here is Python, so they would not judge a push or a gh write run through it.
 
 The first word after `grep`, `rg`, `sed`, `awk` and their kin, and after `git grep`, is a pattern, not a file,
@@ -213,6 +213,8 @@ def _child_refusal(child):
     reason = secretrules.refusal(child[0])
     if reason:
         return f"`ws.py with-secrets` refuses this program itself: {reason}"
+    if re.search(r"[$`]", child[0]):   # G=git; ... -- $G push: the shell picks the program, which no guard sees
+        return f"`ws.py with-secrets` may not run a program given by a variable or substitution: {child[0]}"
     for inner in shell.analyze(shlex.join(child)):
         reason = secretrules.refusal(inner["program"] or "") or _dump(inner["program"], inner["args"])
         if reason or inner["wrappers"] or inner["unresolved"]:
