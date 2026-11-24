@@ -55,7 +55,7 @@ class ArmFilesTests(unittest.TestCase):
 
     def test_criterion_61_an_own_arms_case_hashes_only_what_it_may(self):
         """Every case that names its own arms (B7's) covers only the case, its own arm files, its acceptance test
-        and scaffold, the harness and the graders. None exists yet, so a sample stands in for the rule."""
+        and scaffold, the harness and the graders. B7's four cases are checked, and a sample stands in for the rule."""
         cases = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "evals/cases").glob("*.json"))]
         sample = {"name": "sample", "playbook": "docs/p.md", "scaffold_dir": "evals/scaffold",
                   "acceptance": "evals/acceptance/sample.py",

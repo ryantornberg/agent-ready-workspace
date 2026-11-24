@@ -923,6 +923,26 @@ The order of lane B for the next run, given by the maintainer after reviewing B2
 
 **Lane B runs B6, then B7.** B6 builds in full. B7 builds its cases and two-line texts, then stops before its baseline until the maintainer agrees to its eval budget. Slice Z waits for B7. No paid eval run starts without the maintainer.
 
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+The order of lane B after B6 stopped, from the maintainer's answers in round 9 of the workspace queue. It replaces the order of the entry above; no criterion is dropped or weakened.
+
+**Lane B runs B7, then B6.** B7 builds its cases and two-line texts, and stops before its paid baseline. B6 resumes after B7, as the answer to Q46 will say. Slice Z still waits for both.
+
+### 2026-11-23
+
+Approved by: the maintainer, 2026-11-23
+
+How slice B6 resumes after its re-check stopped it, from the maintainer's answers to Q45 and Q46 in the workspace queue and the yes to B6's selection run in round 9. It gives the eval pages a second fix round; no criterion is dropped or weakened.
+
+**An agent runs the selection cases, on the maintainer's yes per batch with a run count (Q46).** The agent adds `--trust-plugin` to `claude plugin eval`, which otherwise exits 1 in a folder not yet trusted when no terminal can answer. It stops before it would pass the count it was given. One more fix round makes both eval pages, the workspace's and the seed's, say so. The seed pages' open first-reading findings take their one fix round in the same round. A narrow re-check follows, then pull request #50 merges. This is the eval page's second fix round, which the stop rule's limit of two allows, and lane B's stop rule applies to it unchanged.
+
+**B6's first selection run has its yes: 174 runs (criterion 22).** It starts after pull request #50 merges and runs unattended, under the plan's cap of 300 selection runs. A rerun of a rewritten wrapper is a new batch and needs its own yes.
+
+**Codex CLI does not load the wrappers in M3 (Q45).** M4 decides whether the second tool takes them up.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -2044,6 +2064,64 @@ Not done: nothing.
 Parked: none
 Next: the coordinator — B5 is the last slice of lane B; B6 and B7 may start. Slice Z adds the queued lines below. The docs audit takes the known defects in B5's records.
 
+### B6, wrappers: stopped after its fix round
+
+Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b6`, on branch `m3/b6`, at the driver tier, since the slice adds a check. The maintainer's approval of lane B's order, which names B6, was recorded under "Changes after approval" and pushed to main before building. Fresh driver-tier sessions wrote the reviews and the re-checks; the slice's session wrote everything else. No file the eval hashes was edited. The work is committed on the branch, in draft pull request #50, and is not merged: the stop rule fired, as the last item below says.
+
+- **Verified, criterion 21 on the branch:** 28 wrappers in `plugin/skills/`, one for each playbook and how-to with no `lane` key, except three. The review orchestrator waits for M4's review machinery, and tracker operations and git-host operations wait for M8's providers, as red-team finding 14 and "Later" set; the `wrappers` entry in `workspace.json` lists them, each with its reason. No lane draft has a wrapper. Federated search has one, as the entry of 2026-11-21 orders. The new `wrappers` check, with 18 cases, fails a core page with no wrapper, a wrapper whose page is missing, is a lane draft, waits or is not a procedure, and a wrapper with no case of either kind. `python3 ws.py check` passes on the branch.
+- **Verified, the format:** each wrapper is `plugin/skills/<page's file name>/SKILL.md`: a `name`, a quoted `description` that says when to fire and when not and names at least one neighbour as `workspace:<name>`, and a body that names its page. `claude plugin validate plugin` passes and lists the 28 skills as `workspace:<name>`. The descriptions total 7,535 bytes, under the 9,000 that `loaded_size` holds.
+- **Verified, declared for Claude Code:** `plugin/.claude-plugin/plugin.json` names the plugin `workspace`, `.claude-plugin/marketplace.json` lists it from `./plugin`, and `.claude/settings.json` enables `workspace@agent-ready-workspace`. With a scratch config folder, `claude plugin marketplace add ./` alone installs nothing. Adding `claude plugin install workspace@agent-ready-workspace --scope local` makes `claude plugin list` show it enabled, read in place from the folder, and leaves the shared settings file as committed. `--scope project` rewrote the shared settings file, so the README gives the local install.
+- **Verified, Codex CLI's reading of skills:** in a scratch repository, Codex 0.169's `codex debug prompt-input` listed a skill from `.agents/skills/` and none from `plugin/skills/` or `.claude/skills/`. So Codex loads none of the wrappers, and the playbook catalog says so. Inferred, from strings in its binary: its plugin loader accepts `.claude-plugin/plugin.json` from a marketplace a person adds. Q45 asks whether Codex should get the wrappers.
+- **Verified, criterion 22's first half:** 58 selection cases in `plugin/evals/`, a case that fires and a quiet one for each wrapper, and the four the 2026-11-21 entry names for federated search. Each quiet case is a request a neighbour owns. `claude plugin eval` 2.1.330 loads all 58: with each request replaced by the blank template, it refused every case on the template alone, and it refused a deliberately broken grader and a broken setting on their schema. `evals/README.md` gives the command (V6) and says this is the format M4's eval system adopts.
+- **Not run, criterion 22's second half:** no selection run started, under this run's rule. The first run is 174 runs on the small model, under the plan's cap of 300.
+- **Verified, the review:** 51 findings in 41 records, 2 blocking. The first reading of the 28 wrappers and 11 pages found 43, 1 blocking. One fix round fixed 39 of them, among them the blocking one, a link from the playbook catalog that broke in every instance. 3 were deferred to the pages' `prove-by` milestones, M5, M6 and M10, and 1 is queued for slice Z. The two seed pages, changed in the fix round, got first reviews with 8 findings, 1 blocking, all still open. The fresh re-checks read the 43 dispositions and rejected none, though one fix on the eval page held only in part. They found 11 new items, 2 of them blocking.
+- **Verified, the stop rule fired:** the re-check of the eval page found that a fix made a step fail. The fix let an agent start a selection run on a person's yes. In a folder not yet trusted, `claude plugin eval` exits 1 when no terminal can answer its trust question. A fix that creates a blocking finding stops the slice, as lane B's rule says, the rule this slice's reviews followed. The other blocking item, the seed pages without records, cleared when their records were written and the commit check accepted the commit. Q46 asks how B6 resumes.
+- **Verified, kept to the rules:** on the branch, `python3 ws.py selftest` and `python3 ws.py check --staged` pass, the check with only the known warning on fix a bug's eval record. `python3 -m unittest discover -b tests` ran 773 tests, 3 skipped, OK, and `python3 tests/hook_cases.py` passes 93 of 93. CI's result is on the pull request.
+
+Decisions made in the slice:
+
+- **A core procedure is a playbook or how-to with no `lane` key, or a lane page once it is marked proven,** read from front matter, so the program's rule that a lane draft gets its wrapper when proven needs no list.
+- **A wrapper is named after its page's file, without `.md`,** so federated search's is `search-every-source`. The check holds the name to the page.
+- **The selection cases live in `plugin/evals/`,** since `claude plugin eval` reads cases only below the plugin's folder, and the run's results go to `evals/selection/`.
+- **The guidance list narrows from `plugin/` to `plugin/skills/`.** The wrappers are guidance; the 116 case files are test inputs, as eval cases are, and the plugin's manifest is wiring. A test holds the split.
+- **A case's `input_match` names the plugin as well as the wrapper,** so a skill of the same name from another plugin, such as a person's own handoff skill, does not count.
+- **A run is three runs of at most three turns per case, on the small model, with no run that leaves the plugin out,** since a case that fires cannot pass there.
+- **The kit syncs `plugin/` and `.claude-plugin/` and seeds `plugin/evals/`,** so an instance rewrites the requests in its own words; the seed README and the seed eval page say so.
+- **`plugin/` is not on the machinery list.** The `wrappers` check holds it at the commit and in CI. Whether M4's eval stage makes the cases machinery is M4's.
+
+Queued for slice Z, in the list below: the `INDEX.md` row for wrappers.
+
+Not done: the review's second fix round and re-check, which Q46 decides; then the merge of pull request #50; and the selection run with its recorded results, criterion 22's second half, which waits for the maintainer's yes to its 174 runs.
+Parked: Q45, Q46
+Next: the maintainer — answer Q46 on how B6 resumes, and say whether the first selection run may start; B7 does not wait for B6.
+
+### B7, proof attempts: stopped before the baseline
+
+Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b7`, on branch `m3/b7`, at the driver tier, since it adds eval cases, which are machinery. The maintainer's order for lane B, B7 then B6, was recorded under "Changes after approval" and pushed to main before building, as `2cf1122`. Pull request #51 merged as `7721896` after CI passed on Linux, macOS and Windows. A fresh driver-tier session wrote the instruction reviews, and another the re-check; the slice's session wrote everything else. No paid run started: the maintainer's order stops B7 before its baseline, and no approval names a run count for it.
+
+- **Verified, B7's preconditions:** the maintainer's reads of batches 1 and 2 are dated lines under B2's results; batch 1 holds debugging and batch 2 red team review (then adversarial review). Both pages have instruction-review records, and B2t, whose names pass the row of 2026-11-22 requires first, is merged.
+- **Verified, four cases:** `debug-staging-reminder` (from M1's slice 5: the staging hook read `-m"add …"` as options; fix and commit), `debug-leak-check` (from M2's slice 0: the leak check searched JSON text and missed a Windows path; cause only, code left as it was), `red-team-fail-closed` (from M1's slice 1, hooks fail closed) and `red-team-lease` (from M2's slice 4, the writing-session lease). Each red team case asks the agent to write a plan's missing section first, which makes it the author, so the page has it dispatch the red team. Each playbook has its own scaffold under `evals/proof/`.
+- **Verified, criterion 61's half that can be shown now:** each case names its own arms: the playbook under test, a fixed contract copy and, for red team review, a tier binding naming the small model; its two-line text; and nothing for bare. A0's test now lists the four real cases' `covered_files` and passes. A new test fails any B7 case that hashes a file outside `evals/` other than its playbook, or that grades with a hook, since a hook grader hashes `parts/` and `wslib/shell.py`, which slice Z edits. The records' half waits for the recordings.
+- **Verified, the two-line texts** are written and committed, two lines each, before any baseline: `evals/proof/debugging/two-line.md` and `evals/proof/red-team-review/two-line.md`.
+- **Verified, the cases work without an agent:** `tests/test_m3_b7.py` runs each case through `prepare`, `inspect` and `grade`. A run that does nothing fails every case. A run that follows the playbook passes every grader. A left print, a fix in the cause-only case, a missed flaw, a missing triage, a long reply and an unwritten section each fail the grader meant for them. The test skips on Windows, where the eval does not run.
+- **Verified, red team review is graded on protocol and on what the review finds, not on format:** a fresh session dispatched, the record in the page's folder, a short reply with path and verdict, the code left alone, and a hidden test that a record names the plan's false key point and every finding is settled. A side review during the slice found that the first draft's hidden test also checked the record's headings and columns, which the two lines do not name, so a win there would have rested on format. The headings check was removed before anything ran. Inferred: the flaw check matches wording, so a record that names the flaw in other words fails it.
+- **Verified, kept to the rules:** `python3 ws.py selftest` and `python3 ws.py check` pass, the check with only the known warning on fix a bug's eval record; `python3 -m unittest discover -b tests` ran 784 tests, 3 skipped, OK; `python3 tests/hook_cases.py` passes 93 of 93; `python3 evals/grade.py --recorded` finds no difference. The private ledger's check prints 0 unmapped of 223.
+- **Verified, the review:** 9 findings in 2 records, 1 blocking: the eval page let an attempt start without the row's preconditions. One fix round fixed all 9. The fresh re-check upheld 8 and 1 in part, found nothing blocking, and found 2 small breaks the fixes made. The three open items are known defects in the records, for the docs audit.
+- **Verified, Q1's two fixes are made:** B7 had to edit `tests/test_core.py`, whose pooling test listed every case, so it made Q1's two Windows test fixes there. The Git bash lookup walks up from git, and the lease test keeps a dead process's handle open. CI passed on both Windows jobs.
+
+Decisions made in the slice:
+
+- **The dispatched red team runs on the small model** in every arm. The guided arm's fixed tier binding names it, so only the protocol differs between the arms, not the critic's model. The real binding's stronger model is M9's to test, on real requests.
+- **No B7 case uses a hook grader,** so none hashes a file slice Z edits. The red team cases check the commit through the other session's edits instead.
+- **The cause-only case grades the page's exception:** the regression test stays uncommitted and the code unchanged.
+- **The guided arm gets no copy of the pages its playbook links to.** Copies of live pages would stale B7's records when they change, so the arm is tested on the playbook's own steps, and the eval page says a dead link may cost it runs.
+
+Proposed for the recording, as template rule 7 asks: `evals/pool.py` pools every gated record into one table, so B7's full recordings would enter the fix-a-bug table that `evals/README.md` and a test hold. Before the first full B7 recording, it should pool by playbook. Baselines are stored apart and do not affect it.
+
+Not done: the baseline and what follows from it (cut, recording or failed attempt), and so criterion 25 and the records' half of criterion 61; these wait for the maintainer's run count, Q47.
+Parked: Q47
+Next: the maintainer — answer Q47 with a run count for B7's baseline, about 60 runs; the coordinator then resumes B6, as the order of round 9 says.
+
 ### Queued for slice Z
 
 Edits to files the eval hashes, queued by a slice for slice Z to make. Each line names the slice, the file and the edit.
@@ -2108,3 +2186,4 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - B5, `docs/playbooks/fix-a-bug.md`: with B2's queued fix-path section, the fix brief's seam part gives its reason: a fix was once placed at the visible layer again and again while the cause stayed reachable.
 - B5, the one-line request map slice Z writes: its opening says why it exists, that common kinds of work once had no entry point.
 - B5, `INDEX.md`, Topics: a row "Decision records; write, amend or supersede a decision; why a rule exists" linking [the decision record template](../templates/decision-record.md); "Where the ported pages disagreed; departures from the ported pages" linking [decision 0020](../decisions/0020-where-the-sources-disagreed.md); "What the workspace holds and refuses; what success means" linking decisions [0008](../decisions/0008-success-is-a-teammate-who-does-not-ask.md) and [0009](../decisions/0009-hold-what-nobody-can-derive.md); "Retired pages; the archive; what search still finds" linking [decision 0015](../decisions/0015-retired-pages-move-to-an-archive.md); "Unattended runs; moving a pin after a run" linking [decision 0018](../decisions/0018-unattended-runs-write-only-to-a-branch.md); "Branching for product repositories; hotfixes; release branches" linking [decision 0019](../decisions/0019-every-fix-lands-on-trunk-first.md); "A knowledge graph of the code" linking [decision 0013](../decisions/0013-knowledge-graph-output-is-scratch.md); and the row that routes to decision 0001 also names where a person's agent memory, notes and settings belong.
+- B6, `INDEX.md`, Topics: a row "Wrappers; skills; the plugin; why a wrapper fires or stays quiet; selection cases" linking [the playbook catalog's three ways](../playbooks/README.md#three-ways-to-follow-a-playbook) and [the wrappers' selection cases](../../evals/README.md).

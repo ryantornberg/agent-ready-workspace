@@ -44,6 +44,6 @@ A fresh session re-read the page on 2026-11-23, after the fix round, at a2d6a59 
 
 | # | Kind | Finding | Disposition |
 |---|---|---|---|
-| R1 | broke | Not blocking. contradiction. The new rules row says "A core playbook or how-to lands with its wrapper and two selection cases ...; a lane draft gets none." A core page on the `wrappers` waiting list lands with no wrapper, and the check refuses one ("a waiting page with a wrapper fails") (verified, reading `run` and the case). Step 5's bullet and the catalog's rules row state that exception; this row does not label it. Add "unless the `wrappers` entry's waiting list names it". | open |
+| R1 | broke | Not blocking. contradiction. The new rules row says "A core playbook or how-to lands with its wrapper and two selection cases ...; a lane draft gets none." A core page on the `wrappers` waiting list lands with no wrapper, and the check refuses one ("a waiting page with a wrapper fails") (verified, reading `run` and the case). Step 5's bullet and the catalog's rules row state that exception; this row does not label it. Add "unless the `wrappers` entry's waiting list names it". | fixed (second round): "unless the `wrappers` entry's waiting list names it". |
 
 What the first reading missed: nothing.

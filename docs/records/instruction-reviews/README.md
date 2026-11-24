@@ -244,6 +244,8 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b5-size-the-work.md](2026-11-23-b5-size-the-work.md) | `docs/size-the-work.md` | contradiction, trigger, enforcement |
 | [2026-11-23-b5-spec-template.md](2026-11-23-b5-spec-template.md) | `docs/templates/spec.md` | placement |
 | [2026-11-23-b5-templates-index.md](2026-11-23-b5-templates-index.md) | `docs/templates/README.md` | none |
+| [2026-11-23-b7-evals-readme.md](2026-11-23-b7-evals-readme.md) | `evals/README.md` | contradiction, placement |
+| [2026-11-23-b7-readme.md](2026-11-23-b7-readme.md) | `README.md` | contradiction |
 | [2026-11-23-b6-evals-readme.md](2026-11-23-b6-evals-readme.md) | `evals/README.md` | contradiction, step, placement |
 | [2026-11-23-b6-extend-the-workspace.md](2026-11-23-b6-extend-the-workspace.md) | `docs/extend-the-workspace.md` | step, enforcement |
 | [2026-11-23-b6-glossary.md](2026-11-23-b6-glossary.md) | `docs/glossary.md` | none |

@@ -25,7 +25,7 @@ To run the checks before every commit, and on every commit message, a person run
 git config core.hooksPath .githooks
 ```
 
-To load the [wrappers](docs/playbooks/README.md#three-ways-to-follow-a-playbook) in Claude Code, a person runs these once on each machine, from the top of the workspace. The first makes the folder a plugin marketplace on this machine; the second installs the plugin for this folder only, in the ignored local settings, so the shared settings file stays as committed. The nightly job does not run them, since it has no Claude Code.
+To load the [wrappers](docs/playbooks/README.md#three-ways-to-follow-a-playbook) in Claude Code, a person runs these once on each machine, from the top of the workspace. The first makes the folder a plugin marketplace on this machine; the second installs the plugin for this folder only, in the ignored local settings, so the shared settings file stays as committed. The block carries no `<!-- setup -->` mark, so no reader of the setup blocks runs it. One marketplace name serves one folder on a machine: the kit's clone and every workspace made from it declare `agent-ready-workspace`, so the folder that ran the first command last serves the wrappers to all of them, worktrees included. Run the first command again in the folder you work in.
 
 ```
 claude plugin marketplace add ./

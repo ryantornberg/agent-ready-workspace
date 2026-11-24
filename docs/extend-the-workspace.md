@@ -84,7 +84,7 @@ Once the page is committed, its upkeep, such as its review date and the rows tha
 | Every must and never on a page has a row in its rules table, with a true tag. | `prose` |
 | A rules-table tag names a part the manifest uses. | `rules#a part not in the manifest fails` |
 | A page's catalog or index row, and its route in, land in the same commit as the page. | `prose` |
-| A core playbook or how-to lands with its wrapper and two selection cases, one that should fire it and one that should leave it quiet; a lane draft gets none. | `wrappers#a core procedure with no wrapper fails`, `wrappers#a wrapper missing a selection case fails`, `wrappers#a lane draft with a wrapper fails` |
+| A core playbook or how-to lands with its wrapper and two selection cases, one that should fire it and one that should leave it quiet, unless the `wrappers` entry's waiting list names it; a lane draft gets none. | `wrappers#a core procedure with no wrapper fails`, `wrappers#a wrapper missing a selection case fails`, `wrappers#a lane draft with a wrapper fails` |
 | The README's table names each playbook, how-to and procedure section with the state its proof mark gives. | `proof#a README row that disagrees with the page fails` |
 | A change to a file the eval covers, such as a row in INDEX.md or a line in AGENTS.md, waits for a new eval run on record. | `eval_record#so does an edit to the contract the guided arm is given` |
 | A change to a file the eval covers is queued by default; when a check or an approved plan needs it now, it goes on a branch that is not merged until the eval run is on record. | `prose` |

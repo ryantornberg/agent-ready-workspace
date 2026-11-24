@@ -834,8 +834,11 @@ class FailClosedTests(Folder):
     def shell(self):
         if os.name == "nt":   # Git's own bash: the one an agent tool on Windows runs hooks with, not WSL's
             git = shutil.which("git")
-            candidate = git and pathlib.Path(git).resolve().parent.parent / "bin" / "bash.exe"
-            return str(candidate) if candidate and candidate.exists() else None
+            # git.exe sits in Git\cmd from a Windows shell and in Git\mingw64\bin from Git bash; bash.exe is in Git\bin.
+            for folder in pathlib.Path(git).resolve().parents if git else ():
+                if (folder / "bin" / "bash.exe").is_file() and (folder / "usr" / "bin").is_dir():
+                    return str(folder / "bin" / "bash.exe")
+            return None
         return shutil.which("sh")
 
     def run_wiring(self, event, payload, project, path=None):
@@ -2050,7 +2053,8 @@ class EvalThatCanLoseTests(Folder):
 
     # Criterion 28
     def test_three_cases_are_pooled_at_40_or_more_trials_per_arm_with_95_percent_intervals(self):
-        names = sorted(p.stem for p in (ROOT / "evals/cases").glob("*.json"))
+        names = sorted(p.stem for p in (ROOT / "evals/cases").glob("*.json")
+                       if json.loads(p.read_text(encoding="utf-8"))["playbook"] == "docs/playbooks/fix-a-bug.md")
         self.assertEqual(names, ["big-report", "fix-a-bug", "nightly-job"])
         cases, pooled = self.pool.pool()
         self.assertEqual(sorted(cases), names)
@@ -3097,6 +3101,7 @@ class LeaseTests(Folder):
         done = subprocess.Popen([sys.executable, "-c", "pass"])
         done.wait()
         self.dead = done.pid
+        self.dead_process = done    # its handle stays open, so Windows cannot give the dead id to a new process
 
     def hold(self, session="other", pid=None, age=10.0):
         lease = {"session": session, "pid": self.other.pid if pid is None else pid, "taken": time.time() - age}

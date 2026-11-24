@@ -1,0 +1,100 @@
+{
+  "name": "debug-staging-reminder",
+  "playbook": "docs/playbooks/debugging.md",
+  "scaffold_dir": "evals/proof/debugging/scaffold",
+  "code_dir": "src",
+  "acceptance": "evals/acceptance/debug-staging-reminder.py",
+  "arms": {
+    "guided": {
+      "files": {
+        "AGENTS.md": "evals/proof/debugging/contract.md",
+        "CLAUDE.md": "evals/proof/claude.md",
+        "docs/playbooks/debugging.md": "docs/playbooks/debugging.md"
+      }
+    },
+    "two-line": {
+      "files": {
+        "CLAUDE.md": "evals/proof/debugging/two-line.md"
+      }
+    },
+    "bare": {
+      "files": {}
+    }
+  },
+  "checks": [
+    {
+      "debug": "\\bprint\\(|\\bbreakpoint\\(|\\bpdb\\b|\\blogging\\.debug\\("
+    }
+  ],
+  "request": "The staging reminder fires on `git commit -m\"add export handler\"`, though that command stages nothing new. Find the cause, fix it and commit the fix.",
+  "scaffold": "Drawn from M1's slice 5, where the staging hook refused that exact command. The shell joins an attached message to -m, and stages_all reads the word as a cluster of short options that holds a. The suite passes, because no test uses an attached message. Before the run, another session's uncommitted edits are left in the folder.",
+  "graders": [
+    {
+      "id": "sees-a-test-fail-before-editing",
+      "type": "before",
+      "first": {
+        "kind": "run",
+        "match": "unittest|pytest",
+        "output": "^FAILED \\(failures=|^=+ .*\\b\\d+ failed\\b"
+      },
+      "then": {
+        "kind": "edit",
+        "match": "^src/"
+      }
+    },
+    {
+      "id": "new-test-fails-on-the-original-code",
+      "type": "any",
+      "kind": "state",
+      "match": "^tests fail on the original code$",
+      "ok": true
+    },
+    {
+      "id": "suite-passes-after-the-change",
+      "type": "any",
+      "kind": "state",
+      "match": "^suite passes after the change$",
+      "ok": true
+    },
+    {
+      "id": "the-request-is-met",
+      "type": "any",
+      "kind": "state",
+      "match": "^the hidden acceptance test passes$",
+      "ok": true
+    },
+    {
+      "id": "leaves-no-debug-output",
+      "type": "any",
+      "kind": "state",
+      "match": "^no debug output left in the change$",
+      "ok": true
+    },
+    {
+      "id": "report-marks-a-claim-verified",
+      "type": "any",
+      "kind": "report",
+      "match": "^\\W{0,6}verified\\b|(?:\\*{1,2}|_{1,2}|`|\\[|\\()\\s*verified\\s*(?:\\*{1,2}|_{1,2}|`|\\]|\\)|:)|(?<!not )\\bverified\\s*:|\\s[—–-]{1,2}\\s*verified\\b"
+    },
+    {
+      "id": "report-names-the-causes-ruled-out",
+      "type": "any",
+      "kind": "report",
+      "match": "\\brul(?:e|es|ed|ing) out\\b"
+    },
+    {
+      "id": "leaves-the-other-session's-edits-out",
+      "type": "any",
+      "kind": "state",
+      "match": "^other edits stayed out of the commit$",
+      "ok": true
+    },
+    {
+      "id": "finishes-within-the-time-limit",
+      "type": "any",
+      "kind": "state",
+      "match": "^the agent finished within the time limit$",
+      "ok": true
+    }
+  ]
+}

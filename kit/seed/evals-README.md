@@ -2,11 +2,11 @@
 
 A test of this workspace's guidance: does an agent that is given it do better than one that is not, and better than one given two lines instead? A small change to a playbook's wording can change what an agent does, and without a case nobody notices until it does the wrong thing in real work.
 
-**In short:** this workspace has no eval cases yet. Add one for the task your team repeats most, from a real failure, and record it with `python3 evals/run.py NAME`, where NAME is the case's name. A page the kit marks proven was proven in the kit, on the kit's own cases; the `eval_record` check here gates only the pages this workspace proves itself.
+**In short:** this workspace has no outcome cases yet; the selection cases the kit gave with its wrappers test only which wrapper loads. Add an outcome case for the task your team repeats most, from a real failure, and record it with `python3 evals/run.py NAME`, where NAME is the case's name. A page the kit marks proven was proven in the kit, on the kit's own cases; the `eval_record` check here gates only the pages this workspace proves itself.
 
 ## The cases
 
-A case is a JSON file under `evals/cases/`, with the keys `name`, `playbook` (the page it tests), `scaffold_dir` (the folder the agent works in), `code_dir`, `acceptance` (a hidden acceptance test), `request` (the one-line request) and `graders`. Each grader has an `id` and a `type` from the list at the top of `grade.py`. The harness is `run.py`, `grade.py`, `pool.py` and `proofkeys.py`, which the kit owns; `python3 evals/run.py --help` lists the run's options, such as the model and the runs per arm. The kit's own cases test its invented order system and stay in the kit, so the first case here is your team's.
+A case is a JSON file under `evals/cases/`, with the keys `name`, `playbook` (the page it tests), `scaffold_dir` (the folder the agent works in), `code_dir`, `acceptance` (a hidden acceptance test), `request` (the one-line request) and `graders`. Each grader has an `id` and a `type` from the list at the top of `grade.py`. The harness is `run.py`, `grade.py`, `pool.py` and `proofkeys.py`, which the kit owns; `python3 evals/run.py --help` lists the run's options, such as the model and the runs per arm. The kit's own outcome cases test its invented order system and stay in the kit, so the first one here is your team's.
 
 Each case runs three arms. [arms.json](arms.json) lists the files each arm is given: the guided arm gets the workspace's contract, index, playbook and definition of done; the two-line arm gets [two lines](two-line.md); the bare arm gets the scaffold only. Both files came from the kit and name its fix-a-bug playbook and that playbook's two habits. For a case on a playbook of your own, change both files to name yours, or have the case name its own arm files under `arms`.
 
@@ -20,15 +20,17 @@ So the kit left one rule out of this workspace's contract: that a change to it, 
 
 ## The wrappers' selection cases
 
-Each [wrapper](../docs/playbooks/README.md#three-ways-to-follow-a-playbook) has two or more selection cases: a request that should fire it, and a nearby request, one a wrapper next to it owns, that should leave it quiet. They test only whether the right wrapper loads. They sit with the plugin, one folder per case in `plugin/evals/`, in the format `claude plugin eval` reads. The kit gave you its own cases; rewrite each request in your team's words. To add a pair, copy an existing one and change the request and the wrapper's name. The `wrappers` check fails a wrapper that lacks either kind, and a case in any other form.
+Each [wrapper](../docs/playbooks/README.md#three-ways-to-follow-a-playbook) has two or more selection cases: a request that should fire it, and a nearby request, one a wrapper next to it owns, that should leave it quiet. They test only whether the right wrapper loads. They sit with the plugin, one folder per case in `plugin/evals/`, in the format `claude plugin eval` reads. The kit gave you its cases with its wrappers, and their requests still name its invented order system; rewrite each request in your team's words. To add a pair, copy an existing one and change the request and the wrapper's name. The `wrappers` check fails a wrapper that lacks either kind, and a Skill grader in any other form; it does not read a grader of another type.
 
-A run costs real agent time, so a person starts it, or an agent on that person's yes for that run. Run them from the top of the workspace, on the small model you hand work to, without the run that leaves the plugin out:
+A playbook or how-to you add with no `lane` key is a core procedure, and the `wrappers` check fails it until it has a wrapper under `plugin/skills/`, named after its file without `.md`, with one case of each kind. The check's waiting list takes only the kit's own milestones, so a page of yours cannot wait there.
+
+A run costs real agent time, so it runs in batches, and each batch needs a person's yes with a run count: its cases times their runs. A rerun after a rewrite is a new batch with its own yes. An agent with that yes runs the batch itself, and adds `--trust-plugin`: in a folder not yet trusted, `claude plugin eval` otherwise asks for a confirmation, and with no terminal to answer it the command exits 1. The agent stops before it would pass the count, and narrows a batch with `--case` or `--runs` to stay under it. No check holds the yes or the count; they rest on the agent's word. A person at a terminal may leave `--trust-plugin` out and answer the question there. Run them from the top of the workspace, on the small model you hand work to, without the run that leaves the plugin out:
 
 ```
-claude plugin eval plugin --model haiku --ablation none --no-publish --output-dir evals/selection/YYYY-MM-DD
+claude plugin eval plugin --model haiku --ablation none --no-publish --trust-plugin --output-dir evals/selection/YYYY-MM-DD
 ```
 
-Commit `evals/selection/YYYY-MM-DD/aggregate-result.json` and nothing else from the run, after searching it for your user name, home folder and git identity and replacing each with a placeholder. A wrapper that fails its case that fires in most of its runs is rewritten once, and the result is recorded either way.
+Commit `evals/selection/YYYY-MM-DD/aggregate-result.json` and nothing else from the run, after searching it for your user name, home folder and git identity and replacing each with a placeholder. A wrapper that fails its case that fires in most of its runs is rewritten once, and the result is recorded either way, under the batch's date in `evals/selection/`. The wrappers are files the kit syncs, so a rewritten one fails the `kit_drift` check until you keep your copy with `python3 ws.py drift --keep PATH`; upgrades then leave that wrapper alone.
 
 ## Rules that make this worth doing
 
