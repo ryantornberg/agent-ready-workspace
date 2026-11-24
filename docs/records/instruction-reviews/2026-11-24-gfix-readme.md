@@ -9,7 +9,7 @@ reviewed-at: 2d83108, with the uncommitted page edits of the slice GFIX builder
 
 This records a fresh session's review of slice GFIX's edit to the README's Limits list, for the slice's builder and the maintainer.
 
-**In short:** 4 findings: 3 contradiction, 1 eval-case; none is blocking. Every example on the bullet behaves as it says. The bullet says every shell guard but `no_stage_all` refuses a NUL escape and a judged name under a program the parser does not read, but two forms of those pass all seven guards; the code findings are in [the 0004 record](2026-11-24-gfix-0004.md).
+**In short:** 4 findings: 3 contradiction, 1 eval-case; none is blocking. Every example on the bullet behaves as it says. The bullet says every shell guard but `no_stage_all` refuses a NUL escape and a judged name under a program the parser does not read, but two forms of those pass all seven guards; the code findings are in [the 0004 record](2026-11-24-gfix-0004.md). The re-check of fix round 1 found findings 1 to 3 closed as found and 1 new non-blocking item: the bullet's refused escapes miss an octal escape above `\377` and a lone NUL word among `eval`'s words, both of which pass all seven guards.
 
 ## Scope
 
@@ -30,3 +30,27 @@ In scope: the Limits bullet that begins "The shell guards refuse six more lines 
 - step: `command -v git` passes all seven guards, and so do `grep -n "git push" notes.txt` and `echo "gh pr merge 5 --admin"`, the longer quoted strings the bullet asks for (verified). `grep -n 'git' notes.txt` is refused, as "a longer quoted string" implies (verified).
 - trigger: the bold lead says what follows: six refused lines and runner forms that still get past.
 - placement: the bullet sits in the Limits list beside the Q54 bullet it extends, and links decision 0004 for the detail; it restates no rule from procedure endings.
+
+## Re-check of fix round 1, 2026-11-24
+
+A fresh session re-checked the bullet that begins "The shell guards refuse six more lines the parser misreads", as committed in 4dda1e5, against the code of 6efbff3. Each example was run through the seven shell guards' `decide`, and the route lines through bash 3.2.57 and zsh 5.9 with a fake `git`, `gh` and `printenv`, as [the 0004 record's re-check](2026-11-24-gfix-0004.md#re-check-of-fix-round-1-2026-11-24) describes.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | Closed as found; direct variants remain, item 5 | The bullet now names `$'\0'git push --force origin main` among the refused, and all seven refuse it (verified). Its reason, "the shell drops part of such a word", holds in both shells (verified; 0004 record, item 6). `read -d $'\0'` passes, as it says (verified). |
+| 2 | Closed | `NICE -n 5 git push -f origin main` is refused by all seven, and a bare `PRINTENV` passes all seven, as the bullet says (verified). |
+| 3 | Closed | The bullet names the eight shells `shell.SHELL_PROGRAMS` holds; `arch -arm64` before each is refused by all seven, and `arch -arm64 tcsh` passes, as it says (verified). |
+| 4 | Deferred to M4, as the disposition says | The refusal text still ends "look a program up with `command -v git`" (verified), and no eval case was added (verified, read). |
+
+### New items
+
+| # | Class | Where | Finding | Disposition |
+|---|---|---|---|---|
+| 5 | contradiction | The bullet, "an ANSI-C escape that the shell makes a printable character, a tab or a new line", "a NUL escape in a word that holds anything else" and "A NUL escape that is a whole word or value, such as `read -d $'\0'`, passes" | Not blocking. The bullet says every shell guard but `no_stage_all` refuses these escapes, but an octal escape above `\377` passes all seven: `$'\547it' push --force origin main` runs git in both shells, and `$'\400'git push --force origin main` in bash (verified; 0004 record, item 8). It says a whole-word NUL passes, without saying that among `eval`'s words such a word makes the next word the program: `eval $'\0' '${G:-git}' push --force origin main` passes all seven, and bash runs git (verified; 0004 record, item 9). Its list of what still gets past names neither. It holds again once those two items are fixed (inferred). | fixed in fix round 2: the bullet names the octal rule and the `eval` and `watch` exception |
+
+### Checked with no finding
+
+- enforcement: each example the bullet says is refused is refused by all seven guards in `other-live` (verified): `$'\x67it' push --force origin main`, `git$'\0' push --force origin main`, `$'\0'git push --force origin main`, `((git push -f origin main) )`, `$(( $(git push) ))`, `nice -n {5,git} push`, a `nice` inside 8 nested `sh -c`, `GIT push --force origin main`, `arch`, `script` and `flock` with a literal `git`, `NICE -n 5 git push -f origin main`, `arch -arm64` before `gh`, `env`, `printenv`, `pwsh`, `powershell`, each of the eight shells and `/bin/zsh`, and the harmless `which git`, `echo gh pr merge 5 --admin`, `grep -n git notes.txt`, `echo $(( $(date +%s) - START ))` and `bash $SCRIPT`. Each example it says gets past passes all seven (verified): `read -d $'\0'`, `arch $(command -v git) push -f origin main`, `flock /tmp/l -c 'git push -f origin main'`, `man -P 'git push -f origin main' ls`, `BASH -c 'git push -f origin main'`, `PRINTENV` and `arch -arm64 tcsh`. `push_lease` and `no_discard` refuse these only while another live session holds the lease, as their own bullets say; in `free` they pass every line (verified).
+- step: `command -v git`, `grep -n "git push" notes.txt` and `echo "gh pr merge 5 --admin"` pass all seven (verified).
+- trigger: the bold lead, "The shell guards refuse six more lines the parser misreads, and other runner forms still get past them.", says what follows (verified, read).
+- placement: unchanged from the first reading; the bullet links decision 0004 for the detail (verified, read).
