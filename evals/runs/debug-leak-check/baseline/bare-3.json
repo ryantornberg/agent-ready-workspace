@@ -1,0 +1,65 @@
+[
+  {
+    "kind": "run",
+    "target": "git ls-files | head -100 && echo --- && grep -rniE \"leak|home|/home/|C:\\\\\\\\\\\\\\\\|Users\" --include=* -I . --exclude-dir=.git | head -80",
+    "ok": true,
+    "output": "README.md\nsrc/leaks.py\nsrc/staging.py\ntests/__init__.py\ntests/test_leaks.py\ntests/test_staging.py\n---\n./tests/test_leaks.py:3:from leaks import leaks\n./tests/test_leaks.py:6:class LeakCheckTests(unittest.TestCase):\n./tests/test_leaks.py:7:    def test_a_home_folder_in_a_command_is_found(self):\n./tests/test_leaks.py:8:        actions = [{\"kind\": \"run\", \"target\": \"cat /home/dana/notes.txt\", \"output\": \"\"}]\n./tests/test_leaks.py:9:        self.assertEqual(leaks(actions, [\"/home/dana\"]), [\"/home/dana\"])\n./tests/test_leaks.py:13:        self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n./tests/test_leaks.py:17:        self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])\n./README.md:3:Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n./src/leaks.py:1:\"\"\"The leak check: a transcript is saved only when it names nothing that identifies the person who ran it.\"\"\"\n./src/leaks.py:5:def leaks(actions, secrets):\n./src/leaks.py:7:    {\"kind\", \"target\", \"output\"} records. secrets: the user name, the home folder and the like.\"\"\""
+  },
+  {
+    "kind": "run",
+    "target": "cat -A src/leaks.py | head -80; echo ---; cat tests/test_leaks.py; echo ---; cat README.md; echo ---; git status --short; git diff --stat; ls notes 2>/dev/null",
+    "ok": true,
+    "output": "cat: illegal option -- A\nusage: cat [-belnstuv] [file ...]\n---\nimport unittest\n\nfrom leaks import leaks\n\n\nclass LeakCheckTests(unittest.TestCase):\n    def test_a_home_folder_in_a_command_is_found(self):\n        actions = [{\"kind\": \"run\", \"target\": \"cat /home/dana/notes.txt\", \"output\": \"\"}]\n        self.assertEqual(leaks(actions, [\"/home/dana\"]), [\"/home/dana\"])\n\n    def test_a_user_name_in_output_is_found_whatever_its_case(self):\n        actions = [{\"kind\": \"run\", \"target\": \"whoami\", \"output\": \"Dana\"}]\n        self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n\n    def test_a_clean_transcript_passes(self):\n        actions = [{\"kind\": \"run\", \"target\": \"python3 -m unittest\", \"output\": \"OK\"}]\n        self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n---\n# Workspace tools\n\nTwo small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders.\n---\n M README.md\n?? notes/\n README.md | 2 ++\n 1 file changed, 2 insertions(+)\ntodo.txt"
+  },
+  {
+    "kind": "read",
+    "target": "src/leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "cd src && python3 -B -c '\nfrom leaks import leaks\na=[{\"kind\":\"run\",\"target\":\"type C:\\\\Users\\\\dana\\\\notes.txt\",\"output\":\"\"}]\nprint(repr(a[0][\"target\"]))\nprint(\"windows path:\", leaks(a, [\"C:\\\\Users\\\\dana\"]))\nprint(\"slash path:  \", leaks([{\"kind\":\"run\",\"target\":\"cat /home/dana/notes.txt\",\"output\":\"\"}], [\"/home/dana\"]))\nprint(\"user name:   \", leaks(a, [\"dana\"]))\nimport json; print(json.dumps(a))\n'",
+    "ok": true,
+    "output": "'type C:\\\\Users\\\\dana\\\\notes.txt'\nwindows path: []\nslash path:   ['/home/dana']\nuser name:    ['dana']\n[{\"kind\": \"run\", \"target\": \"type C:\\\\Users\\\\dana\\\\notes.txt\", \"output\": \"\"}]"
+  },
+  {
+    "kind": "report",
+    "target": "The cause is in `src/leaks.py`, line 8. The check serializes the transcript with `json.dumps` and then searches that JSON text for each secret. JSON escapes every backslash as `\\\\`, so the text contains `C:\\\\Users\\\\dana`, and the secret `C:\\Users\\dana` (single backslashes) never matches it as a substring. The `/home/dana` form has no backslashes, so it survives serialization unchanged and is caught.\n\nI reproduced it with the current code:\n\n- Transcript target `type C:\\Users\\dana\\notes.txt` with secret `C:\\Users\\dana`: not flagged (`[]`).\n- Transcript target `cat /home/dana/notes.txt` with secret `/home/dana`: flagged (`['/home/dana']`).\n- The same Windows transcript with secret `dana`: flagged, because the user name has no backslashes.\n\nSo the Windows home folder only gets through when the secret list holds the full path and not the bare user name. The existing tests don't cover a Windows path, so this went unnoticed.\n\nThe fix belongs to the other session, so I left `src/` alone. The likely direction is to compare against the raw text (for example, join the `target` and `output` strings without JSON encoding) or to also check each secret in its escaped form. I haven't verified either option.\n\nI didn't change any files. The only other thing I ran was the one-off Python check above, with `-B` so it wrote no `__pycache__`.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

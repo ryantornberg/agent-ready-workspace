@@ -2148,7 +2148,7 @@ Not done: nothing
 Parked: Q49
 Next: the coordinator — B6 is finished; run B7's baseline on Q47's yes of 60 runs, then slice Z. The maintainer — answer Q49 for M4.
 
-### B7, proof attempts: stopped before the baseline
+### B7, proof attempts: stopped after the baseline
 
 Built unattended on 2026-11-23 in the worktree `.claude/worktrees/m3-b7`, on branch `m3/b7`, at the driver tier, since it adds eval cases, which are machinery. The maintainer's order for lane B, B7 then B6, was recorded under "Changes after approval" and pushed to main before building, as `2cf1122`. Pull request #51 merged as `7721896` after CI passed on Linux, macOS and Windows. A fresh driver-tier session wrote the instruction reviews, and another the re-check; the slice's session wrote everything else. No paid run started: the maintainer's order stops B7 before its baseline, and no approval names a run count for it.
 
@@ -2171,9 +2171,29 @@ Decisions made in the slice:
 
 Proposed for the recording, as template rule 7 asks: `evals/pool.py` pools every gated record into one table, so B7's full recordings would enter the fix-a-bug table that `evals/README.md` and a test hold. Before the first full B7 recording, it should pool by playbook. Baselines are stored apart and do not affect it.
 
-Not done: the baseline and what follows from it (cut, recording or failed attempt), and so criterion 25 and the records' half of criterion 61; these wait for the maintainer's run count, Q47.
-Parked: Q47
-Next: the maintainer — answer Q47 with a run count for B7's baseline, about 60 runs; the coordinator then resumes B6, as the order of round 9 says.
+At that first stop, Q47 was parked, and the baseline and what follows from it were not done.
+
+**Resumed on 2026-11-23, after Q47.** Run unattended at the driver tier in the worktree `.claude/worktrees/m3-b7-baseline`, made from `origin/main`. The maintainer's yes to 60 counted runs was recorded under "Changes after approval" and pushed to main before any run, as `b020177`. No file the eval hashes was edited, and no helper session was used.
+
+- **Verified, three baselines on record, on the small model:** `python3 evals/run.py CASE --baseline --runs 10` wrote `evals/runs/CASE/baseline/record.json` for three cases. The bare model passed every grader in 0 of 10 runs in each.
+
+| Case | Passed every grader | Graders the bare model failed most |
+|---|---|---|
+| debug-staging-reminder | 0 of 10 | marks a claim verified, 0; names the causes ruled out, 0; sees a test fail before editing, 2 |
+| debug-leak-check | 0 of 10 | reproduces the failure with a test, 0; the hidden test, 0; marks a claim verified, 0; names the causes ruled out, 0 |
+| red-team-fail-closed | 0 of 10 | record where the page puts it, 0; the hidden test, 0; reply with path and verdict, 0. It dispatched a fresh session in 10 of 10. |
+
+- **Verified, the fourth baseline was not run, to stay under 60:** the three cases started 31 agent runs, one of them refused by `run.py` for holding the operator's identity and run again with `--resume`. Their red team runs dispatched 10 recorded sessions; the refused run's are unknown, so it is counted as 2. That makes 42 counted runs. red-team-lease would add 10 runs and, at the 1 dispatch per run seen, about 10 sessions: about 62, past the yes. So it was not started.
+- **Verified, B7's rule sends both pages to a full recording:** each playbook has a case at 5 or fewer of 10, so neither is cut and neither is a failed attempt. The three arms are recorded at 22 runs per case, which needs its own yes, parked as Q50. R1 passed with no re-record, so the plan is on its base path, and the stop rule's projection does not defer red team review's recording. Both pages stay unproven until then, and no proof key changed.
+- **Inferred, the baseline could not have cut either page:** some graders read what only the guidance names, such as the record's folder and marking a claim verified. The bare model fails those by design. So the guided arm against the two-line arm, in the recording, is the real test.
+- **Verified, kept to the rules:** with the files staged, `python3 ws.py check` exits 0, with only the known warning on fix a bug's eval record; `python3 -m unittest discover -b tests` ran 785 tests, 3 skipped, OK; `python3 tests/hook_cases.py` passes 93 of 93; `python3 evals/grade.py --recorded` finds no difference. The private ledger's check prints 0 unmapped of 223. The run-written files were added to the edit ledger with `python3 ws.py ledger --add`.
+- **A known defect, for the docs audit:** the eval page's proof-attempts section still says no run is on record. That page takes no further fix round in M3, and a fix needs an instruction review, so this slice left it.
+
+Proposed for the recording, repeating the first stop's proposal: before the first full recording, `evals/pool.py` pools by playbook, so B7's records stay out of the fix-a-bug table. It is in Q50's first option. red-team-lease's bare arm in that recording, 22 runs, stands in for its missing baseline.
+
+Not done: the three arms' recordings, 22 runs per case, that B7's rule now asks for, red-team-lease's baseline, and so criterion 25 and the records' half of criterion 61; these wait for the maintainer's answer to Q50.
+Parked: Q50
+Next: the maintainer — answer Q50 on the full recordings; slice Z waits for B7.
 
 ### Queued for slice Z
 

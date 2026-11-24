@@ -1,0 +1,196 @@
+{
+  "case": "debug-staging-reminder",
+  "date": "2026-11-23",
+  "playbook": "docs/playbooks/debugging.md",
+  "covers": [
+    "evals/cases/debug-staging-reminder.json",
+    "docs/playbooks/debugging.md",
+    "evals/run.py",
+    "evals/grade.py",
+    "evals/proofkeys.py",
+    "evals/proof/claude.md",
+    "evals/proof/debugging/contract.md",
+    "evals/proof/debugging/two-line.md",
+    "evals/acceptance/debug-staging-reminder.py",
+    "evals/proof/debugging/scaffold/README.md",
+    "evals/proof/debugging/scaffold/src/leaks.py",
+    "evals/proof/debugging/scaffold/src/staging.py",
+    "evals/proof/debugging/scaffold/tests/__init__.py",
+    "evals/proof/debugging/scaffold/tests/test_leaks.py",
+    "evals/proof/debugging/scaffold/tests/test_staging.py"
+  ],
+  "guidance_sha256": "e7ff3468276fc3ddb7e34185a4c56b9b8722b953563552875177b9e30a9f8579",
+  "runs_per_arm": 10,
+  "agent": "Claude Code 2.1.331",
+  "model": "claude-haiku-5-5",
+  "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
+  "kind": "baseline",
+  "arms": {
+    "bare": {
+      "runs_passing_every_grader": 0,
+      "runs_passing_each_grader": {
+        "sees-a-test-fail-before-editing": 2,
+        "new-test-fails-on-the-original-code": 10,
+        "suite-passes-after-the-change": 10,
+        "the-request-is-met": 10,
+        "leaves-no-debug-output": 10,
+        "report-marks-a-claim-verified": 0,
+        "report-names-the-causes-ruled-out": 0,
+        "leaves-the-other-session's-edits-out": 10,
+        "finishes-within-the-time-limit": 10
+      },
+      "runs": [
+        {
+          "transcript": "bare-1.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-2.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-3.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-4.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-5.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-6.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-7.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-8.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-9.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": false,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-10.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "leaves-no-debug-output": true,
+            "report-marks-a-claim-verified": false,
+            "report-names-the-causes-ruled-out": false,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        }
+      ]
+    }
+  }
+}

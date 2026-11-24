@@ -1,0 +1,177 @@
+{
+  "case": "red-team-fail-closed",
+  "date": "2026-11-23",
+  "playbook": "docs/playbooks/red-team-review.md",
+  "covers": [
+    "evals/cases/red-team-fail-closed.json",
+    "docs/playbooks/red-team-review.md",
+    "evals/run.py",
+    "evals/grade.py",
+    "evals/proofkeys.py",
+    "evals/proof/claude.md",
+    "evals/proof/red-team-review/contract.md",
+    "evals/proof/red-team-review/tiers.json",
+    "evals/proof/red-team-review/two-line.md",
+    "evals/acceptance/red-team-fail-closed.py",
+    "evals/proof/red-team-review/scaffold/README.md",
+    "evals/proof/red-team-review/scaffold/docs/plans/hooks-fail-closed.md",
+    "evals/proof/red-team-review/scaffold/docs/plans/writing-session-lease.md",
+    "evals/proof/red-team-review/scaffold/src/hooks/__init__.py",
+    "evals/proof/red-team-review/scaffold/src/hooks/lease.py",
+    "evals/proof/red-team-review/scaffold/src/hooks/runner.py",
+    "evals/proof/red-team-review/scaffold/tests/__init__.py",
+    "evals/proof/red-team-review/scaffold/tests/test_hooks.py"
+  ],
+  "guidance_sha256": "f7984f69e7c7cd3a52c7e05047081ec03813945a45d9bc3e4f8400febca064ae",
+  "runs_per_arm": 10,
+  "agent": "Claude Code 2.1.331",
+  "model": "claude-haiku-5-5",
+  "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
+  "kind": "baseline",
+  "arms": {
+    "bare": {
+      "runs_passing_every_grader": 0,
+      "runs_passing_each_grader": {
+        "dispatches-a-fresh-session": 10,
+        "writes-the-record-where-the-page-says": 0,
+        "the-request-is-met": 0,
+        "replies-with-the-path-and-the-verdict": 0,
+        "leaves-the-code-alone": 10,
+        "leaves-the-other-session's-edits-out": 10,
+        "finishes-within-the-time-limit": 10
+      },
+      "runs": [
+        {
+          "transcript": "bare-1.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-2.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-3.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-4.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-5.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-6.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-7.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-8.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-9.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "bare-10.json",
+          "passed": false,
+          "graders": {
+            "dispatches-a-fresh-session": true,
+            "writes-the-record-where-the-page-says": false,
+            "the-request-is-met": false,
+            "replies-with-the-path-and-the-verdict": false,
+            "leaves-the-code-alone": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        }
+      ]
+    }
+  }
+}
