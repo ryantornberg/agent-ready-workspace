@@ -999,6 +999,16 @@ Slice Z's way past its stop, from the maintainer's answers to Q53 and Q52 in the
 
 **Criterion 61 now reads:** "Each B7 case's hash holds only the case file, its own arm files, its acceptance tests and scaffold, the harness and the graders, and A0's test checks that list. No file slice Z edits is in it, except the harness file `evals/run.py`, which slice Z changes for Q52. B7's records were current until that change, including after a pass flips a page's proof keys. After it, they are stale at sign-off. Debugging's cases are recorded again in M4 (Q51), and red team review's page is tested in M9 (Q50). Both pages are unproven, and `eval_record` gates only proven pages, so no check fails on the stale records." The B7 row's sentence that no slice after A changes the harness no longer holds for `evals/run.py`.
 
+### 2026-11-24
+
+Approved by: the maintainer, 2026-11-24
+
+How slice Z goes on after its second stop, from the maintainer's answers to Q55 and Q54 in the workspace queue on 2026-11-24 (round 12). Q55 narrows the leak rule of the previous entry. Q54 adds a guard change to slice Z's scope. No criterion is dropped or weakened.
+
+**The leak check refuses every lookalike of an allowed home folder (Q55).** `evals/run.py` drops the exception that let a name close to an allowed one pass. A transcript that names a home folder is refused unless the folder's name is exactly one the case's request or scaffold holds. A narrow re-check by a fresh session reads the change, then R2 starts.
+
+**Each guard refuses a program word the shell expands from a glob or braces (Q54).** The parser reads a word such as `{git,} push` or `/usr/bin/gi? push` as a literal program, so it passes every guard, on main too. Each guard that judges a command by its program refuses such a word, in its own part file, outside the eval's hash, so R2 stays current. A narrow re-check by a fresh session reads the change. The parser fix waits for M4.
+
 ## Results
 
 ### C1, launcher and baselines
@@ -2353,6 +2363,16 @@ The slice stopped under the plan's stop rule: the shell parser's reading of `ws.
 
 The private ledger's rows for slice Z stay on slice Z until its pages reach main.
 
+**Resumed on 2026-11-24, unattended, at the driver tier, after the maintainer's answers to Q53 and Q52 (round 11). Stopped again before R2.** The answers were recorded first, as the change entry of 2026-11-24 that names Q53 and Q52, with criterion 61's new wording, pushed to main as `fc9b9d4` and merged into `m3/z`. This session made the changes; three fresh driver-tier sessions wrote the re-checks. No eval run started: 0 of the 225 approved runs are spent.
+
+- **Verified, Q53, the old refusal is back:** the parser no longer reads `with-secrets` as a wrapper, and `secrets_shell` again finds the child itself and refuses git, gh, a write the parser reports and a nested `with-secrets`. The read-redirection move stays: `secrets_shell` takes `<` and `<>` from the parser's `reads`. The cases the slice had moved to `outward_write`, `no_force_push` and `git_folder_shell` are back in `secrets_shell`, with new cases for the three routes the earlier re-check found. The README's rules row, agent settings, the parts row and decision 0004's amendment say so, and the amendment says the wrapper move waits for M4.
+- **Verified, the re-check of the restore:** the hook's decision matched d2aa593's on 65 lines, and `decide` refused all 111 lines d2aa593 refused plus five more. Every route the earlier records name is refused, among them a NAME in braces, `env GH_REPO=...` in front of `ws.py`, the `sh wslib/launch.sh` form, and `cat /nope/ws.py with-secrets .env -- true`. `python3 ws.py with-secrets NPM_TOKEN -- npm publish` still passes. It found one route open on main too, a program given by a variable (`G=git; ... -- $G push --force origin main`); `secrets_shell` now refuses it, with two cases.
+- **Verified, Q52, the harness:** `evals/run.py` gives the agent the PATH `/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`, finds Claude Code on the operator's own PATH, and refuses to start without `python3` or `git` on the fixed one. With that environment the agent's shell finds `/usr/bin/python3` and `/usr/bin/git`. R1's stored transcripts name Python 3.9 from `Python3.framework`, which is `/usr/bin/python3`, so R2 does not cross a change of interpreter. The leak check refuses any account's home folder, except the placeholder and names the case's request or scaffold holds. The transcript test in `tests/test_core.py` uses the same rule. Over the 271 stored transcripts it refuses none.
+- **Verified, the stop:** the review of the eval page found the first leak rule blocking: it read allowed names from the request only, so it refused 18 stored debugging transcripts for the fixture's own `/home/dana`. Fix round 1 narrowed the pattern; its re-check found real home folders it let through, such as `file:///Users/bob` and `/mnt/c/Users/bob`. Fix round 2 went back to the broad pattern, with one exception for a lookalike of an allowed name. Its re-check found that exception passes an account named `d`, `da` or `dan` followed by a letter outside ASCII, in the two debugging cases, where `dana` is allowed. A third round would pass the stop rule's limit, so the question is queued as Q55. R2's three cases allow no name, so the gap does not reach them (verified, by the re-check).
+- **Inferred, the cleanest way on:** dropping the lookalike exception makes the rule refuse every lookalike, as 5bf39f1 did. Nothing then reaches a transcript, and only debugging's M4 recording pays, in dropped runs. Q55 recommends it.
+- **Parked, a gap on main as well:** a program word the shell expands from a glob or braces, such as `{git,} push --force origin main`, passes every guard, with or without `with-secrets`. The parser reads it as a literal program. Queued as Q54, with the recommendation to refuse it in the guards' own part file, outside the eval's hash, so R2 stays current.
+- **Verified, the checks:** `python3 ws.py selftest` passes every part's cases, `secrets_shell` 165 of 165. `python3 -m unittest discover -b tests` ran 803 tests with 8 failures, all from the three fix-a-bug records being stale until R2, as before. `python3 ws.py check` shows only `eval_record`'s three findings. `python3 ws.py check --commits origin/main..HEAD` passes 20 commits. The private ledger's check prints 0 unmapped items. The branch is pushed with no pull request, as the machinery page's trap requires until its eval records are in.
+
 Not done: R2, the routed arm and their records; `evals/README.md`'s report of both arms; the pull request and its merge; the ledger's move of Z's rows to their pages.
-Parked: Q53
-Next: maintainer — answer Q53; then a slice Z builder applies the answer, runs the narrow re-check, records R2 and the routed arm, and merges.
+Parked: Q54, Q55
+Next: maintainer — answer Q55, and Q54 if it should land before R2; then a slice Z builder applies the answers, runs a narrow re-check, records R2 and the routed arm, and merges.
