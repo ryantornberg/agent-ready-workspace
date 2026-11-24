@@ -295,3 +295,19 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-23-b6-wrapper-throwaway-prototype.md](2026-11-23-b6-wrapper-throwaway-prototype.md) | `plugin/skills/throwaway-prototype/SKILL.md` | none |
 | [2026-11-23-b6-seed-evals-readme.md](2026-11-23-b6-seed-evals-readme.md) | `kit/seed/evals-README.md` | step, enforcement, contradiction |
 | [2026-11-23-b6-seed-readme.md](2026-11-23-b6-seed-readme.md) | `kit/seed/README.md` | contradiction |
+| [2026-11-24-z-agents.md](2026-11-24-z-agents.md) | `AGENTS.md` | contradiction, placement |
+| [2026-11-24-z-index.md](2026-11-24-z-index.md) | `INDEX.md` | contradiction, trigger |
+| [2026-11-24-z-request-map.md](2026-11-24-z-request-map.md) | `docs/request-map.md` | contradiction, trigger, enforcement, placement |
+| [2026-11-24-z-definition-of-done.md](2026-11-24-z-definition-of-done.md) | `docs/definition-of-done.md` | step, enforcement, placement, contradiction |
+| [2026-11-24-z-fix-a-bug.md](2026-11-24-z-fix-a-bug.md) | `docs/playbooks/fix-a-bug.md` | contradiction, step, placement, enforcement |
+| [2026-11-24-z-safe-refactor.md](2026-11-24-z-safe-refactor.md) | `docs/safe-refactor.md` | contradiction, placement |
+| [2026-11-24-z-extend-the-workspace.md](2026-11-24-z-extend-the-workspace.md) | `docs/extend-the-workspace.md` | contradiction |
+| [2026-11-24-z-size-the-work.md](2026-11-24-z-size-the-work.md) | `docs/size-the-work.md` | contradiction |
+| [2026-11-24-z-playbooks-readme.md](2026-11-24-z-playbooks-readme.md) | `docs/playbooks/README.md` | trigger |
+| [2026-11-24-z-fix-record.md](2026-11-24-z-fix-record.md) | `docs/templates/fix-record.md` | step, enforcement, contradiction |
+| [2026-11-24-z-0004.md](2026-11-24-z-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
+| [2026-11-24-z-0005.md](2026-11-24-z-0005.md) | `docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md` | contradiction |
+| [2026-11-24-z-parts.md](2026-11-24-z-parts.md) | `docs/parts.md` | enforcement |
+| [2026-11-24-z-readme.md](2026-11-24-z-readme.md) | `README.md` | enforcement, contradiction |
+| [2026-11-24-z-agent-settings.md](2026-11-24-z-agent-settings.md) | `docs/agent-settings.md` | enforcement, step |
+| [2026-11-24-z-git-host-operations.md](2026-11-24-z-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | placement |

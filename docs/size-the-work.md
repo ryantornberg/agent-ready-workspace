@@ -9,7 +9,7 @@ last-reviewed: 2026-11-21
 
 How much process a change gets, and how to run that process for a feature. It is for the agent deciding how to start, and for the person who will read its plan.
 
-**In short:** a change that is small, easy to reverse, in one repository and under a day of work goes straight to [fix a bug](playbooks/fix-a-bug.md). Everything else climbs a ladder, and stops climbing as soon as the work allows. A feature climbs it in the order the feature ladder gives, with a spec a person agrees to before any plan.
+**In short:** a change that is small, easy to reverse, in one repository and under a day of work goes straight to [fix a bug](playbooks/fix-a-bug.md), or to [safe refactor](safe-refactor.md) or [extend the workspace](extend-the-workspace.md) as the contract routes it. Everything else climbs a ladder, and stops climbing as soon as the work allows. A feature climbs it in the order the feature ladder gives, with a spec a person agrees to before any plan.
 
 ## The gate
 
@@ -65,7 +65,7 @@ A spec says what will be true when the work is done, not how to get there. This 
 
 | The work | Spec? |
 |---|---|
-| Passes [the gate](#the-gate) | No. Go to [fix a bug](playbooks/fix-a-bug.md). |
+| Passes [the gate](#the-gate) | No. Go to [fix a bug](playbooks/fix-a-bug.md), or to safe refactor or extend the workspace as the contract routes it. |
 | A bug whose cause is not known | Not yet. Find the cause with [debugging](playbooks/debugging.md), then put the fix through the gate. |
 | Has an open question of feel, such as how a screen should look or behave | Not yet. Answer it with a [throwaway prototype](playbooks/throwaway-prototype.md), then write the spec with its answer. |
 | Anything else that climbs the ladder | Yes. |
@@ -110,7 +110,7 @@ Once the plan is `done`, the spec is kept as written: the record of what was agr
 
 | Failure | What it looks like | Instead |
 |---|---|---|
-| Ceremony | A spec for work that passes the gate. | Go to fix a bug. |
+| Ceremony | A spec for work that passes the gate. | Go to fix a bug, or to safe refactor or extend the workspace as the contract routes it. |
 | Guessing | A spec for a bug whose cause is not known. | Debug first. |
 | Design in the spec | The spec says how: which class, which table. | Say what will be true; leave the how to the plan. |
 | Untestable | A criterion no command can check. | Rewrite it in a requirement form, with its command. |

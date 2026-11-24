@@ -7,7 +7,7 @@ last-reviewed: 2026-11-22
 
 The dated record that one bug fix leaves behind, for the agent making the fix and anyone later checking what it proved.
 
-**In short:** one file per fix in `docs/records/fixes/`, opened when the fix starts and filled as it goes. It holds the fix brief when there is one, where the work stands, and a `## Report` whose every claim line is marked verified or inferred. The `claim_marks` check reads that report.
+**In short:** one file per fix in `docs/records/fixes/`, opened when the fix starts and filled as it goes. It holds the fix brief, where the work stands, and a `## Report` whose every claim line is marked verified or inferred. The `claim_marks` check reads that report.
 
 ## When to write one
 
@@ -37,7 +37,7 @@ last-reviewed: YYYY-MM-DD
 
 ## Brief
 
-<The fix brief and any dated change to it after approval. Delete this section when the fix had no brief.>
+<The fix brief, and any later change to it under a dated line.>
 
 ## Where it stands
 
@@ -59,7 +59,7 @@ Not done: <anything left, and why, or "nothing">
 
 ## Filling it in
 
-- **The brief.** When the fix had a brief, put it here, with any change to it after approval under a dated line. [Fix a bug](../playbooks/fix-a-bug.md) will define the brief and when a fix needs one; that section is planned for slice Z of M3. Until then, a fix with no brief deletes the section.
+- **The brief.** Put the fix brief here, in the ten parts [fix a bug](../playbooks/fix-a-bug.md#the-fix-brief) gives, with any later change to it under a dated line. Every fix that page takes has one.
 - **Where it stands.** Write a line only once you have run what it claims. A line you have not reached yet says "not yet". A claim written down because it looked plausible, and never checked, is how a wrong fix gets merged.
 - **The layer.** The red-green line names the layer the failing test exercised. A check that passes at one layer proves nothing about another: a screen that now looks right says nothing about the server behind it. When the bug lives at a layer your test did not reach, say so under "Not done".
 - **The running app.** Name the commit each check ran on. A check on an earlier commit does not count for a later one.
@@ -89,6 +89,7 @@ The check also fails a fix record with no `## Report` section. It does not check
 | Rule | Enforced by |
 |---|---|
 | A fix record has a `## Report` section, and every claim line in it starts with verified or inferred. | `claim_marks#a fix record with no report section fails`, `claim_marks#a claim line not marked verified or inferred fails` |
+| The record holds the fix brief in its `## Brief` section. | `prose` |
 | The report is the record's last section. | `prose` |
 | The record is committed with the fix on the fix's branch, and again after the push with the report filled. | `prose` |
 | One fix record per fix, in `docs/records/fixes/`, unless the fix is a slice of a hand-off plan. | `prose` |

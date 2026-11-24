@@ -158,7 +158,7 @@ class AdoptTests(unittest.TestCase):
         self.assertNotIn("docs/plans/", index)
         self.assertNotIn("CHANGELOG.md", index)
         self.assertIn("| the nightly job | `ReconciliationWorker` |", index)
-        self.assertIn("| Add a page | `docs/layout.md`, `INDEX.md` |", index)
+        self.assertIn("| Add a page | `docs/layout.md`, `INDEX.md`, `README.md` |", index)
 
     def test_the_setup_steps_include_the_hooks_and_the_drift_check(self):
         script = setup_steps.script("README.md", (self.instance / "README.md").read_text(encoding="utf-8"))
