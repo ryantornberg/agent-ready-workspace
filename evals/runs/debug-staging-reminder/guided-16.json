@@ -1,0 +1,110 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && echo --- && ls -la .claude 2>/dev/null; echo ---; find . -path ./.git -prune -o -type f -print | grep -v '^./notes/' | head -100; echo ---; grep -rn -i \"stag\\|git add\\|commit\" --include=* -I . --exclude-dir=.git 2>/dev/null | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\n---\ntotal 0\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:18 .\ndrwxr-xr-x@ 11 user  staff  352 Nov 23 23:18 ..\ndrwx------@  2 user  staff   64 Nov 23 23:18 .cc-writes\n---\n./tests/__init__.py\n./tests/test_staging.py\n./tests/test_leaks.py\n./docs/playbooks/debugging.md\n./README.md\n./AGENTS.md\n./CLAUDE.md\n./src/leaks.py\n./src/staging.py\n---\n./tests/test_staging.py:3:from staging import stages_all\n./tests/test_staging.py:6:class StagingReminderTests(unittest.TestCase):\n./tests/test_staging.py:7:    def test_staging_everything_is_caught(self):\n./tests/test_staging.py:8:        for command in (\"git add -A\", \"git add --all\", \"git add .\", \"git commit -a -m 'fix'\", \"git commit -am 'fix'\"):\n./tests/test_staging.py:10:                self.assertTrue(stages_all(command))\n./tests/test_staging.py:13:        for command in (\"git add src/staging.py\", \"git commit -m 'fix the reminder'\", \"git status\", \"ls -A\"):\n./tests/test_staging.py:15:                self.assertFalse(stages_all(command))\n./docs/playbooks/debugging.md:20:7. **Fix or hand on.** If you were asked only for the cause, go to step 8. If you were asked to fix it, and the fix passes the gate in [size the work](../size-the-work.md#the-gate), continue with [fix a bug](fix-a-bug.md) from its second step; once that fix is committed, run [defect escape analysis](escape-analysis.md), which checks whether a review covered the faulty code and, if one did, why it missed it. Otherwise go to step 8, and let the work be sized.\n./docs/playbooks/debugging.md:21:8. **Report.** Say what the cause is, list the causes you ruled out and the run that ruled out each, and name the regression test. Mark each claim verified or inferred, and log a question you had to ask a person, as [procedure endings](../procedure-endings.md) says. By exception to that page's commit step, a regression test from a run that asked only for the cause stays uncommitted: name it in the report, for whoever fixes the bug. On the fix path, [fix a bug](fix-a-bug.md) commits it with the fix.\n./docs/playbooks/debugging.md:43:| The report and the question-log entry follow [procedure endings](../procedure-endings.md); a regression test from a cause-only run stays uncommitted, named in the report. | `prose` |\n./README.md:3:Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n./notes/todo.txt:1:Draft, not ready to commit.\n./AGENTS.md:12:- Uncommitted changes you did not make belong to another session. Leave them as they are, and keep them out of your commit.\n./AGENTS.md:13:- This copy has no remote. Where a procedure says to push, commit and stop there.\n./AGENTS.md:18:- Stage files by name. Never `git add -A`, `git add .` or `git commit -a`: another session may have edits in the same folder.\n./src/staging.py:1:\"\"\"The staging reminder: does a git command stage every change in the folder, rather than files by name?\"\"\"\n./src/staging.py:4:# The options that stage everything, for each git subcommand that has them.\n./src/staging.py:5:STAGE_ALL = {\"add\": {\"-A\", \"--all\", \".\"}, \"commit\": {\"-a\", \"--all\"}}\n./src/staging.py:7:SHORT = {\"add\": \"A\", \"commit\": \"a\"}\n./src/staging.py:10:def stages_all(command):\n./src/staging.py:11:    \"\"\"True when the command stages every change: git add -A, git add ., git commit -a, git commit -am \"x\".\"\"\"\n./src/staging.py:16:    if len(words) < 2 or words[0] != \"git\" or words[1] not in STAGE_ALL:\n./src/staging.py:22:        if word in STAGE_ALL[subcommand]:"
+  },
+  {
+    "kind": "run",
+    "target": "cat -A src/staging.py | head -60; echo ---; cat tests/test_staging.py; echo ---; python3 -m unittest 2>&1 | tail -20; echo ---; python3 -c \"import sys; sys.path.insert(0,'src'); from staging import stages_all; print(stages_all('git commit -m\\\"add export handler\\\"'))\"; git log --oneline -3; git ls-files",
+    "ok": true,
+    "output": "cat: illegal option -- A\nusage: cat [-belnstuv] [file ...]\n---\nimport unittest\n\nfrom staging import stages_all\n\n\nclass StagingReminderTests(unittest.TestCase):\n    def test_staging_everything_is_caught(self):\n        for command in (\"git add -A\", \"git add --all\", \"git add .\", \"git commit -a -m 'fix'\", \"git commit -am 'fix'\"):\n            with self.subTest(command):\n                self.assertTrue(stages_all(command))\n\n    def test_files_named_one_by_one_pass(self):\n        for command in (\"git add src/staging.py\", \"git commit -m 'fix the reminder'\", \"git status\", \"ls -A\"):\n            with self.subTest(command):\n                self.assertFalse(stages_all(command))\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n---\n.....\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n---\nTrue\n86dc16b Orders\nAGENTS.md\nCLAUDE.md\nREADME.md\ndocs/playbooks/debugging.md\nsrc/leaks.py\nsrc/staging.py\ntests/__init__.py\ntests/test_leaks.py\ntests/test_staging.py"
+  },
+  {
+    "kind": "read",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -c \"\nimport shlex;print(shlex.split('git commit -m\\\"add export handler\\\"'))\" ; echo ---; cat CLAUDE.md; echo ---; cat docs/playbooks/debugging.md",
+    "ok": true,
+    "output": "['git', 'commit', '-madd export handler']\n---\n@AGENTS.md\n---\n---\nkind: playbook\nlast-reviewed: 2026-11-23\n---\n\n# Debugging\n\nHow an agent finds the unknown cause of a failure before it changes code. For a bug report, a failing test or CI run, or a flaky test.\n\n**In short:** build a fast repro that shows the failure on demand, before any theory: every run, or at a measured rate for a flaky failure. List several causes that a run could rule out, rank them, and test one change at a time. Keep the repro as the regression test, remove your instrumentation, and halt and report when the loop stalls.\n\n## Steps\n\n1. **Build the repro loop first.** Input: the failure, as a bug report, a failing test, or a failed CI run, whose failing step's log `gh run view RUN --log-failed` prints. RUN is the run's number: the number right after `/runs/` in its link, which `gh run list --limit 5` also lists. A job's link goes on past it, `/runs/<run>/job/<job>`; the job's number is not RUN. Make one command that shows the failure, fails the same way every run, and takes seconds, not minutes. Prefer a test over a session in the running app; prefer a small input over a large one. Run it three times. A flaky failure, one that fails only on some runs, gets a loop instead: run the command 20 times and count the failures. With none, run it 100 times. Output: the command, and the failure it prints every time, or for a flaky failure its count out of the runs. Do not form a theory yet.\n2. **List the causes.** Input: the repro and the code it runs, found with `python3 tools/symbols.py NAME src` or [INDEX.md](../../INDEX.md). Write at least three possible causes. For each, write the run that would rule it out and the result that would. Rank them, most likely first. Output: the ranked list.\n3. **Test one cause per run.** Input: the top cause still standing. Change one thing only, such as one input, one line or one setting, and run the repro. Write down the change, the result, and which causes the result rules out. Output: an updated list. Repeat this step.\n4. **Confirm the cause.** A cause is confirmed when one change makes the repro pass and undoing that change makes it fail again. For a flaky failure, pass means no failure in 100 runs of the loop, and fail means failures return at about step 1's rate. Leave the change undone: it is evidence, not the fix. Output: the cause, and the two runs that show it.\n5. **Keep the repro as the regression test.** Turn the repro into a test in the repository's suite, if it is not one already. It must fail on the code before the fix. For a flaky failure, it fails at least once in step 1's loop on the code before the fix. Output: the test.\n6. **Remove your instrumentation.** Delete every print, log line, breakpoint, temporary flag and scratch file you added. Check with `git status --short`, which also lists new files, and `git diff`, that none is left. Output: a working copy whose only change is the regression test.\n7. **Fix or hand on.** If you were asked only for the cause, go to step 8. If you were asked to fix it, and the fix passes the gate in [size the work](../size-the-work.md#the-gate), continue with [fix a bug](fix-a-bug.md) from its second step; once that fix is committed, run [defect escape analysis](escape-analysis.md), which checks whether a review covered the faulty code and, if one did, why it missed it. Otherwise go to step 8, and let the work be sized.\n8. **Report.** Say what the cause is, list the causes you ruled out and the run that ruled out each, and name the regression test. Mark each claim verified or inferred, and log a question you had to ask a person, as [procedure endings](../procedure-endings.md) says. By exception to that page's commit step, a regression test from a run that asked only for the cause stays uncommitted: name it in the report, for whoever fixes the bug. On the fix path, [fix a bug](fix-a-bug.md) commits it with the fix.\n\n## Halt and report\n\nStop and report, rather than guess, when:\n\n| When | Report |\n|---|---|\n| You cannot make the failure happen on demand, or a flaky failure does not fail once in 100 runs of the loop. | What you tried, what each attempt showed, and what you would need, such as data, an environment or a log. |\n| Every cause on the list is ruled out. | The list, the run that ruled out each, and what the runs suggest to look at next. |\n| The cause is in a second repository, or in `src/orders-service-v1`, which is kept read-only. | The cause and the evidence. Do not edit there. |\n| The fix would undo a recorded decision. | The cause, the decision, and the conflict. |\n\nNever ship a fix for a cause you have not confirmed, and never change code on a hunch to see if the failure goes away.\n\n## Rules\n\n| Rule | Enforced by |\n|---|---|\n| Build a repro that shows the failure on demand, every run or at a measured rate, before you form any theory. | `prose` |\n| Change one thing per run. | `prose` |\n| A cause is confirmed only when a change flips the repro both ways. | `prose` |\n| The report and the question-log entry follow [procedure endings](../procedure-endings.md); a regression test from a cause-only run stays uncommitted, named in the report. | `prose` |\n| Keep the repro as a regression test that fails on the code before the fix. | `prose` |\n| Remove all instrumentation before you finish. | `prose` |\n| Mark every claim in the report verified or inferred. | `eval:fix-a-bug` |\n| Never edit `src/orders-service-v1` while debugging; report a cause found there. | `shelved#an edit inside the shelved folder` |\n| Never edit a second repository while debugging; report a cause found there. | `prose` |\n| When the loop stalls, halt and report; never guess at a fix. | `prose` |\n\n## References\n\n- Andreas Zeller, [Introduction to Debugging](https://www.debuggingbook.org/html/Intro_Debugging.html), in *The Debugging Book*. Credited for steps 2 to 4: debugging as the scientific method, which invents a hypothesis, derives a prediction from it, tests the prediction and repeats until one hypothesis stands."
+  },
+  {
+    "kind": "run",
+    "target": "for i in 1 2 3; do python3 -c \"\nimport sys; sys.path.insert(0,'src')\nfrom staging import stages_all\nprint('stages_all =', stages_all('git commit -m\\\"add export handler\\\"'))\"; done",
+    "ok": true,
+    "output": "stages_all = True\nstages_all = True\nstages_all = True"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest tests.test_staging 2>&1 | grep -E \"FAIL|Ran|OK|FAILED\" | head -20",
+    "ok": true,
+    "output": "FAIL: test_letters_in_a_message_are_not_options (tests.test_staging.StagingReminderTests) [git commit -m\"add export handler\"]\nFAIL: test_letters_in_a_message_are_not_options (tests.test_staging.StagingReminderTests) [git commit -madd]\nFAIL: test_letters_in_a_message_are_not_options (tests.test_staging.StagingReminderTests) [git commit -m -a]\nFAIL: test_letters_in_a_message_are_not_options (tests.test_staging.StagingReminderTests) [git commit -ma fix]\nRan 3 tests in 0.000s\nFAILED (failures=4)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -4; echo ---; python3 -c \"\nimport sys; sys.path.insert(0,'src')\nfrom staging import stages_all\ncases = {'git add -A':True,'git add --all':True,'git add .':True,'git commit -a -m \\'fix\\'':True,'git commit -am \\'fix\\'':True,'git commit -sam x':True,'git commit -m\\\"add export handler\\\"':False,'git commit -F msg -a':True,'git commit -F -a':False,'git add src/x.py':False,'git commit -m fix':False,'git status':False,'git commit --message=ab -a':True,'git add -- .':False}\nfor c,want in cases.items(): print('OK ' if stages_all(c)==want else 'BAD', want, c)\n\"",
+    "ok": true,
+    "output": "----------------------------------------------------------------------\nRan 6 tests in 0.000s\n\nOK\n---\nOK  True git add -A\nOK  True git add --all\nOK  True git add .\nOK  True git commit -a -m 'fix'\nOK  True git commit -am 'fix'\nOK  True git commit -sam x\nOK  False git commit -m\"add export handler\"\nOK  True git commit -F msg -a\nOK  False git commit -F -a\nOK  False git add src/x.py\nOK  False git commit -m fix\nOK  False git status\nOK  True git commit --message=ab -a\nOK  False git add -- ."
+  },
+  {
+    "kind": "run",
+    "target": "git diff --cached --stat; git diff --stat -- src/staging.py tests/test_staging.py; git status --short",
+    "ok": true,
+    "output": " src/staging.py        | 19 ++++++++++++++++---\n tests/test_staging.py |  6 ++++++\n 2 files changed, 22 insertions(+), 3 deletions(-)\n M README.md\n M src/staging.py\n M tests/test_staging.py\n?? notes/"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/staging.py tests/test_staging.py && git commit -F - <<'EOF'\nStop the staging reminder firing on words in a -m message\n\nstages_all scanned every letter of a short-option cluster for -a, so\ngit commit -m\"add export handler\" read the message text as -a and fired\nthe reminder. Letters after a value-taking option (-m, -F, -C, ...) are\nnow treated as the value, and a value letter that ends the word takes\nthe next word.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2; git show --stat HEAD | tail -4; git status --short",
+    "ok": true,
+    "output": "[main a649035] Stop the staging reminder firing on words in a -m message\n 2 files changed, 22 insertions(+), 3 deletions(-)\na649035 Stop the staging reminder firing on words in a -m message\n86dc16b Orders\n\n src/staging.py        | 19 ++++++++++++++++---\n tests/test_staging.py |  6 ++++++\n 2 files changed, 22 insertions(+), 3 deletions(-)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The reminder fired because `stages_all` in `src/staging.py` treated letters inside the `-m` message as options. I fixed it and committed as `a649035` on `main`. This commit contains only `src/staging.py` and `tests/test_staging.py`.\n\n**Cause (verified):** `shlex.split` turns `-m\"add export handler\"` into the single word `-madd export handler`. The short-option check then found an `a` in that text and read it as `-a`. The reminder was not wrong to check for `-a`. It was reading the message as a flag.\n\n**Fix (verified):** In a short-option cluster, a letter that takes a value (`-m`, `-F`, `-C`, and the other commit value flags) ends the scan, so the rest of the word is the value. If the value letter ends the word, the next word is the value. `git commit -am` still counts as staging everything, because `a` comes before `m`.\n\n**Regression test:** I added `test_letters_in_a_message_are_not_options`. It failed on the old code for four commands, including the one from your report. The suite now runs 6 tests, all passing with `python3 -m unittest`. Spot checks also match git's behaviour for `-sam`, `-F msg -a`, `--message=ab -a` and `git add src/x.py`.\n\n**Things to know:**\n- **Not fixed, existing gap (verified):** `git add -- .` returns False, although it stages everything. The `--` break predates this change. I left it alone to keep the fix small. It is a one-line follow-up if you want it.\n- **Hook not in this repo (inferred):** I could not see the hook that prints the reminder. I'm assuming it calls `stages_all`, which fits the test file and the README.\n- **Playbook gaps:** `docs/playbooks/debugging.md` points to `fix-a-bug.md`, `size-the-work.md`, `escape-analysis.md` and `procedure-endings.md`, and none of them exist in this copy. I followed the debugging steps by hand and skipped the sizing gate and the escape analysis.\n- **Left alone:** the uncommitted `README.md` change and `notes/` are another session's work, so I kept them out of the commit as AGENTS.md asks. There is no remote, so I did not push.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "no debug output left in the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "kind": "run",
+    "target": "ls -la && ls -la .claude 2>/dev/null; cat .claude/settings.json 2>/dev/null; cat .claude/settings.local.json 2>/dev/null; ls -la .claude/hooks .claude/skills 2>/dev/null; git status --short; git log --oneline -3",
+    "ok": true,
+    "output": "total 8\ndrwxr-xr-x@  8 user  staff  256 Nov 23 23:16 .\ndrwx------@  5 user  staff  160 Nov 23 23:16 ..\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:16 .claude\ndrwxr-xr-x@ 16 user  staff  512 Nov 23 23:16 .git\ndrwxr-xr-x@  3 user  staff   96 Nov 23 23:16 notes\n-rw-r--r--@  1 user  staff  355 Nov 23 23:16 README.md\ndrwxr-xr-x@  4 user  staff  128 Nov 23 23:16 src\ndrwxr-xr-x@  5 user  staff  160 Nov 23 23:16 tests\ntotal 0\ndrwxr-xr-x@ 3 user  staff   96 Nov 23 23:16 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 23 23:16 ..\ndrwx------@ 2 user  staff   64 Nov 23 23:16 .cc-writes\n M README.md\n?? notes/\n3671172 Orders"
+  },
+  {
+    "kind": "run",
+    "target": "ls -la .git/hooks | grep -v sample; echo ---; git config --list --show-origin | grep -i -E 'hook|commit|template|alias' ; echo ---; find src tests notes -type f | head -50; echo ---; cat README.md; echo ---; ls -la ~/.claude 2>/dev/null | head -50; echo ---; cat ~/.claude/settings.json 2>/dev/null",
+    "ok": false,
+    "output": "Permission to use Bash with command head -50; echo ---; cat README.md; echo ---; ls -la ~/.claude has been denied."
+  },
+  {
+    "kind": "run",
+    "target": "ls -la .git/hooks | grep -v sample; echo ---; git config --list --show-origin | grep -i -E 'hook|commit|template|alias'; echo ---; find src tests notes -type f; echo ---; cat README.md",
+    "ok": true,
+    "output": "total 128\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:16 .\ndrwxr-xr-x@ 16 user  staff   512 Nov 23 23:16 ..\n---\n---\nsrc/leaks.py\nsrc/staging.py\ntests/__init__.py\ntests/test_staging.py\ntests/test_leaks.py\nnotes/todo.txt\n---\n# Workspace tools\n\nTwo small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders."
+  },
+  {
+    "kind": "read",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "notes/todo.txt",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "cd src && python3 -c 'from staging import stages_all; print(stages_all(\"git commit -m\\\"add export handler\\\"\"))'; cd .. && python3 -m unittest 2>&1 | tail -3; PYTHONPATH=src python3 -m unittest 2>&1 | tail -3",
+    "ok": true,
+    "output": "True\nRan 5 tests in 0.000s\n\nOK\nRan 5 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "src/staging.py",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_staging.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest -v 2>&1 | tail -15; cd src && python3 -c 'from staging import stages_all; print(stages_all(\"git commit -m\\\"add export handler\\\"\"))'",
+    "ok": true,
+    "output": "test_a_clean_transcript_passes (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_user_name_in_output_is_found_whatever_its_case (tests.test_leaks.LeakCheckTests) ... ok\ntest_all_flag_after_a_message_is_caught (tests.test_staging.StagingReminderTests) ... ok\ntest_files_named_one_by_one_pass (tests.test_staging.StagingReminderTests) ... ok\ntest_letters_inside_a_message_are_not_flags (tests.test_staging.StagingReminderTests) ... ok\ntest_staging_everything_is_caught (tests.test_staging.StagingReminderTests) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.000s\n\nOK\nFalse"
+  },
+  {
+    "kind": "run",
+    "target": "cd . && git add src/staging.py tests/test_staging.py && git commit -F - <<'EOF'\nFix staging reminder firing on -m messages\n\nstages_all scanned every letter of a short-option cluster for the\nstage-all flag, so the message in git commit -m\"add export handler\"\nwas read as flags and matched the \"a\" in \"add\". Short options that\ntake a value (-m, -F, -C, -c, -t) now end the cluster, and their value\nis skipped, including a value given as the next word.\n\nAdds regression tests for messages containing flag letters and for\n-a placed after a message.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2; git status --short",
+    "ok": true,
+    "output": "[main c14c695] Fix staging reminder firing on -m messages\n 2 files changed, 26 insertions(+), 2 deletions(-)\nc14c695 Fix staging reminder firing on -m messages\n3671172 Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The false positive came from `stages_all` in `src/staging.py`. For short-option clusters it checked every letter in the word, including the letters of the `-m` message. So `git commit -m\"add export handler\"` was read as `-madd export handler`, and the `a` in \"add\" matched `-a`.\n\n**The fix:** short options that take a value (`-m`, `-F`, `-C`, `-c`, `-t` for commit) now end the cluster. Their value is skipped, whether it's attached (`-mfix`) or the next word (`-m fix`). `-am` and `-a` after a message still count as staging everything.\n\n**Tests:** I added two regression tests in `tests/test_staging.py`. One covers messages that contain flag letters, such as `-m\"add export handler\"`, `-m 'add all of it'`, and `-mall`, which should not trigger. The other covers `-a` placed after a message, which should trigger. All 7 tests pass, and the reproduction now returns `False`.\n\n**Commit:** `c14c695` on `main`, \"Fix staging reminder firing on -m messages\". It includes only `src/staging.py` and `tests/test_staging.py`, with the Co-Authored-By line from your reminder. I left your uncommitted `README.md` edit and the `notes/` folder out of it.\n\nThe reminder itself comes from a hook outside this repo, which I couldn't read. The bug is confirmed in the function that the hook's check relies on, so the hook should behave correctly once it picks up the new code, but I haven't triggered it directly.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "no debug output left in the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

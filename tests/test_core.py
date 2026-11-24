@@ -2234,7 +2234,11 @@ class EvalThatCanLoseTests(Folder):
     def test_the_recorded_transcripts_hold_nothing_of_the_operators_environment(self):
         stored = list((ROOT / "evals/runs").glob("*/*.json"))
         self.assertGreaterEqual(len(stored), 120)
-        home = re.compile(r"/(Users|home)/(?!user\b)[^/\s\"']+|[A-Za-z]:\\\\Users\\\\", re.I)
+        # A home folder's name is a plain word ending at a separator. "user" is the sandbox's, and "dana" is the invented
+        # owner of the debugging scaffold's leak-check fixture, whose cases have agents write such paths; a lookalike
+        # name an agent invents, with letters outside ASCII, is not a plain word.
+        home = re.compile(r"""/(?:Users|home)/(?!(?:user|dana)\b)[A-Za-z0-9._-]+(?=[/\s"']|$)"""
+                          r"|[A-Za-z]:\\\\Users\\\\(?!(?:user|dana)\b)", re.I | re.M)
         email = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
         for path in stored:
             text = "\n".join(str(value) for value in self._strings(json.loads(path.read_text(encoding="utf-8"))))

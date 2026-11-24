@@ -1,0 +1,86 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && git ls-files | head -100 && grep -rniE \"leak|home\" --include=* -l . 2>/dev/null | grep -v \"^./.git/\" | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\nCLAUDE.md\nREADME.md\nsrc/leaks.py\nsrc/staging.py\ntests/__init__.py\ntests/test_leaks.py\ntests/test_staging.py\n./tests/test_leaks.py\n./README.md\n./src/leaks.py"
+  },
+  {
+    "kind": "read",
+    "target": "src/leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "CLAUDE.md",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_leaks.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -m unittest tests.test_leaks -v 2>&1 | tail -30",
+    "ok": true,
+    "output": "test_a_clean_transcript_passes (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_user_name_in_output_is_found_whatever_its_case (tests.test_leaks.LeakCheckTests) ... ok\ntest_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests) ... FAIL\n\n======================================================================\nFAIL: test_a_windows_home_folder_in_a_command_is_found (tests.test_leaks.LeakCheckTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_leaks.py\", line 17, in test_a_windows_home_folder_in_a_command_is_found\n    self.assertEqual(leaks(actions, [\"C:\\\\Users\\\\dana\"]), [\"C:\\\\Users\\\\dana\"])\nAssertionError: Lists differ: [] != ['C:\\\\Users\\\\dana']\n\nSecond list contains 1 additional elements.\nFirst extra element 0:\n'C:\\\\Users\\\\dana'\n\n- []\n+ ['C:\\\\Users\\\\dana']\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src python3 -c '\nimport json\nfrom leaks import leaks\na=[{\"kind\":\"run\",\"target\":\"type C:\\\\Users\\\\dana\\\\notes.txt\",\"output\":\"\"}]\nt=json.dumps(a).lower()\nprint(\"raw secret in text:\", \"c:\\\\users\\\\dana\" in t)\nprint(\"escaped secret in text:\", \"c:\\\\\\\\users\\\\\\\\dana\" in t)\nprint(\"json text:\", t)\nprint(\"forward-slash form:\", leaks([{\"kind\":\"run\",\"target\":\"cat /home/dana/x\",\"output\":\"\"}],[\"/home/dana\"]))\nprint(\"windows secret, forward-slash path in transcript:\", leaks([{\"kind\":\"run\",\"target\":\"cat C:/Users/dana/x\",\"output\":\"\"}],[\"C:\\\\Users\\\\dana\"]))\nprint(\"windows secret written with forward slashes:\", leaks(a,[\"C:/Users/dana\"]))\n'",
+    "ok": true,
+    "output": "raw secret in text: False\nescaped secret in text: True\njson text: [{\"kind\": \"run\", \"target\": \"type c:\\\\users\\\\dana\\\\notes.txt\", \"output\": \"\"}]\nforward-slash form: ['/home/dana']\nwindows secret, forward-slash path in transcript: []\nwindows secret written with forward slashes: []"
+  },
+  {
+    "kind": "run",
+    "target": "git status --short && git diff --stat -- src tests && git diff -- tests",
+    "ok": true,
+    "output": " M README.md\n M tests/test_leaks.py\n?? notes/\n tests/test_leaks.py | 4 ++++\n 1 file changed, 4 insertions(+)\ndiff --git a/tests/test_leaks.py b/tests/test_leaks.py\nindex 4a76635..879a9a7 100644\n--- a/tests/test_leaks.py\n+++ b/tests/test_leaks.py\n@@ -12,6 +12,10 @@ class LeakCheckTests(unittest.TestCase):\n         actions = [{\"kind\": \"run\", \"target\": \"whoami\", \"output\": \"Dana\"}]\n         self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n \n+    def test_a_windows_home_folder_in_a_command_is_found(self):\n+        actions = [{\"kind\": \"run\", \"target\": \"type C:\\\\Users\\\\dana\\\\notes.txt\", \"output\": \"\"}]\n+        self.assertEqual(leaks(actions, [\"C:\\\\Users\\\\dana\"]), [\"C:\\\\Users\\\\dana\"])\n+\n     def test_a_clean_transcript_passes(self):\n         actions = [{\"kind\": \"run\", \"target\": \"python3 -m unittest\", \"output\": \"OK\"}]\n         self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])"
+  },
+  {
+    "kind": "report",
+    "target": "The leak check misses Windows paths because it searches a JSON-escaped copy of the transcript for the secret written with single backslashes.\n\n**Cause:** `leaks()` in `src/leaks.py:8` runs `json.dumps(actions)` and searches that text. JSON escapes every backslash, so `C:\\Users\\dana` is stored as `C:\\\\Users\\\\dana`. The secret `C:\\Users\\dana` is never escaped, so it never matches. Forward-slash paths have no backslashes to escape, which is why `/home/dana` is caught.\n\n**Reproduction:** I added `test_a_windows_home_folder_in_a_command_is_found` to `tests/test_leaks.py`. It fails on every run I made, with `[] != ['C:\\\\Users\\\\dana']`. I left it in place as the regression test.\n\n**Claims:**\n- Verified: the new test fails, and the other three tests pass (`PYTHONPATH=src python3 -m unittest tests.test_leaks -v`).\n- Verified: the JSON text contains `c:\\\\users\\\\dana` and does not contain `c:\\users\\dana`. The escaped form matches, the raw form does not. (Ran in a one-off command, no file changes.)\n- Verified: `/home/dana` is detected, and a clean transcript passes.\n- Verified: `src/` is unchanged. The only changes in the tree are the test addition, plus `README.md` and `notes/`, which were already there at the start.\n- Inferred: a fix in `src/` would need to compare the secrets against an unescaped form of the transcript, or against both forms. I have not tested that, since you asked me not to fix it.\n\nI did not add any debug or print lines.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

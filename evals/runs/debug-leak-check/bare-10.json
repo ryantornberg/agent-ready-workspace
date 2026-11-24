@@ -1,0 +1,66 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && ls -R src 2>/dev/null | head -50; grep -rniE \"leak|home|/home|Users\" --include=* -l . 2>/dev/null | grep -v \"^./.git/\" | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\nleaks.py\nstaging.py\n./tests/test_leaks.py\n./README.md\n./src/leaks.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat -n src/leaks.py; echo ----; cat -n tests/test_leaks.py; echo ----; grep -n -iE \"leak|home\" README.md",
+    "ok": true,
+    "output": "     1\t\"\"\"The leak check: a transcript is saved only when it names nothing that identifies the person who ran it.\"\"\"\n     2\timport json\n     3\t\n     4\t\n     5\tdef leaks(actions, secrets):\n     6\t    \"\"\"The secrets that appear anywhere in the transcript, ignoring case. actions: the transcript, a list of\n     7\t    {\"kind\", \"target\", \"output\"} records. secrets: the user name, the home folder and the like.\"\"\"\n     8\t    text = json.dumps(actions).lower()\n     9\t    return [secret for secret in secrets if secret.lower() in text]\n----\n     1\timport unittest\n     2\t\n     3\tfrom leaks import leaks\n     4\t\n     5\t\n     6\tclass LeakCheckTests(unittest.TestCase):\n     7\t    def test_a_home_folder_in_a_command_is_found(self):\n     8\t        actions = [{\"kind\": \"run\", \"target\": \"cat /home/dana/notes.txt\", \"output\": \"\"}]\n     9\t        self.assertEqual(leaks(actions, [\"/home/dana\"]), [\"/home/dana\"])\n    10\t\n    11\t    def test_a_user_name_in_output_is_found_whatever_its_case(self):\n    12\t        actions = [{\"kind\": \"run\", \"target\": \"whoami\", \"output\": \"Dana\"}]\n    13\t        self.assertEqual(leaks(actions, [\"dana\"]), [\"dana\"])\n    14\t\n    15\t    def test_a_clean_transcript_passes(self):\n    16\t        actions = [{\"kind\": \"run\", \"target\": \"python3 -m unittest\", \"output\": \"OK\"}]\n    17\t        self.assertEqual(leaks(actions, [\"/home/dana\", \"dana\"]), [])\n    18\t\n    19\t\n    20\tif __name__ == \"__main__\":\n    21\t    unittest.main()\n----\n3:Two small checks a workspace runs: the staging reminder, which warns before a git command stages every change in the folder, and the leak check, which refuses to save an agent's transcript when it names the person who ran it."
+  },
+  {
+    "kind": "run",
+    "target": "cd src && python3 -I -c '\nfrom leaks import leaks\na=[{\"kind\":\"run\",\"target\":r\"type C:\\Users\\dana\\notes.txt\",\"output\":\"\"}]\nprint(\"windows:\", leaks(a,[r\"C:\\Users\\dana\"]))\nprint(\"unix:\", leaks([{\"kind\":\"run\",\"target\":\"cat /home/dana/notes.txt\",\"output\":\"\"}],[\"/home/dana\"]))\nimport json; print(json.dumps(a).lower())\n'",
+    "ok": false,
+    "output": "Exit code 1\nTraceback (most recent call last):\n  File \"<string>\", line 2, in <module>\nModuleNotFoundError: No module named 'leaks'"
+  },
+  {
+    "kind": "run",
+    "target": "python3 -c '\nimport sys; sys.path.insert(0,\"src\")\nimport json\nfrom leaks import leaks\na=[{\"kind\":\"run\",\"target\":r\"type C:\\Users\\dana\\notes.txt\",\"output\":\"\"}]\nprint(\"windows:\", leaks(a,[r\"C:\\Users\\dana\"]))\nprint(\"unix:\", leaks([{\"kind\":\"run\",\"target\":\"cat /home/dana/notes.txt\",\"output\":\"\"}],[\"/home/dana\"]))\nprint(json.dumps(a).lower())\n'",
+    "ok": true,
+    "output": "windows: []\nunix: ['/home/dana']\n[{\"kind\": \"run\", \"target\": \"type c:\\\\users\\\\dana\\\\notes.txt\", \"output\": \"\"}]"
+  },
+  {
+    "kind": "report",
+    "target": "The cause is in `src/leaks.py`, line 8:\n\n```python\ntext = json.dumps(actions).lower()\n```\n\n`json.dumps` escapes every backslash as `\\\\`, so the transcript is searched in its escaped form. A Windows path in a transcript such as `C:\\Users\\dana` is stored as `c:\\\\users\\\\dana`, which never contains the secret `C:\\Users\\dana` with single backslashes. The check compares the secret against the escaped text, so the match fails. Forward-slash paths like `/home/dana` contain no characters that JSON escapes, so they match.\n\nI confirmed this by running the function directly from `src/`:\n\n- Transcript containing `type C:\\Users\\dana\\notes.txt`, secret `C:\\Users\\dana`: returns `[]` (leak missed).\n- Transcript containing `cat /home/dana/notes.txt`, secret `/home/dana`: returns `['/home/dana']` (leak caught).\n\nThe escaped text in the first case is `type c:\\\\users\\\\dana\\\\notes.txt`.\n\nThe existing tests in `tests/test_leaks.py` only cover a `/home/dana` path, so they don't catch this. A fix would need to compare against the escaped or unescaped form consistently, for example by searching the raw strings instead of the JSON dump. I haven't changed anything, and `src/` is untouched, as you asked.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": false
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]
