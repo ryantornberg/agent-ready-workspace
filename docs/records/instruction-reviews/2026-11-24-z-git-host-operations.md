@@ -28,3 +28,15 @@ In scope: the diff from d2aa593, which changes "a person publishes" to "a person
 - trigger: the purpose line, the In short line and the routing table are unchanged, and the change does not move when the page applies.
 - enforcement: the rules table's draft row stays `prose`, which is true: no part refuses a non-draft `gh pr create` or an agent's merge in a team's workspace. The merge-commit row's `no_admin_merge` cases exist.
 - eval-case: the page is `proof: unproven` with `prove-by: M8`, so its behavior needs no case yet.
+
+## Re-check
+
+A fresh session re-read the page on 2026-11-24, after the fix round, at 9a28eda. It read `git diff d2aa593` of the page, the contract's rules table and changing the machinery's step 6 and rules table, and ran `python3 ws.py check`, whose only errors are fix a bug's three pending eval runs.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed | The rules table's draft row now reads "merging with `python3 ws.py merge NUMBER`; in a team's workspace, a person publishes and merges", in step with the contract's row. The paragraph and the "Publish and merge" row link changing the machinery's path, whose step 6 gives `gh pr ready NUMBER` and then `python3 ws.py merge NUMBER`. A reader of the rules table alone now has the command. The page still holds three copies of the rule, as the finding noted; the disposition keeps them and fixes the one that misled. Verified: the page, `AGENTS.md` and changing the machinery. |
+
+Broke: none.
+
+Missed: none.

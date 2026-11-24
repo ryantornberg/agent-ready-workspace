@@ -28,3 +28,15 @@ In scope: the whole page, with most attention to the diff from d2aa593 in "Befor
 - enforcement: the changed text adds no must or never, and the rules table is unchanged. Verified.
 - placement: the paragraph repeats the contract's routing on the page that picks a procedure, where it belongs, and links procedure endings rather than restating it. Verified.
 - eval-case: the change rewords who states the two routes; the routes themselves are the same as before the change, so it asks no new behavior. The page is a reference page with no proof key. Verified: `git diff d2aa593 -- docs/playbooks/README.md`.
+
+## Re-check
+
+A fresh session re-read the page on 2026-11-24, after the fix round, at 9a28eda. It read the page, `git diff d2aa593` of it and the contract's "How work flows", and ran `python3 ws.py check`, whose only errors are fix a bug's three pending eval runs.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed | The "Fix a bug" row now adds "A small refactor goes to safe refactor instead, and a small change to pages only to extend the workspace." That matches the paragraph above the catalog and the contract. A reader who picks from the table alone now sees both routes. The row names the two pages without links; the paragraph above links both. Verified: the page and `AGENTS.md`. |
+
+Broke: none.
+
+Missed: none.

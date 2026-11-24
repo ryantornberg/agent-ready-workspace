@@ -28,3 +28,17 @@ In scope: the whole page, with most attention to the diff from d2aa593: the In s
 - trigger: the In short line, the templates index row ("You start a fix on the fix a bug path"), the records README row and `INDEX.md`'s "A fix record" row all match the changed page. A slice of a hand-off plan still needs no record; fix a bug does not take such slices, since the hand-off plan is for work too big for it, so "every fix that page takes" does not reach them. Verified.
 - placement: the brief bullet links fix a bug's "The fix brief" for the ten parts instead of restating them, and the changed text restates no rule procedure endings holds. Verified.
 - eval-case: the behavior the change asks, a brief in every fix's record, is owned by fix a bug's "The fix path's gates", marked `Proof: unproven, prove-by M6.` A template carries only `kind` and `last-reviewed`, by layout's page kinds table, so this page cannot carry a proof key of its own. The guided arm in `evals/arms.json` holds no copy of this page, and no grader reads a brief. Verified.
+
+## Re-check
+
+A fresh session re-read the page on 2026-11-24, after the fix round, at 9a28eda. It read the page, `git diff d2aa593` of it and of fix a bug, fix a bug's "The fix brief" and step 6, and escape analysis's step 9. It ran `python3 ws.py check`, whose only errors are fix a bug's three pending eval runs; no link error is reported on either page.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed | The skeleton's Brief section and the brief bullet both say "any later change to it under a dated line"; neither names an approval. Verified: the page. |
+| 2 | fixed | The rules table has the row "The record holds the fix brief in its `## Brief` section", tagged `prose`, which is true: `claim_marks` reads only the report. Verified: the page and the first reading's scratch run, which this re-check did not repeat. |
+| 3 | fixed | Fix a bug's step 6 now says to run defect escape analysis "after the commit and before the report, as its page says", and no longer puts its section in the fix record. Escape analysis's step 9 keeps the analysis in the report outside a plan. The fix record's skeleton has no escape analysis section, and its rule that the report is the last section stands. No page now asks for the section. Verified: the three pages. |
+
+Broke: none.
+
+Missed: none.

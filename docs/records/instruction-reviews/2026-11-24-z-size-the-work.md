@@ -28,3 +28,15 @@ In scope: the whole page, with most attention to the diff from d2aa593: the In s
 - enforcement: the changed text adds no must or never. The gate's rule keeps its `prose` row. Verified.
 - placement: the routing is stated in the contract and repeated here as the gate's outcome, where a reader sizing work needs it; no rule procedure endings states is restated in the changed text. Verified.
 - eval-case: the page is `proof: unproven` with `prove-by: M9`, so its behavior needs no case yet. Verified: front matter.
+
+## Re-check
+
+A fresh session re-read the page on 2026-11-24, after the fix round, at 9a28eda. It read the page, `git diff d2aa593` of it and the contract's "How work flows", and ran `python3 ws.py check`, whose only errors are fix a bug's three pending eval runs.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed | The Ceremony row now says "Go to fix a bug, or to safe refactor or extend the workspace as the contract routes it", in the same words as the spec table's "Passes the gate" row, and the In short line links all three pages. The contract sends a small refactor to safe refactor and a small change to pages only to extend the workspace. No other place on the page sends work that passes the gate to fix a bug alone. Verified: the page and `AGENTS.md`. |
+
+Broke: none.
+
+Missed: none.
