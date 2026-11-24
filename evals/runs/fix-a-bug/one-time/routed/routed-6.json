@@ -1,0 +1,108 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && ls -R src | head -100 && grep -rni \"export\" --include=* -l src docs INDEX.md 2>/dev/null | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\norders-api\norders-service-v1\norders-web\n\nsrc/orders-api:\nreconciliation_worker.py\nsales_report.py\n\nsrc/orders-service-v1:\nnightly_job.py\n\nsrc/orders-web:\ncsv_export.py\norders_page.py\nquarterly_export.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ndocs/parts.md\ndocs/playbooks/feature-layer-walk.md\ndocs/playbooks/fix-a-bug.md\ndocs/playbooks/README.md\ndocs/playbooks/throwaway-prototype.md\ndocs/playbooks/tracker-operations.md\ndocs/decisions/0002-hooks-remind-the-commit-enforces.md\ndocs/agent-settings.md\ndocs/templates/bug-ticket.md\ndocs/templates/fix-record.md\ndocs/templates/pull-request.md\ndocs/templates/spec.md\ndocs/templates/hub.md\nINDEX.md"
+  },
+  {
+    "kind": "read",
+    "target": "INDEX.md",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-web/csv_export.py",
+    "ok": true
+  },
+  {
+    "kind": "read",
+    "target": "docs/playbooks/fix-a-bug.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "ls -a && ls docs/records 2>/dev/null; ls docs/rules 2>/dev/null; find . -path ./.git -prune -o \\( -name \"test*\" -o -name \"*_test.py\" -o -name \"conftest.py\" \\) -print | head; cat src/README.md 2>/dev/null | head -40; git log --oneline | head -5; grep -rn \"Export\\|export\" docs/rules 2>/dev/null | head",
+    "ok": true,
+    "output": ".\n..\n.claude\n.git\nAGENTS.md\nCLAUDE.md\ndocs\nINDEX.md\nnotes\nREADME.md\nsrc\ntests\norders-api.md\n./tests\n./tests/test_orders_service_v1.py\n./tests/test_orders_web.py\n./tests/test_orders_api.py\n./docs/playbooks/test-first.md\nb47ac63 Orders"
+  },
+  {
+    "kind": "read",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "cat docs/playbooks/test-first.md | head -60; ls notes; cat README.md | head -30; git diff README.md | head -20",
+    "ok": true,
+    "output": "---\nkind: playbook\nproof: unproven\nprove-by: M4\nlast-reviewed: 2026-11-21\n---\n\n# Test first\n\nHow an agent adds or changes behavior one failing test at a time, and how it proves a bug fix with a test. For any agent changing code.\n\n**In short:** look for code to reuse, then loop: one failing test through a public interface, the least code that passes it, a tidy-up, repeat. For a bug fix, the test fails on the code before the fix and passes on the fix, and the report records both runs.\n\n## Steps\n\n1. **Look for reuse first.** Input: the behavior you were asked for. Search with `python3 tools/symbols.py NAME src` when you have a name, or [INDEX.md](../../INDEX.md) when you have a topic. When the behavior needs new logic, not only a call to code that exists, run the author's steps of the [reuse checklist](reuse-checklist.md) here. Output: the code and the test helpers you will build on, or a note that none fit.\n2. **Find the repository's test command.** Input: the repository you are changing. Read its own build and test files; commands differ per repository, so do not carry one over from another. Output: the command that runs one test and the command that runs the whole suite. If it has no test harness at any level, stop and report.\n3. **Write one failing test.** Input: the next small piece of behavior. Write a single test that calls the code through its public interface, as a caller would. Run it. Output: a test that fails, and fails for the reason you expect. A test that fails for another reason, such as a typo or a missing import, does not count: fix the test and run it again.\n4. **Write the least code that passes it.** Input: the failing test. Change only what that test needs. Run the test. Output: the test passes.\n5. **Tidy up.** Input: passing tests. Remove duplication and rename what reads badly, running the tests after each change. Output: cleaner code, every test still passing. A restructuring larger than this loop goes to [safe refactor](../safe-refactor.md).\n6. **Repeat from step 3** until the behavior you were asked for is covered. Never write several tests and then the code for all of them; one test at a time.\n7. **Run the whole suite.** Output: the suite passes. Then finish as the [definition of done](../definition-of-done.md) says, with the report it gives.\n\nStop when the requested behavior is covered and the suite passes. If a test shows the request needs a change in a second repository, stop and report, as [fix a bug](fix-a-bug.md#stop-and-ask-when) says.\n\n## A bug fix: the red-green proof\n\nA bug fix follows [fix a bug](fix-a-bug.md). Its test is the regression test, and it carries the proof that the fix works:\n\n1. Write the test before you change the code, as fix-a-bug's first step says.\n2. Run it on the code before the fix. It fails, for the reason in the report. That is red.\n3. Make the fix. Run the test again. It passes. That is green.\n4. Record both runs in the report as verified lines: the command, and what each run showed.\n\nSkip the tidy-up step for a bug fix. Fix-a-bug asks for the smallest change that passes, and a second bug found on the way is written down and left alone.\n\nIf you cannot make the test fail on the code before the fix, you do not understand the bug yet. Report that and do not guess at a fix. A test that passes on both versions proves nothing.\n\n## Writing a good test\n\n| Do | Why |\n|---|---|\n| Put the test at the seam the cause points to: the narrowest layer where the wrong behavior shows. | A test at the right layer fails for the right reason and runs fast. |\n| Test the class of input, not the one case in the report. If one empty order broke it, test empty orders. | The report names one instance; the bug is usually a class. |\n| Assert the behavior the caller sees, not the shape of the fix. | A test that checks the fix's own lines passes for any code that has those lines, right or wrong. |\n| When a test level has no harness, such as no end-to-end runner, move down one level: integration, then unit. | A test that runs beats a better test that cannot. Say in the report which level you used and why. |\n| For a UI handler, call the handler directly instead of mounting the whole screen, where the framework allows it. | It is faster, and it fails for the handler's own reason. |\n| Never pin a wall-clock time or date in a test. Pass in a clock, or compare against one the test controls. | A pinned time passes today and fails tomorrow. |\n\n## Rules\n\n| Rule | Enforced by |\n|---|---|\n| A bug fix's test fails on the code before the fix and passes on the fix. | `eval:fix-a-bug` |\n| The report records both runs of that test, before and after the fix. | `prose` |\n| Write one failing test at a time; never batch tests ahead of the code. | `prose` |\n| A test that fails for a reason other than the one expected does not count as red. | `prose` |\n| Never pin a wall-clock time or date in a test. | `prose` |\ntodo.txt\n# Orders\n\nThe order system's code.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders.\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders."
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest tests.test_orders_web 2>&1 | tail -20; echo \"---\"; cd src/orders-web 2>/dev/null; cd . && python3 -m unittest discover -s tests -p 'test_orders_web.py' 2>&1 | tail -20",
+    "ok": true,
+    "output": ".F...\n======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=1)\n---\nE\n======================================================================\nERROR: test_orders_web (unittest.loader._FailedTest)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_orders_web\nTraceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 436, in _find_test_path\n    module = self._get_module_from_name(name)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 377, in _get_module_from_name\n    __import__(name)\n  File \"tests/test_orders_web.py\", line 3, in <module>\n    from csv_export import to_csv\nModuleNotFoundError: No module named 'csv_export'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -6; echo \"--- callers of OrdersPage / export:\"; grep -rn \"OrdersPage\\|\\.export(\\|click(\" src tests | grep -v \"^src/orders-web/orders_page.py:2[56]\"; echo \"--- chains/aliases:\"; grep -rln \"orders-web\\|OrdersPage\" docs INDEX.md README.md | head",
+    "ok": true,
+    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n--- callers of OrdersPage / export:\nsrc/orders-web/orders_page.py:5:class OrdersPage:\nsrc/orders-web/orders_page.py:17:    def click(self, button):\ntests/test_orders_web.py:4:from orders_page import OrdersPage\ntests/test_orders_web.py:13:class OrdersPageTests(unittest.TestCase):\ntests/test_orders_web.py:15:        page = OrdersPage(ORDERS)\ntests/test_orders_web.py:16:        page.click(\"refresh\")\ntests/test_orders_web.py:20:        page = OrdersPage(ORDERS)\ntests/test_orders_web.py:21:        page.export()\ntests/test_orders_web.py:25:        page = OrdersPage(ORDERS)\ntests/test_orders_web.py:26:        page.click(\"export\")\n--- chains/aliases:\ndocs/size-the-work.md\ndocs/playbooks/reuse-checklist.md\ndocs/playbooks/feature-layer-walk.md\ndocs/playbooks/impact-analysis.md\ndocs/playbooks/review-orchestrator.md\ndocs/playbooks/effort-estimate.md\ndocs/playbooks/architecture-review.md\ndocs/playbooks/throwaway-prototype.md\ndocs/safe-refactor.md\ndocs/code-review.md"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage registered only the refresh handler, so clicking Export\nfound no handler and did nothing. Register export alongside refresh.\n\nThe existing export test called page.export() directly, so it passed\nwithout the button being wired. Add a test that clicks \"export\".\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit show --stat HEAD | head -20; git status --short",
+    "ok": true,
+    "output": "commit 93cdc14d07e4a616bea5c97137fe542bcb2459b1\nAuthor: eval <eval@example.invalid>\nDate:   Tue Nov 24 11:57:11 2026 -0700\n\n    Wire the Export button to its handler\n    \n    OrdersPage registered only the refresh handler, so clicking Export\n    found no handler and did nothing. Register export alongside refresh.\n    \n    The existing export test called page.export() directly, so it passed\n    without the button being wired. Add a test that clicks \"export\".\n    \n    Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The Export button works again. The fix is committed as `93cdc14` on `main`.\n\n**Cause:** `OrdersPage.__init__` registered only the `refresh` handler. Clicking `export` found no handler and did nothing. The existing export test called `page.export()` directly, so it passed without the button being wired.\n\n**Change:**\n- `src/orders-web/orders_page.py`: one line, `self._on(\"export\", self.export)`.\n- `tests/test_orders_web.py`: a new test, `test_export_button_writes_one_download`, that clicks `\"export\"` and checks for one download.\n\n**Verified:**\n- Before the fix, the new test failed with `AssertionError: 0 != 1`.\n- After the fix, `python3 -m unittest` runs 9 tests, all OK.\n- The only caller of the changed code is the new test.\n\n**Not in the commit:**\n- The `README.md` edit and the `notes/` folder were already in your working tree. I left both alone. The README edit includes the note \"ask whether Export should include cancelled orders.\" The code still exports every order, cancelled ones included. That is a product question, and I did not change it.\n- The workspace procedure asks for a fix record under `docs/records/fixes/`. This repo has no `docs/records/` folder, so I did not write one. I also did not open a pull request, since this repo has no remote configured here.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]
