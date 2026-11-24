@@ -1019,6 +1019,16 @@ How slice Z goes on after its third stop, from the maintainer's answers to Q73 a
 
 **Each guard refuses the five routes Q54's re-checks found (Q74).** They are ANSI-C quoting, a runner the parser does not know, braces or a glob in a wrapper's own arguments, a `((` that holds a command, and nesting past the parser's depth. Each passes every shell guard, on main too. Each guard refuses them in its own part file, outside the eval's hash, as Q54 did, so R2 stays current. A narrow re-check by a fresh session reads the change. The parser fixes follow early in M4: that is the maintainer's condition.
 
+### 2026-11-24
+
+Approved by: the maintainer, 2026-11-24
+
+How slice Z goes on after its fourth stop, from the maintainer's answers to Q76 and Q77 in the workspace queue on 2026-11-24 (round 14). Q76 settles the leak rule of the Q73 entry. Q77 takes the Q74 entry's guard work out of slice Z. No criterion is dropped or weakened.
+
+**One more round on the leak check, then R2 regardless (Q76).** Before matching, `evals/run.py` turns backslashes into slashes and drops `//` and `/./`. It passes the placeholder only when a separator or the end of the text follows it. One fresh session re-checks the change. Anything that re-check finds goes to M4, not to another fix round, and R2 starts. This entry is the exception to the stop rule's two-round limit, for this one change only.
+
+**Q74's guard work leaves slice Z (Q77).** Slice Z reverts its Q74 guard changes, so it merges with the guards Q54 left. The README's limits name the five routes as open until slice GFIX lands. Then R2, the routed arm, the pull request and the merge. Slice GFIX, a new driver-tier slice right after Z on its own branch, carries Q74's narrowed rules; its builder records its own entry.
+
 ## Results
 
 ### C1, launcher and baselines
