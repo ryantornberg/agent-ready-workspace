@@ -1758,16 +1758,33 @@ def _with_secrets_child(words):
             if text.endswith(suffix):
                 return text[:-len(suffix)]
         return text
-    at = next((i for i, word in enumerate(words) if name(word) in WITH_SECRETS_STARTERS), None)
-    if at is None:
+    # ws.py is the program, or the script a Python starts; with-secrets is its subcommand, after only ws.py's own
+    # options. A word named ws.py anywhere else on the line is an argument, not the wrapper.
+    if not words:
         return None
-    marker = next((i for i in range(at + 1, len(words)) if words[i].text == "with-secrets"), None)
-    if marker is None:
+    at = 0
+    if name(words[0]) not in WITH_SECRETS_STARTERS:
+        if not re.fullmatch(r"py|pythonw?[0-9.]*", name(words[0])):
+            return None
+        at = 1
+        while at < len(words) and words[at].text.startswith("-"):
+            at += 2 if words[at].text in ("-X", "-W") else 1
+        if at >= len(words) or name(words[at]) not in WITH_SECRETS_STARTERS:
+            return None
+    marker = at + 1
+    while marker < len(words) and words[marker].text != "with-secrets":
+        if words[marker].text == "--root":
+            marker += 2
+        elif words[marker].text.startswith("-"):
+            marker += 1
+        else:
+            return None
+    if marker >= len(words):
         return None
     dashes = next((i for i in range(marker + 1, len(words)) if words[i].text == "--"), None)
     if dashes is None or dashes + 1 >= len(words):
         return None
-    return words[dashes + 1:]
+    return words[dashes + 1:], [w.text for w in words[marker + 1:dashes] if not w.text.startswith("-")]
 
 
 def _redirect_writes(records):
@@ -1943,9 +1960,16 @@ class _Walker:
             name = name[:-4]
         deep = ctx.depth >= MAX_DEPTH
 
-        child = None if deep else _with_secrets_child(words)
-        if child is not None:
-            return self.dispatch(child, own, writes, records, ctx, via + [WITH_SECRETS], piped_in, runtime, cwd,
+        found = None if deep else _with_secrets_child(words)
+        if found is not None:
+            # Each NAME reaches the child set to a value from the secrets file, which no command line shows, so
+            # it is a value the guards cannot know: GH_REPO or a GIT_CONFIG_* name is then unresolved, as when the
+            # line sets it from a variable. The child must not pass as if it ran with none of them set.
+            child, names = found
+            own2 = dict(own)
+            for variable in names:
+                own2[variable] = ("$" + variable, True)
+            return self.dispatch(child, own2, writes, records, ctx, via + [WITH_SECRETS], piped_in, runtime, cwd,
                                  cwd_reason, cleared)
         if name in WRAPPER_OPTIONS and not deep:
             unwrapped = self._unwrap(name, args)

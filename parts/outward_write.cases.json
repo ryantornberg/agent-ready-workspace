@@ -9089,5 +9089,36 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "GH_REPO handed in by ws.py with-secrets is a value the line does not show, so the write is unresolved and refused (M3 slice Z)",
+    "event": {
+      "command": "python3 ws.py with-secrets GH_REPO -- gh pr create --fill",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {
+        "[\".\", \"gh\", [\"pr\", \"create\", \"--fill\"]]": {
+          "destinations": [],
+          "unresolved": "the repository is a variable",
+          "no_repository": false,
+          "remote": null,
+          "refspecs": null,
+          "mirror": false,
+          "branch": null,
+          "main_branch": null
+        }
+      }
+    },
+    "allow": false
   }
 ]

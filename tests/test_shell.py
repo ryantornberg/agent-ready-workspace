@@ -921,7 +921,13 @@ class WithSecretsTests(unittest.TestCase):
 
     def test_the_line_s_assignments_and_redirections_reach_the_child(self):
         found = find("WS_SECRETS_FILE=/tmp/x python3 ws.py with-secrets T -- cat < .env", "cat")
-        self.assertEqual((found["env"], found["reads"][0]["path"]), ({"WS_SECRETS_FILE": "/tmp/x"}, ".env"))
+        self.assertEqual((found["env"], found["reads"][0]["path"]), ({"WS_SECRETS_FILE": "/tmp/x", "T": "$T"}, ".env"))
+
+    def test_each_name_reaches_the_child_as_a_value_the_line_does_not_show(self):
+        found = find("python3 ws.py with-secrets GH_REPO GH_TOKEN -- gh pr create --fill", "gh")
+        self.assertEqual(found["env_dynamic"], ["GH_REPO", "GH_TOKEN"])
+        found = find("python3 ws.py with-secrets GIT_CONFIG_COUNT -- git status", "git")
+        self.assertIn("GIT_CONFIG_COUNT", found["env_dynamic"])
 
     def test_a_child_that_runs_another_is_unwrapped_in_turn(self):
         found = find("python3 ws.py with-secrets T -- sh -c 'gh pr merge 1 --admin'", "gh")
@@ -931,7 +937,9 @@ class WithSecretsTests(unittest.TestCase):
 
     def test_not_a_wrapper(self):
         for line in ("python3 ws.py with-secrets T", "python3 ws.py with-secrets T --", "python3 ws.py check",
-                     "python3 tools/other.py with-secrets T -- git push"):
+                     "python3 tools/other.py with-secrets T -- git push", "cat .env ws.py with-secrets -- true",
+                     "rm .git/config ws.py with-secrets -- true", "python3 tools/x.py ws.py with-secrets T -- true",
+                     "python3 ws.py check with-secrets T -- true"):
             with self.subTest(line):
                 self.assertNotIn("git", [c["program"] for c in commands(line)])
                 self.assertEqual([c["wrappers"] for c in commands(line)], [[]])
