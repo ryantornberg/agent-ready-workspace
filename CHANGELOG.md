@@ -2,7 +2,7 @@
 
 What changed in each version, for someone deciding whether to take it. The [milestone records](docs/milestones/m1.md) say how each change was made and checked.
 
-## Unreleased: M3
+## 0.4.0, 2026-11-25: M3, the reading layer, the safety machinery and the kit
 
 **Changed:**
 
