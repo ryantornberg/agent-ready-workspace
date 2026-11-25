@@ -1043,6 +1043,18 @@ Slice GFIX, from the maintainer's answers to Q77 and Q75 in the workspace queue 
 
 **Done when:** each rule has a case that fails before the change; `python3 ws.py selftest`, `python3 ws.py check` and the tests pass; one narrow re-check by a fresh session reads the change; the README's limits and decision 0004 say what the guards refuse and what waits for M4; and CI passes on Linux, macOS and Windows.
 
+### 2026-11-25
+
+Approved by: the maintainer, 2026-11-25
+
+How slice GFIX finishes after its stop, from the maintainer's answers to Q80 and Q79 in the workspace queue on 2026-11-25 (round 16). No criterion is dropped or weakened.
+
+**Fail closed on escapes in `$'...'` (Q80).** In `$'...'` quoting, the shell guards refuse every escape except those the parser reads itself, and a word of only `\0`. This is one more fix round, past the stop rule's two-round limit, by the maintainer's exception, for this one change only. One fresh session re-checks it. Anything that re-check finds goes to M4, not to another round. #56 merges after #55.
+
+**Keep no program list until M4 (Q79).** Harmless lines the runner rule refuses, such as `which git`, stay refused. Each refusal's message names the way around it.
+
+**Lanes (round 16).** Slice Z's diagnosis runs in lane B and GFIX's last round in lane C, at the same time.
+
 ## Results
 
 ### C1, launcher and baselines
