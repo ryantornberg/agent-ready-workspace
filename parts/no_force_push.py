@@ -21,15 +21,22 @@ It refuses a push that would force or delete the branch named in "branch" (defau
 that names literal refspecs and asks for no force, deletion, prune or mirror passes without its target being worked
 out, since no config can force it.
 
-It also refuses a push it cannot judge, as the discard guard does: a remote or a refspec that is a variable or a
-substitution, with a message pointing to `git push -u origin HEAD`; a target the runner could not work out; a
+It refuses `git send-pack`, `git http-push` and a remote helper such as `git remote-https` outright, since they
+push without `git push` and it judges only `git push` (red team finding B2, Q85).
+
+It also refuses a push it cannot judge, as the discard guard does: a word of the push the shell would expand,
+unquoted braces or a glob, or a word directly followed by `(`, which zsh reads as a glob or a glob qualifier that
+runs code, since `{+,}main` becomes `+main main` after the guard read it; a git call that is not built in, an alias
+or a git-NAME program, may be a push, so it is judged so too (wslib/gitrules.py, `push_expands`; red team finding
+B1, Q85); a remote or a refspec that is a variable or a substitution, with a message pointing to `git push -u origin HEAD`; a target the runner could not work out; a
 program or git subcommand that is a variable, an alias that runs a shell command, a git alias it could not read,
 arguments `xargs` or `find -exec` supply to git; HOME, XDG_CONFIG_HOME, a GIT_CONFIG_* variable or a -c value that
 changes a key the guards read, set on the push; and a forcing push after a call earlier in the line that changes
 the branch, an upstream, a remote or gh's default (wslib/gitrules.py, `earlier_change`), since the runner worked
 the target out before that call ran. A git alias is expanded from config, so a stored alias that force-pushes main
 is refused, and one that pushes a branch passes. `--dry-run` publishes nothing and passes. A subcommand that is
-neither built in nor an alias is a program named git-NAME, not a push, and passes.
+neither built in nor an alias is a program named git-NAME, not a push, and passes, unless one of its words is one
+the shell would expand.
 See docs/decisions/0004-the-hook-contract.md.
 """
 from wslib import gitrules
@@ -112,6 +119,9 @@ def decide(event, config):
     expanded = gitrules.unreadable(event.get("command"))   # {git,} push: the git it becomes goes unjudged (Q54, Q74)
     if expanded:
         return _cannot_judge(expanded)
+    spread = gitrules.push_expands(event.get("command"))    # git push origin {+,}main: +main main (B1)
+    if spread:
+        return _cannot_judge(spread)
     calls, why_aliases = gitrules.read(event)
     targets = None
     for index, call in enumerate(calls):
@@ -119,6 +129,10 @@ def decide(event, config):
         if why:
             return _cannot_judge(why)
         git = call.get("git")
+        if git and gitrules.pushes(git.get("subcommand")) and git.get("subcommand") != "push":
+            return (f"git {git['subcommand']} publishes branches without git push, and this guard judges only git "
+                    f"push, so it cannot tell whether it force-pushes or deletes {branch}. Use `git push`, such as "
+                    f"`git push -u origin HEAD`. See {PAGE}")
         if not git or git.get("subcommand") != "push":
             continue
         push = git.get("push") or {}

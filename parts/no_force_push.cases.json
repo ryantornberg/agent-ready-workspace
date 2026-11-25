@@ -2965,5 +2965,665 @@
       "targets": {}
     },
     "allow": true
+  },
+  {
+    "name": "a force push whose refspec is braces that make it +main is refused (B1)",
+    "event": {
+      "command": "git push origin {+,}main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{+,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push whose refspec is braces that make it :main is refused (B1)",
+    "event": {
+      "command": "git push origin {:,}main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{:,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose refspec is braces that make it main is refused (B1)",
+    "event": {
+      "command": "git push -f origin ma{i,}n",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"ma{i,}n\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose refspec is a glob that may match a file named main is refused (B1)",
+    "event": {
+      "command": "git push -f origin mai[n]",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"mai[n]\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose refspec is a brace range is refused (B1)",
+    "event": {
+      "command": "git push -f origin ma{i..i}n",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"ma{i..i}n\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push of braces is refused even when it forces nothing (B1)",
+    "event": {
+      "command": "git push origin feature-{a,b}",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"feature-{a,b}\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "an unquoted glob refspec is refused, since the shell may expand it (B1)",
+    "event": {
+      "command": "git push -f origin refs/heads/*:refs/heads/*",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"refs/heads/*:refs/heads/*\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "braces in a push's remote word are refused (B1)",
+    "event": {
+      "command": "git push {origin,+main}",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"{origin,+main}\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "braces in a push inside sh -c text are refused (B1)",
+    "event": {
+      "command": "sh -c 'git push origin {+,}main'",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{+,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "braces in a push run by a stored alias are refused (B1)",
+    "event": {
+      "command": "git p origin {+,}main",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {
+            "p": "push"
+          }
+        }
+      },
+      "targets": {
+        "[\".\", \"git\", [\"p\", \"origin\", \"{+,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "quoted or escaped braces and globs in a push pass, since the shell expands none of them (B1)",
+    "event": {
+      "command": "git push -u origin 'ma{i,}n' && git push -u origin \"fix-[1]\" && git push -u origin fix-\\{a,b\\}",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"ma{i,}n\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        },
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"fix-[1]\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        },
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"fix-{a,b}\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a glob on another git call, and braces on another program, pass beside a push (B1)",
+    "event": {
+      "command": "git add *.py docs/{a,b}.md && ls tests/test_{a,b}.py && git push -u origin HEAD",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "git send-pack with --force is refused (B2)",
+    "event": {
+      "command": "git send-pack --force git@github.com:o/r.git main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack with a + refspec is refused (B2)",
+    "event": {
+      "command": "git send-pack git@github.com:o/r.git +main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack --all --force is refused (B2)",
+    "event": {
+      "command": "git send-pack --all --force git@github.com:o/r.git",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack deleting main is refused (B2)",
+    "event": {
+      "command": "git send-pack git@github.com:o/r.git :main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack of a branch, forcing nothing, is refused: the guard does not judge send-pack (B2)",
+    "event": {
+      "command": "git send-pack git@github.com:o/r.git feature",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack with an option that takes an optional value is refused (B2)",
+    "event": {
+      "command": "git send-pack --force-with-lease git@github.com:o/r.git main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git http-push with --force is refused (B2)",
+    "event": {
+      "command": "git http-push --force https://github.com/o/r.git main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack behind a wrapper is refused (B2)",
+    "event": {
+      "command": "env GIT_TRACE=1 git -C /m send-pack --force git@github.com:o/r.git main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git send-pack through a stored alias is refused (B2)",
+    "event": {
+      "command": "git sp --force git@github.com:o/r.git main",
+      "cwd": "/m",
+      "aliases": {
+        ".": {
+          "aliases": {
+            "sp": "send-pack"
+          }
+        }
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose refspec zsh reads as a glob group is refused (B1, review)",
+    "event": {
+      "command": "git push -f origin ma(i)n",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"ma\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push word with a zsh glob qualifier that runs code is refused (B1, review)",
+    "event": {
+      "command": "git push origin feature README.md(e:'git push -f origin main':)",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"feature\", \"README.md\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a remote helper fed a forced refspec is refused (B2, review)",
+    "event": {
+      "command": "printf 'push +refs/heads/main:refs/heads/main\\n\\n' | git remote-https origin https://github.com/o/r.git",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git remote-ext is refused (B2, review)",
+    "event": {
+      "command": "git remote-ext origin 'ext::ssh host git-receive-pack r.git'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a shell function that pushes HEAD passes: name() is not a glob (B1, review)",
+    "event": {
+      "command": "p() { git push -u origin HEAD; }; p",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "braces in a push whose program word is escaped are refused (B1, re-check)",
+    "event": {
+      "command": "g\\it push origin {+,}main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{+,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a glob group in a push whose program word is quoted is refused (B1, re-check)",
+    "event": {
+      "command": "\"g\"it push -f origin ma(i)n",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"ma\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a glob in a push whose program word holds empty quotes is refused (B1, re-check)",
+    "event": {
+      "command": "gi''t push -f origin mai[n]",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"mai[n]\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "braces in a push whose program word is in ANSI-C quotes are refused (B1, re-check)",
+    "event": {
+      "command": "$'g'it push origin {+,}main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{+,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
   }
 ]

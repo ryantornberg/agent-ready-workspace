@@ -36,6 +36,8 @@ runner reads what it needs from git (decision 0004, "Shell events": the `aliases
                               not read, a line nested too deep, git or gh in another letter case (M3 slices Z and
                               GFIX, the maintainer's answers to Q54, Q74, Q77 and Q75).
     expands(text)          -> True when the shell may expand a program word written so.
+    push_expands(command)  -> why a word of a git push, or of a git call that may be one, holds unquoted braces or a
+                              glob, or a word zsh reads with a following `(` as a glob, or None (M3 sign-off, Q85).
 
 A git config file is one of the files the runner lists in `git_config`: the global ones (`~/.gitconfig`,
 `$XDG_CONFIG_HOME/git/config`, `~/.config/git/config`, `GIT_CONFIG_GLOBAL`) and every file an `include.path` or
@@ -808,3 +810,70 @@ def unreadable(command):
                     f"pattern), so no guard can tell which program runs")
     return walker.found[0] if walker.found else None
 # -- End of the block held twice. ------------------------------------------------------------------------------
+
+
+# -- a push's words the shell would expand (M3 sign-off, red team finding B1) ----------------------------------
+
+# The git subcommands that push. A guard judges a push by its words as the parser gives them, before the shell
+# expands them, so a word of a push that the shell would expand is refused as one no guard can read. A remote
+# helper, git remote-https and the rest, pushes what its input names.
+PUSHING = frozenset({"push", "send-pack", "http-push"})
+
+
+def pushes(subcommand):
+    """True for a git subcommand that pushes: push, send-pack, http-push or a remote helper (remote-NAME)."""
+    return subcommand in PUSHING or (subcommand or "").startswith("remote-")
+
+
+class _PushParser(_Parser):
+    """The noting parser, which also notes each word directly followed by an unquoted `(`: zsh reads `ma(i)n` as
+    a glob and `x(e:'...':)` as a glob qualifier that runs code, where the parser reads a word and a subshell.
+    `name()` is a function and passes."""
+    grouped = set()
+
+    def _read_word(self):
+        word = super()._read_word()
+        if self.s.startswith("(", self.i) and not self.s.startswith("()", self.i):
+            _PushParser.grouped.add(id(word))
+        return word
+
+
+class _PushReader(shell._Walker):
+    """The parser's own walk, noting the first word of a git push, or of a git call that may be one, that holds
+    unquoted braces or a glob, or that zsh reads with what follows as a glob. A git call that is not built in,
+    such as an alias or a program named git-NAME, may be a push."""
+
+    def dispatch(self, words, own, writes, records, ctx, *rest):
+        entry = super().dispatch(words, own, writes, records, ctx, *rest)
+        git = (entry or {}).get("git") if isinstance(entry, dict) else None
+        if git and not self.found and (pushes(git.get("subcommand")) or not git.get("builtin")):
+            for word in words[1:]:
+                source = _source(word)
+                if BRACES.search(source) or GLOB.search(source) or id(word) in _PushParser.grouped:
+                    self.found.append(
+                        f"its word `{word.text}` is braces or a glob, or is followed by `(`, which zsh reads as a "
+                        f"glob or a glob qualifier. The shell expands such a word into other words, or runs code in "
+                        f"it, before git reads it, so no guard can tell what this push, or this git call that may "
+                        f"be one, sends. Quote the word, or write each branch out")
+                    break
+        return entry
+
+
+def push_expands(command):
+    """Why a git push on the line, or a git call that may be one, holds a word the shell would expand, or None
+    (red team finding B1, Q85)."""
+    command = command or ""
+    if not any(mark in command for mark in "{*?[("):
+        return None             # nothing the shell expands. No test for `git` here: g\it and "g"it run git too
+    walker = _PushReader(None, ("github.com",))
+    walker.found = []
+    saved, shell._Parser = shell._Parser, _PushParser
+    _Parser.found, _Parser.raw, _Parser.nul, _PushParser.grouped = [], {}, set(), set()
+    try:
+        walker.walk_list(shell.parse(command), shell._Context(), [], True)
+    except RecursionError:
+        return "the line nests too deeply to read each word of its pushes"
+    finally:
+        shell._Parser = saved
+        _Parser.found, _Parser.raw, _Parser.nul, _PushParser.grouped = [], {}, set(), set()
+    return walker.found[0] if walker.found else None
