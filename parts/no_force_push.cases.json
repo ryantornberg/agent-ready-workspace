@@ -3517,5 +3517,113 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "braces in a push whose program word is escaped are refused (B1, re-check)",
+    "event": {
+      "command": "g\\it push origin {+,}main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{+,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a glob group in a push whose program word is quoted is refused (B1, re-check)",
+    "event": {
+      "command": "\"g\"it push -f origin ma(i)n",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"ma\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a glob in a push whose program word holds empty quotes is refused (B1, re-check)",
+    "event": {
+      "command": "gi''t push -f origin mai[n]",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"mai[n]\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "braces in a push whose program word is in ANSI-C quotes are refused (B1, re-check)",
+    "event": {
+      "command": "$'g'it push origin {+,}main",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"{+,}main\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
   }
 ]

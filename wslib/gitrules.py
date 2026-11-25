@@ -863,8 +863,8 @@ def push_expands(command):
     """Why a git push on the line, or a git call that may be one, holds a word the shell would expand, or None
     (red team finding B1, Q85)."""
     command = command or ""
-    if "git" not in command.lower() or not any(mark in command for mark in "{*?[("):
-        return None                                       # no git call, or nothing the shell expands: nothing to read
+    if not any(mark in command for mark in "{*?[("):
+        return None             # nothing the shell expands. No test for `git` here: g\it and "g"it run git too
     walker = _PushReader(None, ("github.com",))
     walker.found = []
     saved, shell._Parser = shell._Parser, _PushParser
