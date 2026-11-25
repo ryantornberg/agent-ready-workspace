@@ -1055,6 +1055,14 @@ How slice GFIX finishes after its stop, from the maintainer's answers to Q80 and
 
 **Lanes (round 16).** Slice Z's diagnosis runs in lane B and GFIX's last round in lane C, at the same time.
 
+### 2026-11-25
+
+Approved by: the maintainer, 2026-11-24
+
+How slice Z goes on after its fifth stop, from the maintainer's answer to Q78 in the workspace queue on 2026-11-24 (round 15). The routed arm failed criterion 54 after its one re-record, and the stop rule kept the unproven pages and the wrappers out until a person decides. This entry is that decision. No criterion is dropped or weakened.
+
+**Diagnose, then fix the pages and measure the routed arm again, in two steps (Q78).** Step 1 starts no run. A fresh session reads the routed runs that failed only because no claim was marked verified, and names the pages that lead there. For each page it proposes a fix, says whether the fix touches a file the eval hashes, and gives the run count the new measurement would need. It then stops for the maintainer's choice of fix and run count. Step 2 makes the chosen fix and measures the routed arm again, within that count. Slice Z does not merge before step 2 ends.
+
 ## Results
 
 ### C1, launcher and baselines
