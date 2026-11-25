@@ -5,4 +5,4 @@ description: "This workspace's procedure for a small code change. Use it first, 
 
 # Fix a bug
 
-Open `docs/playbooks/fix-a-bug.md`, from the top of this workspace, read the whole page and follow it. That page is the procedure, and it wins over anything said here.
+Open `docs/playbooks/fix-a-bug.md`, from the top of this workspace, read the whole page and follow it through its last step, the report in the definition of done's shape. That page is the procedure, and it wins over anything said here.
