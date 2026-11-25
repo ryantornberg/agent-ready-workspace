@@ -579,5 +579,12 @@
       "command": "$'\\547\\550' pr merge 5 --admin"
     },
     "allow": false
+  },
+  {
+    "name": "an admin merge whose program ends in zsh's \\x with no digit is refused (GFIX, Q80)",
+    "event": {
+      "command": "gh$'\\x' pr merge 5 --admin"
+    },
+    "allow": false
   }
 ]

@@ -2481,9 +2481,9 @@
     "allow": false
   },
   {
-    "name": "a colour escape, arithmetic, a C-style for loop and xargs's {} pass (Q74)",
+    "name": "arithmetic, a C-style for loop and xargs's {} pass (Q74)",
     "event": {
-      "command": "printf $'\\e[31mred\\e[0m\\n'; echo $((1+2)); for ((i=0;i<3;i++)); do echo $i; done; ls | xargs -I{} echo {}",
+      "command": "echo $((1+2)); for ((i=0;i<3;i++)); do echo $i; done; ls | xargs -I{} echo {}",
       "cwd": "/m",
       "targets": {}
     },
@@ -2580,9 +2580,9 @@
     "allow": true
   },
   {
-    "name": "a brace list for pytest, pgrep of a name, a check mark escape and 8 nested shells pass (Q74, re-check; GFIX)",
+    "name": "a brace list for pytest, pgrep of a name and 8 nested shells pass (Q74, re-check; GFIX)",
     "event": {
-      "command": "pytest tests/test_{a,b}.py; pgrep -fl pytest; printf $'\\u2713 done\\n'; sh -c 'sh -c \"sh -c true\"'",
+      "command": "pytest tests/test_{a,b}.py; pgrep -fl pytest; sh -c 'sh -c \"sh -c true\"'",
       "cwd": "/m",
       "targets": {}
     },
@@ -2679,13 +2679,13 @@
     "allow": true
   },
   {
-    "name": "escapes that make a vertical tab or a carriage return pass (Q74, fix round 2)",
+    "name": "escapes that make a vertical tab or a carriage return are refused (GFIX, Q80)",
     "event": {
       "command": "printf $'a\\x0bb\\x0dc'",
       "cwd": "/m",
       "targets": {}
     },
-    "allow": true
+    "allow": false
   },
   {
     "name": "a force push behind a program the parser does not read, git named by its path, is refused (GFIX)",
@@ -2871,6 +2871,96 @@
     "name": "a NUL-only word read gets still passes (GFIX, fix round 2)",
     "event": {
       "command": "find . -print0 | while IFS= read -r -d $'\\0' f; do wc -l \"$f\"; done",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "a force push whose program ends in zsh's \\x with no digit is refused (GFIX, Q80)",
+    "event": {
+      "command": "git$'\\x' push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose program ends in zsh's \\M- is refused (GFIX, Q80)",
+    "event": {
+      "command": "git$'\\M-' push --force origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push after bash's \\x{3b}, in eval's text, is refused (GFIX, Q80)",
+    "event": {
+      "command": "eval $'echo x\\x{3b}git push --force origin main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push after \\C- takes the next escape, in eval's text, is refused (GFIX, Q80)",
+    "event": {
+      "command": "eval $'\\C-\\x3bgit push --force origin main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push after \\c takes the next escape, in eval's text, is refused (GFIX, Q80)",
+    "event": {
+      "command": "eval $'\\c\\x3bgit push --force origin main'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a force push whose flag is bash's \\x{2d} is refused (GFIX, Q80)",
+    "event": {
+      "command": "git push $'\\x{2d}\\x{2d}force' origin main",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a colour escape the parser does not read is refused (GFIX, Q80)",
+    "event": {
+      "command": "printf $'\\e[31mred\\e[0m\\n'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a check mark escape the parser does not read is refused (GFIX, Q80)",
+    "event": {
+      "command": "printf $'\\u2713 done\\n'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a NUL-only word written other than \\0 is refused (GFIX, Q80)",
+    "event": {
+      "command": "find . -print0 | while IFS= read -r -d $'\\x00' f; do echo \"$f\"; done",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "the escapes the parser reads itself pass (GFIX, Q80)",
+    "event": {
+      "command": "printf $'a\\tb\\r\\n'; IFS=$'\\n' read -r x; echo $'it\\'s \\\"ok\\\"\\?\\\\'",
       "cwd": "/m",
       "targets": {}
     },

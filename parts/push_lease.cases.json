@@ -2264,5 +2264,31 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "while another live session holds the lease, a push after bash's \\x{3b}, in eval's text, is refused (GFIX, Q80)",
+    "event": {
+      "command": "eval $'echo x\\x{3b}git push -u origin HEAD'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
   }
 ]

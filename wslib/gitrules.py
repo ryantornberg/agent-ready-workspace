@@ -586,13 +586,12 @@ def listed(destination, repositories):
 # The parser misreads some lines, and then every guard judges a command the shell will not run. Until the parser's
 # own fixes in M4, each shell guard refuses such a line in its own part file, as a command it cannot judge:
 # - a program word the shell expands: a glob, braces, zsh's extended glob or zsh's =NAME (Q54);
-# - an ANSI-C quoted escape that the shell makes a printable ASCII character, a tab or a new line, such as $'\x66',
-#   $'\146', $'f', $'\x0a', bash's $'\cJ' or zsh's $'\C-j', where the parser keeps the letters after the
-#   backslash; and a NUL escape in a word that holds anything else, such as git$'\0' or $'\0'git, since bash cuts
-#   the quoted text at a NUL and keeps the rest of the word, and zsh hands the program the word up to it. A word
-#   that is only NUL escapes, after an optional NAME= or --option=, such as read -d $'\0', passes, except among
-#   the words of eval or watch, which join them into a line where the parser misreads it. An octal escape counts
-#   by its low eight bits, as both shells read it, so \547 is g and \400 a NUL (Q74, slice GFIX);
+# - an escape in ANSI-C quoting, $'...', other than those the parser reads as both shells do: \\, \', \", \?, \n,
+#   \t and \r. Each shell decodes escapes the other does not, or decodes them otherwise: zsh makes $'\x' a NUL, bash
+#   reads $'\x{67}' as g, and \c or \C- may take the escape after it. So every other escape is refused, whatever
+#   the character it makes, such as $'\x66', $'\146', $'\e[31m', $'\u2713' or git$'\0' (Q74, Q80, slice GFIX). A
+#   word that is only \0 escapes, after an optional NAME= or --option=, such as read -d $'\0', passes, except among
+#   the words of eval or watch, which join them into a line where the parser misreads it;
 # - a (( that the parser reads as arithmetic and that may hold a command: ((git push) ), which the shell runs as
 #   two subshells, or any substitution inside one, such as $(( $(git push) )), whose command the parser never
 #   reads (Q74);
@@ -610,12 +609,12 @@ def listed(destination, repositories):
 EXPANDING = re.compile(r"[*?\[{}#^]|.~|^=")
 BRACES = re.compile(r"\{[^{}]*(?:,|\.\.)[^{}]*\}")
 GLOB = re.compile(r"[*?\[]")
-ANSI_ESCAPE = re.compile(r"\\(?:([0-7]{1,3})|x([0-9a-fA-F]{1,2})|u([0-9a-fA-F]{1,4})|U([0-9a-fA-F]{1,8})|c(.)|C-(.))",
-                         re.S)
 ARITH_WORDS = re.compile(r"[\w.'\"]\s+['\"A-Za-z_]|\$\(|`")
-# A word that is only NUL escapes in one $'...', after an optional NAME= or --option=: the program gets an empty word
+# The escapes in $'...' that the parser reads as both shells do; every other escape is refused (Q80).
+READ_ESCAPES = frozenset("\\'\"?ntr")
+# A word that is only \0 escapes in one $'...', after an optional NAME= or --option=: the program gets an empty word
 # or an empty value, as in read -d $'\0'.
-ONLY_NUL = re.compile(r"(?:-{0,2}[\w.-]+=)?\$'(?:\\(?:0{1,3}|x0{1,2}|u0{1,4}|U0{1,8}|c@|C-@))+'")
+ONLY_NUL = re.compile(r"(?:-{0,2}[\w.-]+=)?\$'(?:\\0)+'")
 # The programs the guards judge by name, or that run text, or that dump the environment. eval is left out: it is a
 # shell builtin, which a program that runs another cannot start, so `claude plugin eval` or `grep eval` passes.
 JUDGED = frozenset({"git", "gh", "env", "printenv", "pwsh", "powershell"}) | shell.SHELL_PROGRAMS
@@ -679,28 +678,20 @@ def _unquoted(raw):
 
 
 def _ansi_c(raw):
-    """Why a word's source holds an ANSI-C escape that the shell makes a character the parser misses, or None."""
+    """Why a word's source holds an escape in $'...' that the parser does not read as the shells do, or None (Q80)."""
+    if ONLY_NUL.fullmatch(raw):
+        _Parser.nul.add(raw)                   # judged by the program that gets it: eval or watch
+        return None
     i = 0
     while i < len(raw):
         if raw.startswith("$'", i):
-            end = _close(raw, i)
-            for match in ANSI_ESCAPE.finditer(raw, i + 2, end):
-                if raw[i + 2:match.start()].replace("\\\\", "").endswith("\\"):
-                    continue                     # \\x41: an escaped backslash, then plain letters
-                control = match.group(5) or match.group(6)
-                if control is not None:
-                    code = ord(control) & 0x1F                 # bash's \cJ, zsh's \C-j: here a new line
-                else:
-                    code = int(next(group for group in match.groups() if group), 8 if match.group(1) else 16)
-                    code = code & 0xFF if match.group(1) else code   # \547 is g, \400 a NUL: the low 8 bits
-                if code in (0x09, 0x0A) or 0x20 <= code <= 0x7E:
-                    return (f"its word `{raw}` holds the ANSI-C escape `{match.group(0)}`, which the shell makes a "
-                            f"character the parser does not read")
-                if code == 0 and ONLY_NUL.fullmatch(raw):
-                    _Parser.nul.add(raw)               # judged by the program that gets it: eval or watch
-                elif code == 0:
-                    return (f"its word `{raw}` holds the NUL escape `{match.group(0)}` beside other text, and the "
-                            f"shell drops part of the word at a NUL, which the parser does not read")
+            end, j = _close(raw, i), i + 2
+            while j < end:
+                if raw[j] == "\\" and raw[j + 1:j + 2] not in READ_ESCAPES:
+                    return (f"its word `{raw}` holds the escape `{raw[j:j + 2]}` in $'...' quoting, and the shells "
+                            f"read such an escape in ways the parser does not. Write the character itself, or let "
+                            f"printf read the escape inside '...'")
+                j += 2 if raw[j] == "\\" else 1
             i = end
         elif raw[i] == "\\":
             i += 2

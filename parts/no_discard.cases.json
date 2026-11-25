@@ -2971,5 +2971,31 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "while another live session holds the lease, a hard reset after \\C- takes the next escape, in eval's text, is refused (GFIX, Q80)",
+    "event": {
+      "command": "eval $'\\C-\\x3bgit reset --hard'",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
   }
 ]

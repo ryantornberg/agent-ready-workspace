@@ -9291,5 +9291,25 @@
       "targets": {}
     },
     "allow": false
+  },
+  {
+    "name": "a gh write whose program ends in zsh's \\x with no digit is refused (GFIX, Q80)",
+    "event": {
+      "command": "gh$'\\x' pr create --fill",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": false
   }
 ]
