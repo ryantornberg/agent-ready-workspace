@@ -2,14 +2,14 @@
 kind: record
 last-reviewed: 2026-11-24
 covers: README.md
-reviewed-at: 2d83108, with the uncommitted page edits of the slice GFIX builder
+reviewed-at: 2d83108, with the uncommitted page edits of the slice GFIX builder; re-checked at 0bbf4f6, with the uncommitted page edits of fix round 3
 ---
 
 # Instruction review: README.md (slice GFIX)
 
 This records a fresh session's review of slice GFIX's edit to the README's Limits list, for the slice's builder and the maintainer.
 
-**In short:** 4 findings: 3 contradiction, 1 eval-case; none is blocking. Every example on the bullet behaves as it says. The bullet says every shell guard but `no_stage_all` refuses a NUL escape and a judged name under a program the parser does not read, but two forms of those pass all seven guards; the code findings are in [the 0004 record](2026-11-24-gfix-0004.md). The re-check of fix round 1 found findings 1 to 3 closed as found and 1 new non-blocking item: the bullet's refused escapes miss an octal escape above `\377` and a lone NUL word among `eval`'s words, both of which pass all seven guards. The re-check of fix round 2 found item 5 closed as found and 1 new non-blocking item: the bullet's refused escapes miss three escape spellings that pass all seven guards, and `read -d $'\400'` is refused though the bullet says a whole-word NUL passes.
+**In short:** 4 findings: 3 contradiction, 1 eval-case; none is blocking. Every example on the bullet behaves as it says. The bullet says every shell guard but `no_stage_all` refuses a NUL escape and a judged name under a program the parser does not read, but two forms of those pass all seven guards; the code findings are in [the 0004 record](2026-11-24-gfix-0004.md). The re-check of fix round 1 found findings 1 to 3 closed as found and 1 new non-blocking item: the bullet's refused escapes miss an octal escape above `\377` and a lone NUL word among `eval`'s words, both of which pass all seven guards. The re-check of fix round 2 found item 5 closed as found and 1 new non-blocking item: the bullet's refused escapes miss three escape spellings that pass all seven guards, and `read -d $'\400'` is refused though the bullet says a whole-word NUL passes. The re-check of fix round 3 found item 6 closed as found and 1 new blocking item: the bullet says the parser reads the seven allowed escapes as both shells do, but inside `${...}` it does not, and `: ${x:-$'\''} && git push --force origin main # '}` passes all seven guards.
 
 ## Scope
 
@@ -74,3 +74,23 @@ A fresh session re-checked the bullet that begins "The shell guards refuse six m
 - enforcement: each example the bullet says is refused is refused by all seven guards in `other-live` (verified): `$'\x67it' push --force origin main`, `git$'\0' push --force origin main`, `$'\0'git push --force origin main`, `$'\547it' push --force origin main`, `((git push -f origin main) )`, `$(( $(git push) ))`, `nice -n {5,git} push`, `GIT push --force origin main`, `NICE -n 5 git push -f origin main`, `arch -arm64 git push -f origin main`, and the harmless `which git`, `echo gh pr merge 5 --admin`, `grep -n git notes.txt`, `echo $(( $(date +%s) - START ))` and `bash $SCRIPT`. Each example it says gets past passes all seven (verified): `read -d $'\0'`, `command -v git`, `grep -n "git push" notes.txt`, `arch $(command -v git) push -f origin main`, `flock /tmp/l -c 'git push -f origin main'`, `man -P 'git push -f origin main' ls`, `BASH -c 'git push -f origin main'`, `PRINTENV` and `arch -arm64 tcsh`.
 - enforcement, letter case past ASCII: no character this Mac's file system folds to a letter of `git` or `gh` was found; `ſh` reaches `sh`, and `ſh -c 'git push --force origin main'` passes all seven, the class the bullet names as "a shell named in another letter case" (verified; 0004 record).
 - step, trigger and placement: unchanged from the first reading and the re-check of fix round 1; the bullet still links decision 0004 for the detail (verified, read).
+
+## Re-check of fix round 3, 2026-11-25
+
+A fresh session re-checked the bullet that begins "The shell guards refuse five more kinds of line the parser misreads", as edited in the working tree on 0bbf4f6, against the code of 0bbf4f6. Each example was run through the seven shell guards' `decide`, and the route lines through bash 3.2.57 and zsh 5.9 with a fake `git`, `gh` and `printenv`, as [the 0004 record's re-check of fix round 3](2026-11-24-gfix-0004.md#re-check-of-fix-round-3-2026-11-25) describes.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 6 | Closed as found; the bullet's new claim fails, item 7 | The bullet now names the seven escapes the rule lets through, and drops the printable-character, NUL-beside-text and octal claims (verified, read). `$'\x67it'`, `git$'\x'` and `git$'\0'` before `push --force origin main`, `eval $'echo x\x{3b}git push --force origin main'` and `eval $'\C-\x3bgit push --force origin main'` are refused by all seven in `other-live`; `read -d $'\0'` passes all seven; `read -d $'\400'` is refused, and the bullet no longer calls it a NUL (verified). |
+
+### New items
+
+| # | Class | Where | Finding | Disposition |
+|---|---|---|---|---|
+| 7 | contradiction | The bullet, "an escape in `$'...'` quoting other than the seven the parser reads as both shells do", and its list of what still gets past every guard | Blocking: a page claim is false. In a word the parser and both shells read the seven alike (verified; 0004 record, item 18). Inside `${...}`, and inside `((` in bash, the parser does not read `\'` as the shells do: `: ${x:-$'\''} && git push --force origin main # '}` passes all seven guards, and bash and zsh each ran git (verified; 0004 record, item 16). The same misreading with plain quotes, `echo ${x:-"'"} ; git push --force origin main ; echo "'}"`, passes all seven, and both shells ran git (verified; item 17). The bullet's list of what still gets past names neither. | fixed: the bullet says the seven are read alike in a word, and names the routes of the 0004 record's items 15 to 17 among the lines that get past until M4 |
+
+### Checked with no finding
+
+- enforcement: each example the bullet says is refused is refused by all seven guards in `other-live` (verified): `$'\x67it' push --force origin main`, `git$'\x' push --force origin main`, `git$'\0' push --force origin main`, `((git push -f origin main) )`, `$(( $(git push) ))`, `nice -n {5,git} push`, `GIT push --force origin main`, `NICE -n 5 git push -f origin main`, `arch -arm64 git push -f origin main`, `script -q /dev/null git push -f origin main`, `flock /tmp/l git push -f origin main`, and the harmless `which git`, `echo gh pr merge 5 --admin`, `grep -n git notes.txt`, `echo $(( $(date +%s) - START ))`, `bash $SCRIPT` and `printf $'\e[31mred'`. `eval` and `watch` before `$'\0' '${G:-git}' push --force origin main` are refused by all seven (verified). Each example it says passes or gets past passes all seven (verified): `read -d $'\0'`, `command -v git`, `grep -n "git push" notes.txt`, `arch $(command -v git) push -f origin main`, `flock /tmp/l -c 'git push -f origin main'`, `man -P 'git push -f origin main' ls`, `BASH -c 'git push -f origin main'`, `PRINTENV`, `arch -arm64 tcsh` and the way around, `printf '\033[31mred'`, which both shells print as the same bytes (verified).
+- enforcement, "bash and zsh each decode escapes the other does not": zsh makes `$` of `\$` and a NUL of `\0`, where bash keeps `\$` and ends the text (verified); bash reads `\x{67}` as `g`, and zsh does not (verified in the re-check of fix round 2).
+- step, trigger and placement: the bullet keeps its place in the Limits list and still links decision 0004 for the detail; "five" matches the five kinds it lists before the runner rule (verified, read).
