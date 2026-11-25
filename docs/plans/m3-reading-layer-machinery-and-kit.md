@@ -2400,7 +2400,7 @@ Edits to files the eval hashes, queued by a slice for slice Z to make. Each line
 - B5, `INDEX.md`, Topics: a row "Decision records; write, amend or supersede a decision; why a rule exists" linking [the decision record template](../templates/decision-record.md); "Where the ported pages disagreed; departures from the ported pages" linking [decision 0020](../decisions/0020-where-the-sources-disagreed.md); "What the workspace holds and refuses; what success means" linking decisions [0008](../decisions/0008-success-is-a-teammate-who-does-not-ask.md) and [0009](../decisions/0009-hold-what-nobody-can-derive.md); "Retired pages; the archive; what search still finds" linking [decision 0015](../decisions/0015-retired-pages-move-to-an-archive.md); "Unattended runs; moving a pin after a run" linking [decision 0018](../decisions/0018-unattended-runs-write-only-to-a-branch.md); "Branching for product repositories; hotfixes; release branches" linking [decision 0019](../decisions/0019-every-fix-lands-on-trunk-first.md); "A knowledge graph of the code" linking [decision 0013](../decisions/0013-knowledge-graph-output-is-scratch.md); and the row that routes to decision 0001 also names where a person's agent memory, notes and settings belong.
 - B6, `INDEX.md`, Topics: a row "Wrappers; skills; the plugin; why a wrapper fires or stays quiet; selection cases" linking [the playbook catalog's three ways](../playbooks/README.md#three-ways-to-follow-a-playbook) and [the wrappers' selection cases](../../evals/README.md).
 
-### Z, contract, index and recordings: stopped after the routed arm's diagnosis
+### Z, contract, index and recordings: stopped after the routed arm without the plugin
 
 Built unattended on 2026-11-24 at the driver tier, on branch `m3/z` in the worktree `.claude/worktrees/m3-z`, since the slice changes the contract, the shell parser and eval cases. The maintainer's yes to Z's recordings and the Q8 scan were recorded first, as the change entry of 2026-11-24, pushed to main as `d2aa593`. A driver-tier helper built the parser moves and the Q8 scan on its own branch, merged into `m3/z`. Fresh driver-tier sessions wrote every review and re-check; this session wrote the rest. The branch is pushed (`e905168`) with no pull request, as the machinery page's trap requires until its eval records are in. No eval run started: 0 of the 225 approved runs are spent.
 
@@ -2499,11 +2499,41 @@ Run counts for the remeasure, each against R2's guided 42 of 45:
 
 Verified: M3 has spent at least 521 eval runs, out of the stop rule's 1,000. That is R1's 135, B7's 30 baseline runs, debugging's 131, R2's 135 and the routed arm's 90. Probes and failed runs are not in the records, so the true total is higher. Every option fits under 1,000. Queued as Q81, with these three options. The recommendation is the three unhashed fixes at up to 90 runs. They are the only fixes the data tie to a page, and no record goes stale. A miss would itself show that the loss runs across the whole routed arm, and that would justify the 225-run option.
 
+**Resumed on 2026-11-25, unattended, at the driver tier, for the maintainer's answer to Q81. Stopped a seventh time, after the routed arm without the plugin.** The answer was recorded first, as the change entry of 2026-11-25 that names Q81, pushed to main as `349b364`. This session added a one-time arm, `routed-no-plugin` in `evals/one-time.json`: the routed arm's files and no plugin (`f64752a`). For each of the three cases its file map equals the routed arm's, and each case's hash still equals its record's, so R2 stays current (verified). No page changed. It then ran `python3 evals/run.py CASE --one-time routed-no-plugin --model haiku --runs 15 --budget 15` once per case: 45 runs started and 45 were recorded (`0a20d2e`). That spends the 45 runs Q81 approved. The counts below are verified, from a script outside the repository that grades each transcript with `evals/grade.py`. Every cause is inferred, and every p value is a one-sided Fisher exact test.
+
+| Arm | Runs | Passed every grader | Lost the verified label | Wrote a fix record | Read the definition of done |
+|---|---|---|---|---|---|
+| Guided, R2 | 45 | 42 | 1 | 0 | 16 |
+| Routed, pages and plugin | 90 | 69 | 19 | 63 | 5 |
+| Routed, pages only | 45 | 37 | 6 | 23 | 10 |
+
+- **Verified, the result:** without the plugin, fix-a-bug passed 11 of 15, nightly-job 15 and big-report 11. The label was lost in 4, 0 and 2 runs. 5 of the 6 lost it on that grader alone. Two more big-report runs failed "the request is met" and "leaves the other report alone" together, and nothing else. Runs failing a grader other than the label: 3 of 45 here, 2 of 45 guided, 3 of 90 routed.
+- **Verified, the losses have the routed arm's shape:** 5 of the 6 reports never write "verified", and one writes it only as "Not verified". Each ends with sections such as Cause, Fix, Test and Not done, with no claim marked.
+- **Answer to Q81: the pages drive most of the loss, and the wrappers add to it.** Verified: the pages alone lose the label in 13 percent of runs, against 2 percent guided (p = 0.055). The plugin raises that to 21 percent (p = 0.20 against the pages alone). Inferred: the pages are the cause that stays when the wrappers go. The wrappers' share is smaller and this sample cannot confirm it.
+- **Verified, what the wrappers change:** with the plugin, agents wrote a fix record more often, 63 of 90 against 23 of 45 (p = 0.026). They read the definition of done less, 5 of 90 against 10 of 45 (p = 0.006). And 15 of 90 opened by reading the playbook with the Read tool, as the fix-a-bug wrapper asks, against none without it.
+- **Verified, the record no longer predicts the loss:** without the plugin, runs that wrote a record lost the label in 3 of 23, and the rest in 3 of 22. Inferred: the Q78 diagnosis's reading, that the record's second home for the report explains the loss, is weakened. The record path is something the wrappers push agents onto, not the cause itself.
+- **Verified, the one page that tracks the label:** over all three arms, runs that read the definition of done lost it in 0 of 31, and the rest in 26 of 149 (p = 0.005). Without the plugin it was 0 of 10 against 6 of 35. Pooled over the 135 routed runs, with and without the plugin, it is the only page read by 8 or more runs whose readers lose the label less (0 of 15, p = 0.038; the next is p = 0.21), and no page's readers lose it more (lowest p = 0.17). Inferred: the definition of done holds the report's marked shape, and the extra pages send the agent to the template and procedure endings instead. Reading it is partly a sign of a thorough run too, so this is not proof.
+- **Verified, criterion 54 without the wrappers:** 37 of 45 is under 39, the guided count less the margin of 3. Inferred: dropping the wrappers alone would not pass.
+- **Verified, one confound:** the runs used Claude Code 2.1.332; the routed arm and R2 used 2.1.331. The model is `claude-haiku-5-5` in all three.
+- **Decision made without asking, a new one-time arm, not a flag:** `evals/one-time.json` sits outside every case's hash, and `--one-time` writes to its own folder, so the routed arm's 90 runs stay as they are. A flag in `run.py` would have staled every record, since every case hashes it.
+- **Decision made without asking, the eval page waits:** Q81 says no page change, so `evals/README.md` does not yet name this arm. The remeasure's builder publishes it there with the next result.
+
+The fix proposed, and its run count:
+
+- **Recommended, the unhashed pages and the wrapper, up to 90 runs.** `docs/templates/fix-record.md`, in its "In short" line and "When to write one", and `docs/procedure-endings.md`, in "The report", say: end the reply with the report in the definition of done's shape, every claim marked, and keep a copy in the record. The fix-a-bug wrapper's body says to follow the page through step 6, the report, in that shape; its description stays, so B6's selection result still stands (inferred). The page fixes address the larger share. The wrapper fix is the one change that bears on the plugin's share, which steers agents away from the definition of done. None of the three is hashed, so R2 stays current. Each is a guidance page and needs an instruction-review record. The remeasure is the routed arm with the plugin, 45 runs, passing at 39 of 45; on a miss, one 45-run re-record, passing at 78 of 90.
+- **Inferred, the chance:** a pass needs the label loss near 4 in 45. The definition of done's readers lost none, so routing every report through its shape could get there. It is not assured.
+- **The other two options.** Adding fix-a-bug's step 6, which is hashed, costs up to 225 runs: R2 again, then the routed arm and its re-record. Keeping the unproven pages out of the index, the stop rule's default, costs 135: `INDEX.md` is in every case's hash, so R2 runs again.
+- **Verified, the run total:** M3's records now hold at least 566 eval runs of the stop rule's 1,000: the 521 counted before, and these 45. The recommendation would bring it to at most 656, the step 6 option to 791.
+
+Queued as Q83, with these three options and the unhashed fix as the recommendation. A miss on it would show the loss runs past the pages these fixes reach, and would justify the 225-run option.
+
+- **Verified, the checks:** on `0a20d2e`, `python3 ws.py selftest` passes every part's cases, and `python3 -m unittest discover -b tests` ran 803 tests, OK, 3 skipped. `python3 ws.py check` shows only the warning that a plain check has no base commit. `python3 evals/grade.py --recorded` finds no difference. `python3 ws.py check --commits origin/m3/z..HEAD` passes 2 commits. The private ledger's check prints 0 unmapped items. The branch was pushed with its pre-push check, and #55 stays a draft, not merged.
+
 The private ledger's rows for slice Z stay on slice Z until its pages reach main.
 
-Not done: the merge of `m3/z`; the ledger's move of Z's rows to their pages
-Parked: Q81
-Next: maintainer — answer Q81, the fix and run count for Q78's step 2, which blocks Z's merge, GFIX's merge and M3's sign-off; then a slice Z builder makes the fix, measures routed again within that count, and merges if it passes.
+Not done: nothing
+Parked: Q83
+Next: maintainer — answer Q83, the fix and run count for the routed remeasure, which blocks Z's merge, GFIX's merge and M3's sign-off; then a slice Z builder makes the fix, measures routed again within that count, and merges #55 if it passes.
 
 ### GFIX, Q74's narrowed guard rules and git or gh in any case
 
