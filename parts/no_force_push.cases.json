@@ -3418,5 +3418,104 @@
       "targets": {}
     },
     "allow": false
+  },
+  {
+    "name": "a force push whose refspec zsh reads as a glob group is refused (B1, review)",
+    "event": {
+      "command": "git push -f origin ma(i)n",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-f\", \"origin\", \"ma\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a push word with a zsh glob qualifier that runs code is refused (B1, review)",
+    "event": {
+      "command": "git push origin feature README.md(e:'git push -f origin main':)",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"origin\", \"feature\", \"README.md\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a remote helper fed a forced refspec is refused (B2, review)",
+    "event": {
+      "command": "printf 'push +refs/heads/main:refs/heads/main\\n\\n' | git remote-https origin https://github.com/o/r.git",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "git remote-ext is refused (B2, review)",
+    "event": {
+      "command": "git remote-ext origin 'ext::ssh host git-receive-pack r.git'",
+      "cwd": "/m",
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a shell function that pushes HEAD passes: name() is not a glob (B1, review)",
+    "event": {
+      "command": "p() { git push -u origin HEAD; }; p",
+      "cwd": "/m",
+      "targets": {
+        "[\".\", \"git\", [\"push\", \"-u\", \"origin\", \"HEAD\"]]": {
+          "destinations": [
+            {
+              "host": "github.com",
+              "owner": "o",
+              "name": "r",
+              "url": "git@github.com:o/r.git"
+            }
+          ],
+          "unresolved": null,
+          "no_repository": false,
+          "remote": "origin",
+          "refspecs": null,
+          "mirror": false,
+          "branch": "feature",
+          "main_branch": "main"
+        }
+      }
+    },
+    "allow": true
   }
 ]
