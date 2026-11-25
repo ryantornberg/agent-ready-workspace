@@ -1,17 +1,19 @@
 ---
 kind: template
-last-reviewed: 2026-11-22
+last-reviewed: 2026-11-25
 ---
 
 # Fix record template
 
 The dated record that one bug fix leaves behind, for the agent making the fix and anyone later checking what it proved.
 
-**In short:** one file per fix in `docs/records/fixes/`, opened when the fix starts and filled as it goes. It holds the fix brief, where the work stands, and a `## Report` whose every claim line is marked verified or inferred. The `claim_marks` check reads that report.
+**In short:** one file per fix in `docs/records/fixes/`, opened when the fix starts and filled as it goes. It holds the fix brief, where the work stands, and a `## Report` whose every claim line is marked verified or inferred. The `claim_marks` check reads that report. The record's report is a copy: your reply still ends with the report itself, every claim marked.
 
 ## When to write one
 
-Open a fix record when you start a fix on the [fix a bug](../playbooks/fix-a-bug.md) path, and fill it in at each step, not from memory at the end. Its report is the report that page ends with.
+Open a fix record when you start a fix on the [fix a bug](../playbooks/fix-a-bug.md) path, and fill it in at each step, not from memory at the end.
+
+Its `## Report` is a copy of the report that page ends with, and it does not replace that report. End your reply with the report, in the shape the [definition of done](../definition-of-done.md#the-report) gives, every claim marked verified or inferred, as [procedure endings](../procedure-endings.md#the-report) says. Keep the same lines in the record, in the same shape.
 
 A fix that is a slice of a hand-off plan needs no fix record. Its report goes under the plan's "Results", as step 6 of the [hand-off plan template](hand-off-plan.md#how-to-use-it) says for every slice.
 
@@ -51,8 +53,8 @@ last-reviewed: YYYY-MM-DD
 
 Fixed: <what was wrong, in one sentence>
 
-- verified: <something you ran, and what you saw>
-- inferred: <something you reasoned out and did not check>
+verified  <something you ran, and what you saw>
+inferred  <something you reasoned out and did not check>
 
 Not done: <anything left, and why, or "nothing">
 ```
@@ -63,7 +65,7 @@ Not done: <anything left, and why, or "nothing">
 - **Where it stands.** Write a line only once you have run what it claims. A line you have not reached yet says "not yet". A claim written down because it looked plausible, and never checked, is how a wrong fix gets merged.
 - **The layer.** The red-green line names the layer the failing test exercised. A check that passes at one layer proves nothing about another: a screen that now looks right says nothing about the server behind it. When the bug lives at a layer your test did not reach, say so under "Not done".
 - **The running app.** Name the commit each check ran on. A check on an earlier commit does not count for a later one.
-- **The report.** Always write it, even when the work stopped early. Keep it the last section. The session's report repeats its lines. "Not done" names the same things a report in the session names, as [procedure endings](../procedure-endings.md#the-report) says.
+- **The report.** Always write it, even when the work stopped early. Keep it the last section. It is a copy of the report your reply ends with, and its "Not done" names the same things, as [procedure endings](../procedure-endings.md#the-report) says.
 - **Committing it.** Commit the record with the fix, on the fix's branch, with "Where it stands" filled so far. After the push, fill in the commits, the pull request and the report, then commit and push the record once more on that branch. This follows the order of [procedure endings](../procedure-endings.md#the-order): commit, push, then report. Staging and messages follow [its commit section](../procedure-endings.md#the-commit). When the fix is code in a pinned repository, its branch is not in this repository: the record is then a change of pages only here, committed and pushed as procedure endings' rows for pages say. A review round's record goes in the pull request's description, as that page's step 10 says, not here.
 
 ## What the check reads
@@ -74,7 +76,7 @@ The `claim_marks` check reads every file in `docs/records/fixes/` except a READM
 - A line starting `Fixed:` or `Not done:` is a header line. Keep everything it says on that line.
 - Every other line is a claim line. It may start with `- ` or `* `, then `**`. Then it must start with `verified` or `inferred` in lowercase, followed by a space, a colon or `**`.
 
-Both shapes pass: the skeleton's list, and the block of `verified  <...>` lines that the [definition of done](../definition-of-done.md#the-report) gives. Each of these fails:
+Both shapes pass: the block of `verified  <...>` lines that the skeleton and the [definition of done](../definition-of-done.md#the-report) give, and a list of `- verified: <...>` lines. Each of these fails:
 
 - `Verified` or `Inferred` with a capital letter.
 - A numbered list, such as `1. verified: ...`.
