@@ -13,15 +13,16 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 
 ## Key points
 
-- **The guards come first, under one rule.** A shell guard refuses any command whose deciding word the parser cannot resolve to a literal. That replaces M3's fix per route.
-- **The parser fix merges after recording R3, not before.** The eval hashes the parser. Slice H0 lets a re-grade hold grading files, so the fix then costs no runs. Landing it sooner costs 135 runs.
-- **Then the review loop:** dispatch, a completion record, a review mark, and a gate that refuses a pull request without one. Teach-back and a merge policy per repository complete it.
-- **Then the eval system:** suites, a gate at the push, and proof attempts for ten pages.
+- **The guards come first, under one rule.** A shell guard refuses any command whose deciding word the parser cannot resolve to a literal.
+- **The parser fix merges after recording R3.** The eval hashes the parser. Slice H0 lets a re-grade hold grading files, so the fix then costs no runs. Landing it sooner costs 135 runs.
+- **The review loop:** dispatch, a completion record, a review mark, a gate at pull-request creation, teach-back and a merge policy.
+- **The eval system:** suites, a gate at the push, and proof attempts for ten pages.
 - **Eval runs:** about 1,175 planned, a stop at 1,400. Each batch needs the maintainer's yes with a count.
+- **Review sessions:** about 180 planned, a stop at 250. A review scales to its diff, and a pull request is capped at 16.
 - **Harness changes land in one slice, before any recording.**
-- **The stop rule splits findings.** A gap a slice caused can stop it. A gap already open on main is recorded, and the slice goes on.
+- **The stop rule splits findings.** A gap a slice caused can stop it. A gap already open on main is recorded instead.
 - **The decision queue is not built in M4.**
-- **Not red-teamed and not approved.** The maintainer's review of M3 comes first. Five questions wait in his queue.
+- **Not red-teamed and not approved.** The maintainer's review of M3 comes first. Six questions wait in his queue.
 
 ## Settled decisions
 
@@ -40,6 +41,7 @@ The maintainer, 2026-11-25, in the brief for this plan:
 Added to the brief the same day, through the coordinator:
 
 - Pull request 59 moved the decision queue plan's red team tables into dated records, on the maintainer's answer to Q3. The plan template and the red team review page still say a plan keeps its triage table. M4 aligns them, and this plan says which form it takes.
+- The run budget counted eval runs only. The review gate starts five or more driver-tier sessions for each pull request, and nothing capped that. The plan estimates review sessions per pull request and per slice, sets a cap or scales the dimensions to the diff, and says where the count is reported.
 
 The maintainer, answering M3's queue, 2026-11-21 to 2026-11-25:
 
@@ -91,6 +93,8 @@ Each is the author's. A reviewer reads this section to challenge them.
 - **Budgets:** four of the nine other pages are planned to reach a recording, and the plan stops at 1,400 agent runs. That four is a guess; the baselines replace it. Rejected: the program's full 1,520 for the attempts alone.
 - **The routed arm is measured once more at the close.** M4 adds contract lines, index rows and pages, and M3 showed that added text can cost passes.
 - **A plan's red team triage lives in the record, and the plan links each record** (L7). Rejected: the table stays in the plan. The maintainer chose the record for the decision queue plan, the record already has a Disposition column that every other document uses, and M3's plan carried about 225 lines of triage tables. This plan's own Red team section takes that form now, ahead of the template.
+- **A review scales to its diff, and a pull request is capped at 16 review sessions** (L1). Rejected: every dimension on every round, which makes about 22 sessions for a pull request with two fix rounds; and a cap alone, which stops a loop late without making it cheaper. Reuse runs when the range adds a file or a function, where the page runs it always today: the program counts four dimensions that always run. Every dimension stays at the driver tier. The cap's number, and whether advisory work may drop a tier, are in the maintainer's queue.
+- **A range of tests or eval cases alone gets two dimensions,** code and test adequacy. Rejected: the four. A test or a case holds no architecture to judge, and the code dimension reads what it could weaken.
 - **New pages name M6 in `prove-by`.** A page cannot be proven by the milestone that writes it, and M6 uses the review loop on real fixes.
 - **Machine-state records go to M5**, with the first instance. M3 left the choice between M4 and M5 open.
 - **Names:** see [names this plan fixes](#names-this-plan-fixes).
@@ -159,7 +163,7 @@ H0 starts beside G2, in its own lane. H2 starts after H1 merges. H3 starts after
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
 | L0 | Facts and prior art | Record how each agent tool starts a headless session at a tier with its edit tools off, and where its transcript is. Test two existing review marks against this plan's criteria. A decision record says what is taken and what is built. See "L0" below. | driver | Criterion 31 |
-| L1 | Dispatch | `ws.py dispatch` builds a prompt from a template file and its inputs, starts a fresh session at the tier's model and effort, and writes the reply to a record. Each recurring brief becomes one template file. See "L1" below. | driver | Criteria 32–34 |
+| L1 | Dispatch | `ws.py dispatch` builds a prompt from a template file and its inputs, starts a fresh session at the tier's model and effort, and writes the reply to a record. Each recurring brief becomes one template file. It scales a review to its diff, and counts sessions against a cap. See "L1" below. | driver | Criteria 32–34, 57–59 |
 | L2 | The completion record | For each reviewed commit, which dimensions completed, judged from each reviewer's own output. The findings table. A re-check of earlier "fixed" rows, and a whole-branch pass. See "L2" below. | driver | Criteria 35–36 |
 | L3 | The review mark and the gate | `ws.py review mark` with its refusals, `ws.py review status`, and a `review_gate` part that refuses a pull request with no mark, or one that is not a draft. See "L3" below. | driver | Criteria 37–40 |
 | L4 | The finding lifecycle | Verify before fixing. "Fixed" names the check that fails without the fix. A decline names where the defect now lives. A direction rule in place of a round count. A nit cap. The defect register's cross-check. See "L4" below. | driver | Criteria 41–42 |
@@ -279,7 +283,7 @@ Each attempt runs as M3's slice B7 did. Two cases are drawn from M1 to M3's real
 
 ### L0: Facts and prior art
 
-Record each as verified or not under "Results", with the command or the transcript. For Claude Code and for Codex CLI: the command that starts a headless session on a named model and effort; the setting that turns its edit tools off, and what can still write; where the session's transcript is, and what marks its end; and how a time limit stops it.
+Record each as verified or not under "Results", with the command or the transcript. For Claude Code and for Codex CLI: the command that starts a headless session on a named model and effort; the setting that turns its edit tools off, and what can still write; where the session's transcript is, and what marks its end; how a time limit stops it; and whether the tool reports a session's token use.
 
 Then test two existing review marks in a scratch repository, against criteria 35 to 40: AI-DLC's `attest`, which ties commits to reviewed work by a content fingerprint and fails closed, and Anthropic's `agent-approval-check`, which requires human approvals on agent commits. Both are named by the program plan; that each exists and does this is inferred until the slice runs them. A decision record says, for each criterion, what each meets, what M4 takes with credit, and what it builds. It also settles where a mark is stored. If one of them meets every criterion of a slice, that slice adopts it, and the plan changes by an approved entry.
 
@@ -294,12 +298,26 @@ Then test two existing review marks in a scratch repository, against criteria 35
 - **A reviewer starts with its edit tools off,** as L0 found possible, so "edit nothing" is held by the launch.
 - **One adapter per agent tool:** a function that builds the command, and one that reads recorded output. The tests need no agent.
 
+**A review scales to its diff.** The dispatch picks a full round's dimensions from the paths the range changes, and prints why:
+
+| The range changes | A full round starts |
+|---|---|
+| Guidance pages, plans or records only | Nothing. The instruction review's trailers hold guidance. |
+| Tests or eval cases only | Code and test adequacy. |
+| Any other machinery path, or code under `src/` | Code, architecture, security and test adequacy. Reuse, when the range adds a file or a function. Docs drift and the other triggered dimensions, as their triggers say. |
+
+- **A fix round runs less.** On a delta round the dispatch starts code over the delta; security, when the delta changes a hook, a guard, a check or CI; each dimension that has a finding from an earlier round; and the re-check of the rows marked fixed. The whole-branch pass runs once, at the tip that is to get the mark.
+- **It counts review sessions.** Every session a dispatch starts for a review is one: a dimension, a retry, a re-check, a whole-branch pass, an instruction review, a red team, a teach-back grader. Each dispatch record holds its tier, model, effort and duration, and its token use where the agent tool reports it.
+- **A pull request has a cap.** The manifest's `review` entry sets the most review sessions one pull request may start: 16 here, and the same in the kit. At the cap the dispatch refuses and names the count. The loop stops for the person, who raises the cap for that branch or ends the review. `python3 ws.py review status` prints the branch's count against the cap.
+
+The estimates behind the cap are under [review session budgets](#review-session-budgets).
+
 If a tool cannot be driven this way, dispatch ships for one tool behind its adapter, and the README marks the review gate "one tool". That is the program's rule, and not a stop.
 
 ### L2: The completion record
 
 - **Judged from the reviewer's own words.** `python3 ws.py review collect` reads each reviewer's transcript through the adapter. A dimension is complete only when its reply holds a closed report for this tip, a count of findings equal to the table's rows, and the lines its dimension owes. For architecture those are `Invariants checked:` and `Big picture:`, and one alone does not count.
-- **It writes two things for the tip:** the completion record, and the findings table in the form [the review orchestrator](../playbooks/review-orchestrator.md) gives.
+- **It writes two things for the tip:** the completion record, and the findings table in the form [the review orchestrator](../playbooks/review-orchestrator.md) gives. The completion record counts the round's sessions: started, retried and not complete.
 - **A delta round re-checks every earlier row marked fixed,** in a fresh session.
 - **Before a branch is called ready, one pass reads the whole branch,** not only the last delta.
 
@@ -378,6 +396,7 @@ Settled before any page or part is written. A builder who finds a name wrong pro
 | Suite | The cases that belong to one page. | None considered. |
 | Outcome case | A case graded on what the agent left behind. | "Quality case": it grades an outcome, and says nothing else about quality. |
 | Batch | Every eval run started under one yes from the maintainer. | "Session", which M3's cap used and a builder read three ways. |
+| Review session | One fresh session a dispatch starts for a review, a re-check, an instruction review, a red team or a teach-back. | "Reviewer": one reviewer may take two sessions, a first and a retry. |
 | Dispatch template | The fixed text a fresh session is sent. | "Prompt template": the pages already say dispatch. |
 
 New pages: `docs/playbooks/teach-back.md`, as L5 gives it, and one decision record each for the guards' rule, the review mark and the merge policy. Everything else is an edit to a page that exists.
@@ -450,7 +469,13 @@ Closing:
 53. From L3's merge on, every pull request of this plan that changed a machinery path or `src/` had a mark at its head when it was published. `docs/milestones/m4.md` lists each. (V4)
 54. The private port ledger maps every catalog item it gives M4 to a page, a part, a later milestone or a reason. Its check prints 0 unmapped items. (V5)
 55. Every pull request of this plan merged with every required check passing on Linux, macOS and Windows. (V4)
-56. `docs/milestones/m4.md` marks each criterion with its evidence, and reports the eval runs used per slice against its budget, the review sessions per slice, the always-loaded size and the outside checks' outcomes. (V2, V9)
+56. `docs/milestones/m4.md` marks each criterion with its evidence, and reports the eval runs used per slice against its budget, the review sessions used per slice against its estimate, the always-loaded size and the outside checks' outcomes. (V2, V9)
+
+Sub-batch L, review sessions. They are numbered after the closing criteria because they joined the draft later:
+
+57. When a range changes only guidance pages, plans or records, the dispatch starts no dimension. When it changes only tests or eval cases, it starts code and test adequacy. Otherwise it starts the four, and reuse and each triggered dimension only when its trigger holds. A test covers each row. (V1)
+58. On a delta round the dispatch starts code, security when the delta changes a hook, a guard, a check or CI, each dimension with an earlier finding, and the re-check. A mark needs one whole-branch pass at its tip, and no more. (V1)
+59. `ws.py dispatch` never starts a review session past the manifest's cap for a pull request, and its refusal names the count. Each dispatch record holds its tier, model, effort and duration. `ws.py review status` prints the branch's count against the cap. (V1)
 
 ## Verification
 
@@ -485,11 +510,14 @@ Stop the plan and report when any of these happens:
 - After R3, a slice needs a change to a file criterion 21 names. That costs a recording, so the maintainer decides.
 - The eval runs reach 1,400 agent runs, or the selection and routing runs 300. Re-records, probes, failed runs and dispatched sessions count.
 - A slice's batch is used up before its "Done when" holds.
+- The review sessions reach 250, counted as [review session budgets](#review-session-budgets) says.
 - G2's measure shows it refuses a line agents need and no wording of the rule passes it.
 - L0 finds that an existing review mark meets every criterion of a slice. The plan changes by an approved entry before that slice is built.
 - The engine, a part or a CI test needs a third-party package.
 
 A part that cannot be made safe on Windows within its slice ships for macOS and Linux, says so in the README, and does not weaken the guard. A review loop that cannot be made tool-neutral ships for one tool. Neither is a stop.
+
+A pull request that reaches its cap of review sessions stops its own loop for the person. That does not stop the plan.
 
 ## Limits
 
@@ -519,9 +547,45 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 
 - **The stop is 1,400 agent runs.** If all nine other pages went to a recording, the total would be about 1,970. The maintainer chooses the pages after the baselines; nothing past 1,400 runs without a change of plan.
 - **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. A full selection rerun, 174, happens only if a wrapper's description changes. The stop is 300.
-- **Review sessions are not eval runs, and cost more each.** A review round is five or more fresh sessions at the driver tier. No cap is set; each slice's report counts them.
+- **Review sessions are not eval runs, and are budgeted apart,** in the next section.
 - **Red team review's cases change in L7 and cost no run here.** Its stored 10-run baseline goes stale and is named so; M9 runs it again, 20 runs for both cases, with that page's recording.
 - G0 to G4, H0, H2's build, and L0 to L7 start no eval run. L0's recorded tool runs are a handful of headless sessions.
+
+## Review session budgets
+
+A review session is a fresh session at the driver tier. It costs more of the maintainer's quota than an eval run on the small model. How much more is not measured: L0 records whether each agent tool reports a session's token use, and the first three reviews through the loop put a figure in the milestone record. Every count in this section is an estimate, from the scale rule in "L1".
+
+Per pull request, through the loop:
+
+| Round | Sessions | Made of |
+|---|---|---|
+| A full round on machinery code | 6 | The four, docs drift, and reuse or one retry |
+| A fix round after it | 5 | Code and security over the delta, one dimension with a finding, the re-check, the whole-branch pass |
+| A full round on tests or cases alone | 2 | Code and test adequacy |
+| A fix round after it | 3 | Code, the re-check, the whole-branch pass |
+
+So a clean pull request costs about 6, one fix round makes 11, and two make 16, which is the cap. Without the scale rule, the review page's dimensions on every round would make 6, 14 and 22.
+
+Per slice, for M4's own build:
+
+| Slices | How each is reviewed | Sessions |
+|---|---|---|
+| G0 to G4 | By hand: a fresh re-check, one more per fix round, and the instruction review of its pages with its re-check. | 18 |
+| H0, H1 | The same. | 6 |
+| L0 to L3 | The same: the loop does not exist yet. | 15 |
+| L4 to L7 | Through the loop: one pull request each with one fix round, 11, and two for its pages' instruction review. | 52 |
+| H2 | Through the loop, with two fix rounds, and two for its pages. | 18 |
+| H3 | Through the loop: about five pull requests of cases, 5 each. | 25 |
+| Z | Through the loop, 11, and four for the hashed pages' instruction reviews. | 15 |
+| Two fix pull requests nobody planned | Through the loop, 11 each. | 22 |
+| The plan and the close | Three red team rounds on this plan, the outside red team, and three teach-back graders. | 7 |
+| | **Review sessions at the driver tier** | **178** |
+
+- **The stop is 250 review sessions.** A slice that passes twice its row says so in its report before it goes on.
+- **A guard slice still open when L3 merges goes through the loop,** as "First real use" says. Each adds about 11 to its row.
+- **Where the count is reported.** In each dispatch record. In the completion record, per round. By `python3 ws.py review status`, against the cap. In one line of the pull request's review record, such as `Sessions: 11 of 16`. In each slice's report under "Results", against its row here. And in `docs/milestones/m4.md`, in a "Review sessions used" table beside "Eval runs used".
+- **Before L1 merges,** a builder counts by hand each fresh session it starts for a review, and reports the count the same way.
+- **The cap is an instance's own.** It lives in the manifest, so a team sets its number where it sets its tiers.
 
 ## Execution profile
 
@@ -538,6 +602,7 @@ About 6 hours, as the program estimates.
 - Agree the spec, then approve the plan after its red team.
 - Say yes, with a count, to each eval batch. After H3's baselines, choose which pages go to a recording.
 - Read one full review record.
+- Raise a pull request's cap of review sessions, or end its review, when a loop stops there.
 - Sit two teach-backs: one on a plan awaiting approval once L5 has merged, and one on a pull request.
 - Confirm this repository's merge policy, and set any other repository's.
 - Read the ten proof results, and strike any page he disagrees with.
@@ -553,7 +618,7 @@ About 6 hours, as the program estimates.
 - The mark and the completion record of one real change.
 - An instruction-review record for each guidance page changed, and the trailers that name them.
 - A report per slice under "Results", each claim marked verified or inferred, with the list of hashed-file edits queued for slice Z.
-- `docs/milestones/m4.md`, with entries in `CHANGELOG.md` and `EVIDENCE.md`, current before the outside checks run.
+- `docs/milestones/m4.md`, with its eval runs and review sessions used, and entries in `CHANGELOG.md` and `EVIDENCE.md`, all current before the outside checks run.
 - A question-log row for each question the workspace should have answered, as the contract's rule says.
 
 ## Later
@@ -588,5 +653,6 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Verified, by reading:** the program plan's section for M4, the private attack scripts' report, and the maintainer's answers to M3's queue.
 - **Verified:** the eval's hash covers the shell parser, as the eval page's "The gate" says, so a parser change stales the three fix-a-bug records. The wrappers' descriptions hold 8,542 of 9,000 bytes, by M3's record. Ten pages or sections name M4 in `prove-by`, by the README's table.
 - **Verified, for the red team triage item:** pull request 59 merged on 2026-11-25 as `cb07903`, and the decision queue plan's Red team section now links seven records. The plan template's rule 4, red team review's step 5 and three places in size the work still name the plan's table. Both red team cases give their guided arm the page, both hidden tests assert a Disposition in the plan's table, and one baseline record is stored, for `red-team-fail-closed`. Red team review is unproven, and `eval_record` gates proven pages only, by its own docstring.
+- **Inferred, for the review session budgets:** every count in that section. It rests on the review orchestrator's page, read at `2d00f5b`: five dimensions that always run today, one retry each, and a re-check and a whole-branch pass on a delta round. No review has run through a dispatch yet, so no session's cost is measured.
 - **Inferred:** every budget figure for H3 beyond the baselines, since the baselines decide which pages are recorded. That the two existing review marks do what the program plan says, until L0 runs them. That grading files can leave the recording's hash without loss, which the red team should attack.
 - **Not run:** no eval or selection run, no guard attack, and no red team.
