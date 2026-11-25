@@ -1063,6 +1063,14 @@ How slice Z goes on after its fifth stop, from the maintainer's answer to Q78 in
 
 **Diagnose, then fix the pages and measure the routed arm again, in two steps (Q78).** Step 1 starts no run. A fresh session reads the routed runs that failed only because no claim was marked verified, and names the pages that lead there. For each page it proposes a fix, says whether the fix touches a file the eval hashes, and gives the run count the new measurement would need. It then stops for the maintainer's choice of fix and run count. Step 2 makes the chosen fix and measures the routed arm again, within that count. Slice Z does not merge before step 2 ends.
 
+### 2026-11-25
+
+Approved by: the maintainer, 2026-11-25
+
+How slice Z goes on after its sixth stop, from the maintainer's answer to Q81 in the workspace queue on 2026-11-25. It amends step 2 of the entry above that names Q78: before any fix, one more measurement. No criterion is dropped or weakened.
+
+**Diagnose the wrappers first (Q81).** Run the routed arm once without the wrappers' plugin, 45 runs, 15 per case, with no page change. Compare it with the routed arm's 90 runs, and say whether the wrappers or the pages drive the loss of the "claim marked verified" label. Propose the fix and its run count, then stop for the maintainer's choice. These 45 runs count toward the stop rule's 1,000. #55 is not merged.
+
 ## Results
 
 ### C1, launcher and baselines
