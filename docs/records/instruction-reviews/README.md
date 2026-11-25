@@ -320,3 +320,4 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-25-z-fix-record.md](2026-11-25-z-fix-record.md) | `docs/templates/fix-record.md` | contradiction, placement |
 | [2026-11-25-z-procedure-endings.md](2026-11-25-z-procedure-endings.md) | `docs/procedure-endings.md` | enforcement |
 | [2026-11-25-z-wrapper-fix-a-bug.md](2026-11-25-z-wrapper-fix-a-bug.md) | `plugin/skills/fix-a-bug/SKILL.md` | contradiction |
+| [2026-11-25-z-evals-readme-routed.md](2026-11-25-z-evals-readme-routed.md) | `evals/README.md` | contradiction, placement |

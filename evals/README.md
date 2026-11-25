@@ -24,7 +24,7 @@ Since M3's slice Z, each request also ends "You have my approval for anything yo
 
 [arms.json](arms.json) lists each arm's files. A case may add files to a shared arm for itself alone (`add_files`): since M3, the nightly-job and big-report cases' guided arm also gets [the live order service's rule page](../docs/rules/orders-api.md), because their code paths fall under it, as an agent tool that loads rule pages would show it. A case may instead name its own arm files (`arms`), which replace the shared ones for that case; M3's proof attempts use that, so they depend on no shared file. Before a gated arm reads a page, the runner takes out its proof keys (`proof`, `prove-by`, `proven-by` and a section's proof line, in their exact forms only), and the hash ignores the same text; see [decision 0006](../docs/decisions/0006-what-proven-means.md).
 
-A one-time arm, defined in [one-time.json](one-time.json), sits outside every case's hash, so adding one stales no record, and its runs go to `runs/<case>/one-time/<arm>/`, which the gate never reads. The routed arm is one: the guided arm's files, every page under `docs/` the index links to, read as they ship, and the wrappers' plugin enabled. It was measured once, at M3's close; see [the routed arm](#the-routed-arm-measured-once). The two-line arm asks for the two habits the playbook asks for, word for word what its graders check, and says nothing about this code. It is what a team could write in a minute instead of the workspace. So the guided arm can beat it only through what the two lines leave out: the facts in the contract and the index, and the rest of the playbook. None of the files says what the graders look for.
+A one-time arm, defined in [one-time.json](one-time.json), sits outside every case's hash, so adding one stales no record, and its runs go to `runs/<case>/one-time/<arm>/`, which the gate never reads. The routed arm is one: the guided arm's files, every page under `docs/` the index links to, read as they ship, and the wrappers' plugin enabled. It was measured at M3's close, failed its margin, and passed after a fix to three pages it reads; see [the routed arm](#the-routed-arm-at-m3s-close). The two-line arm asks for the two habits the playbook asks for, word for word what its graders check, and says nothing about this code. It is what a team could write in a minute instead of the workspace. So the guided arm can beat it only through what the two lines leave out: the facts in the contract and the index, and the rest of the playbook. None of the files says what the graders look for.
 
 The guided arm gets the pages, not the engine: no hooks run, so nothing refuses an edit to the shelved folder. The eval tests what the guidance makes the agent do, not what the hooks stop.
 
@@ -93,9 +93,9 @@ What this does and does not show:
 
 Earlier recordings are in the git history: 41, 18 and 0 of 45 on 2026-11-18, R1 of M3; 40, 19 and 0 of 45 on 2026-11-16, at M2's close; 45, 19 and 0 of 45 on 2026-11-16, in M2's slice 0; 44, 19 and 0 of 45 on 2026-11-16 (M1's second recording); 43, 14 and 0 of 45 on 2026-11-15; and the first, five runs per arm of fix-a-bug with a four-line contract and no two-line arm (2026-11-14).
 
-### The routed arm, measured once
+### The routed arm, at M3's close
 
-The routed arm asks whether shipping the unproven pages and the wrappers harms what is proven. It is the guided arm's files, every page under `docs/` that the index links to, and the wrappers' plugin enabled. It read those pages as they ship, unstripped, proof keys included. It was measured once, at M3's close, against R2's guided arm, in a record the gate never reads, and recorded once more after it missed its margin. Its runs are in `runs/<case>/one-time/routed-first/` and `runs/<case>/one-time/routed/`. `--rerecord` takes only the gated arms, and `--one-time` empties its arm's folder before it runs, so the first batch was moved to `routed-first/` by hand before the second ran, and the pooled count was worked by hand. `pool.py` reads gated records only, so it prints neither.
+The routed arm asks whether shipping the unproven pages and the wrappers harms what is proven. It is the guided arm's files, every page under `docs/` that the index links to, and the wrappers' plugin enabled. It read those pages as they ship, unstripped, proof keys included. It was measured at M3's close, against R2's guided arm, in a record the gate never reads, and recorded once more after it missed its margin. Its runs are in `runs/<case>/one-time/routed-first/` and `runs/<case>/one-time/routed/`. `--rerecord` takes only the gated arms, and `--one-time` empties its arm's folder before it runs, so the first batch was moved to `routed-first/` by hand before the second ran, and the pooled count was worked by hand. `pool.py` reads gated records only, so it prints none of the routed counts. Two more one-time arms followed, each in its own folder: `routed-no-plugin`, the same pages without the wrappers, and `routed-after-fix`, the routed arm again after the fix below.
 
 | Case | Routed, first 45 | Routed, once more | Routed, pooled |
 |---|---|---|---|
@@ -104,11 +104,23 @@ The routed arm asks whether shipping the unproven pages and the wrappers harms w
 | nightly-job | 15 of 15 | 12 of 15 | 27 of 30: 90% (74% to 97%) |
 | **Pooled** | **36 of 45** | **33 of 45** | **69 of 90: 77% (67% to 84%)** |
 
-**It fails.** R2's guided arm passed 42 of 45, 84 on the 90-run scale. Pooled, the routed arm needed 78 of 90, the guided count less a margin of 6, and passed 69. The first 45 runs alone missed too: 36, against 39. Routed against guided, one-sided Fisher exact test: p = 0.012. So the plan's stop rule fires, and the plan stops. A person decides whether the unproven pages' index rows, which slice Z adds, and the wrappers, already in the plugin on main, stay; slice Z is not merged until then.
+**It failed at first.** R2's guided arm passed 42 of 45, 84 on the 90-run scale. Pooled, the routed arm needed 78 of 90, the guided count less a margin of 6, and passed 69. The first 45 runs alone missed too: 36, against 39. Routed against guided, one-sided Fisher exact test: p = 0.012. So the plan's stop rule fired, and a person decided how to go on.
 
-- **Almost all of the loss is one habit.** 18 of the routed arm's 21 failed runs failed only `report-marks-a-claim-verified`, against 1 of the guided arm's 3. The facts held: every routed nightly-job run left the shelved folder alone, and 27 of 30 big-report runs left `SalesReport` alone, against 13 of 15 guided.
-- **The extra pages send the agent into record keeping and branching** (counts verified, cause inferred). Of the 90 routed runs, 63 wrote a file under `docs/records/` and 55 made a branch; R2's guided runs did so 0 and 1 times. Of the 19 routed runs that failed the report grader, 15 wrote such a record. Most of their reports mark no claim at all; a few write one as prose, such as "Not verified:". The pages that ask for records and branches are the likely cause; no run has tested it.
-- **A pass would not have proved there is no harm.** At M2's guided rate of 40 of 45, an arm that truly drops to 80% is caught about half the time, as the plan computed; at R2's 42 of 45, about three times in four.
+- **Almost all of the loss was one habit.** 18 of the routed arm's 21 failed runs failed only `report-marks-a-claim-verified`, against 1 of the guided arm's 3. The facts held: every routed nightly-job run left the shelved folder alone, and 27 of 30 big-report runs left `SalesReport` alone, against 13 of 15 guided.
+- **Inferred: the pages drove most of it, and the wrappers added to it.** Verified: without the plugin, the routed pages lost the label in 6 of 45 runs and passed 37 (`routed-no-plugin`); with it, they lost it in 19 of 90. Against the guided arm's 1 of 45, the pages alone give p = 0.055, and the plugin's addition p = 0.20, so neither split is firm. Runs that read the definition of done never lost it. Inferred: the fix record template and procedure endings gave the marked report a second home in the record, and agents ended the reply with a plain summary instead.
+
+**After the fix, it passes.** The fix record template and procedure endings now say the record keeps a copy and the reply still ends with the marked report, and the fix-a-bug wrapper names the page's last step, the report. None of these files is in a case's hash, so R2 stayed current. The routed arm then ran once more, 45 runs, 15 per case, and needed 39, the guided count less a margin of 3:
+
+| Case | Routed, after the fix |
+|---|---|
+| big-report | 13 of 15 |
+| fix-a-bug | 14 of 15 |
+| nightly-job | 13 of 15 |
+| **Pooled** | **40 of 45** |
+
+It lost the label in 3 of 45 runs, against 19 of 90 before the fix (one-sided Fisher exact test, p = 0.024). Its 5 failed runs against the guided arm's 3 give p = 0.36. None of the 3 runs that lost the label wrote a fix record. So the unproven pages' index rows and the wrappers stay. The runs without the plugin and after the fix used Claude Code 2.1.332; R2 and the first 90 routed runs used 2.1.331, so each comparison across that line also crosses a version change. The model is `claude-haiku-5-5` in all of them.
+
+A pass does not prove there is no harm. At M2's guided rate of 40 of 45, an arm that truly drops to 80% is caught about half the time, as the plan computed; at R2's 42 of 45, about four times in five.
 
 ### What changed for this recording
 
