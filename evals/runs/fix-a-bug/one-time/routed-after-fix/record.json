@@ -1,0 +1,266 @@
+{
+  "case": "fix-a-bug",
+  "date": "2026-11-25",
+  "playbook": "docs/playbooks/fix-a-bug.md",
+  "covers": [
+    "evals/cases/fix-a-bug.json",
+    "docs/playbooks/fix-a-bug.md",
+    "evals/run.py",
+    "evals/grade.py",
+    "evals/proofkeys.py",
+    "evals/arms.json",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "INDEX.md",
+    "docs/definition-of-done.md",
+    "evals/two-line.md",
+    "evals/acceptance/fix-a-bug.py",
+    "parts/no_stage_all.py",
+    "wslib/shell.py",
+    "evals/scaffold/README.md",
+    "evals/scaffold/src/orders-api/reconciliation_worker.py",
+    "evals/scaffold/src/orders-api/sales_report.py",
+    "evals/scaffold/src/orders-service-v1/nightly_job.py",
+    "evals/scaffold/src/orders-web/csv_export.py",
+    "evals/scaffold/src/orders-web/orders_page.py",
+    "evals/scaffold/src/orders-web/quarterly_export.py",
+    "evals/scaffold/tests/__init__.py",
+    "evals/scaffold/tests/test_orders_api.py",
+    "evals/scaffold/tests/test_orders_service_v1.py",
+    "evals/scaffold/tests/test_orders_web.py"
+  ],
+  "guidance_sha256": "bcb7b72f225035b9dd221a0fc4fcbb53fe34b022afd69e2aeb25691e8eae5145",
+  "runs_per_arm": 15,
+  "agent": "Claude Code 2.1.332",
+  "model": "claude-haiku-5-5",
+  "sandbox": "Claude Code's own sandbox (Seatbelt on macOS, bubblewrap on Linux)",
+  "kind": "one-time",
+  "arm": "routed-after-fix",
+  "arms": {
+    "routed-after-fix": {
+      "runs_passing_every_grader": 14,
+      "runs_passing_each_grader": {
+        "sees-a-test-fail-before-editing": 15,
+        "new-test-fails-on-the-original-code": 15,
+        "suite-passes-after-the-change": 15,
+        "the-request-is-met": 15,
+        "report-marks-a-claim-verified": 14,
+        "stages-by-name": 15,
+        "leaves-the-other-session's-edits-out": 15,
+        "finishes-within-the-time-limit": 15
+      },
+      "runs": [
+        {
+          "transcript": "routed-after-fix-1.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-2.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-3.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-4.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-5.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-6.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-7.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-8.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-9.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-10.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-11.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-12.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-13.json",
+          "passed": false,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": false,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-14.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        },
+        {
+          "transcript": "routed-after-fix-15.json",
+          "passed": true,
+          "graders": {
+            "sees-a-test-fail-before-editing": true,
+            "new-test-fails-on-the-original-code": true,
+            "suite-passes-after-the-change": true,
+            "the-request-is-met": true,
+            "report-marks-a-claim-verified": true,
+            "stages-by-name": true,
+            "leaves-the-other-session's-edits-out": true,
+            "finishes-within-the-time-limit": true
+          }
+        }
+      ]
+    }
+  }
+}

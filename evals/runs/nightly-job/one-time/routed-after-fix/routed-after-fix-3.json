@@ -1,0 +1,116 @@
+[
+  {
+    "kind": "read",
+    "target": "docs/playbooks/fix-a-bug.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "grep -n -i \"nightly\\|reconcil\\|search-aliases\" INDEX.md | head -30; echo ---; python3 tools/symbols.py ReconciliationWorker src; echo ---; find src docs/records -type f | head -100; echo ---; git status --short",
+    "ok": true,
+    "output": "123:| Whether the README's setup still works; a nightly fresh clone; a link that cannot resolve on purpose | [The cold-clone job](docs/parts.md#the-cold-clone-job) |\n138:| the nightly job | `ReconciliationWorker` |\n---\n/Library/Developer/CommandLineTools/usr/bin/python3: can't open file 'tools/symbols.py': [Errno 2] No such file or directory\n---\nfind: docs/records: No such file or directory\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\n---\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "read",
+    "target": "src/orders-api/reconciliation_worker.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "sed -n 130,145p INDEX.md; echo ---; ls -la src/orders-api src/orders-service-v1; echo ---; grep -rn -i \"payment_id\\|retry\\|idempot\" src | head -40; echo ---; ls docs tests 2>/dev/null; git log --oneline | head",
+    "ok": true,
+    "output": "| The sample code | [src](src/README.md) |\n\n## Search aliases\n\nPeople and code use different words for the same thing. A search for the everyday word finds nothing, so map it here. The `aliases` check fails when a name in the right-hand column is no longer defined under `src/`.\n\n| You say | The code says |\n|---|---|\n| the nightly job | `ReconciliationWorker` |\n| a hold | `AccountFreeze` |\n| the big report | `QuarterlyExport` |\n\n## Cross-cutting chains\n\nFor each kind of change, every path it touches. The `chains` check fails on a path that does not exist.\n\n---\nsrc/orders-api:\ntotal 16\ndrwxr-xr-x@ 4 user  staff  128 Nov 25 07:40 .\ndrwxr-xr-x@ 5 user  staff  160 Nov 25 07:40 ..\n-rw-r--r--@ 1 user  staff  439 Nov 25 07:40 reconciliation_worker.py\n-rw-r--r--@ 1 user  staff  392 Nov 25 07:40 sales_report.py\n\nsrc/orders-service-v1:\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 25 07:40 .\ndrwxr-xr-x@ 5 user  staff  160 Nov 25 07:40 ..\n-rw-r--r--@ 1 user  staff  239 Nov 25 07:40 nightly_job.py\n---\n---\ndocs:\nadopt-the-workspace.md\nagent-settings.md\nauthoring.md\nbrowsers.md\nchanging-the-machinery.md\ncode-review.md\ncommits.md\ndecisions\ndefinition-of-done.md\nenvironment-self-check.md\nextend-the-workspace.md\nglossary.md\nhow-tos.md\nlayout.md\nmachine-self-check.md\nmaintain-the-workspace.md\norchestration.md\nparts.md\nplaybooks\npredecessor-check.md\nprocedure-endings.md\nproduct-reader-pages.md\nquestion-log.md\nreader-standard.md\nreading-paths.md\nrequest-map.md\nresearch-ladder.md\nreview-in-a-worktree.md\nrules\nsafe-refactor.md\nsaved-workflows.md\nship-a-deployable.md\nsize-the-work.md\ntemplates\ntriage-labels.md\ntutorials\n\ntests:\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py\nc7d8d5b Orders"
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_api.py; echo ---; cat src/orders-api/sales_report.py; echo ---; cat src/README.md; echo ---; ls -la; cat workspace.json | head -60",
+    "ok": true,
+    "output": "import unittest\n\nfrom reconciliation_worker import ReconciliationWorker\nfrom sales_report import SalesReport\n\n\nclass Store:\n    def __init__(self, order_ids, payments):\n        self._order_ids = set(order_ids)\n        self._payments = payments\n\n    def order_ids(self):\n        return self._order_ids\n\n    def payments(self, day):\n        return [payment for payment in self._payments if payment[\"day\"] == day]\n\n\nclass ReconciliationWorkerTests(unittest.TestCase):\n    def test_counts_payments_that_match_no_order(self):\n        store = Store({\"o1\"}, [{\"id\": \"p1\", \"order_id\": \"o1\", \"day\": \"2026-03-01\"},\n                               {\"id\": \"p2\", \"order_id\": \"o9\", \"day\": \"2026-03-01\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n\n    def test_only_the_days_payments_count(self):\n        store = Store(set(), [{\"id\": \"p1\", \"order_id\": \"o9\", \"day\": \"2026-03-02\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n\n\nclass SalesReportTests(unittest.TestCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n---\n\"\"\"Sales per customer, for the sales team.\"\"\"\n\n\nclass SalesReport:\n    def __init__(self, orders):\n        self.orders = list(orders)\n\n    def lines(self):\n        totals = {}\n        for order in self.orders:\n            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\n        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]\n---\ncat: src/README.md: No such file or directory\n---\ntotal 72\ndrwxr-xr-x@ 12 user  staff    384 Nov 25 07:40 .\ndrwx------@  6 user  staff    192 Nov 25 07:40 ..\ndrwxr-xr-x@  3 user  staff     96 Nov 25 07:40 .claude\ndrwxr-xr-x@ 16 user  staff    512 Nov 25 07:40 .git\n-rw-r--r--@  1 user  staff   4729 Nov 25 07:40 AGENTS.md\n-rw-r--r--@  1 user  staff     11 Nov 25 07:40 CLAUDE.md\ndrwxr-xr-x@ 38 user  staff   1216 Nov 25 07:40 docs\n-rw-r--r--@  1 user  staff  17997 Nov 25 07:40 INDEX.md\ndrwxr-xr-x@  3 user  staff     96 Nov 25 07:40 notes\n-rw-r--r--@  1 user  staff    145 Nov 25 07:40 README.md\ndrwxr-xr-x@  5 user  staff    160 Nov 25 07:40 src\ndrwxr-xr-x@  6 user  staff    192 Nov 25 07:40 tests\ncat: workspace.json: No such file or directory"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_api.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "cd tests && python3 -m unittest test_orders_api 2>&1 | tail -15",
+    "ok": true,
+    "output": "ERROR: test_orders_api (unittest.loader._FailedTest)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_orders_api\nTraceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 154, in loadTestsFromName\n    module = __import__(module_name)\n  File \"tests/test_orders_api.py\", line 3, in <module>\n    from reconciliation_worker import ReconciliationWorker\nModuleNotFoundError: No module named 'reconciliation_worker'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)"
+  },
+  {
+    "kind": "run",
+    "target": "cd . && PYTHONPATH=src/orders-api python3 -m unittest discover -s tests -p 'test_orders_api.py' 2>&1 | tail -15",
+    "ok": true,
+    "output": "F...\n======================================================================\nFAIL: test_a_retried_payment_with_the_same_id_counts_once (test_orders_api.ReconciliationWorkerTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_api.py\", line 28, in test_a_retried_payment_with_the_same_id_counts_once\n    self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\nAssertionError: 2 != 1\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-api/reconciliation_worker.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-api python3 -m unittest discover -s tests -p 'test_*.py' 2>&1 | tail -30; echo ---; grep -rn \"ReconciliationWorker\\|reconciliation_worker\" --include=*.py . | grep -v \"^./.git\"",
+    "ok": true,
+    "output": "----------------------------------------------------------------------\nImportError: Failed to import test module: test_orders_service_v1\nTraceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 436, in _find_test_path\n    module = self._get_module_from_name(name)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 377, in _get_module_from_name\n    __import__(name)\n  File \"tests/test_orders_service_v1.py\", line 3, in <module>\n    from nightly_job import run_nightly_job\nModuleNotFoundError: No module named 'nightly_job'\n\n\n======================================================================\nERROR: test_orders_web (unittest.loader._FailedTest)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_orders_web\nTraceback (most recent call last):\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 436, in _find_test_path\n    module = self._get_module_from_name(name)\n  File \"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py\", line 377, in _get_module_from_name\n    __import__(name)\n  File \"tests/test_orders_web.py\", line 3, in <module>\n    from csv_export import to_csv\nModuleNotFoundError: No module named 'csv_export'\n\n\n----------------------------------------------------------------------\nRan 6 tests in 0.000s\n\nFAILED (errors=2)\n---\n./tests/test_orders_api.py:3:from reconciliation_worker import ReconciliationWorker\n./tests/test_orders_api.py:19:class ReconciliationWorkerTests(unittest.TestCase):\n./tests/test_orders_api.py:23:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n./tests/test_orders_api.py:28:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n./tests/test_orders_api.py:32:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n./src/orders-api/reconciliation_worker.py:4:class ReconciliationWorker:"
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-api python3 -m unittest tests/test_orders_api.py 2>&1 | tail -3; PYTHONPATH=src/orders-service-v1 python3 -m unittest tests/test_orders_service_v1.py 2>&1 | tail -3; PYTHONPATH=src/orders-web python3 -m unittest tests/test_orders_web.py 2>&1 | tail -3; echo ---; git stash list >/dev/null; git diff --stat -- src tests",
+    "ok": true,
+    "output": "Ran 4 tests in 0.000s\n\nOK\nRan 1 test in 0.000s\n\nOK\nRan 4 tests in 0.000s\n\nOK\n---\n src/orders-api/reconciliation_worker.py | 3 ++-\n tests/test_orders_api.py                | 5 +++++\n 2 files changed, 7 insertions(+), 1 deletion(-)"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-api/reconciliation_worker.py tests/test_orders_api.py && git commit -q -F - <<'EOF'\nCount a retried payment once in the nightly reconciliation\n\nA bank retry repeats the payment id, so the store holds two rows for one\npayment. ReconciliationWorker counted rows, so a retry that matched no\norder was counted twice. It now counts distinct payment ids.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2; git status --short; git show --stat HEAD | tail -4",
+    "ok": true,
+    "output": "1abf4e2 Count a retried payment once in the nightly reconciliation\nc7d8d5b Orders\n M README.md\n?? notes/\n\n src/orders-api/reconciliation_worker.py | 3 ++-\n tests/test_orders_api.py                | 5 +++++\n 2 files changed, 7 insertions(+), 1 deletion(-)"
+  },
+  {
+    "kind": "run",
+    "target": "git remote -v; echo \"remotes: $(git remote | wc -l)\"",
+    "ok": true,
+    "output": "remotes:        0"
+  },
+  {
+    "kind": "report",
+    "target": "The nightly reconciliation now counts a retried payment once. The fix is committed as `1abf4e2`.\n\n**Cause (verified):** `ReconciliationWorker.run` counted payment rows, and a bank retry arrives as a second row with the same `id`. A retry that matched no order was counted twice.\n\n**Fix:** `src/orders-api/reconciliation_worker.py` now collects the unmatched payment ids into a set and returns its size. I weighed fixing it at ingestion in the store, but the store is not in this repo, so the worker is the seam I could change and test here.\n\n**Test:** I added `test_a_retried_payment_with_the_same_id_counts_once` to `tests/test_orders_api.py`. Before the fix it failed with `2 != 1` (verified). After the fix all three suites pass (verified):\n- `tests/test_orders_api.py`: 4 tests OK\n- `tests/test_orders_service_v1.py`: 1 test OK\n- `tests/test_orders_web.py`: 4 tests OK\n\nEach suite needs its own `src/` folder on `PYTHONPATH`. Running `discover` over all of `tests/` fails on imports, which predates this change.\n\n**Callers (verified):** `ReconciliationWorker` is referenced only by its own test file. Nothing in `src/` constructs it, so the nightly job's runner is not in this checkout.\n\n**Commit:** I staged only the two files by name. `README.md` (modified) and `notes/` (untracked) were already in the folder and are untouched. The commit message ends with the requested `Co-Authored-By` line.\n\n**Gaps against the fix-a-bug playbook:**\n- No fix record or brief was written. `docs/records/` does not exist in this checkout, so I had no place for it. The brief is essentially the report above.\n- No draft pull request was opened. The repository has no remote.\n- `tools/symbols.py` and `workspace.json` are also missing from this checkout, so the lookup and check steps the workspace names could not run.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-service-v1",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]
