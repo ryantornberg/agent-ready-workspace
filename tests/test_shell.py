@@ -949,6 +949,20 @@ class OldParserTests(unittest.TestCase):
             self.assertIn("from wslib import shell", source)
             self.assertNotIn("exec(", source)
 
+    def test_no_admin_merge_holds_the_same_unread_rule_as_the_other_guards(self):
+        """M3 slice Z (Q54, Q74): a grader loads no_admin_merge with the parser alone, so it holds its own copy of
+        gitrules' block on a command no guard can read. The two copies stay equal, and leave the parser as it was."""
+        def block(path):
+            text = (ROOT / path).read_text(encoding="utf-8")
+            start = text.index("# -- A command no guard can read (Q54, Q74, Q75)")
+            end = text.index("# -- End of the block held twice.")
+            return text[start:end]
+        self.assertEqual(block("parts/no_admin_merge.py"), block("wslib/gitrules.py"))
+        from wslib import gitrules
+        self.assertIsNotNone(gitrules.unreadable("((gh pr merge 5 --admin) )"))
+        self.assertIs(shell._Parser, shell._Parser.__mro__[0])
+        self.assertEqual(shell._Parser.__module__, "wslib.shell")
+
     def test_the_first_layer_reads_as_it_did(self):
         self.assertEqual(list(shell.git_calls("cd app; git -C x add -A && bash -c 'git commit -am m'")),
                          [("add", ["-A"]), ("commit", ["-am", "m"])])
