@@ -24,6 +24,26 @@ What changed in each version, for someone deciding whether to take it. The [mile
 - Per-case arm files (`arms`), additions to a shared arm (`add_files`), one-time arms outside every hash (`evals/one-time.json`, with the routed arm), the wrappers' plugin inside the sandbox, `run.py --baseline`, `--attempt`, `--rerecord`, and graders for a review protocol and a diagnosis.
 - Checks: `page_kinds`, `chains`, `pointers`, `rules` (and `ws.py rules`), `loaded_size`, `proof`. `direct_push` also refuses a commit that changes a proof anchor pushed straight to main.
 - Pages: the layout, the glossary, decision record 0006, the records folder, an archive hidden from search, and pointer files for GitHub Copilot and opencode.
+- The safety machinery M2 did not build. Shell guards that judge a git or gh call by what it would really do, read from git's and gh's own config: `no_force_push` refuses a force push or deletion of main in every form the plan names; `no_discard` refuses a discard of uncommitted work, and `push_lease` a push, while another live session holds the main working copy; `outward_write` lets an agent write only to the repositories in `outward-repos.json`, and refuses every approval and `gh api graphql` call; `git_folder` and `git_folder_shell` refuse writes into a git folder or git config file and config changes to the keys the guards read; `secrets_shell` refuses environment dumps and reads of the secrets file. Each refuses a command it cannot judge. Decision 0004 is amended for each.
+- `python3 ws.py merge NUMBER`, which merges a pull request with a merge commit only once every required check passed on its head commit, and `python3 ws.py with-secrets NAME -- PROGRAM`, which hands one program a value from the secrets file and never the shell.
+- An after-edit reminder of the index chain a path is in, and a stop gate that refuses a session's first stop of a turn while the check or the fast tests fail. Session-start notices for a pending handoff note and for red CI on main; `python3 ws.py handoff`.
+- One launcher, `wslib/launch.sh`, for every hook, git hook and CI step, with one Python process per hook call and a time budget per hook that the case runner holds on three systems. Baselines (`python3 ws.py baseline`): a check tolerates its old findings and fails a new one. `python3 ws.py pins` checks out the pinned repositories that answer.
+- The kit: `python3 ws.py adopt PATH` makes an instance whose checks pass, `upgrade` takes a new kit in and refuses on drift, and `drift` and the `kit_drift` check name a hand edit to a file the kit owns. Decision 0007.
+- About 60 pages of procedures, templates and records, each playbook and how-to marked proven or unproven with the milestone that is to prove it: the playbook catalog, the review orchestrator, the instruction review, red team review, debugging, the lane drafts for QA, product, DevOps, development and automation, two tutorials, and decisions 0006 to 0020. 28 skill wrappers in `plugin/skills/` point at the procedures that can run today, with a selection case each that should fire it and one that should not.
+- Checks: `review_trailer` (a guidance change names its review record), `review_index`, `claim_marks`, `plan_budgets`, `decisions`, `wrappers`, `commit_subject`, `secret_scan`, `agent_settings`, `kit_drift`, `chain_reminder`, `ci_notice`, `handoff_loader` and `stop_gate`, besides those listed above.
+- The eval's closing recording, R2, on 2026-11-24: 42, 18 and 0 of 45 runs passed every grader. The routed arm, the guided arm's files plus every page the index links to and the wrappers, passed 40 of 45 after one fix to the fix record template and procedure endings, against 39 needed.
+
+**Fixed:**
+
+- Found by M3's outside checks, each with cases that failed first, in [#57](https://github.com/ryantornberg/agent-ready-workspace/pull/57):
+  - A push word the shell expands passed `no_force_push`, which read the word before the shell expanded it: `git push origin {+,}main` becomes `+main main`. A word of a push, or of a git call that may be one, holding unquoted braces or a glob, or directly followed by `(`, which zsh reads as a glob or a glob qualifier, is now refused as a push no guard can judge.
+  - `git send-pack`, `git http-push` and the remote helpers called by name, such as `git remote-https`, pushed past `no_force_push`, which judged only `git push`. They are now refused outright.
+
+**Known limits, for M4:**
+
+- The same cause still opens other routes: braces or a glob in a write path or a `git config` key reach into `.git` past `git_folder_shell`, braces or a glob in a write path edit `outward-repos.json` past `outward_write`, and a word followed by `(` outside a push's own words runs code through a zsh glob qualifier. They close with the parser work in M4.
+- Git can still reach main through a command it runs from its config, the environment or a URL, such as `GIT_EDITOR`, `core.fsmonitor`, `credential.helper`, `GIT_SSH_COMMAND` or an `ext::` URL. The README names this as the interpreter limit; M4 takes it up.
+- The README's Limits list the other lines the shell parser still misreads.
 
 ## 0.3.0, 2026-11-17: M2, port what the work workspace learned
 
