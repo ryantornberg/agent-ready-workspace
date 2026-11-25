@@ -1,0 +1,100 @@
+[
+  {
+    "kind": "run",
+    "target": "git status --short && python3 tools/symbols.py Export src 2>/dev/null; grep -ril \"export\" src docs/playbooks/fix-a-bug.md INDEX.md 2>/dev/null | head -50",
+    "ok": true,
+    "output": " M README.md\n?? notes/\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ndocs/playbooks/fix-a-bug.md\nINDEX.md"
+  },
+  {
+    "kind": "read",
+    "target": "docs/playbooks/fix-a-bug.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/orders_page.py; echo ----; cat src/orders-web/quarterly_export.py; echo ----; ls -R src | head -60; echo ----; git log --oneline | head; ls docs/records 2>/dev/null",
+    "ok": false,
+    "output": "Exit code 1\n\"\"\"The orders page: a table of orders and two buttons.\"\"\"\nfrom csv_export import to_csv\n\n\nclass OrdersPage:\n    def __init__(self, orders):\n        self.orders = list(orders)\n        self.shown = []\n        self.downloads = []\n        self._handlers = {}\n        self._on(\"refresh\", self.refresh)\n\n    def _on(self, button, handler):\n        self._handlers[button] = handler\n\n    def click(self, button):\n        \"\"\"Run the button's handler. A button with no handler does nothing.\"\"\"\n        handler = self._handlers.get(button)\n        if handler:\n            handler()\n\n    def refresh(self):\n        self.shown = sorted(self.orders, key=lambda order: order[\"id\"])\n\n    def export(self):\n        self.downloads.append(to_csv(self.orders))\n----\n\"\"\"Every order in a quarter, one line each, as CSV.\"\"\"\n\n\nclass QuarterlyExport:\n    def __init__(self, orders):\n        self.orders = list(orders)\n\n    def to_csv(self):\n        lines = [\"order_id,items,total\"]\n        for order in self.orders:\n            total = sum(order[\"prices\"])\n            lines.append(f\"{order['id']},{len(order['prices'])},{total}\")\n        return \"\\n\".join(lines) + \"\\n\"\n----\norders-api\norders-service-v1\norders-web\n\nsrc/orders-api:\nreconciliation_worker.py\nsales_report.py\n\nsrc/orders-service-v1:\nnightly_job.py\n\nsrc/orders-web:\ncsv_export.py\norders_page.py\nquarterly_export.py\n----\n2bc7235 Orders"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-web/csv_export.py; echo ----; ls -la; echo ----; ls docs tools notes 2>&1; echo ----; find . -name \"*test*\" -not -path \"./.git/*\" | head; echo ----; grep -rn \"export\\|click\" --include=*.py . | grep -v \"^./.git\" | head -30",
+    "ok": true,
+    "output": "\"\"\"Turn orders into CSV text.\"\"\"\n\n\ndef to_csv(orders):\n    lines = [\"id,customer,total\"]\n    for order in orders:\n        lines.append(f\"{order['id']},{order['customer']},{order['total']:.2f}\")\n    return \"\\n\".join(lines) + \"\\n\"\n----\ntotal 72\ndrwxr-xr-x@ 12 user  staff    384 Nov 24 11:49 .\ndrwx------@  6 user  staff    192 Nov 24 11:49 ..\ndrwxr-xr-x@  3 user  staff     96 Nov 24 11:49 .claude\ndrwxr-xr-x@ 16 user  staff    512 Nov 24 11:49 .git\n-rw-r--r--@  1 user  staff   4729 Nov 24 11:49 AGENTS.md\n-rw-r--r--@  1 user  staff     11 Nov 24 11:49 CLAUDE.md\ndrwxr-xr-x@ 38 user  staff   1216 Nov 24 11:49 docs\n-rw-r--r--@  1 user  staff  17997 Nov 24 11:49 INDEX.md\ndrwxr-xr-x@  3 user  staff     96 Nov 24 11:49 notes\n-rw-r--r--@  1 user  staff    145 Nov 24 11:49 README.md\ndrwxr-xr-x@  5 user  staff    160 Nov 24 11:49 src\ndrwxr-xr-x@  6 user  staff    192 Nov 24 11:49 tests\n----\nls: tools: No such file or directory\ndocs:\nadopt-the-workspace.md\nagent-settings.md\nauthoring.md\nbrowsers.md\nchanging-the-machinery.md\ncode-review.md\ncommits.md\ndecisions\ndefinition-of-done.md\nenvironment-self-check.md\nextend-the-workspace.md\nglossary.md\nhow-tos.md\nlayout.md\nmachine-self-check.md\nmaintain-the-workspace.md\norchestration.md\nparts.md\nplaybooks\npredecessor-check.md\nprocedure-endings.md\nproduct-reader-pages.md\nquestion-log.md\nreader-standard.md\nreading-paths.md\nrequest-map.md\nresearch-ladder.md\nreview-in-a-worktree.md\nrules\nsafe-refactor.md\nsaved-workflows.md\nship-a-deployable.md\nsize-the-work.md\ntemplates\ntriage-labels.md\ntutorials\n\nnotes:\ntodo.txt\n----\n./tests\n./tests/test_orders_service_v1.py\n./tests/test_orders_web.py\n./tests/test_orders_api.py\n./docs/playbooks/test-first.md\n----\n./tests/test_orders_web.py:3:from csv_export import to_csv\n./tests/test_orders_web.py:5:from quarterly_export import QuarterlyExport\n./tests/test_orders_web.py:16:        page.click(\"refresh\")\n./tests/test_orders_web.py:19:    def test_export_writes_one_download(self):\n./tests/test_orders_web.py:21:        page.export()\n./tests/test_orders_web.py:30:        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\n./tests/test_orders_web.py:31:        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\n./tests/test_orders_web.py:32:        self.assertEqual(len(export.to_csv().splitlines()), 3)\n./src/orders-web/orders_page.py:2:from csv_export import to_csv\n./src/orders-web/orders_page.py:16:    def click(self, button):\n./src/orders-web/orders_page.py:25:    def export(self):"
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_web.py; echo ----; cat notes/todo.txt; echo ----; cat README.md; echo ----; git diff README.md; echo ----; grep -n -i \"export\" INDEX.md | head -20",
+    "ok": true,
+    "output": "import unittest\n\nfrom csv_export import to_csv\nfrom orders_page import OrdersPage\nfrom quarterly_export import QuarterlyExport\n\nORDERS = [\n    {\"id\": 2, \"customer\": \"Okafor\", \"total\": 40.0},\n    {\"id\": 1, \"customer\": \"Lindqvist\", \"total\": 12.5},\n]\n\n\nclass OrdersPageTests(unittest.TestCase):\n    def test_refresh_button_sorts_the_table(self):\n        page = OrdersPage(ORDERS)\n        page.click(\"refresh\")\n        self.assertEqual([order[\"id\"] for order in page.shown], [1, 2])\n\n    def test_export_writes_one_download(self):\n        page = OrdersPage(ORDERS)\n        page.export()\n        self.assertEqual(len(page.downloads), 1)\n\n    def test_csv_has_a_header_and_a_row_per_order(self):\n        self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])\n\n\nclass QuarterlyExportTests(unittest.TestCase):\n    def test_one_line_per_order_after_the_header(self):\n        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\n        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\n        self.assertEqual(len(export.to_csv().splitlines()), 3)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n----\nDraft, not ready to commit.\n----\n# Orders\n\nThe order system's code.\n\nRun the tests with `python3 -m unittest`.\n\nNote to self: ask whether Export should include cancelled orders.\n----\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\n----\n140:| the big report | `QuarterlyExport` |"
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-web python3 -m unittest tests.test_orders_web -v 2>&1 | tail -20; echo ----; python3 -m unittest 2>&1 | tail -5",
+    "ok": true,
+    "output": "test_csv_has_a_header_and_a_row_per_order (tests.test_orders_web.OrdersPageTests) ... ok\ntest_export_writes_one_download (tests.test_orders_web.OrdersPageTests) ... ok\ntest_refresh_button_sorts_the_table (tests.test_orders_web.OrdersPageTests) ... ok\ntest_one_line_per_order_after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n----\n........\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK"
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_web.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -12",
+    "ok": true,
+    "output": "======================================================================\nFAIL: test_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_web.py\", line 27, in test_export_button_writes_one_download\n    self.assertEqual(len(page.downloads), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-web/orders_page.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest 2>&1 | tail -4; echo ----; git status --short; echo ----; git diff -- src tests",
+    "ok": true,
+    "output": "----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n----\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/\n----\ndiff --git a/src/orders-web/orders_page.py b/src/orders-web/orders_page.py\nindex 890e073..23e2ce8 100644\n--- a/src/orders-web/orders_page.py\n+++ b/src/orders-web/orders_page.py\n@@ -9,6 +9,7 @@ class OrdersPage:\n         self.downloads = []\n         self._handlers = {}\n         self._on(\"refresh\", self.refresh)\n+        self._on(\"export\", self.export)\n \n     def _on(self, button, handler):\n         self._handlers[button] = handler\ndiff --git a/tests/test_orders_web.py b/tests/test_orders_web.py\nindex dd55b7b..4a46f4b 100644\n--- a/tests/test_orders_web.py\n+++ b/tests/test_orders_web.py\n@@ -21,6 +21,11 @@ class OrdersPageTests(unittest.TestCase):\n         page.export()\n         self.assertEqual(len(page.downloads), 1)\n \n+    def test_export_button_writes_one_download(self):\n+        page = OrdersPage(ORDERS)\n+        page.click(\"export\")\n+        self.assertEqual(len(page.downloads), 1)\n+\n     def test_csv_has_a_header_and_a_row_per_order(self):\n         self.assertEqual(to_csv(ORDERS).splitlines(), [\"id,customer,total\", \"2,Okafor,40.00\", \"1,Lindqvist,12.50\"])"
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nFix Export button doing nothing on the orders page\n\nOrdersPage registered only the refresh button handler, so clicking\nExport found no handler and did nothing. Register export alongside it,\nand add a test that clicks the button rather than calling export().\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -3; git show --stat HEAD | tail -4; git status --short",
+    "ok": true,
+    "output": "62920a9 Fix Export button doing nothing on the orders page\n2bc7235 Orders\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The Export button now works. The fix is committed as `62920a9`.\n\n**Cause:** `OrdersPage.__init__` registered only the Refresh handler. Clicking Export found no handler and did nothing. The `export()` method itself was fine.\n\n**Fix:** one line in `src/orders-web/orders_page.py` registers `export` the same way `refresh` is registered. I also added `test_export_button_writes_one_download` in `tests/test_orders_web.py`, which clicks the button. It failed before the fix (`0 != 1`) and passes after. The full suite passes: 9 tests, verified by running `python3 -m unittest`.\n\n**Not committed:** your uncommitted edit to `README.md` (the \"ask whether Export should include cancelled orders\" note) and the untracked `notes/` folder. Both are still in the working tree.\n\n**Workflow gaps:**\n- The fix-a-bug playbook asks for a fix brief in `docs/records/fixes/` before the fix. This checkout has no `docs/records/` folder, so I skipped the brief. I did not create that folder.\n- `AGENTS.md` mentions `tools/symbols.py`, `workspace.json` and `ws.py`, and none of them exist in this checkout. I did not run those checks.\n\nThe open question from your README note, whether Export should include cancelled orders, is still open. The fix exports every order in the page's list, as before.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

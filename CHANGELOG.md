@@ -2,9 +2,14 @@
 
 What changed in each version, for someone deciding whether to take it. The [milestone records](docs/milestones/m1.md) say how each change was made and checked.
 
-## Unreleased: M3, sub-batch A
+## Unreleased: M3
 
 **Changed:**
+
+- The engine's version is 0.4.0. Set the manifest's `version` to match, in the same step as the engine upgrade.
+- `python3 ws.py check --commits BASE..HEAD` also runs `deny_list` on the lines each commit adds, the scan the machinery page asks for before a branch committed with `--no-verify` is pushed.
+- `INDEX.md` gains a row for every page, chain and part M3 added, grouped under four headings. `AGENTS.md` links the request map and the reading paths, and routes a small refactor and a small change to pages. The definition of done names where each record keeps its report.
+- `fix-a-bug.md` gains the fix path's gates, in a section marked unproven for M6: the fix brief, a stop before a risky change, and the test matrix. The three fix-a-bug cases' requests grant any approval those gates ask for.
 
 - `freshness` is retired. `page_kinds` holds its review-date rule, with the same cases, beside the new kind and opening rules. `stale_pages` reads `page_kinds`.
 - `eval_record` gates only the playbooks marked proven (decision record 0006). For each, pooled across its own cases, the guided arm must beat two lines, and pass no more than 3 runs fewer than the previous record's guided arm and the anchor its `proven-by` names.

@@ -2029,5 +2029,215 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "rmdir of a folder in the git folder is refused, as the parser reports it (M3 slice Z)",
+    "event": {
+      "command": "rmdir .git/refs/heads/x",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "shred of the repository's config is refused, as the parser reports it (M3 slice Z)",
+    "event": {
+      "command": "shred -n 3 -u .git/config",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "rmdir of a folder outside the git folder passes",
+    "event": {
+      "command": "rmdir build/tmp",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "find -delete outside the git folder is still refused: what it removes is known only when it runs",
+    "event": {
+      "command": "find build -name '*.o' -delete",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a relative write after a cd the parser cannot follow into the git folder is refused (M3 slice Z)",
+    "event": {
+      "command": "true; cd .git && git status; touch config",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a cd into the git folder in a subshell that has ended leaves a later write placed, so it passes",
+    "event": {
+      "command": "(cd .git && git status); touch notes.txt",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a cd into the git folder in a shell's -c text does not move a later write, so it passes",
+    "event": {
+      "command": "bash -c 'cd .git && git status'; touch notes.txt",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a word named ws.py later on the line is no with-secrets wrapper: rm .git/config is still judged (M3 slice Z)",
+    "event": {
+      "command": "rm .git/config ws.py with-secrets -- true",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a global config write whose program word is braces (Q54)",
+    "event": {
+      "command": "{git,} config --global core.hooksPath /tmp/h",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a write behind a wrapper whose program word is a glob (Q54)",
+    "event": {
+      "command": "env c[p] x .git/config",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "a config write whose program word is a zsh extended glob (Q54)",
+    "event": {
+      "command": "g~x config --global core.hooksPath /tmp/h",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "git_config": {
+        "home": "/home/a",
+        "files": [
+          "/home/a/.gitconfig",
+          "/home/a/.config/git/config",
+          "/home/a/dotfiles/git/.gitconfig",
+          "/home/a/work.inc",
+          "/m/shared/team.gitconfig"
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
   }
 ]

@@ -1,0 +1,130 @@
+[
+  {
+    "kind": "read",
+    "target": "docs/playbooks/fix-a-bug.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 tools/symbols.py ReconciliationWorker src; git status --short; find src -type f | head -100",
+    "ok": true,
+    "output": "/Library/Developer/CommandLineTools/usr/bin/python3: can't open file 'tools/symbols.py': [Errno 2] No such file or directory\n M README.md\n?? notes/\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py"
+  },
+  {
+    "kind": "run",
+    "target": "grep -rn \"ReconciliationWorker\\|nightly\" --include=*.py --include=*.md . | grep -v \"^./.git/\"; echo ---; cat -n src/orders-api/reconciliation_worker.py; echo ---; git log --oneline -3 -- src/orders-api",
+    "ok": true,
+    "output": "./tests/test_orders_service_v1.py:3:from nightly_job import run_nightly_job\n./tests/test_orders_service_v1.py:22:        self.assertEqual(run_nightly_job(store, \"2026-03-01\"), 1)\n./tests/test_orders_api.py:3:from reconciliation_worker import ReconciliationWorker\n./tests/test_orders_api.py:19:class ReconciliationWorkerTests(unittest.TestCase):\n./tests/test_orders_api.py:23:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n./tests/test_orders_api.py:27:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n./docs/parts.md:68:A check runs in phases. By default it runs at the commit and in CI. A check that sets `PHASES` names its own, from `\"commit\"`, `\"ci\"`, `\"nightly\"` and `\"push\"`:\n./docs/parts.md:74:| `python3 ws.py check --phase nightly` | `nightly`. CI's weekly run runs it, for checks too slow for every commit. |\n./docs/parts.md:216:- `python3 ws.py baseline` writes the files from the folder's current findings. It writes a file only for a check that finds errors, or that has a file already. Add `--phase ci` or `--phase nightly` for the checks of those phases.\n./docs/glossary.md:18:| Check | A part that reads a snapshot of files and reports findings. By default it runs at the commit and in CI; a check may name other phases, such as the push or the nightly run. |\n./docs/machine-self-check.md:47:10. **Lookup.** Input: Python from step 1. Run `python3 tools/symbols.py ReconciliationWorker src`. Pass: it prints `src/orders-api/ReconciliationWorker.cs` and a line number. In an instance, use a name from your own code, such as one from [INDEX.md's search aliases](../INDEX.md#search-aliases). Fail: no output. Output: the file and line, or nothing. Class: in an instance, first run step 11's pin check, since a pinned repository that is not checked out holds no names; otherwise a workspace bug.\n./docs/playbooks/feature-layer-walk.md:37:| A background job | Adds work that runs on a schedule or a queue, like `ReconciliationWorker`, \"the nightly job\". |\n./docs/playbooks/feature-layer-walk.md:80:| The worker | `src/orders-api`, a class like `ReconciliationWorker` | Keep in session. |\n./docs/playbooks/fix-a-bug.md:4:proven-by: docs/milestones/m1.md, b754e39bc8627f9cf180843b113d264ffb07b079:evals/runs/fix-a-bug/record.json, b754e39bc8627f9cf180843b113d264ffb07b079:evals/runs/nightly-job/record.json, b754e39bc8627f9cf180843b113d264ffb07b079:evals/runs/big-report/record.json\n./docs/playbooks/bug-triage-meeting.md:74:| `ORD-421`: holds lifted by the nightly job | `affects:end-user`, `trigger:normal-path`, `seen:observed`, `kind:functional`, `effort:medium`, `area:holds` | 2, possible launch blocker |\n./docs/playbooks/bug-triage-meeting.md:75:| `ORD-415`: the nightly job floods its log with retries when the payment service is down | `affects:team-only`, `trigger:other-system-fails`, `seen:observed`, `kind:functional`, `effort:small`, `area:reconciliation` | 4, harden |\n./docs/playbooks/throwaway-prototype.md:18:- **Logic**: how state changes through a sequence, such as what an order looks like after each step of the nightly job.\n./docs/playbooks/bug-grooming.md:50:Invented: `ORD-421` says a hold placed on an account is lifted when the nightly job runs. Step 3 reproduces it at the tip of main: the hold is lifted, verified. The ticket also claims held orders ship that night; the helper could not check shipping locally, so that claim is marked could not check, and step 4 proposes moving it to \"Out of scope\" as unknown. The code pointer is `ReconciliationWorker` in `src/orders-api/ReconciliationWorker.cs`. The person approves every change but the size, which stays proposed, so the filer's `effort` label stays too.\n./docs/research-ladder.md:21:| An everyday word for something in the code, such as \"the nightly job\" | [INDEX.md's search aliases](../INDEX.md#search-aliases) | The name the code uses. |\n./docs/triage-labels.md:54:| `area:reconciliation` | The nightly job that matches payments to orders (`ReconciliationWorker`). |\n./docs/triage-labels.md:81:An invented bug, `ORD-421`: a hold placed on an account is lifted when the nightly job runs, so held orders ship. Support saw it happen on two accounts.\n./docs/rules/orders-api.md:14:- **The team's words map to these names.** \"The nightly job\" is `ReconciliationWorker`. \"A hold\" is `AccountFreeze`. The [index](../../INDEX.md#search-aliases) lists the rest.\n./docs/templates/hub.md:112:| orders-api | Service: the live order service, with the nightly payment match (`ReconciliationWorker`) and holds (`AccountFreeze`) | `src/orders-api` | [orders-api](orders-api.md) |\n./docs/templates/hub.md:120:                                  +--> payment provider (nightly match)\n./docs/templates/hub.md:123:- \"The nightly job\" is `ReconciliationWorker`; \"a hold\" is `AccountFreeze`.\n./docs/tutorials/first-agent-task.md:10:**In short:** put the practice on a branch of its own, start an agent, and ask it where the nightly job lives. Check its answer yourself. Have it add one row to the question log and commit it on the branch, then review the diff and run the checks yourself. Reflect on how it worked, then delete the branch, so nothing reaches main.\n./docs/tutorials/first-agent-task.md:39:Where does the nightly job live? Give the file and the line, and the page that told you where to look. Change nothing.\n./docs/tutorials/first-agent-task.md:42:Watch how it gets there. A good answer goes from the everyday words to the index's search aliases, finds the name `ReconciliationWorker`, then asks for that name's file and line. A weak one searches every file for \"nightly\". The contract's \"Finding things\" section tells it which lookup fits.\n./docs/tutorials/first-agent-task.md:48:python3 tools/symbols.py ReconciliationWorker src\n./docs/tutorials/first-agent-task.md:58:Add one row to the table in docs/question-log.md: date <today>, the question \"Practice: where does the nightly job live?\", kind \"could not find\", and where the answer lives now, INDEX.md's search aliases. Commit it on the current branch with a conventional commit subject, staging the file by name. Do not push.\n./docs/tutorials/get-oriented.md:32:## 2. Find the nightly job three ways\n./docs/tutorials/get-oriented.md:34:People here say \"the nightly job\". Where is it? Each lookup below answers from a different starting point.\n./docs/tutorials/get-oriented.md:39:grep -n -i \"nightly\" INDEX.md\n./docs/tutorials/get-oriented.md:41:python3 tools/symbols.py ReconciliationWorker src\n./docs/tutorials/get-oriented.md:46:The first lookup turns the everyday word into the name the code uses, `ReconciliationWorker`. The second goes straight to the file and line. The third finds any text, here a phrase from the class's comment, and is the slowest to read on a large codebase. Pick the one that fits what you already know, and do not stack them: the [research ladder](../research-ladder.md) says which to use when.\n./INDEX.md:123:| Whether the README's setup still works; a nightly fresh clone; a link that cannot resolve on purpose | [The cold-clone job](docs/parts.md#the-cold-clone-job) |\n./INDEX.md:138:| the nightly job | `ReconciliationWorker` |\n./AGENTS.md:21:- \"The nightly job\" means `ReconciliationWorker`. \"A hold\" means `AccountFreeze`. More in [INDEX.md](INDEX.md#search-aliases). A check fails when one of those names leaves the code.\n./src/orders-service-v1/nightly_job.py:1:\"\"\"The nightly job: count the day's payments that match no order.\"\"\"\n./src/orders-service-v1/nightly_job.py:4:def run_nightly_job(store, day):\n./src/orders-api/reconciliation_worker.py:4:class ReconciliationWorker:\n---\n     1\t\"\"\"Runs once a night and counts the day's payments that match no order.\"\"\"\n     2\t\n     3\t\n     4\tclass ReconciliationWorker:\n     5\t    def __init__(self, store):\n     6\t        self.store = store\n     7\t\n     8\t    def run(self, day):\n     9\t        \"\"\"Return how many of the day's payments match no order.\"\"\"\n    10\t        order_ids = self.store.order_ids()\n    11\t        unmatched = [payment for payment in self.store.payments(day) if payment[\"order_id\"] not in order_ids]\n    12\t        return len(unmatched)\n---\nd51f340 Orders"
+  },
+  {
+    "kind": "run",
+    "target": "cat -n tests/test_orders_api.py; echo ---; ls tests src/orders-api; echo ---; cat -n src/orders-service-v1/nightly_job.py; echo ---; cat -n tests/test_orders_service_v1.py; echo ---; cat workspace.json | head -60; ls docs/records/fixes 2>/dev/null; ls docs/records 2>/dev/null",
+    "ok": false,
+    "output": "Exit code 1\n     1\timport unittest\n     2\t\n     3\tfrom reconciliation_worker import ReconciliationWorker\n     4\tfrom sales_report import SalesReport\n     5\t\n     6\t\n     7\tclass Store:\n     8\t    def __init__(self, order_ids, payments):\n     9\t        self._order_ids = set(order_ids)\n    10\t        self._payments = payments\n    11\t\n    12\t    def order_ids(self):\n    13\t        return self._order_ids\n    14\t\n    15\t    def payments(self, day):\n    16\t        return [payment for payment in self._payments if payment[\"day\"] == day]\n    17\t\n    18\t\n    19\tclass ReconciliationWorkerTests(unittest.TestCase):\n    20\t    def test_counts_payments_that_match_no_order(self):\n    21\t        store = Store({\"o1\"}, [{\"id\": \"p1\", \"order_id\": \"o1\", \"day\": \"2026-03-01\"},\n    22\t                               {\"id\": \"p2\", \"order_id\": \"o9\", \"day\": \"2026-03-01\"}])\n    23\t        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n    24\t\n    25\t    def test_only_the_days_payments_count(self):\n    26\t        store = Store(set(), [{\"id\": \"p1\", \"order_id\": \"o9\", \"day\": \"2026-03-02\"}])\n    27\t        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n    28\t\n    29\t\n    30\tclass SalesReportTests(unittest.TestCase):\n    31\t    def test_one_line_per_customer_in_name_order(self):\n    32\t        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n    33\t        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n    34\t\n    35\t\n    36\tif __name__ == \"__main__\":\n    37\t    unittest.main()\n---\nsrc/orders-api:\nreconciliation_worker.py\nsales_report.py\n\ntests:\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py\n---\n     1\t\"\"\"The nightly job: count the day's payments that match no order.\"\"\"\n     2\t\n     3\t\n     4\tdef run_nightly_job(store, day):\n     5\t    order_ids = store.order_ids()\n     6\t    return len([payment for payment in store.payments(day) if payment[\"order_id\"] not in order_ids])\n---\n     1\timport unittest\n     2\t\n     3\tfrom nightly_job import run_nightly_job\n     4\t\n     5\t\n     6\tclass Store:\n     7\t    def __init__(self, order_ids, payments):\n     8\t        self._order_ids = set(order_ids)\n     9\t        self._payments = payments\n    10\t\n    11\t    def order_ids(self):\n    12\t        return self._order_ids\n    13\t\n    14\t    def payments(self, day):\n    15\t        return [payment for payment in self._payments if payment[\"day\"] == day]\n    16\t\n    17\t\n    18\tclass NightlyJobTests(unittest.TestCase):\n    19\t    def test_counts_payments_that_match_no_order(self):\n    20\t        store = Store({\"o1\"}, [{\"id\": \"p1\", \"order_id\": \"o1\", \"day\": \"2026-03-01\"},\n    21\t                               {\"id\": \"p2\", \"order_id\": \"o9\", \"day\": \"2026-03-01\"}])\n    22\t        self.assertEqual(run_nightly_job(store, \"2026-03-01\"), 1)\n    23\t\n    24\t\n    25\tif __name__ == \"__main__\":\n    26\t    unittest.main()\n---\ncat: workspace.json: No such file or directory"
+  },
+  {
+    "kind": "run",
+    "target": "ls docs 2>&1 | head -30; ls docs/records docs/templates 2>&1; grep -rn \"reconciliation_worker\\|ReconciliationWorker\" src tests --include=*.py; git remote -v; git diff --stat",
+    "ok": true,
+    "output": "adopt-the-workspace.md\nagent-settings.md\nauthoring.md\nbrowsers.md\nchanging-the-machinery.md\ncode-review.md\ncommits.md\ndecisions\ndefinition-of-done.md\nenvironment-self-check.md\nextend-the-workspace.md\nglossary.md\nhow-tos.md\nlayout.md\nmachine-self-check.md\nmaintain-the-workspace.md\norchestration.md\nparts.md\nplaybooks\npredecessor-check.md\nprocedure-endings.md\nproduct-reader-pages.md\nquestion-log.md\nreader-standard.md\nreading-paths.md\nrequest-map.md\nresearch-ladder.md\nreview-in-a-worktree.md\nrules\nsafe-refactor.md\nls: docs/records: No such file or directory\ndocs/templates:\nbug-ticket.md\ndecision-record.md\nepic-folder.md\nfix-record.md\nfresh-session-prompt.md\nhand-off-plan.md\nhub.md\nmilestone-record.md\npull-request.md\nREADME.md\nspec.md\nsrc/orders-api/reconciliation_worker.py:4:class ReconciliationWorker:\ntests/test_orders_api.py:3:from reconciliation_worker import ReconciliationWorker\ntests/test_orders_api.py:19:class ReconciliationWorkerTests(unittest.TestCase):\ntests/test_orders_api.py:23:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\ntests/test_orders_api.py:27:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n README.md | 2 ++\n 1 file changed, 2 insertions(+)"
+  },
+  {
+    "kind": "read",
+    "target": "docs/templates/fix-record.md",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "docs/records/fixes/2026-11-24-duplicate-retried-payments.md",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_api.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-api:src/orders-web python3 -m unittest tests.test_orders_api 2>&1 | tail -20",
+    "ok": true,
+    "output": "F...\n======================================================================\nFAIL: test_a_retried_payment_counts_once (tests.test_orders_api.ReconciliationWorkerTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_api.py\", line 33, in test_a_retried_payment_counts_once\n    self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\nAssertionError: 2 != 1\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-api/reconciliation_worker.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "PYTHONPATH=src/orders-api:src/orders-web:src/orders-service-v1 python3 -m unittest discover -s tests -t . 2>&1 | tail -15; echo \"exit=$?\"",
+    "ok": true,
+    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\nexit=0"
+  },
+  {
+    "kind": "edit",
+    "target": "docs/records/fixes/2026-11-24-duplicate-retried-payments.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-api/reconciliation_worker.py tests/test_orders_api.py docs/records/fixes/2026-11-24-duplicate-retried-payments.md && git status --short && git commit -q -F - <<'EOF'\nfix: count a retried payment once in the nightly job\n\nA bank retry arrives with the same payment id. ReconciliationWorker\ncounted every row, so the retry was counted twice. Count each payment\nid once.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -2; git status --short",
+    "ok": true,
+    "output": " M README.md\nA  docs/records/fixes/2026-11-24-duplicate-retried-payments.md\nM  src/orders-api/reconciliation_worker.py\nM  tests/test_orders_api.py\n?? notes/\n6d0ac1f fix: count a retried payment once in the nightly job\nd51f340 Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "edit",
+    "target": "docs/records/fixes/2026-11-24-duplicate-retried-payments.md",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "docs/records/fixes/2026-11-24-duplicate-retried-payments.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "git add docs/records/fixes/2026-11-24-duplicate-retried-payments.md && git commit -q -F - <<'EOF'\ndocs: record the retried-payment fix and its proof\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -3; git status --short",
+    "ok": true,
+    "output": "5516d6e docs: record the retried-payment fix and its proof\n6d0ac1f fix: count a retried payment once in the nightly job\nd51f340 Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "The nightly job no longer counts a retried payment twice. The fix is committed on `main` as `6d0ac1f`, with a follow-up commit `5516d6e` that fills in the fix record.\n\n**The bug:** `ReconciliationWorker.run` in `src/orders-api/reconciliation_worker.py` counted every payment row and never looked at the payment id, so a retry with the same id was counted once per arrival.\n\n**The fix:** the worker now keeps a set of payment ids it has already seen and skips repeats before the order-match check. I added a test, `test_a_retried_payment_counts_once`, which failed with `2 != 1` before the change. The full suite now passes: 9 tests, all OK.\n\n**Things to know:**\n- **Same defect in the audit copy.** `src/orders-service-v1/nightly_job.py` has the same double count. I left it alone because that copy is read-only for audits and a hook refuses edits to it. It needs fixing if anyone still runs it.\n- **Assumption.** I assumed a payment id is unique per payment, so two rows with one id are the same payment. If the bank can reuse ids, this fix would undercount.\n- **Repository state.** There is no git remote, so there is no pull request. `README.md` (already modified) and `notes/` (untracked) were not part of this change and are untouched.\n- **Workspace gaps.** `tools/symbols.py` and `workspace.json` are not in this checkout, so I used grep. The playbook's defect register (`docs/records/defects.md`) doesn't exist either, so the audit-copy defect is noted in the fix record instead.\n\nThe fix record is at `docs/records/fixes/2026-11-24-duplicate-retried-payments.md`.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-service-v1",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

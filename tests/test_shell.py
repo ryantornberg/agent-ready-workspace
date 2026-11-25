@@ -462,6 +462,43 @@ class ConfigWriteTests(unittest.TestCase):
     def test_an_environment_write_reaches_any_command(self):
         self.assertTrue(guarded_writes("GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=alias.p GIT_CONFIG_VALUE_0=push make"))
 
+    def test_keys_guarded_only_for_a_persistent_write(self):
+        """M3 slice Z, from C5d's and C5e's queues: core.hooksPath and submodule.recurse, which wslib/gitrules.py
+        listed itself until now."""
+        for line in ("git config core.hooksPath /tmp/x", "git config --global core.hookspath /tmp/x",
+                     "git config set CORE.HOOKSPATH /tmp/x", "git config --unset core.hooksPath",
+                     "git config submodule.recurse true", "git config --global submodule.recurse true"):
+            with self.subTest(line):
+                self.assertEqual(len(guarded_writes(line)), 1)
+        for line in ("git -c core.hooksPath=/tmp/x status", "git -c submodule.recurse=true status",
+                     "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=x git status",
+                     "git config core.hooksPath", "git config submodule.x.recurse true", "git config core.pager cat"):
+            with self.subTest(line):
+                self.assertEqual(guarded_writes(line), [])
+
+    def test_a_section_removed_or_renamed(self):
+        """M3 slice Z, from C5d's queue: the parser reports a renamed section's new name, and judges a rename or a
+        removal by the keys the section holds or will hold."""
+        def section_writes(line):
+            return [(w["op"], w["key"], w.get("new_key"), w["guarded"]) for c in commands(line)
+                    for w in c["config_writes"]]
+        cases = {
+            "git config --rename-section hooks core": [("rename-section", "hooks", "core", True)],
+            "git config rename-section staged remote.origin": [("rename-section", "staged", "remote.origin", True)],
+            "git config --rename-section x submodule": [("rename-section", "x", "submodule", True)],
+            "git config --rename-section remote.o remote.p": [("rename-section", "remote.o", "remote.p", True)],
+            "git config --rename-section old new": [("rename-section", "old", "new", False)],
+            'git config --rename-section old "$N"': [("rename-section", "old", None, True)],
+            "git config --rename-section old": [("rename-section", "old", None, True)],
+            "git config --remove-section core": [("remove-section", "core", None, True)],
+            "git config --remove-section alias": [("remove-section", "alias", None, True)],
+            "git config remove-section remote.origin": [("remove-section", "remote.origin", None, True)],
+            "git config --remove-section color": [("remove-section", "color", None, False)],
+        }
+        for line, expected in cases.items():
+            with self.subTest(line):
+                self.assertEqual(section_writes(line), expected)
+
 
 class EnvironmentTests(unittest.TestCase):
     """A0 and criterion 55: GIT_SSH, GIT_SSH_COMMAND; HOME and the config-file variables on a git command."""
@@ -505,17 +542,31 @@ class DiscardTests(unittest.TestCase):
         "git stash drop": "stash drop", "git stash pop": "stash pop", "git stash clear": "stash clear",
         "git worktree remove ../wt": "worktree remove", "git worktree remove --force ../wt": "worktree remove --force",
         "git worktree prune": "worktree prune", "git clean -fd": "clean --force",
+        # M3 slice Z, from C3a's queue: the forms the discard guard handled in its own file until now.
+        "git checkout .": "whole-tree checkout", "git checkout -- .": "whole-tree checkout",
+        "git checkout HEAD -- :/": "whole-tree checkout", "git checkout main -- '*'": "whole-tree checkout",
+        "git checkout ../..": "whole-tree checkout", "git checkout --pathspec-from-file=list": "whole-tree checkout",
+        "git checkout --pathspec-from-file list main": "whole-tree checkout",
+        "git restore .": "whole-tree restore", "git restore --source=HEAD~1 :/": "whole-tree restore",
+        "git restore -s HEAD ./": "whole-tree restore", "git restore --staged --worktree .": "whole-tree restore",
+        "git restore -SW .": "whole-tree restore", "git restore --pathspec-from-file=list": "whole-tree restore",
+        "git stash": "stash write", "git stash -m wip": "stash write", "git stash push -u": "stash write",
+        "git stash save wip": "stash write", "git stash store abc123": "stash write",
+        "git rebase main": "rebase", "git rebase --autostash --no-autostash main": "rebase",
+        "git cherry-pick abc123": "cherry-pick", "git cp x": "cherry-pick",
     }
 
     def test_each_form(self):
         for line, expected in self.CASES.items():
             with self.subTest(line):
-                self.assertIn(expected, git(line)["discard"])
+                self.assertIn(expected, git(line, aliases={"cp": "cherry-pick"})["discard"])
 
     def test_safe_forms_drop_nothing(self):
-        for line in ("git switch main", "git checkout main", "git reset HEAD a.py", "git rebase main",
-                     "git rebase --autostash --no-autostash main", "git stash list", "git stash", "git worktree list",
-                     "git read-tree HEAD"):
+        for line in ("git switch main", "git checkout main", "git reset HEAD a.py", "git stash list",
+                     "git stash show", "git stash apply abc123", "git worktree list", "git read-tree HEAD",
+                     "git checkout -- a.py", "git checkout main -- src/", "git checkout -b . main",
+                     "git restore a.py", "git restore --staged .", "git restore -S :/", "git restore -s . a.py",
+                     "git checkout ./a", "git rebase-x"):
             with self.subTest(line):
                 self.assertEqual(git(line)["discard"], [])
 
@@ -749,6 +800,24 @@ class WriteTargetTests(unittest.TestCase):
             "install -m 644 a /usr/local/b": [("/usr/local/b", "install")],
             "rsync -av --delete src/ dest/": [("dest/", "rsync")],
             "touch .git/index.lock": [(".git/index.lock", "touch")],
+            # M3 slice Z, from C5c's queue: the removers and find -delete, which wslib/gitrules.py read itself.
+            "unlink .git/HEAD": [(".git/HEAD", "unlink")],
+            "rmdir -p .git/refs/x": [(".git/refs/x", "rmdir")],
+            "shred -n 3 -u .git/config": [(".git/config", "shred")],
+            "shred --iterations 3 a b": [("a", "shred"), ("b", "shred")],
+            "find .git -name '*.lock' -delete": [(".git", "find -delete")],
+            "find -L a b -type f -delete": [("a", "find -delete"), ("b", "find -delete")],
+            "find -delete": [(".", "find -delete")],
+            # M3 slice Z, from C5e's queue: the paths git mv, rm, checkout and restore write, which
+            # parts/outward_write.py read itself until now.
+            "git mv a.txt b.txt": [("a.txt", "git mv"), ("b.txt", "git mv")],
+            "git rm -r --cached docs": [("docs", "git rm")],
+            "git checkout HEAD~1 -- a.txt": [("HEAD~1", "git checkout"), ("a.txt", "git checkout")],
+            "git checkout -b feature": [],
+            "git restore --source=HEAD~1 -W a.txt": [("a.txt", "git restore")],
+            "git restore -s HEAD a.txt": [("a.txt", "git restore")],
+            "git -C sub -C deeper rm x": [("sub/deeper/x", "git rm")],
+            "git -C sub rm /abs/x": [("/abs/x", "git rm")],
         }
         for line, expected in cases.items():
             with self.subTest(line):
@@ -756,9 +825,13 @@ class WriteTargetTests(unittest.TestCase):
 
     def test_reads_are_not_writes(self):
         for line in ("sed 's/a/b/' f.txt", "cat a", "echo x 2>&1", "grep x < in.txt",
-                     "cp a"):
+                     "cp a", "find .git -name '*.lock'"):
             with self.subTest(line):
                 self.assertEqual(writes(line), [])
+
+    def test_a_git_write_after_a_variable_dash_C_is_dynamic(self):
+        found = [w for c in commands('git -C "$D" rm x') for w in c["writes"]]
+        self.assertEqual([(w["path"], w["dynamic"]) for w in found], [("x", True)])
 
     def test_a_dynamic_target(self):
         found = [w for c in commands('echo x > "$F"') for w in c["writes"]]
@@ -766,6 +839,82 @@ class WriteTargetTests(unittest.TestCase):
 
     def test_a_redirect_on_a_group(self):
         self.assertEqual(writes("{ echo a; echo b; } > out.txt"), [("out.txt", ">")])
+
+    def test_the_folders_a_cd_it_cannot_follow_may_have_entered(self):
+        """M3 slice Z, from C5c's queue: a relative write after a cd the parser cannot follow names that cd's
+        folder, so a guard can tell it may land in a git folder."""
+        cases = {
+            "true; cd .git; touch config": [".git"],
+            "(cd .git && touch config)": [".git"],
+            "true; cd .git && git status; touch config": [".git"],
+            'x=1; cd "$(git rev-parse --git-dir)"; touch config': ["$(git rev-parse --git-dir)"],
+            "true; cd a; pushd .git/hooks; touch pre-commit": ["a", ".git/hooks"],
+        }
+        for line, expected in cases.items():
+            with self.subTest(line):
+                found = find(line, "touch")
+                self.assertIsNone(found["cwd"])
+                self.assertEqual(found["cd_folders"], expected)
+
+    def test_no_folders_when_the_folder_is_known(self):
+        for line in ("cd .git && touch config", "touch config", "(cd .git); touch config", "bash -c 'cd .git'; touch c"):
+            with self.subTest(line):
+                self.assertEqual(find(line, "touch")["cd_folders"], [])
+
+
+def reads(line):
+    return [(r["path"], r["via"]) for c in commands(line) for r in c["reads"]]
+
+
+class ReadTests(unittest.TestCase):
+    """M3 slice Z, from C5f's queue: input redirections as reads, which parts/secrets_shell.py found itself."""
+
+    def test_each_form(self):
+        cases = {
+            "wc -l < .env": [(".env", "<")],
+            "exec 3<> .env": [(".env", "<>")],
+            "cat 0< a.txt": [("a.txt", "<")],
+            "while read -r l; do echo \"$l\"; done < .env": [(".env", "<")],
+            "{ cat; } < a.txt": [("a.txt", "<")],
+            "< .env": [(".env", "<")],
+            'echo "$(wc -l < .env)"': [(".env", "<")],
+            "sh -c 'wc -l < .env'": [(".env", "<")],
+            "eval 'wc -l < .env'": [(".env", "<")],
+            "bash -lc 'cat < .env'": [(".env", "<")],
+            "sh -xc 'cat < .env'": [(".env", "<")],
+            "bash -c -e 'cat < .env'": [(".env", "<")],
+            "bash -c -o pipefail 'cat < .env'": [(".env", "<")],
+            "bash -O extglob -c 'cat < .env'": [(".env", "<")],
+            "bash -c 'cat' < .env": [(".env", "<")],
+            "bash < script.sh": [("script.sh", "<")],
+            "sudo cat < .env": [(".env", "<")],
+        }
+        for line, expected in cases.items():
+            with self.subTest(line):
+                self.assertEqual(reads(line), expected)
+
+    def test_other_redirections_are_not_reads(self):
+        for line in ("cat > a", "cat << EOF\nx\nEOF", "cat <<< text", "cat <&3", "echo x 2>&1", "cat a"):
+            with self.subTest(line):
+                self.assertEqual(reads(line), [])
+
+    def test_a_dynamic_read(self):
+        self.assertEqual([r["dynamic"] for c in commands('F=.env; wc -l < "$F"') for r in c["reads"]], [True])
+
+
+class WithSecretsTests(unittest.TestCase):
+    """M3 slice Z, from the maintainer's answer to Q53: the parser does not read `ws.py with-secrets NAME ... --
+    PROGRAM` as a wrapper. The line's program is Python, and `secrets_shell` reads the child itself and refuses git,
+    gh and a write under it. Reading the wrapper here waits for M4."""
+
+    def test_the_line_s_program_is_the_one_that_starts_ws_py(self):
+        for line in ("python3 ws.py with-secrets T -- git push --force origin main",
+                     "sh wslib/launch.sh ws.py with-secrets T -- git push --force origin main",
+                     "env GH_REPO=them/theirs python3 ws.py with-secrets T -- gh pr create --fill"):
+            with self.subTest(line):
+                found = commands(line)
+                self.assertEqual([c["git"] or c["gh"] for c in found], [None])
+                self.assertNotIn("ws.py with-secrets", found[0]["wrappers"])
 
 
 class OldParserTests(unittest.TestCase):

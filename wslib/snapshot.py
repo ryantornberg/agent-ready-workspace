@@ -672,6 +672,61 @@ class Message(Snapshot):
         return self._files[path]
 
 
+class Added(Snapshot):
+    """The lines one commit added, as files: each path the commit changed, holding only its added lines, each on
+    the line number it has in the commit, with blank lines between. A file the commit created with no lines is
+    there, empty, so its name is still read. Used by `ws.py check --commits` for the parts that set COMMIT_DIFF.
+    Not a Memory snapshot: a part never takes it for one of its cases."""
+
+    def __init__(self, added):
+        self._files = {}
+        for path, lines in added.items():
+            text = []
+            for number, line in lines:
+                text += [""] * max(0, number - 1 - len(text))
+                text.append(line)
+            self._files[path] = "\n".join(text).encode("utf-8", "surrogateescape")
+        super().__init__(self._files, list(self._files), added=added)
+
+    def _bytes(self, path):
+        return self._files.get(path)
+
+
+def added_by_commit(root, revisions):
+    """{commit id: {path: [(line number, text)]}}: the lines each commit in revisions (such as BASE..HEAD) added,
+    read as text whatever the file's encoding, so a UTF-16 file's lines are read too. One git process. A path a
+    commit created with no lines maps to []. A merge adds no lines of its own here."""
+    output = _git(root, "-c", "core.quotePath=false", "log", revisions, "-p", "-U0", "--text", "--no-color",
+                  "--no-ext-diff", "--no-renames", "--format=%x00commit %H")
+    found, commit, path, header, number = {}, None, None, None, 0
+    for raw in output.decode("utf-8", "surrogateescape").split("\n"):
+        if raw.startswith("\0commit "):
+            commit, path = raw[len("\0commit "):].strip(), None
+            found.setdefault(commit, {})
+        elif raw.startswith("diff --git ") and commit:
+            rest, path = raw[len("diff --git "):], None
+            size = (len(rest) - 5) // 2
+            header = rest[2 + size + 3:] if rest.startswith("a/") and rest[2 + size:2 + size + 3] == " b/" else None
+        elif raw.startswith("new file mode") and commit and header:
+            found[commit].setdefault(header, [])
+        elif raw.startswith("+++ ") and commit:
+            target = raw[4:]
+            path = None if target == "/dev/null" else (target[2:] if target.startswith("b/") else target)
+            if path is not None:
+                found[commit].setdefault(path, [])
+        elif raw.startswith("--- ") and commit:
+            continue
+        elif raw.startswith("@@ "):
+            try:
+                number = int(raw.split("+", 1)[1].split(" ", 1)[0].split(",", 1)[0])
+            except (IndexError, ValueError):
+                number = 0
+        elif raw.startswith("+") and commit and path is not None:
+            found[commit][path].append((number, raw[1:]))
+            number += 1
+    return found
+
+
 def history(root, ref="HEAD"):
     """Every line every commit in ref's history added, as a Memory snapshot: each changed path is
     "<commit>:<path>", and its added lines are the lines that commit added to that file. One git process.

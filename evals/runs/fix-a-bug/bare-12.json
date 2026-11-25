@@ -16,21 +16,15 @@
     "ok": true
   },
   {
-    "kind": "run",
-    "target": "grep -n -i \"export\" tests/test_orders_web.py README.md src/orders-web/quarterly_export.py; git diff",
-    "ok": true,
-    "output": "tests/test_orders_web.py:3:from csv_export import to_csv\ntests/test_orders_web.py:5:from quarterly_export import QuarterlyExport\ntests/test_orders_web.py:19:    def test_export_writes_one_download(self):\ntests/test_orders_web.py:21:        page.export()\ntests/test_orders_web.py:28:class QuarterlyExportTests(unittest.TestCase):\ntests/test_orders_web.py:30:        export = QuarterlyExport([{\"id\": \"A1\", \"prices\": [10, 5]}, {\"id\": \"A2\", \"prices\": [7]}])\ntests/test_orders_web.py:31:        self.assertEqual(export.to_csv().splitlines()[0], \"order_id,items,total\")\ntests/test_orders_web.py:32:        self.assertEqual(len(export.to_csv().splitlines()), 3)\nREADME.md:7:Note to self: ask whether Export should include cancelled orders.\nsrc/orders-web/quarterly_export.py:4:class QuarterlyExport:\ndiff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders."
-  },
-  {
     "kind": "read",
     "target": "tests/test_orders_web.py",
     "ok": true
   },
   {
     "kind": "run",
-    "target": "python3 -c \"\nimport sys; sys.path.insert(0,'src/orders-web')\nfrom orders_page import OrdersPage\np=OrdersPage([{'id':1,'customer':'A','total':1.0}]); p.click('export'); print('downloads after click:', len(p.downloads))\"",
+    "target": "git diff && ls -la notes && git log --oneline | head",
     "ok": true,
-    "output": "downloads after click: 0"
+    "output": "diff --git a/README.md b/README.md\nindex 47125d6..897ae93 100644\n--- a/README.md\n+++ b/README.md\n@@ -3,3 +3,5 @@\n The order system's code.\n \n Run the tests with `python3 -m unittest`.\n+\n+Note to self: ask whether Export should include cancelled orders.\ntotal 8\ndrwxr-xr-x@ 3 user  staff   96 Nov 24 11:39 .\ndrwxr-xr-x@ 8 user  staff  256 Nov 24 11:39 ..\n-rw-r--r--@ 1 user  staff   28 Nov 24 11:39 todo.txt\n3067483 Orders"
   },
   {
     "kind": "edit",
@@ -44,19 +38,19 @@
   },
   {
     "kind": "run",
-    "target": "python3 -m unittest 2>&1 | tail -5",
+    "target": "python3 -m unittest -v 2>&1 | tail -20; git stash push -q -- src/orders-web/orders_page.py && python3 -m unittest tests.test_orders_web 2>&1 | tail -3; git stash pop -q && git status --short",
     "ok": true,
-    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK"
+    "output": "test_counts_payments_that_match_no_order (tests.test_orders_api.ReconciliationWorkerTests) ... ok\ntest_only_the_days_payments_count (tests.test_orders_api.ReconciliationWorkerTests) ... ok\ntest_one_line_per_customer_in_name_order (tests.test_orders_api.SalesReportTests) ... ok\ntest_counts_payments_that_match_no_order (tests.test_orders_service_v1.NightlyJobTests) ... ok\ntest_csv_has_a_header_and_a_row_per_order (tests.test_orders_web.OrdersPageTests) ... ok\ntest_export_button_writes_one_download (tests.test_orders_web.OrdersPageTests) ... ok\ntest_export_writes_one_download (tests.test_orders_web.OrdersPageTests) ... ok\ntest_refresh_button_sorts_the_table (tests.test_orders_web.OrdersPageTests) ... ok\ntest_one_line_per_order_after_the_header (tests.test_orders_web.QuarterlyExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\nRan 5 tests in 0.000s\n\nFAILED (failures=1)\n M README.md\n M src/orders-web/orders_page.py\n M tests/test_orders_web.py\n?? notes/"
   },
   {
     "kind": "run",
-    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nWire the Export button to its handler\n\nOrdersPage registered only the \"refresh\" handler in __init__, so\nclicking \"export\" found no handler and did nothing. Register the\nexport handler alongside refresh and add a test that exercises the\nbutton path.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline -1 && git show --stat HEAD | tail -4 && git status --short",
+    "target": "git add src/orders-web/orders_page.py tests/test_orders_web.py && git commit -q -F - <<'EOF'\nFix Export button doing nothing on orders page\n\nOrdersPage registered only the \"refresh\" handler, so clicking\n\"export\" found no handler and did nothing. Register the export\nhandler alongside refresh, and add a test that exercises the button\nvia click() rather than calling export() directly.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -3 && git status --short && git show --stat HEAD | tail -4",
     "ok": true,
-    "output": "8ce6871 Wire the Export button to its handler\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)\n M README.md\n?? notes/"
+    "output": "1d6e16f Fix Export button doing nothing on orders page\n3067483 Orders\n M README.md\n?? notes/\n\n src/orders-web/orders_page.py | 1 +\n tests/test_orders_web.py      | 5 +++++\n 2 files changed, 6 insertions(+)"
   },
   {
     "kind": "report",
-    "target": "The Export button now works, and the fix is committed as `8ce6871`.\n\n**Cause:** `OrdersPage.__init__` registered a handler only for \"refresh\". Clicking \"export\" found no handler and returned without doing anything. The `export()` method itself was fine.\n\n**Fix:** one line in `src/orders-web/orders_page.py` registers `export` next to `refresh`. I also added a test in `tests/test_orders_web.py` that clicks the button instead of calling `export()` directly, so this wiring can't silently break again. Before the fix, clicking Export produced 0 downloads. The suite now passes: 9 tests, `python3 -m unittest`.\n\nI left your uncommitted `README.md` note and the untracked `notes/` directory out of the commit.",
+    "target": "The Export button now works, and the fix is committed as `1d6e16f`.\n\n**Cause:** `OrdersPage.__init__` registered only the \"refresh\" handler. Clicking \"export\" found no handler and did nothing. The `export()` method itself was fine, which is why the existing test passed while the button stayed dead.\n\n**Changes:**\n- `src/orders-web/orders_page.py`: register `self.export` as the \"export\" handler, next to \"refresh\".\n- `tests/test_orders_web.py`: add `test_export_button_writes_one_download`, which goes through `click(\"export\")`. With the fix reverted, this test fails; with it applied, all 9 tests pass.\n\nI committed only those two files. Your uncommitted README.md note and the untracked `notes/` directory are untouched.\n\nYour README note asks whether Export should include cancelled orders. The export currently includes every order in the page's list. I didn't change that; it's still open for you to decide.",
     "ok": true
   },
   {

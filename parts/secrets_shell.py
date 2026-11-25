@@ -10,7 +10,8 @@ It refuses:
   `GetEnvironmentVariables`. That method's name is refused in any word of a command and in the rest of the raw
   line, which the parser cannot read as PowerShell; inside a message body, or a heredoc body fed to a program
   that is not a shell, it is text and passes (M3 slice PSFIX);
-- a command that names a secrets file, in an argument or after `<`, unless its program only looks at the file's
+- a command that names a secrets file, in an argument or after `<` or `<>` (the reads the parser reports, inside
+  substitutions, `eval` and a shell's `-c` text too), unless its program only looks at the file's
   name (NAMES_ONLY, and the git subcommands in GIT_NAMES_ONLY). The files are the patterns in "secrets" and
   "home", the same lists `agent_settings` holds the tools' settings to. Each is matched against the end of a
   path at any folder, without regard to case, so `../.env`, `~/.ssh/id_ed25519`, `$HOME/.aws/credentials` and
@@ -20,7 +21,7 @@ It refuses:
 - a variable the line itself sets is read with that value, so `F=.env; cat "$F"` is refused. Any other variable
   passes, as it does for `git_folder_shell`;
 - `ws.py with-secrets` whose program is one that command refuses itself (a shell, `env`, `printenv` or a program
-  that runs another), or is a git or gh call or a write the parser reports. The other shell guards read only the
+  that runs another), is given by a variable or substitution, or is a git or gh call or a write the parser reports. The other shell guards read only the
   line's own program, which here is Python, so they would not judge a push or a gh write run through it.
 
 The first word after `grep`, `rg`, `sed`, `awk` and their kin, and after `git grep`, is a pattern, not a file,
@@ -34,6 +35,7 @@ import posixpath
 import re
 import shlex
 
+from wslib import gitrules
 from wslib import secretrules
 from wslib import shell
 
@@ -212,6 +214,10 @@ def _child_refusal(child):
     reason = secretrules.refusal(child[0])
     if reason:
         return f"`ws.py with-secrets` refuses this program itself: {reason}"
+    if re.search(r"[$`]", child[0]):   # G=git; ... -- $G push: the shell picks the program, which no guard sees
+        return f"`ws.py with-secrets` may not run a program given by a variable or substitution: {child[0]}"
+    if gitrules.expands(child[0]):   # -- {git,} push: the shell expands it before with-secrets starts it (Q54)
+        return f"`ws.py with-secrets` may not run a program word the shell expands (a glob or braces): {child[0]}"
     for inner in shell.analyze(shlex.join(child)):
         reason = secretrules.refusal(inner["program"] or "") or _dump(inner["program"], inner["args"])
         if reason or inner["wrappers"] or inner["unresolved"]:
@@ -222,54 +228,6 @@ def _child_refusal(child):
             return ("`ws.py with-secrets` may not run git, gh or a program that writes a file the shell guards "
                     "judge, since they would not see it: run git and gh by their own names, which sign in "
                     "on their own")
-    return None
-
-
-def _input_redirections(node, out):
-    """Every word after `<` or `<>` anywhere in a parsed command line, inside substitutions, sh -c and eval too."""
-    if isinstance(node, dict):
-        if node.get("op") in ("<", "<>") and node.get("target") is not None:
-            out.append(node["target"])
-        for key in ("target", "body_subs"):
-            _input_redirections(node.get(key), out)
-    elif isinstance(node, shell.Word):
-        for sub in node.subs:
-            _input_redirections(sub, out)
-    elif isinstance(node, (list, tuple)):
-        if len(node) == 3 and node[0] == "simple":
-            _inner_text(node[1], out)
-        for item in node:
-            _input_redirections(item, out)
-    return out
-
-
-def _inner_text(words, out):
-    """Parse the text `sh -c` or `eval` runs, so a redirection inside it is seen."""
-    texts = [word.text for word in words if isinstance(word, shell.Word)]
-    while texts and (shell.Word(head=texts[0]).assign or texts[0] in shell.WRAPPERS):
-        texts = texts[1:]
-    if not texts:
-        return
-    name = secretrules.program_name(texts[0])
-    if name == "eval":
-        _input_redirections(shell.parse(" ".join(texts[1:])), out)
-    elif name in shell.SHELL_PROGRAMS:
-        at = next((i for i, text in enumerate(texts[1:], 1) if re.match(r"^-[A-Za-z]*c[A-Za-z]*$", text)), None)
-        body = _shell_text(texts[at + 1:]) if at else None
-        if body is not None:                  # -c, -lc, -ec, -c -e and -c -o pipefail: the first word no option takes
-            _input_redirections(shell.parse(body), out)
-
-
-def _shell_text(words):
-    """The text a shell's -c runs: the first word after it that is neither an option nor the value of -o or -O."""
-    skip = False
-    for word in words:
-        if skip:
-            skip = False
-        elif word in ("-o", "+o", "-O", "+O"):
-            skip = True
-        elif not word.startswith(("-", "+")):
-            return word
     return None
 
 
@@ -311,6 +269,10 @@ def _runs_method(command, calls):
 def decide(event, config):
     command = event.get("command") or ""
     patterns = _patterns(config)
+    expanded = gitrules.expanded_program(command)   # {env,} or {cat,} .env: the program goes unjudged (Q54)
+    if expanded:
+        return (f"this command cannot be judged: {expanded}, so it may print the environment or read a secrets "
+                f"file. Write it with literal words. See {PAGE}")
     calls = shell.analyze(command)
     if METHOD in command.lower() and _runs_method(command, calls):
         return ("PowerShell's GetEnvironmentVariables method prints the whole environment, secrets included. To see "
@@ -349,10 +311,11 @@ def decide(event, config):
         hit = _named(args, env, patterns)
         if hit:
             return _message(*hit)
-    for target in _input_redirections(shell.parse(command), []):
-        hit = _named([target.text], assigned, patterns)
-        if hit:
-            return _message("< " + target.text, hit[1])
+    for call in calls:
+        for read in call["reads"]:
+            hit = _named([read["path"]], assigned, patterns)
+            if hit:
+                return _message("< " + read["path"], hit[1])
     return None
 
 

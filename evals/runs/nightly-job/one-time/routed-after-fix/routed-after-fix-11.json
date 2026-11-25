@@ -1,0 +1,114 @@
+[
+  {
+    "kind": "read",
+    "target": "docs/playbooks/fix-a-bug.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "git status --short && git log --oneline | head -3 && python3 tools/symbols.py ReconciliationWorker src; python3 tools/symbols.py AccountFreeze src; ls docs/records docs/records/fixes docs/templates 2>&1; find src -type f | head -100",
+    "ok": true,
+    "output": " M README.md\n?? notes/\n3b55c7a Orders\n/Library/Developer/CommandLineTools/usr/bin/python3: can't open file 'tools/symbols.py': [Errno 2] No such file or directory\n/Library/Developer/CommandLineTools/usr/bin/python3: can't open file 'tools/symbols.py': [Errno 2] No such file or directory\nls: docs/records: No such file or directory\nls: docs/records/fixes: No such file or directory\ndocs/templates:\nbug-ticket.md\ndecision-record.md\nepic-folder.md\nfix-record.md\nfresh-session-prompt.md\nhand-off-plan.md\nhub.md\nmilestone-record.md\npull-request.md\nREADME.md\nspec.md\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\nsrc/orders-web/csv_export.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py"
+  },
+  {
+    "kind": "run",
+    "target": "cat src/orders-api/reconciliation_worker.py; echo ----; cat src/README.md; echo ----; ls -la src/orders-api; echo ----; git ls-files | head -80",
+    "ok": true,
+    "output": "\"\"\"Runs once a night and counts the day's payments that match no order.\"\"\"\n\n\nclass ReconciliationWorker:\n    def __init__(self, store):\n        self.store = store\n\n    def run(self, day):\n        \"\"\"Return how many of the day's payments match no order.\"\"\"\n        order_ids = self.store.order_ids()\n        unmatched = [payment for payment in self.store.payments(day) if payment[\"order_id\"] not in order_ids]\n        return len(unmatched)\n----\ncat: src/README.md: No such file or directory\n----\ntotal 16\ndrwxr-xr-x@ 4 user  staff  128 Nov 25 07:41 .\ndrwxr-xr-x@ 5 user  staff  160 Nov 25 07:41 ..\n-rw-r--r--@ 1 user  staff  439 Nov 25 07:41 reconciliation_worker.py\n-rw-r--r--@ 1 user  staff  392 Nov 25 07:41 sales_report.py\n----\nAGENTS.md\nCLAUDE.md\nINDEX.md\nREADME.md\ndocs/adopt-the-workspace.md\ndocs/agent-settings.md\ndocs/authoring.md\ndocs/browsers.md\ndocs/changing-the-machinery.md\ndocs/code-review.md\ndocs/commits.md\ndocs/decisions/0001-pin-code-repositories.md\ndocs/decisions/0002-hooks-remind-the-commit-enforces.md\ndocs/decisions/0003-the-engine-in-one-folder.md\ndocs/decisions/0004-the-hook-contract.md\ndocs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md\ndocs/decisions/0006-what-proven-means.md\ndocs/decisions/0007-the-kit.md\ndocs/decisions/0008-success-is-a-teammate-who-does-not-ask.md\ndocs/decisions/0009-hold-what-nobody-can-derive.md\ndocs/decisions/0010-three-kinds-of-guidance-plus-reference.md\ndocs/decisions/0011-pages-go-straight-to-main.md\ndocs/decisions/0012-one-lookup-by-what-you-know.md\ndocs/decisions/0013-knowledge-graph-output-is-scratch.md\ndocs/decisions/0014-three-tiers-bound-in-one-place.md\ndocs/decisions/0015-retired-pages-move-to-an-archive.md\ndocs/decisions/0016-a-spec-lives-in-its-plan.md\ndocs/decisions/0017-one-folder-per-large-piece-of-work.md\ndocs/decisions/0018-unattended-runs-write-only-to-a-branch.md\ndocs/decisions/0019-every-fix-lands-on-trunk-first.md\ndocs/decisions/0020-where-the-sources-disagreed.md\ndocs/definition-of-done.md\ndocs/environment-self-check.md\ndocs/extend-the-workspace.md\ndocs/glossary.md\ndocs/how-tos.md\ndocs/layout.md\ndocs/machine-self-check.md\ndocs/maintain-the-workspace.md\ndocs/orchestration.md\ndocs/parts.md\ndocs/playbooks/README.md\ndocs/playbooks/architecture-review.md\ndocs/playbooks/bug-grooming.md\ndocs/playbooks/bug-triage-meeting.md\ndocs/playbooks/debugging.md\ndocs/playbooks/decision-interview.md\ndocs/playbooks/docs-audit.md\ndocs/playbooks/effort-estimate.md\ndocs/playbooks/escape-analysis.md\ndocs/playbooks/feature-layer-walk.md\ndocs/playbooks/feedback-walkthrough.md\ndocs/playbooks/fix-a-bug.md\ndocs/playbooks/git-host-operations.md\ndocs/playbooks/handoff.md\ndocs/playbooks/impact-analysis.md\ndocs/playbooks/import-a-repository.md\ndocs/playbooks/instruction-review.md\ndocs/playbooks/prompt-retrospective.md\ndocs/playbooks/qa-verification-list.md\ndocs/playbooks/red-team-review.md\ndocs/playbooks/regression-run.md\ndocs/playbooks/regression-triage.md\ndocs/playbooks/reuse-checklist.md\ndocs/playbooks/review-orchestrator.md\ndocs/playbooks/search-every-source.md\ndocs/playbooks/standup-report.md\ndocs/playbooks/test-first.md\ndocs/playbooks/throwaway-prototype.md\ndocs/playbooks/tracker-operations.md\ndocs/predecessor-check.md\ndocs/procedure-endings.md\ndocs/product-reader-pages.md\ndocs/question-log.md\ndocs/reader-standard.md\ndocs/reading-paths.md\ndocs/request-map.md\ndocs/research-ladder.md\ndocs/review-in-a-worktree.md\ndocs/rules/orders-api.md"
+  },
+  {
+    "kind": "read",
+    "target": "docs/templates/fix-record.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "git ls-files | tail -n +80; echo ----; cat docs/rules/orders-api.md; echo ----; cat src/orders-service-v1/nightly_job.py; echo ----; cat src/orders-api/sales_report.py; echo ----; grep -n -i -A3 \"nightly\\|retry\\|payment\" INDEX.md | head -60",
+    "ok": true,
+    "output": "docs/rules/orders-api.md\ndocs/safe-refactor.md\ndocs/saved-workflows.md\ndocs/ship-a-deployable.md\ndocs/size-the-work.md\ndocs/templates/README.md\ndocs/templates/bug-ticket.md\ndocs/templates/decision-record.md\ndocs/templates/epic-folder.md\ndocs/templates/fix-record.md\ndocs/templates/fresh-session-prompt.md\ndocs/templates/hand-off-plan.md\ndocs/templates/hub.md\ndocs/templates/milestone-record.md\ndocs/templates/pull-request.md\ndocs/templates/spec.md\ndocs/triage-labels.md\ndocs/tutorials/first-agent-task.md\ndocs/tutorials/get-oriented.md\nsrc/orders-api/reconciliation_worker.py\nsrc/orders-api/sales_report.py\nsrc/orders-service-v1/nightly_job.py\nsrc/orders-web/csv_export.py\nsrc/orders-web/orders_page.py\nsrc/orders-web/quarterly_export.py\ntests/__init__.py\ntests/test_orders_api.py\ntests/test_orders_service_v1.py\ntests/test_orders_web.py\n----\n---\nkind: reference\nlast-reviewed: 2026-11-16\napplies-to: \"src/orders-api/**\"\n---\n\n# Rule: the live order service\n\nYou are editing `src/orders-api`, the live order service. These hold for every change here.\n\n**In short:** this is the live service, not the shelved copy; the team's words map to the names below; and a change follows its page.\n\n- **This is the code that runs.** `src/orders-service-v1` has the same names and is shelved, kept read-only for audits. A fix made there fixes nothing.\n- **The team's words map to these names.** \"The nightly job\" is `ReconciliationWorker`. \"A hold\" is `AccountFreeze`. The [index](../../INDEX.md#search-aliases) lists the rest.\n- **A change here is a bug fix or a feature, and follows its page.** Small fixes follow [fix a bug](../playbooks/fix-a-bug.md): a test that fails first, then the fix.\n----\n\"\"\"The nightly job: count the day's payments that match no order.\"\"\"\n\n\ndef run_nightly_job(store, day):\n    order_ids = store.order_ids()\n    return len([payment for payment in store.payments(day) if payment[\"order_id\"] not in order_ids])\n----\n\"\"\"Sales per customer, for the sales team.\"\"\"\n\n\nclass SalesReport:\n    def __init__(self, orders):\n        self.orders = list(orders)\n\n    def lines(self):\n        totals = {}\n        for order in self.orders:\n            totals[order[\"customer\"]] = totals.get(order[\"customer\"], 0) + sum(order[\"prices\"])\n        return [f\"{customer}: {total}\" for customer, total in sorted(totals.items())]\n----\n123:| Whether the README's setup still works; a nightly fresh clone; a link that cannot resolve on purpose | [The cold-clone job](docs/parts.md#the-cold-clone-job) |\n124-| Unattended runs; moving a pin after a run | [Decision 0018](docs/decisions/0018-unattended-runs-write-only-to-a-branch.md) |\n125-| Branching for product repositories; hotfixes; release branches | [Decision 0019](docs/decisions/0019-every-fix-lands-on-trunk-first.md) |\n126-| A knowledge graph of the code | [Decision 0013](docs/decisions/0013-knowledge-graph-output-is-scratch.md) |\n--\n138:| the nightly job | `ReconciliationWorker` |\n139-| a hold | `AccountFreeze` |\n140-| the big report | `QuarterlyExport` |\n141-"
+  },
+  {
+    "kind": "run",
+    "target": "cat tests/test_orders_api.py; echo ----; cat tests/__init__.py; echo ----; cat workspace.json | head -60; echo ----; ls tests; git config user.name; git config user.email; git remote -v",
+    "ok": true,
+    "output": "import unittest\n\nfrom reconciliation_worker import ReconciliationWorker\nfrom sales_report import SalesReport\n\n\nclass Store:\n    def __init__(self, order_ids, payments):\n        self._order_ids = set(order_ids)\n        self._payments = payments\n\n    def order_ids(self):\n        return self._order_ids\n\n    def payments(self, day):\n        return [payment for payment in self._payments if payment[\"day\"] == day]\n\n\nclass ReconciliationWorkerTests(unittest.TestCase):\n    def test_counts_payments_that_match_no_order(self):\n        store = Store({\"o1\"}, [{\"id\": \"p1\", \"order_id\": \"o1\", \"day\": \"2026-03-01\"},\n                               {\"id\": \"p2\", \"order_id\": \"o9\", \"day\": \"2026-03-01\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\n\n    def test_only_the_days_payments_count(self):\n        store = Store(set(), [{\"id\": \"p1\", \"order_id\": \"o9\", \"day\": \"2026-03-02\"}])\n        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)\n\n\nclass SalesReportTests(unittest.TestCase):\n    def test_one_line_per_customer_in_name_order(self):\n        report = SalesReport([{\"customer\": \"Okafor\", \"prices\": [4]}, {\"customer\": \"Lindqvist\", \"prices\": [2]}])\n        self.assertEqual(report.lines(), [\"Lindqvist: 2\", \"Okafor: 4\"])\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n----\n\"\"\"Put each service's folder on the import path, so a test imports its modules by name.\"\"\"\nimport pathlib\nimport sys\n\nSRC = pathlib.Path(__file__).resolve().parent.parent / \"src\"\nfor service in (\"orders-api\", \"orders-web\", \"orders-service-v1\"):\n    sys.path.insert(0, str(SRC / service))\n----\ncat: workspace.json: No such file or directory\n----\n__init__.py\ntest_orders_api.py\ntest_orders_service_v1.py\ntest_orders_web.py\neval\neval@example.invalid"
+  },
+  {
+    "kind": "edit",
+    "target": "docs/records/fixes/2026-11-25-nightly-job-retry-double-count.md",
+    "ok": true
+  },
+  {
+    "kind": "edit",
+    "target": "tests/test_orders_api.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest tests.test_orders_api 2>&1 | tail -15",
+    "ok": true,
+    "output": "F...\n======================================================================\nFAIL: test_a_retried_payment_counts_once (tests.test_orders_api.ReconciliationWorkerTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"tests/test_orders_api.py\", line 28, in test_a_retried_payment_counts_once\n    self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\nAssertionError: 2 != 1\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nFAILED (failures=1)"
+  },
+  {
+    "kind": "edit",
+    "target": "src/orders-api/reconciliation_worker.py",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "python3 -m unittest discover -s tests -t . -p 'test_*.py' 2>&1 | tail -8; echo ----; python3 -m unittest tests.test_orders_api 2>&1 | tail -3; echo ----; grep -rn \"ReconciliationWorker\\|\\.run(\" --include=*.py src tests",
+    "ok": true,
+    "output": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n----\nRan 4 tests in 0.000s\n\nOK\n----\nsrc/orders-api/reconciliation_worker.py:4:class ReconciliationWorker:\ntests/test_orders_api.py:3:from reconciliation_worker import ReconciliationWorker\ntests/test_orders_api.py:19:class ReconciliationWorkerTests(unittest.TestCase):\ntests/test_orders_api.py:23:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\ntests/test_orders_api.py:28:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 1)\ntests/test_orders_api.py:32:        self.assertEqual(ReconciliationWorker(store).run(\"2026-03-01\"), 0)"
+  },
+  {
+    "kind": "edit",
+    "target": "docs/records/fixes/2026-11-25-nightly-job-retry-double-count.md",
+    "ok": true
+  },
+  {
+    "kind": "run",
+    "target": "git add src/orders-api/reconciliation_worker.py tests/test_orders_api.py docs/records/fixes/2026-11-25-nightly-job-retry-double-count.md && git diff --cached --stat && git commit -q -F - <<'EOF'\nFix nightly job double count on retried payments\n\nReconciliationWorker.run counted payment rows, so a bank retry that\narrives with the same payment id was counted twice. It now counts\ndistinct payment ids. Adds a red test for the retry case and the fix\nrecord with its brief.\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>\nEOF\ngit log --oneline | head -2; git status --short",
+    "ok": true,
+    "output": " .../2026-11-25-nightly-job-retry-double-count.md   | 45 ++++++++++++++++++++++\n src/orders-api/reconciliation_worker.py            |  2 +-\n tests/test_orders_api.py                           |  5 +++\n 3 files changed, 51 insertions(+), 1 deletion(-)\n09dbf7c Fix nightly job double count on retried payments\n3b55c7a Orders\n M README.md\n?? notes/"
+  },
+  {
+    "kind": "report",
+    "target": "Fixed and committed as `09dbf7c` on `main`. The repo has no remote, so there is no pull request.\n\nThe bug: `ReconciliationWorker.run` in `src/orders-api/reconciliation_worker.py` counted payment rows. A bank retry arrives as a second row with the same payment id, so it was counted twice. The fix counts distinct payment ids instead.\n\nThe change is one line, plus a new test and a fix record at `docs/records/fixes/2026-11-25-nightly-job-retry-double-count.md`.\n\nverified: `test_a_retried_payment_counts_once` failed before the fix with `AssertionError: 2 != 1` and passes after it.\nverified: the full suite (`python3 -m unittest discover -s tests -t . -p 'test_*.py'`) runs 9 tests, all OK.\nverified: nothing in `src/` or `tests/` calls `ReconciliationWorker.run` except its own tests.\ninferred: the production nightly job, which lives outside this repo, calls `run` the same way and needs no change.\ninferred: the bank's retry rows carry the same payment id, as you reported. I did not inspect the store's data.\n\nNot done:\n- I did not check the live store's retry data.\n- I did not change whether a retried payment should count at all when it matches no order. That is a business question, and the fix only makes the count per payment id.\n- I left `src/orders-service-v1/nightly_job.py` alone. It is the read-only audit copy, not the live service.\n- I left the existing unstaged `README.md` change and the untracked `notes/` folder alone, since they were not part of this fix.",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "suite passes after the change",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "tests fail on the original code",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the hidden acceptance test passes",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "a commit was made",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "other edits stayed out of the commit",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "unchanged in the commit and on disk: src/orders-service-v1",
+    "ok": true
+  },
+  {
+    "kind": "state",
+    "target": "the agent finished within the time limit",
+    "ok": true
+  }
+]

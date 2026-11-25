@@ -24,9 +24,9 @@ A git alias is expanded from config at hook time, as git would run it, so an ali
 hard reset and one that runs git status passes. The runner gives the lease, the session's own working copy, each
 git folder's kind and the aliases read in each folder (decision 0004, "Shell events"). This part reads the command
 through wslib/gitrules.py, which the shell guards share, and looks each call's folder up by the parser's own text.
-Parser gaps it handles here, until slice Z moves them into the parser: a whole-tree checkout or restore, a stash
-write, and the rebase and cherry-pick commands, none of which the parser lists among the forms that drop work.
-See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md.
+The parser lists every form it decides on among the forms that drop work, a whole-tree checkout or restore, a stash
+write, rebase and cherry-pick included (M3 slice Z); the guard adds only a rebasing pull, which the parser reports
+on its own. See docs/decisions/0005-concurrent-sessions-and-the-edit-ledger.md.
 """
 import datetime
 import posixpath
@@ -43,56 +43,11 @@ SHARED = {"stash drop", "stash pop", "stash clear", "worktree prune"}
 MAIN_ONLY = {"reset --hard", "reset --keep", "reset --merge", "switch --force", "checkout --force",
              "read-tree --reset -u", "clean --force", "autostash", "whole-tree checkout", "whole-tree restore",
              "stash write", "rebase", "cherry-pick", "pull --rebase"}
-STASH_WRITES = {"push", "save", "store"}
-WHOLE = {".", "./", ":/", ":/.", ":/*", ":(top)", ":(top).", "*", "**"}
-CHECKOUT_VALUES = {"-b", "-B", "--orphan", "--conflict", "--pathspec-from-file"}
-RESTORE_VALUES = {"-s", "--source", "--conflict", "--pathspec-from-file"}
-
-
-def _whole(word):
-    if word in WHOLE:
-        return True
-    parts = [part for part in word.split("/") if part]
-    return bool(parts) and all(part in (".", "..") for part in parts)
-
-
-def _operands(args, with_values):
-    """(operands, flags) of a checkout or restore, with every operand after "--" counted."""
-    operands, flags, skip, ended = [], set(), False, False
-    for word in args:
-        if skip:
-            skip = False
-        elif ended:
-            operands.append(word)
-        elif word == "--":
-            ended = True
-        elif word.startswith("-") and word != "-":
-            name = word.split("=", 1)[0]
-            flags.add(name)
-            skip = name in with_values and "=" not in word
-        else:
-            operands.append(word)
-    return operands, flags
 
 
 def forms(git):
-    """The forms of this git call that can drop work, the parser's and this guard's own."""
+    """The forms of this git call that can drop work: the parser's, and a rebasing pull."""
     found = set(git.get("discard") or ())
-    subcommand, args = git.get("subcommand"), git.get("args") or []
-    if subcommand == "checkout":
-        operands, flags = _operands(args, CHECKOUT_VALUES)
-        if any(_whole(word) for word in operands) or any(f.startswith("--pathspec-from") for f in flags):
-            found.add("whole-tree checkout")
-    if subcommand == "restore":
-        operands, flags = _operands(args, RESTORE_VALUES)
-        staged_only = flags & {"-S", "--staged"} and not flags & {"-W", "--worktree"}
-        whole = any(_whole(word) for word in operands) or any(f.startswith("--pathspec-from") for f in flags)
-        if whole and not staged_only:
-            found.add("whole-tree restore")
-    if subcommand == "stash" and git.get("action") in STASH_WRITES:
-        found.add("stash write")
-    if subcommand in ("rebase", "cherry-pick"):
-        found.add(subcommand)
     if git.get("pull_rebase"):
         found.add("pull --rebase")
     return found
@@ -116,8 +71,9 @@ def decide(event, config):
     own = event.get("own_working_copy")
     who = _holder(lease)
     calls, why_aliases = gitrules.read(event)
+    expanded = gitrules.expanded_program(event.get("command"))   # {git,} reset: the git goes unjudged (Q54)
     for call in calls:
-        why = gitrules.unresolved(call, why_aliases)
+        why = gitrules.unresolved(call, why_aliases) or expanded
         if why:
             return (f"another live agent session ({who}) holds the main working copy, and this command cannot be "
                     f"judged: {why}. Write it with literal words, or run it in a worktree of your own. See {PAGE}")

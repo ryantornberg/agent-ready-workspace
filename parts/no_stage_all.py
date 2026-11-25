@@ -24,6 +24,9 @@ holds the command, or a command piped into a shell, and it cannot tell that
 The parser lives in wslib/shell.py, shared with no_admin_merge. The eval grader
 uses the same function, so the rule an agent is tested against is the rule the
 hook enforces, and the eval hash covers that module with this file.
+
+The rule's page is procedure endings, "The commit", whose rules table names this
+hook; the runner adds the page to the reminder.
 """
 import re
 
@@ -32,6 +35,7 @@ from wslib import shell
 KIND = "hook"
 EVENT = "before-shell"
 MODE = "remind"
+PAGE = "docs/procedure-endings.md#the-commit"   # the page that states the staging rule (criterion 34)
 
 EVERYTHING = re.compile(r"^(?::/\*?|[./*]+)$")   # .  ./  *  ./*  ../..  :/
 _long = shell.long_option

@@ -2,8 +2,8 @@
 key the guards read.
 
 The shell half of `git_folder`. It reads the command with the shared parser and judges every write the parser
-reports (`>`, `>>`, `tee`, `cp`, `mv` and its source, `sed -i`, `dd of=`, `rm`, `ln`, `truncate`, `install`,
-`rsync`, `touch`, `git config --file`), and `unlink`, `rmdir` and `shred`, which the parser does not report yet.
+reports (`>`, `>>`, `tee`, `cp`, `mv` and its source, `sed -i`, `dd of=`, `rm`, `unlink`, `rmdir`, `shred`, `ln`,
+`truncate`, `install`, `rsync`, `touch`, `git config --file` and `find -delete`).
 It refuses:
 
 - a write under any `.git` segment, a linked worktree's `.git` file and `src/*/.git/` included, and to a git config
@@ -38,5 +38,9 @@ PAGE = "docs/decisions/0004-the-hook-contract.md"
 
 
 def decide(event, config):
+    why = gitrules.expanded_program(event.get("command"))   # {git,} config --global: the git goes unjudged (Q54)
+    if why:
+        return (f"this command cannot be judged: {why}, so it may write a git folder or a git config file. "
+                f"Write it with literal words. See {PAGE}")
     reasons = gitrules.shell_refusals(event)
     return reasons[0] if reasons else None

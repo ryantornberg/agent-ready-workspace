@@ -2198,10 +2198,12 @@ class EvalThatCanLoseTests(Folder):
     def test_the_agent_gets_none_of_the_operators_environment(self):
         home = self.root / "home"   # a home folder with no shell start-up file, unlike a CI runner's
         home.mkdir()
-        with mock.patch.dict(os.environ, {"WS_OPERATOR_SECRET": "x", "ZDOTDIR": "/operator/zsh", "GIT_AUTHOR_EMAIL": "me@example.com"}):
+        with mock.patch.dict(os.environ, {"WS_OPERATOR_SECRET": "x", "ZDOTDIR": "/operator/zsh", "GIT_AUTHOR_EMAIL": "me@example.com",
+                                          "PATH": "/Users/someone-else/bin" + os.pathsep + os.environ.get("PATH", "")}):
             env = self.harness.agent_env(self.root, home)
         self.assertEqual(set(env) - set(self.harness.KEPT_ENVIRONMENT),
-                         {"SHELL", "CLAUDE_CODE_SHELL", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "XDG_CONFIG_HOME"})
+                         {"PATH", "SHELL", "CLAUDE_CODE_SHELL", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "XDG_CONFIG_HOME"})
+        self.assertEqual(env["PATH"], os.pathsep.join(self.harness.AGENT_PATH))   # fixed, not the operator's (Q52)
         self.assertFalse(self.harness.start_up_file(env["CLAUDE_CODE_SHELL"], home).exists())   # so none of the operator's aliases load
         self.assertEqual(pathlib.Path(env["GIT_CONFIG_GLOBAL"]).read_text(encoding="utf-8"), "")
         self.assertNotIn("WS_OPERATOR_SECRET", env)
@@ -2231,18 +2233,27 @@ class EvalThatCanLoseTests(Folder):
         elif isinstance(value, str):
             yield value
 
+    # Stored before Q73 made run.py refuse every home folder but the placeholder's. The debugging fixture's invented
+    # owner, "dana", is in these cases' request and scaffold, so their agents wrote /home/dana and C:\Users\dana;
+    # they name no real account. They are stale until M4, which points the fixture at /home/user when it records
+    # debugging again (Q51, Q73), and that record replaces these. In debug-leak-check's two-line-18 the agent also
+    # wrote "/home/d\u00e4n\u0430", a lookalike, as test data of its own.
+    STALE_UNTIL_M4 = {"debug-leak-check", "debug-staging-reminder"}
+    FIXTURE_OWNER = re.compile(r"(?:/(?:users|home)/|[a-z]:\\+users\\+)dana(?:[\s.].*)?", re.I)
+    LOOKALIKES = {"debug-leak-check/two-line-18.json": ["/home/d", "/home/d\u00e4n\u0430"]}
+
     def test_the_recorded_transcripts_hold_nothing_of_the_operators_environment(self):
         stored = list((ROOT / "evals/runs").glob("*/*.json"))
         self.assertGreaterEqual(len(stored), 120)
-        # A home folder's name is a plain word ending at a separator. "user" is the sandbox's, and "dana" is the invented
-        # owner of the debugging scaffold's leak-check fixture, whose cases have agents write such paths; a lookalike
-        # name an agent invents, with letters outside ASCII, is not a plain word.
-        home = re.compile(r"""/(?:Users|home)/(?!(?:user|dana)\b)[A-Za-z0-9._-]+(?=[/\s"']|$)"""
-                          r"|[A-Za-z]:\\\\Users\\\\(?!(?:user|dana)\b)", re.I | re.M)
+        # The harness's own rule (run.home_folders): any account's home folder but the placeholder "user".
         email = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
         for path in stored:
             text = "\n".join(str(value) for value in self._strings(json.loads(path.read_text(encoding="utf-8"))))
-            self.assertIsNone(home.search(text), path.name)
+            case = path.parent.name
+            found = self.harness.home_folders(text)
+            if case in self.STALE_UNTIL_M4:
+                found = [folder for folder in found if not self.FIXTURE_OWNER.fullmatch(folder)]
+            self.assertEqual(sorted(set(found)), self.LOOKALIKES.get(f"{case}/{path.name}", []), path.name)
             for address in email.finditer(text):   # the eval identity, or the agent tool's own commit trailer
                 self.assertTrue(address.group(0).endswith(".invalid") or address.group(0) == "noreply@anthropic.com",
                                 (path.name, address.group(0)))
@@ -2546,6 +2557,47 @@ class EvalHarnessApartTests(Folder):
                 files = eval_record.covered_files(case_path, self.harness.load_case(name), list(tree.paths()), arms)
                 self.assertEqual(self.harness.covered(name),
                                  (files, eval_record.guidance_hash({f: tree.read(f) for f in files}, PROOF_KEYS.strip)))
+
+    def test_any_accounts_home_folder_is_refused_but_the_case_s_own(self):
+        """M3 slice Z (Q52): a run printed the operator's PATH, which named another account's home folder."""
+        with mock.patch.object(self.harness, "operator_identity", return_value=[]):
+            for target in ("echo $PATH: /Users/someone-else/.local/bin", "ls /home/someone-else/", r"dir C:\Users\someone-else",
+                           r"dir c:\\users\\someone-else\\x"):
+                with self.subTest(target):
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            for target in ("file:///Users/bob/x", "ls /mnt/c/Users/bob/x", "ls /var/home/bob", "echo ${X:-/home/bob}",
+                           "ls /home/bob?x", "ls /home/_bob/x", "cc -I/home/bob/inc", r"dir C:\Users\bob\x41",
+                           "PATH=/a:/Users/bob.smith/bin", "cat /home/jos\u00e9/x", "GET /api/users/42"):
+                with self.subTest(target):   # the last errs toward refusing: a run lost, not a leak
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            for target in ("ls /home/user/x", "ls /Users/Shared/x", "cat ~/x", "ls /usr/home", "echo /Users/user",
+                           r'type "C:\Users\user\x"', "ls /home/user.", "ls /Users/Public/x", "echo /home/$USER/x",
+                           r"dir \Users\user\x", r"dir C:/Users\user\x", "ls /home//user/x"):
+                with self.subTest(target):
+                    self.assertFalse(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            # No case's own name passes, and a name that goes on past an ASCII part is read whole (Q73).
+            for target in ("cat /home/dana/notes.txt", r"type C:\Users\dana.", "cat /home/dana\u00eb/x",
+                           r"type C:\Users\Dana Smith\x", "cat /home/d\u00e4na/x", "cat /home/d\u0430na/x",
+                           "ls /home/user\u00eb/x", r"dir C:\Users\user Smith\x", "ls /Users/Shared\u200b/x",
+                           "ls /home/user\u0301/x", "ls /home/useR2/x", "ls /Users/Publicity"):
+                with self.subTest(target):
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+            # Backslashes, mixed separators, // and /./ are read as one slash, and the placeholder passes only before
+            # a slash, a line break or the end (Q76).
+            for target in (r"cd \Users\bob", r"type \home\bob\x", r"type \\wsl$\Ubuntu\home\bob\x",
+                           r"type \\wsl.localhost\Ubuntu\home\bob\x", r"type C:/Users\bob\x", r"type C:\Users/bob/x",
+                           r"type \\host\c$\Users\bob\x", "ls /home//bob/x", "ls /home/./bob/x", "ls /Users/./bob/x",
+                           r"type C:\Documents and Settings\bob\x", r"type C:\Users\User (2)\x", r"type C:\Users\user(2)\x",
+                           r"type C:\Users\user&co\x", r"type C:\Users\user$\x", r"type C:\Users\user'x\x",
+                           r"type C:\Users\user{1}\x", "ls /home/user$", "cd /home/user && ls"):
+                with self.subTest(target):
+                    self.assertTrue(self.harness.leaks([{"kind": "run", "target": target, "ok": True}]))
+        self.assertFalse(hasattr(self.harness, "case_accounts"))
+
+    def test_the_agent_s_path_holds_what_its_cases_run(self):
+        self.assertIn("a-program-nobody-has", self.harness.missing_on_agent_path(("a-program-nobody-has",)))
+        self.assertEqual(self.harness.missing_on_agent_path(("sh",)), [] if os.name != "nt" else ["sh"])
+        self.assertTrue(os.path.isabs(self.harness.agent_command("go", "haiku")[0]) or not shutil.which("claude"))
 
     def test_a_windows_path_written_with_backslashes_is_found(self):
         """Criterion 27. Runs on every system: the identity is given, not read from this machine."""
@@ -3575,6 +3627,89 @@ class DenyListTests(Folder):
             # The cases run with their own settings only, so the part loads, and then refuses the manifest's.
             self.assertEqual(code, 1, setting)
             self.assertIn("only its cases may", out, setting)
+
+
+class DenyListCommitsTests(Folder):
+    """M3 slice Z, Q8: `check --commits BASE..HEAD` runs deny_list on the lines each commit adds, beside the message
+    checks, so a branch committed with --no-verify is scanned before it is pushed."""
+
+    def setUp(self):
+        super().setUp()
+        self.workspace({"use": "deny_list"})
+        self.list_file = self.root.parent / f"{self.root.name}-deny.txt"
+        self.list_file.write_text("# private\nglobex corp\nre:\\bGLX-\\d+\\b\n", encoding="utf-8")
+        self.addCleanup(self.list_file.unlink)
+        home = self.root.parent / f"{self.root.name}-home"   # so the default list path is never the real one
+        environment = mock.patch.dict(os.environ, {"WS_DENY_LIST": str(self.list_file), "HOME": str(home),
+                                                   "USERPROFILE": str(home)})
+        environment.start()
+        self.addCleanup(environment.stop)
+        self.git("init", "-q", "-b", "main")
+        self.write("old.md", "Globex Corp was here before the range.\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "--no-verify", "-m", "chore: start")
+        self.base = self.git("rev-parse", "HEAD").stdout.strip()
+
+    def commit(self, files, message):
+        for path, data in files.items():
+            if isinstance(data, bytes):
+                (self.root / path).parent.mkdir(parents=True, exist_ok=True)
+                (self.root / path).write_bytes(data)
+            else:
+                self.write(path, data)
+            self.git("add", "--", path)
+        self.git("commit", "-q", "--no-verify", "-m", message)
+        return self.git("rev-parse", "HEAD").stdout.strip()
+
+    def commits(self):
+        return self.ws("check", "--commits", f"{self.base}..HEAD")
+
+    def test_a_line_a_commit_adds_fails_naming_the_commit_and_line_never_the_term(self):
+        self.commit({"a.md": "fine\n"}, "docs: fine")
+        bad = self.commit({"a.md": "fine\nmore\nShips to globex-corp, see GLX-42.\n"}, "docs: more")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn(f"commit {bad[:7]} \"docs: more\"", out)
+        self.assertIn("a.md:3: matches line 2 of the private deny list", out)
+        self.assertIn("a.md:3: matches line 3 of the private deny list", out)
+        self.assertIn("[deny_list]", out)
+        self.assertNotIn("globex", out.lower())
+        self.assertIn("2 commit(s) checked", out)
+
+    def test_only_the_lines_the_range_adds_are_read(self):
+        self.commit({"old.md": "Globex Corp was here before the range.\nA new line.\n"}, "docs: a line")
+        code, out = self.commits()
+        self.assertEqual(code, 0, out)
+
+    def test_a_term_a_later_commit_removes_still_fails_on_the_commit_that_added_it(self):
+        bad = self.commit({"a.md": "globex corp\n"}, "docs: add")
+        self.commit({"a.md": "clean\n"}, "docs: remove")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn(f"commit {bad[:7]} ", out)
+
+    def test_a_new_file_s_name_and_a_utf16_file_are_read(self):
+        self.commit({"plans/globex-corp.md": ""}, "docs: an empty file")
+        self.commit({"u.txt": "globex corp\n".encode("utf-16")}, "docs: utf-16")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn("plans/<name ", out)
+        self.assertIn("u.txt:1:", out)
+        self.assertNotIn("globex", out.lower())
+
+    def test_the_message_checks_still_run(self):
+        self.commit({"a.md": "fine\n"}, "docs: globex corp")
+        code, out = self.commits()
+        self.assertEqual(code, 1, out)
+        self.assertIn("commit message:1: matches line 2 of the private deny list", out)
+
+    def test_with_no_list_it_warns_once_per_commit_checks_nothing_and_passes(self):
+        del os.environ["WS_DENY_LIST"]
+        self.commit({"a.md": "globex corp\n"}, "docs: add")
+        code, out = self.commits()
+        self.assertEqual(code, 0, out)
+        self.assertEqual(out.count("warning: workspace.json:1: no private deny list"), 1, out)
+        self.assertIn("1 commit(s) checked", out)
 
 
 class RepositoryTests(unittest.TestCase):

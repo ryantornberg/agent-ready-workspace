@@ -34,15 +34,28 @@ so a guard learns everything it decides on without parsing again:
     cwd             the folder the command runs in, relative to the session's folder ("." when unchanged), or
                     None when it cannot be known.
     cwd_unresolved  why cwd is None.
+    cd_folders      when cwd is None, the folder each cd or pushd earlier in this shell named, as written, so a
+                    guard can tell where a relative write after a cd the parser cannot follow may land; [] when
+                    cwd is known.
     writes          [{"path", "dynamic", "via"}]: >, >>, >|, &>, <>, tee, cp (target), mv (source and target),
-                    sed -i, dd of=, rm, ln, truncate, install, rsync, touch, git config --file.
+                    sed -i, dd of=, rm, unlink, rmdir, shred, ln, truncate, install, rsync, touch,
+                    git config --file, the operands of git mv, rm, checkout and restore (after any -C folder;
+                    a checkout's branch too, since the words cannot tell it from a path), and find -delete, whose
+                    path is each folder it starts from ("." when it names none), since the files it removes are
+                    known only when it runs.
     config_writes   [{"key", "value", "op", "via", "guarded"}]: git config written by git -c, git config,
                     GIT_CONFIG_COUNT/KEY_n/VALUE_n or GIT_CONFIG_PARAMETERS. key is None when unknowable.
                     guarded is True for remote.*, url.*, push.*, branch.*.pushRemote, branch.*.merge,
                     remote.pushDefault, include.*, includeIf.*, alias.*, core.worktree and core.sshCommand,
-                    and for any key that cannot be known.
+                    and for any key that cannot be known (guarded_key). A persistent `git config` write is also
+                    guarded for the keys in PERSISTENT_GUARDED, such as core.hooksPath, and a rename or
+                    removal of a section is guarded when the section, or the new name, holds such a key
+                    (guarded_section). A rename's write also gives "new_key", the new name, None when it
+                    cannot be read.
     config_env      the config-affecting variables set on it: HOME, XDG_CONFIG_HOME, GIT_CONFIG_GLOBAL,
                     GIT_CONFIG_SYSTEM, GIT_CONFIG_NOSYSTEM (HOME too under env -i).
+    reads           [{"path", "dynamic", "via"}]: the command's input redirections, < and <>, as writes are given,
+                    inside substitutions, eval and a shell's -c text in every flag form too.
     ssh_env         GIT_SSH and GIT_SSH_COMMAND, when set.
     git             None, or the git facts below.
     gh              None, or the gh facts below.
@@ -70,7 +83,10 @@ so a guard learns everything it decides on without parsing again:
     discard         canonical names of the forms that drop work: "switch --force", "checkout --force",
                     "read-tree --reset -u", "reset --hard", "reset --keep", "reset --merge", "autostash",
                     "stash drop", "stash pop", "stash clear", "worktree remove", "worktree remove --force",
-                    "worktree prune", "clean --force".
+                    "worktree prune", "clean --force", "whole-tree checkout" and "whole-tree restore" (a pathspec
+                    of ".", ":/", "*" or only "." and "..", or --pathspec-from-file; a restore of --staged alone
+                    is not one), "stash write" (push, save, store and a plain stash), "rebase" and
+                    "cherry-pick".
     pull_rebase     True for a pull that rebases (-r, --rebase, -c pull.rebase).
     tracking        True for -t/--track, -u/--set-upstream(-to), push -u.
     remote          None, or {"action", "name", "url", "push", "dynamic"} for git remote add / set-url / ...
@@ -823,14 +839,15 @@ class _Context:
     """What the shell knows at one point of the line: its folder, its exported variables, whether it is a subshell."""
 
     def __init__(self, cwd=".", cwd_reason=None, env=None, subshell=False, in_sub=False, depth=0,
-                 worktree_reason=None):
+                 worktree_reason=None, cd_folders=()):
         self.cwd, self.cwd_reason, self.env = cwd, cwd_reason, dict(env or {})
         self.subshell, self.in_sub, self.depth = subshell, in_sub, depth
         self.worktree_reason = worktree_reason
+        self.cd_folders = list(cd_folders)      # every cd or pushd folder this shell has seen, as written
 
     def copy(self, **changes):
         clone = _Context(self.cwd, self.cwd_reason, self.env, self.subshell, self.in_sub, self.depth,
-                         self.worktree_reason)
+                         self.worktree_reason, self.cd_folders)
         for key, value in changes.items():
             setattr(clone, key, value)
         return clone
@@ -931,6 +948,32 @@ def guarded_key(key):
     return section == "core" and variable in ("worktree", "sshcommand")
 
 
+# Keys only a persistent `git config` write is refused for, beyond guarded_key's: core.hooksPath points git at
+# another hooks folder, which turns off every commit and push check (M3 slice C5d, the maintainer's answer to Q16),
+# and submodule.recurse makes every later push send each submodule to its own remote, which the outward-write guard
+# does not work out (M3 slice C5e). A -c value lasts one call, as --no-verify does, so a -c write of one is not
+# guarded; the guard it concerns judges it.
+PERSISTENT_GUARDED = {"core.hookspath", "submodule.recurse"}
+
+
+def guarded_persistent_key(key):
+    """True for a key whose persistent `git config` write the guards refuse: guarded_key's, and PERSISTENT_GUARDED.
+    A key that cannot be known counts."""
+    if key is None:
+        return True
+    return guarded_key(key) or (len(key.split(".")) == 2 and key.lower() in PERSISTENT_GUARDED)
+
+
+def guarded_section(name):
+    """True when a config section of that name holds a key a persistent write may not set, or may: removing it
+    unsets those keys, and renaming another section to it sets them. `core` holds core.hooksPath. A name that
+    cannot be known counts."""
+    if name is None:
+        return True
+    return guarded_key(name + ".x") or guarded_key(name) or name.lower() in {
+        key.split(".")[0] for key in PERSISTENT_GUARDED}
+
+
 def _env_config(env):
     """[(key or None, value, via)] that GIT_CONFIG_COUNT/KEY_n/VALUE_n or GIT_CONFIG_PARAMETERS set."""
     found = []
@@ -976,7 +1019,7 @@ PUSH_FLAGS = ("all", "branches", "mirror", "tags", "follow-tags", "no-follow-tag
 SUBCOMMAND_SHORT_VALUES = {
     "push": "o", "commit": "mFCct", "tag": "mFu", "merge": "mFsX", "switch": "cC", "checkout": "bB",
     "rebase": "xsX", "pull": "sX", "stash": "m", "branch": "u", "notes": "mFcC", "clean": "e", "worktree": "b",
-    "remote": "tm", "config": "f", "cherry-pick": "mX", "commit-tree": "mFp",
+    "remote": "tm", "config": "f", "cherry-pick": "mX", "commit-tree": "mFp", "restore": "s",
 }
 SUBCOMMAND_LONG_VALUES = {
     "push": ("repo", "receive-pack", "exec", "push-option", "recurse-submodules"),
@@ -990,11 +1033,27 @@ SUBCOMMAND_LONG_VALUES = {
     "stash": ("message", "pathspec-from-file"),
     "switch": ("create", "force-create", "orphan", "conflict"),
     "checkout": ("orphan", "conflict", "pathspec-from-file"),
+    "restore": ("source", "conflict", "pathspec-from-file"),
     "branch": ("set-upstream-to", "format", "sort", "contains", "no-contains", "merged", "no-merged", "points-at"),
     "worktree": ("reason",),
     "config": ("file", "blob", "type", "default", "comment", "value", "url"),
     "notes": ("message", "file", "reuse-message", "reedit-message", "ref"),
 }
+
+
+# A pathspec that names the whole tree: a checkout or restore of it overwrites every changed file.
+WHOLE_TREE = {".", "./", ":/", ":/.", ":/*", ":(top)", ":(top).", "*", "**"}
+# The stash actions that write a stash entry, and so take the working tree's changes away: a plain `git stash` is
+# a push.
+STASH_WRITES = {"push", "save", "store"}
+
+
+def _whole_tree(text):
+    """True for a pathspec of the whole tree: one in WHOLE_TREE, or a path of only "." and ".." segments."""
+    if text in WHOLE_TREE:
+        return True
+    parts = [part for part in text.split("/") if part]
+    return bool(parts) and all(part in (".", "..") for part in parts)
 
 
 def _git(args, env, cwd, cwd_reason, ctx, aliases):
@@ -1007,6 +1066,7 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
     config_writes, file_writes, nested, messages = [], [], [], []
     folder, folder_reason = cwd, cwd_reason
     git_dir = work_tree = None
+    prefix, prefix_dynamic = "", False         # the -C folders as written, for the paths a git call writes
     i = 0
     while i < len(args):
         text = args[i].text
@@ -1031,6 +1091,10 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
                     git_dir = folder
                 continue
         if name == "-C":
+            if dynamic:
+                prefix_dynamic = True
+            elif value:
+                prefix = value if _absolute(value) or not prefix else posixpath.join(prefix, value)
             if dynamic:
                 folder, folder_reason = None, "-C names a variable or substitution"
             elif value and folder is not None:
@@ -1195,6 +1259,16 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
         discard.append("worktree remove --force" if {"-f", "--force"} & set(names) else "worktree remove")
     if subcommand == "worktree" and facts["action"] == "prune":
         discard.append("worktree prune")
+    if subcommand in ("checkout", "restore"):
+        whole = any(_whole_tree(word.text) for _, word in operands) or any(
+            name.startswith("--pathspec-from") for name in names)
+        staged_only = {"-S", "--staged"} & set(names) and not {"-W", "--worktree"} & set(names)
+        if whole and not (subcommand == "restore" and staged_only):
+            discard.append("whole-tree " + subcommand)
+    if subcommand == "stash" and facts["action"] in STASH_WRITES:
+        discard.append("stash write")
+    if subcommand in ("rebase", "cherry-pick"):
+        discard.append(subcommand)
     if subcommand == "pull":
         rebase = None
         if config("pull.rebase") is not None:
@@ -1220,6 +1294,13 @@ def _git(args, env, cwd, cwd_reason, ctx, aliases):
     if subcommand in ("switch", "checkout", "branch") and (
             {"-t", "--track", "-u", "--set-upstream-to", "--set-upstream"} & set(names)):
         facts["tracking"] = True
+
+    if subcommand in ("mv", "rm", "checkout", "restore"):
+        # Each operand may be a path git rewrites or removes. A checkout's first operand may be a branch instead;
+        # it is reported too, since the words alone cannot tell them apart.
+        for _, word in operands:
+            path = word.text if not prefix or _absolute(word.text) else posixpath.join(prefix, word.text)
+            file_writes.append({"path": path, "dynamic": word.dynamic or prefix_dynamic, "via": "git " + subcommand})
 
     if subcommand == "rebase":
         for name, value in opts:
@@ -1282,8 +1363,16 @@ def _git_config(opts, operands, action, file_writes):
         return [{"key": None, "value": None, "op": op, "via": "git config", "guarded": True, "scope": scope}]
     key, dynamic = values[0]
     value = values[1][0] if len(values) > 1 and op == "set" else None
-    return [{"key": None if dynamic else key, "value": value, "op": op, "via": "git config",
-             "guarded": dynamic or guarded_key(key), "scope": scope}]
+    write = {"key": None if dynamic else key, "value": value, "op": op, "via": "git config", "scope": scope}
+    if op == "rename-section":
+        new = values[1] if len(values) > 1 else None
+        write["new_key"] = None if new is None or new[1] else new[0]
+        write["guarded"] = dynamic or guarded_section(key) or guarded_section(write["new_key"])
+    elif op == "remove-section":
+        write["guarded"] = dynamic or guarded_section(key)
+    else:
+        write["guarded"] = dynamic or guarded_persistent_key(key)
+    return [write]
 
 
 def _git_remote(action, opts, operands):
@@ -1536,6 +1625,7 @@ WRITE_OPTIONS = {   # program: (short options that take a value, long ones that 
                         "min-size", "remote-option", "suffix", "out-format", "info", "debug", "usermap",
                         "groupmap", "rsync-path")),
     "tee": ("", ()), "touch": ("rdt", ("reference", "date")),
+    "unlink": ("", ()), "rmdir": ("", ()), "shred": ("ns", ("iterations", "size", "random-source")),
 }
 
 
@@ -1558,7 +1648,7 @@ def _program_writes(program, args):
     opts, operands = _scan(args, short_values, long_values)
     words = [word for _, word in operands]
     target = next((value for name, value in opts if name in ("-t", "--target-directory") and value), None)
-    if program in ("rm", "tee", "truncate", "touch"):
+    if program in ("rm", "tee", "truncate", "touch", "unlink", "rmdir", "shred"):
         for word in words:
             add(word, program)
     elif program in ("cp", "mv", "install", "rsync"):
@@ -1629,6 +1719,29 @@ def _sed_writes(args):
     return [{"path": word.text, "dynamic": word.dynamic, "via": "sed -i"} for word in files]
 
 
+def _find_deletes(args):
+    """A find that deletes what it finds writes under each folder it starts from: "." when it names none. The files
+    it removes are known only when it runs, so a guard judges the folder, not a file."""
+    if not any(word.literal and word.text == "-delete" for word in args):
+        return []
+    i = 0
+    while i < len(args) and args[i].text in ("-H", "-L", "-P", "-E", "-X", "-d", "-s", "-x"):
+        i += 1
+    starts = []
+    while i < len(args) and not (args[i].literal and (args[i].text.startswith("-") or args[i].text in ("(", "!", ","))):
+        starts.append(args[i])
+        i += 1
+    if not starts:
+        return [{"path": ".", "dynamic": False, "via": "find -delete"}]
+    return [{"path": word.text, "dynamic": word.dynamic, "via": "find -delete"} for word in starts]
+
+
+def _redirect_reads(records):
+    """The files a command reads by < or <>, as writes are given."""
+    return [{"path": record["target"].text, "dynamic": record["target"].dynamic, "via": record["op"]}
+            for record in records if record["op"] in ("<", "<>") and record["target"] is not None]
+
+
 def _redirect_writes(records):
     writes = []
     for record in records:
@@ -1661,6 +1774,8 @@ class _Walker:
             target = self._cd_target(pipeline)
             if target is not False:
                 self.walk_command(pipeline[0], ctx, via, piped_in=False)
+                if target is not None:
+                    ctx.cd_folders.append(target.text)
                 leading = (k == 0 and not ctx.subshell and (first_of_line or (ops and ops[0] == "&&")))
                 if not leading:
                     ctx.cwd, ctx.cwd_reason = None, ("a cd inside a subshell" if ctx.subshell else
@@ -1731,9 +1846,9 @@ class _Walker:
 
     def _redirect_only(self, records, ctx, via):
         self.walk_records(records, ctx, via)
-        writes = _redirect_writes(records)
-        if writes:
-            self.out.append(self._dict(None, [], {}, ctx, via, writes=writes))
+        writes, reads = _redirect_writes(records), _redirect_reads(records)
+        if writes or reads:
+            self.out.append(self._dict(None, [], {}, ctx, via, writes=writes, reads=reads))
 
     def simple(self, words, records, ctx, via, piped_in):
         self.walk_subs(words, ctx, via)
@@ -1743,16 +1858,16 @@ class _Walker:
             name, value = words[i].assign
             own[name] = (value, words[i].dynamic)
             i += 1
-        writes = _redirect_writes(records)
+        writes, reads = _redirect_writes(records), _redirect_reads(records)
         if i == len(words):
             ctx.env.update(own)               # NAME=value alone: it stays for the rest of this shell
-            if writes:
-                self.out.append(self._dict(None, [], own, ctx, via, writes=writes))
+            if writes or reads:
+                self.out.append(self._dict(None, [], own, ctx, via, writes=writes, reads=reads))
             return
         self.dispatch(words[i:], own, writes, records, ctx, via, piped_in, None, ctx.cwd, ctx.cwd_reason, False)
 
     def _dict(self, program, args, own, ctx, via, writes=(), cwd=None, cwd_reason=None, cleared=False,
-              unresolved=None, runtime=None, use_ctx_cwd=True):
+              unresolved=None, runtime=None, use_ctx_cwd=True, reads=()):
         env = {} if cleared else {k: v for k, v in ctx.env.items()}
         env.update(own)
         return {
@@ -1765,7 +1880,8 @@ class _Walker:
             "wrappers": list(via), "in_substitution": ctx.in_sub, "in_subshell": ctx.subshell,
             "unresolved": unresolved, "runtime_args": runtime,
             "cwd": ctx.cwd if use_ctx_cwd else cwd, "cwd_unresolved": ctx.cwd_reason if use_ctx_cwd else cwd_reason,
-            "writes": list(writes), "config_writes": [],
+            "cd_folders": list(ctx.cd_folders) if (ctx.cwd if use_ctx_cwd else cwd) is None else [],
+            "writes": list(writes), "reads": list(reads), "config_writes": [],
             "config_env": sorted({k for k in CONFIG_ENV if k in env} | ({"HOME"} if cleared else set())),
             "ssh_env": sorted(k for k in SSH_ENV if env.get(k) is not None),
             "git": None, "gh": None,
@@ -1776,10 +1892,11 @@ class _Walker:
         args = words[1:]
         env = {} if cleared else dict(ctx.env)
         env.update(own)
+        reads = _redirect_reads(records)
 
         def emit(program, unresolved=None, **extra):
             entry = self._dict(program, args, own, ctx, via, writes, cwd, cwd_reason, cleared, unresolved, runtime,
-                               use_ctx_cwd=False)
+                               use_ctx_cwd=False, reads=reads)
             entry["env"] = {k: (v[0] if v is not None else None) for k, v in env.items()}
             entry["env_dynamic"] = sorted(k for k, v in env.items() if v is not None and v[1])
             entry["config_env"] = sorted({k for k in CONFIG_ENV if k in env} | ({"HOME"} if cleared else set()))
@@ -1813,7 +1930,7 @@ class _Walker:
                 if split is not None:
                     text = split[0] + " " + " ".join(shlex.quote(w.text) for w in inner)
                     return self._run_text(text, split[1] or any(w.dynamic for w in inner), name + " -S", words,
-                                          own, writes, ctx, via, cwd, cwd_reason)
+                                          own, writes, ctx, via, cwd, cwd_reason, reads)
                 if inner:
                     if clear:
                         own2 = dict(extra)
@@ -1825,13 +1942,13 @@ class _Walker:
         if name == "eval" and not deep:
             dynamic = any(w.dynamic for w in args)
             text = " ".join(w.text for w in args)
-            return self._run_text(text, dynamic, "eval", words, own, writes, ctx, via, cwd, cwd_reason)
+            return self._run_text(text, dynamic, "eval", words, own, writes, ctx, via, cwd, cwd_reason, reads)
         if name == "watch" and not deep:
             _, operands = _scan(args, "nd", ("interval", "differences"))
             rest = [w for _, w in operands]
             if rest:
                 return self._run_text(" ".join(w.text for w in rest), any(w.dynamic for w in rest), "watch",
-                                      words, own, writes, ctx, via, cwd, cwd_reason)
+                                      words, own, writes, ctx, via, cwd, cwd_reason, reads)
         if name in SHELL_PROGRAMS and not deep:
             return self._shell(name, args, own, writes, records, ctx, via, piped_in, emit, cwd, cwd_reason)
         if name in ("export", "declare", "typeset", "readonly", "local") and not ctx.in_sub:
@@ -1844,6 +1961,7 @@ class _Walker:
                     ctx.env[word.text] = None
         if name == "find" and not deep:
             entry = emit("find")
+            entry["writes"] = list(writes) + _find_deletes(args)
             self._find(args, own, writes, ctx, via, cwd, cwd_reason, cleared)
             return entry
 
@@ -1878,7 +1996,7 @@ class _Walker:
             for entry in self.out[before:]:
                 entry["unresolved"] = entry["unresolved"] or f"{label} runs text that holds a variable or substitution"
 
-    def _run_text(self, text, dynamic, label, words, own, writes, ctx, via, cwd, cwd_reason):
+    def _run_text(self, text, dynamic, label, words, own, writes, ctx, via, cwd, cwd_reason, reads=()):
         """eval, sh -c, env -S, watch: the text is a command line of its own."""
         inner = ctx.copy(depth=ctx.depth + 1, cwd=cwd, cwd_reason=cwd_reason)
         inner.env = dict(ctx.env)
@@ -1899,9 +2017,9 @@ class _Walker:
                 entry = self._dict(words[0].text.rsplit("/", 1)[-1], words[1:], own, ctx, via, writes, cwd,
                                    cwd_reason, unresolved=reason, use_ctx_cwd=False)
                 self.out.append(entry)
-        if writes:
+        if writes or reads:
             self.out.append(self._dict(None, [], own, ctx, via, writes=writes, cwd=cwd, cwd_reason=cwd_reason,
-                                       use_ctx_cwd=False))
+                                       use_ctx_cwd=False, reads=reads))
         return None
 
     def _shell(self, name, args, own, writes, records, ctx, via, piped_in, emit, cwd, cwd_reason):
@@ -1923,20 +2041,22 @@ class _Walker:
                 i += 1
                 continue
             break
+        reads = _redirect_reads(records)
         if has_c:
             if i < len(args):
                 return self._run_text(args[i].text, args[i].dynamic, name + " -c", [_literal(name)] + args, own,
-                                      writes, ctx, via, cwd, cwd_reason)
+                                      writes, ctx, via, cwd, cwd_reason, reads)
             return emit(name)
         if i < len(args) and not reads_stdin:
             return emit(name)                  # a script: out of reach, and said so
         for record in records:
             if record["op"] in ("<<", "<<-") and record["body"] is not None:
                 return self._run_text(record["body"], record["body_dynamic"],
-                                      name + " <<", [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason)
+                                      name + " <<", [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason,
+                                      reads)
             if record["op"] == "<<<" and record["target"] is not None:
                 return self._run_text(record["target"].text, record["target"].dynamic, name + " <<<",
-                                      [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason)
+                                      [_literal(name)] + args, own, writes, ctx, via, cwd, cwd_reason, reads)
             if record["op"] == "<":
                 return emit(name)              # a script read from a file
         if piped_in:

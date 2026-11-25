@@ -30,6 +30,10 @@ runner reads what it needs from git (decision 0004, "Shell events": the `aliases
                               moved from wslib/shellfacts.py, which still offers it).
     listed(destination, repositories)
                            -> True when a destination is one of the repositories in the outward-write list.
+    expanded_program(command)
+                           -> why a program word of the command is one the shell expands into other words, or
+                              None: a glob, braces or a zsh pattern (M3 slice Z, the maintainer's answer to Q54).
+    expands(text)          -> True when the shell may expand a program word written so.
 
 A git config file is one of the files the runner lists in `git_config`: the global ones (`~/.gitconfig`,
 `$XDG_CONFIG_HOME/git/config`, `~/.config/git/config`, `GIT_CONFIG_GLOBAL`) and every file an `include.path` or
@@ -45,17 +49,21 @@ from . import shell
 
 PAGE = "docs/decisions/0004-the-hook-contract.md"
 
-# Programs whose operands the parser does not report as writes, though each removes or changes the file it names.
-# A parser gap handled here, until slice Z moves it into wslib/shell.py.
-REMOVERS = {"unlink", "rmdir", "shred"}
 # Programs that write the files they are given. When xargs or find -exec supplies those files at run time, no guard
 # can know which they are.
-WRITERS = {"rm", "cp", "mv", "ln", "truncate", "install", "rsync", "touch", "tee", "dd"} | REMOVERS
+WRITERS = {"rm", "cp", "mv", "ln", "truncate", "install", "rsync", "touch", "tee", "dd", "unlink", "rmdir", "shred"}
 PERSISTENT_OPS = {"set", "unset", "edit", "rename-section", "remove-section"}
 # The text of a write target that is a variable, read for what it shows: a .git segment, a config file's name, or
 # a way to ask git for its folder.
 GIT_FOLDER_HINTS = re.compile(r"GIT_DIR|GIT_COMMON_DIR|rev-parse|--git-path|--git-dir|--git-common-dir")
 VARIABLE = re.compile(r"\$(?:\{(\w+)\}|(\w+))")
+# A program word the shell expands before it runs, anywhere in the word, its folders included: a glob (*, ? or [),
+# braces ({git,} or {/usr/bin,-C/tmp/x}/git, which becomes two words), zsh's extended glob (#, ^, and ~ past the
+# first letter, where it is not the home folder), and zsh's =NAME, which becomes the program's full path. The parser
+# reads such a word as a literal program, and keeps only its last part, so it would pass every guard (Q54). A quoted
+# word does not expand, and the parser does not say which parts were quoted, so a quoted one is refused too: no
+# program a person runs has such a name. The test commands `[` and `[[` are the exceptions. The parser fix waits for M4.
+EXPANDING = re.compile(r"[*?\[{}#^]|.~|^=")
 
 
 def fold(path):
@@ -165,18 +173,6 @@ def _dynamic_refusal(path, call, home, files, cwd):
     return None
 
 
-def _find_deletes(call):
-    """True for a find that deletes what it finds: a parser gap handled here."""
-    return call.get("program") == "find" and "-delete" in (call.get("args") or [])
-
-
-def _remover_writes(call):
-    if call.get("program") not in REMOVERS:
-        return []
-    return [{"path": word, "dynamic": index in set(call.get("dynamic_args") or ()), "via": call["program"]}
-            for index, word in enumerate(call.get("args") or []) if not word.startswith("-")]
-
-
 def _config_file(absolute, files):
     """True for a git config file: one the runner listed, or a repository's own config under its git folder."""
     if absolute is None:
@@ -185,47 +181,10 @@ def _config_file(absolute, files):
     return absolute in files or (".git" in parts and parts[-1] in ("config", "config.worktree"))
 
 
-# Keys a persistent `git config` write may not set, beyond A0's list in wslib/shell.py: core.hooksPath points git
-# at another hooks folder, which turns off every commit and push check (M3 slice C5d, the maintainer's answer to
-# Q16). submodule.recurse makes every later push send each submodule to its own remote, which the outward-write
-# guard does not work out (M3 slice C5e). Kept here, outside the eval's hash, until slice Z moves them into
-# `guarded_key`. A -c value lasts one call, like --no-verify, so it is not counted here; the guard it concerns
-# judges it.
-PERSISTENT_ONLY = {"core.hookspath", "submodule.recurse"}
-
-
-def _persistent_only(key):
-    parts = key.split(".")
-    return len(parts) == 2 and key.lower() in PERSISTENT_ONLY
-
-
-def _section_guarded(name):
-    """True when a section of that name holds a key the guards refuse, or may: `core` holds core.hooksPath."""
-    return shell.guarded_key(name + ".x") or shell.guarded_key(name) or name.lower() == "core"
-
-
-def _guarded(write, call=None):
-    key = write.get("key")
-    if key is None:
-        return True
-    if write.get("op") == "remove-section":
-        # Removing `core` removes core.hooksPath, which this workspace sets to its own hooks folder.
-        return shell.guarded_key(key + ".x") or shell.guarded_key(key) or key.lower() == "core"
-    if write.get("op") == "rename-section":
-        # The parser reports the old name only; the new one decides as much, since renaming a section to
-        # remote.x or core brings its keys in there. A parser gap handled here until slice Z.
-        new = _renamed_to(call, key)
-        return _section_guarded(key) or new is None or _section_guarded(new)
-    return shell.guarded_key(key) or _persistent_only(key)
-
-
-def _renamed_to(call, old):
-    """The new name a `git config --rename-section OLD NEW` gives, or None when it cannot be read."""
-    args = list(((call or {}).get("git") or {}).get("args") or [])
-    for index, word in enumerate(args):
-        if word in ("--rename-section", "rename-section") and index + 2 < len(args) and args[index + 1] == old:
-            return args[index + 2]
-    return None
+def _guarded(write):
+    """True for a persistent `git config` write the guards refuse, as the parser judges it: a key it lists, a
+    section that holds one, and a key or a name that cannot be read."""
+    return write.get("key") is None or bool(write.get("guarded"))
 
 
 DEVICES = {"/dev/null", "/dev/stdout", "/dev/stderr", "/dev/tty"}
@@ -257,10 +216,6 @@ def shell_refusals(event):
     writes to the keys the guards read. Each is a reason, in the order the shell would run them."""
     facts, cwd = _Facts(event), event.get("cwd")
     calls, why_aliases = read(event)
-    # A cd the parser cannot follow (one that is not the leading command, or one in a subshell) leaves a later
-    # command's folder unknown. If any cd in the line enters a git folder, a relative write after it may land there.
-    enters = next((arg for call in calls if call.get("program") in ("cd", "pushd") for arg in call.get("args") or []
-                   if git_segment(arg) or GIT_FOLDER_HINTS.search(arg)), None)
     reasons = []
     for call in calls:
         alias_why = _alias_config_refusal(call, why_aliases)
@@ -274,11 +229,16 @@ def shell_refusals(event):
                            f"tell whether one is in a git folder or a git config file. Name the files on the command "
                            f"line, or edit them with the edit tool")
             continue
-        if _find_deletes(call):
+        if any(write.get("via") == "find -delete" for write in call.get("writes") or ()):
             reasons.append("find -delete removes whatever it finds when it runs, so no guard can tell whether that is "
                            "in a git folder. Remove named files with rm, or ask the person")
             continue
-        for write in list(call.get("writes") or ()) + _remover_writes(call):
+        # A cd the parser cannot follow (one that is not the leading command, or one in a subshell) leaves this
+        # command's folder unknown, and the parser names the folders the cds before it entered. If one is a git
+        # folder, a relative write here may land there.
+        enters = next((folder for folder in call.get("cd_folders") or ()
+                       if git_segment(folder) or GIT_FOLDER_HINTS.search(folder)), None)
+        for write in call.get("writes") or ():
             path = write.get("path") or ""
             if path in DEVICES:
                 continue
@@ -296,7 +256,7 @@ def shell_refusals(event):
             if why:
                 reasons.append(why)
         for write in call.get("config_writes") or ():
-            if write.get("via") != "git config" or write.get("op") not in PERSISTENT_OPS or not _guarded(write, call):
+            if write.get("via") != "git config" or write.get("op") not in PERSISTENT_OPS or not _guarded(write):
                 continue
             scope = write.get("scope") or ""
             if scope.startswith("--file ") and "$" not in scope and \
@@ -304,7 +264,7 @@ def shell_refusals(event):
                 continue                  # a file git reads no config from
             key = write.get("key") or "a key it cannot read"
             if write.get("op") == "rename-section":
-                key = f"{key} to {_renamed_to(call, key) or 'a name it cannot read'}"
+                key = f"{key} to {write.get('new_key') or 'a name it cannot read'}"
             reasons.append(f"git config {write['op']} of {key} rewrites a git config file, and that key decides "
                            f"where a push goes, what a git command runs, or which folder git works on. Every guard "
                            f"reads it, so an agent does not change it; a person does, from their own terminal")
@@ -622,3 +582,33 @@ def listed(destination, repositories):
         return False
     key = ((destination.get("host") or "").lower(), _path(destination))
     return any(key == ((entry.get("host") or "").lower(), _path(entry)) for entry in repositories or ())
+
+
+
+def expands(text):
+    """True when the shell may expand a program word written so into another name, or into several words (Q54)."""
+    return text not in ("[", "[[") and bool(EXPANDING.search(text))
+
+
+class _ProgramWords(shell._Walker):
+    """The parser's own walk, noting each program word as written, before the parser keeps only its last part. It
+    sees every program word the parser judges: after assignments and wrappers, in substitutions and in `sh -c`."""
+
+    def dispatch(self, words, *rest):
+        self.words.append(words[0])
+        return super().dispatch(words, *rest)
+
+
+def expanded_program(command):
+    """Why a program word of the command is one the shell expands into other words, or None (Q54)."""
+    walker = _ProgramWords(None, ("github.com",))
+    walker.words = []
+    try:
+        walker.walk_list(shell.parse(command or ""), shell._Context(), [], True)
+    except RecursionError:   # this walk adds a frame per wrapper, so it can run out before the parser does
+        return "the line nests too deeply to read each program word"
+    for word in walker.words:
+        if not word.dynamic and expands(word.text):
+            return (f"its program word `{word.text}` is a pattern the shell expands (a glob, braces or a zsh "
+                    f"pattern), so no guard can tell which program runs")
+    return None

@@ -8975,5 +8975,161 @@
       }
     },
     "allow": true
+  },
+  {
+    "name": "shred of the list of repositories is refused, as the parser reports it (M3 slice Z)",
+    "event": {
+      "command": "shred -u outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git -C into a folder, then rm of the list, is refused, as the parser reports the path (M3 slice Z)",
+    "event": {
+      "command": "git -C sub rm --cached outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git restore of the list through a git alias is refused, as the parser expands it and reports the path (M3 slice Z)",
+    "event": {
+      "command": "git -c alias.rs=restore rs outward-repos.json",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "git rm of another file passes",
+    "event": {
+      "command": "git rm old.txt",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      }
+    },
+    "allow": true
+  },
+  {
+    "name": "a gh write whose program word is braces (Q54)",
+    "event": {
+      "command": "{gh,} pr create --fill",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a push whose program word is a glob (Q54)",
+    "event": {
+      "command": "g?t push origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": false
+  },
+  {
+    "name": "a glob in an argument, not the program word, passes (Q54)",
+    "event": {
+      "command": "ls *.md",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": true
+  },
+  {
+    "name": "a push whose program folder is braces (Q54)",
+    "event": {
+      "command": "{/usr/bin,-C/tmp/x}/git push -u origin HEAD",
+      "cwd": "/m",
+      "repositories": {
+        "file": "outward-repos.json",
+        "repositories": [
+          {
+            "host": "github.com",
+            "owner": "me",
+            "name": "ours"
+          }
+        ],
+        "unresolved": null
+      },
+      "targets": {}
+    },
+    "allow": false
   }
 ]

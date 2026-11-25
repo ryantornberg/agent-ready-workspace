@@ -2030,5 +2030,57 @@
       }
     },
     "allow": false
+  },
+  {
+    "name": "while another live session holds the lease, a push whose program word is braces is refused (Q54)",
+    "event": {
+      "command": "{git,} push -u origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
+  },
+  {
+    "name": "while another live session holds the lease, a push whose program word is a zsh extended glob is refused (Q54)",
+    "event": {
+      "command": "git# push -u origin HEAD",
+      "session": "s-this",
+      "pid": 7,
+      "cwd": "/m",
+      "own_working_copy": "/m",
+      "lease": {
+        "state": "other-live",
+        "holder": {
+          "session": "abcdef123456",
+          "pid": 9,
+          "taken": 1700000000
+        },
+        "file": "/m/.git/ws-lease.json"
+      },
+      "working_copies": {
+        ".": {
+          "kind": "main",
+          "top": "/m"
+        }
+      }
+    },
+    "allow": false
   }
 ]

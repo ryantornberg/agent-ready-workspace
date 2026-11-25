@@ -4,6 +4,24 @@
     "base": "guided",
     "index_links": "INDEX.md",
     "under": "docs",
-    "plugins": ["plugin"]
+    "plugins": [
+      "plugin"
+    ]
+  },
+  "routed-no-plugin": {
+    "why": "M3 slice Z's diagnosis (Q81): the routed arm with the wrappers' plugin left out, to tell whether the wrappers or the pages drive the routed arm's loss of the claim-marked-verified label. The same files as routed, read as they ship, unstripped.",
+    "base": "guided",
+    "index_links": "INDEX.md",
+    "under": "docs",
+    "plugins": []
+  },
+  "routed-after-fix": {
+    "why": "M3 slice Z's remeasure (Q83): the routed arm again, after the fix record template, procedure endings and the fix-a-bug wrapper were changed to say the reply ends with the marked report. The same files and plugin as routed, read as they ship, unstripped, in its own folder so routed's 90 runs stay as they are.",
+    "base": "guided",
+    "index_links": "INDEX.md",
+    "under": "docs",
+    "plugins": [
+      "plugin"
+    ]
   }
 }

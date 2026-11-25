@@ -1,6 +1,6 @@
 ---
 kind: reference
-last-reviewed: 2026-11-23
+last-reviewed: 2026-11-25
 ---
 
 # Procedure endings
@@ -104,7 +104,7 @@ Report to the person in the session's reply, in the shape [the definition of don
 - **verified**: you ran something and saw the result;
 - **inferred**: you reasoned your way there.
 
-Then name what is not done: anything left uncommitted or unpushed, any refusal from the steps above with its text, any write waiting on the person's yes, and the question-log entry's text if it could not be committed. A procedure that writes its report to a record, such as a fix record, puts the same lines there.
+Then name what is not done: anything left uncommitted or unpushed, any refusal from the steps above with its text, any write waiting on the person's yes, and the question-log entry's text if it could not be committed. A procedure that keeps its report in a record, such as a fix record, puts the same lines there as a copy. The copy does not replace the reply: the reply still ends with the report, every claim marked.
 
 ## Rules
 
@@ -113,7 +113,7 @@ Then name what is not done: anything left uncommitted or unpushed, any refusal f
 | Stage files by name; never stage everything. | `no_stage_all#add -A`, `edit_ledger#a path the ledger does not hold fails, whatever staged it` |
 | A commit that changes a guidance page names its review record or a listed skip reason. | `review_trailer#a guidance page changed with no trailer fails` |
 | A commit that changes a machinery path reaches main only through a pull request. | `direct_push#a commit that changes a part fails, naming the commit and the path` |
-| Mark every claim in a report as verified or inferred. | `eval:fix-a-bug` |
+| Mark every claim in a report as verified or inferred, and end the reply with the report, even when a record keeps a copy. | `eval:fix-a-bug` |
 | Ask before an outward write the request does not name, and write nothing on a repository outside this one and those pinned under `src/`. | `prose` |
 | Off main, push nothing for pages; the commits stay on the branch for its pull request, and the report names each. | `prose` |
 | Log a question the workspace should have answered, and commit the entry before the report, unless the log holds uncommitted rows you did not add; then give its text in the report. | `prose` |

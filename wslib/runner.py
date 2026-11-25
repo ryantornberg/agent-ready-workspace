@@ -290,7 +290,9 @@ def push_tutorials(root, local, remote):
 
 def command_commits(root, args):
     """CI: every check that reads a commit message, run over each commit of a range, BASE..HEAD: a pull request's
-    commits, or a push to main's. Each commit is judged with its own message, identities, paths and tree."""
+    commits, or a push to main's. Each commit is judged with its own message, identities, paths and tree. The
+    checks that set COMMIT_DIFF, `deny_list` among them, also run on the lines each commit adds (M3 slice Z, Q8),
+    so a branch committed with --no-verify is scanned before it is pushed."""
     base, _, head = args.commits.partition("..")
     if not base or set(base) == {"0"} or not head:
         print(f"warning: the range {args.commits!r} has no base commit, so no commit message was checked")
@@ -299,19 +301,33 @@ def command_commits(root, args):
     if commits is None:
         raise partlib.PartError(f"the commits in {args.commits} cannot be listed. Fetch the whole history "
                                 f"(fetch-depth: 0 in CI), then run it again.")
-    parts = [part for part in partlib.load_all(root)
-             if part.kind == "check" and getattr(part.module, "COMMIT_MESSAGE", False) is True]
+    loaded = partlib.load_all(root)
+    parts = [part for part in loaded if part.kind == "check" and getattr(part.module, "COMMIT_MESSAGE", False) is True]
+    diff_parts = [part for part in loaded if part.kind == "check" and getattr(part.module, "COMMIT_DIFF", False) is True]
+    added = {}
+    if diff_parts and commits:
+        try:
+            added = snapshots.added_by_commit(root, f"{base}..{head}")
+        except RuntimeError as error:
+            raise partlib.PartError(f"the lines the commits in {args.commits} add cannot be read: {error}")
     errors = 0
     for commit in reversed(commits):
         message = commit["message"].encode("utf-8", "surrogateescape")
         snapshot = snapshots.Message(root, message, commit=commit,
                                      identities={"author": commit["author"], "committer": commit["committer"]})
         lines = []
-        for part in parts:
-            for found in part.run(snapshot):
+        runs = [(part, snapshot) for part in parts]
+        if diff_parts:
+            diff = snapshots.Added(added.get(commit["commit"], {}))
+            runs += [(part, diff) for part in diff_parts]
+        for part, judged in runs:
+            for found in part.run(judged):
+                line = partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
+                                        f"python3 ws.py check --commits {args.commits}")
+                if judged is not snapshot and line in lines:
+                    continue          # the same warning from the message and the diff, such as no deny list
                 errors += found["level"] == "error"
-                lines.append(partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
-                                              f"python3 ws.py check --commits {args.commits}"))
+                lines.append(line)
         if lines:
             print(f"commit {commit['commit'][:7]} \"{commit['subject']}\":")
             print("\n".join(f"  {line}" for line in lines))
