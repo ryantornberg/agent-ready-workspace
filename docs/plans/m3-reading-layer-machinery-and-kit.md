@@ -2595,3 +2595,23 @@ Draft pull request #56, on branch `m3/gfix` from `m3/z` at `4a22107`, at the dri
 Not done: nothing
 Parked: Q82
 Next: coordinator — run M3's outside checks before sign-off; Q82, Q84 and the re-check's items 15, 16, 17 and 19 wait for M4
+
+### Sign-off, B1 and B2 and the triage
+
+At the driver tier, from the maintainer's answer to Q85 of 2026-11-25: fix B1 and B2 of the private attack scripts before sign-off, each with a case; B3 and B4 go to M4 as known limits. Part 1 is pull request #57, on branch `m3/b1b2` from main at `09e832c`; CI passed all five check jobs and both cold-clone jobs on its head `c7baf00`, and `python3 ws.py merge 57` merged it as `0dfb349`. Part 2, the triage and the records, is on branch `m3/signoff`. 0 eval runs.
+
+- **Verified, B1:** `gitrules.push_expands` names a word of a git push, or of a git call that is not built in and so may be one, that holds unquoted braces or a glob, or that is directly followed by `(`. `no_force_push` refuses it as a push it cannot judge. `git push origin {+,}main`, `{:,}main`, `-f origin ma{i,}n` and `-f origin mai[n]` are refused. It lives outside the block held twice and outside the eval's hash.
+- **Verified, B2:** `no_force_push` refuses `git send-pack`, `git http-push` and every `git remote-*` helper outright, a stored alias to one included.
+- **Verified, test first:** 30 new cases. 18 of the first 21 failed on `09e832c`; the other 3 are two lines that pass and a forced glob refspec refused already. Fix round 1's 4 refusal cases failed on `e6b8b6d`, and fix round 2's 4 on `0c447d4`.
+- **Verified, the reviews:** one fresh driver-tier reading and one fresh re-check, recorded in `docs/records/instruction-reviews/2026-11-25-signoff-readme.md`, `-parts.md` and `-0004.md`. The first found 10 items, 5 blocking: zsh's glob group `ma(i)n` and glob qualifier `x(e:'...':)` in a push, and `git remote-https` fed a forced refspec. Fix round 1 closed them for a push. The re-check found a quoted program word such as `g\it` skipping the rule, which fix round 2 closed, and the `ext::` transport, one of the commands git runs from its config, environment or a URL, which the pages now name as the interpreter limit for M4.
+- **Decision made without asking, the zsh qualifier outside a push:** `ls README.md(e:'git push -f origin main':)`, an array assignment and a `for` list still pass every shell guard. They are the parser's misread, the cause of B3 and B4, so the pages name them for M4. The review marked the item blocking, so it goes to the maintainer with the recommendation to take it into M4 with the parser work; no third fix round ran.
+- **Verified, the cost:** of 3,025 distinct stored eval commands and 16,438 distinct shell commands from this machine's session logs, none is newly refused by either rule.
+- **Verified, the private attack scripts:** run against `c7baf00`, 115 of 174 attacks as expected, against 101 on main. All 16 controls pass, and all four B1 and all four B2 attacks are refused. `push_lease` now holds 9 of 10 and `outward_write` 27 of 36, since `no_force_push` also refuses their `send-pack` and brace forms.
+- **Verified, the checks on `c7baf00`:** `python3 ws.py selftest` passes every part's cases, `no_force_push` 189 of 189. `python3 -m unittest discover -b tests` ran 804 tests, OK, 3 skipped. `python3 tests/hook_cases.py` passes 94 of 94. `python3 evals/grade.py --recorded` finds no difference. `python3 ws.py check --commits origin/main..HEAD` passes 5 commits. The pushes passed the pre-push hook, so Q82's `--no-verify` was not needed.
+- **Verified, criterion 43:** the scheduled cold-clone run 45672318567 passed at 18:10 UTC on 25 November, after #55 merged, the third night in a row.
+- **Verified, the triage:** each of the red team's 10 findings verified and dispositioned in its record: 6 accepted with the fix made, 2 accepted in part, 2 deferred to M4. No second round: the fixes corrected records and pages and changed no decision, requirement, slice or step.
+- **Verified, the records:** `docs/milestones/m3.md` marks every criterion with its evidence and records the outside checks and M4's limits; `CHANGELOG.md`, `EVIDENCE.md` and four question-log rows, for Q10, Q20, Q82 and Q84.
+
+Not done: the tag `v0.4.0` and the milestone's status, which wait for the maintainer's go
+Parked: none
+Next: maintainer — decide whether the zsh glob qualifier outside a push goes to M4, then give the go to sign off and tag `v0.4.0`

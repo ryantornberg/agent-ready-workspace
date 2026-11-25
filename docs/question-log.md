@@ -1,6 +1,6 @@
 ---
 kind: record
-last-reviewed: 2026-11-22
+last-reviewed: 2026-11-25
 ---
 
 # Question log
@@ -24,7 +24,11 @@ The measure of a workspace is this list getting shorter per piece of work, not t
 | 2026-11-15 | M1's criterion 25 asks for `git add -A` to be refused, but decision 0002 made the hook remind and the commit refuse. Which one holds? The session had to ask the maintainer to approve a revised criterion. | did not understand | The revised criterion, under "Changes after approval" in the [M1 plan](plans/m1-make-the-core-hold-weight.md); the reasons in [decision 0002](decisions/0002-hooks-remind-the-commit-enforces.md) |
 | 2026-11-15 | How does a session commit eval-harness work before the costly runs, when `eval_record` refuses every commit that changes what the eval covers until the runs are on record? The maintainer asked for the work to be committed and pushed first; the workspace did not say how. | not there | [Changing the machinery](changing-the-machinery.md#traps), the trap on eval-harness commits |
 | 2026-11-21 | May an amendment to a decision record edit its **In short** line? The layout rule said a record changes only by a dated "Amended" paragraph, yet slices C4 and C5a had edited the line to keep it true. M3's builders queued it for the maintainer as Q15. | did not understand | [Layout](layout.md#the-opening): an amendment may also edit the record's **In short** line |
+| 2026-11-21 | May the merge helper find `gh` on `PATH`, when criterion 35 of the M3 plan says no environment variable may change which `gh` it calls? M3's builder queued it for the maintainer as Q10; the answer was to keep `PATH`. | did not understand | The README's Limits, the bullet on `python3 ws.py merge` |
 | 2026-11-22 | When a slice builds what another lane's pages call planned, who updates those pages? Slice C5e built the outward-write guard, and three B2 pages still call it planned in C5e; the plan's rule against changing anything outside a slice's row left it open. M3's builder queued it for the maintainer as Q31. | not there | Not answered yet: Q31 in the workspace queue |
+| 2026-11-22 | Which commit should a worktree start from after the lease refuses a session? The lease's refusal said `git worktree add -b BRANCH`, which starts from the main copy's HEAD and so carries the holder's unpushed commits. M3's builder queued it as Q20. | not there | The `lease`, `no_discard` and `push_lease` refusals, which say to start from `origin/main` with `--no-track`; [decision 0005](decisions/0005-concurrent-sessions-and-the-edit-ledger.md) |
+| 2026-11-25 | How does a builder push a guard change that turns a passing case into a refusal, when the pre-push hook loads the cases from the remote's tip and the library from disk, and refuses? Slice GFIX queued it as Q82. | not there | Not answered in a page yet: until M4 fixes the hook, push with `--no-verify` after `python3 ws.py check --commits origin/main..HEAD` passes, by the maintainer's answer to Q82, recorded in the M3 plan's GFIX results |
+| 2026-11-25 | What should `python3 ws.py merge` do with an open pull request stacked on the branch it merges and deletes? GitHub closed #56 when #55's branch was deleted. Slice Z queued it as Q84. | not there | Not answered in a page yet: M4 builds it, retargeting each such pull request to the merged one's base before the deletion |
 
 ## The kickoff prompt
 
