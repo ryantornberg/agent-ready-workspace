@@ -5,5 +5,12 @@
     "index_links": "INDEX.md",
     "under": "docs",
     "plugins": ["plugin"]
+  },
+  "routed-no-plugin": {
+    "why": "M3 slice Z's diagnosis (Q81): the routed arm with the wrappers' plugin left out, to tell whether the wrappers or the pages drive the routed arm's loss of the claim-marked-verified label. The same files as routed, read as they ship, unstripped.",
+    "base": "guided",
+    "index_links": "INDEX.md",
+    "under": "docs",
+    "plugins": []
   }
 }
