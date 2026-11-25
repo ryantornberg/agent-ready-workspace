@@ -29,3 +29,25 @@ In scope: the `no_force_push` row of "The parts here", which the diff against 09
 - trigger: `INDEX.md` routes "Adding a check or a hook" and a finding named by its part here, and a refused force push to decision 0004, which the row links (verified).
 - placement: the row is the page's one-line statement of what the hook refuses, beside the `outward_write` row that already names `send-pack` and `http-push` for its own rule; the two do not disagree, since `outward_write` refuses them by destination and `no_force_push` outright (verified, read).
 - eval-case: the page is marked `proof: unproven` with `prove-by: M4` (verified, front matter).
+
+## Re-check
+
+A fresh session re-read the page and the code on 2026-11-25, after fix round 1, at 0c447d4: the diff `09e832c..0c447d4` of this page, `parts/no_force_push.py`, its cases and `wslib/gitrules.py`. It ran `python3 ws.py selftest` (every part ok, `no_force_push` 185 of 185), `no_force_push.decide`, `python3 ws.py hook before-shell --tool claude-code` on Bash events with `cwd` set to this worktree, and `zsh -f` and `bash` on `print` and `echo` lines in a temporary folder of its own.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed, holds | The row names a word directly followed by `(`. The hook refuses `git push -f origin ma(i)n`, `git push -f origin ma(\|)in` and `git push origin feature README.md(e:'git push -f origin main':)`, exit 2 each. Verified. The same refusal is skipped when the program word is quoted: Missed, item 1. |
+| 2 | fixed, holds | The row names the remote helpers. The hook refuses `git remote-https`, fed a forced refspec, and `git -c alias.h=remote-https h origin URL`, exit 2 each. Verified. A helper git starts from an `ext::` URL still passes: Missed, item 2. |
+| 3 | fixed, holds | The row says the rule covers "a git call that is not built in and so may be one", and the docstring now says such a call passes "unless one of its words is one the shell would expand". The hook refuses `git lfs track *.psd` and passes `git lfs track "*.psd"`, `git log -- *.py` and `git add docs/*.md`. Verified. |
+
+Broke: none.
+
+Missed:
+
+1. Blocking. A quoted or escaped program word turns off the refusal the row lists. `push_expands` returns early when the text `git` is not in the line, but the parser and both shells read `g\it`, `gi''t`, `"g"it` and `$'g'it` as `git`. The hook passes `g\it push origin {+,}main`, `gi''t push -f origin mai[n]`, `"g"it push -f origin ma(i)n` and `$'g'it push origin {+,}main`, exit 0 each, and bash and zsh print `git git git git +main main` for `g\it gi""t "g"it $'g'it {+,}main`. Verified. Inferred, not run: that git then force-pushes main. The full evidence is in the README's record, `2026-11-25-signoff-readme.md`, under "Re-check".
+2. Not blocking, as finding 2 was here, since the row does not claim its list of routes is complete. `git -c protocol.ext.allow=always ls-remote 'ext::sh -c git% push% -f% origin% main'` passes every before-shell hook, and git's `ext::` transport runs the command a remote helper is given. Verified: the hook, exit 0, and `man git-remote-ext`. Inferred, not run: that the push runs. The README's and decision 0004's records mark it blocking.
+
+The author's settlement of the re-check, 2026-11-25. No further re-check ran; fix round 2 was the last the plan allows.
+
+- Missed 1: fixed, fix round 2: `push_expands` no longer tests the line for the text `git`, so the walk reads the program as the parser does; four cases, `g\it`, `"g"it`, `gi''t` and `$'g'it`, each failed first.
+- Missed 2: the row now says a remote helper is refused when called by name. The `ext::` route itself is the README's interpreter limit, taken to the maintainer for M4, as the README record says.
