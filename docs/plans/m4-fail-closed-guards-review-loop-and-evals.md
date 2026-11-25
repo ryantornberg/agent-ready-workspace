@@ -37,6 +37,10 @@ The maintainer, 2026-11-25, in the brief for this plan:
 - The plan says whether M4 builds the decision queue, and why.
 - This plan stops before its red team, and is neither published nor merged.
 
+Added to the brief the same day, through the coordinator:
+
+- Pull request 59 moved the decision queue plan's red team tables into dated records, on the maintainer's answer to Q3. The plan template and the red team review page still say a plan keeps its triage table. M4 aligns them, and this plan says which form it takes.
+
 The maintainer, answering M3's queue, 2026-11-21 to 2026-11-25:
 
 - **Q6.** The two gaps in the proof checks close in M4.
@@ -86,6 +90,7 @@ Each is the author's. A reviewer reads this section to challenge them.
 - **The eval gate moves from the commit to the push** (H2). A commit and a branch push warn; a push to main is refused; CI fails the pull request. Rejected: refusing the commit, which forces `--no-verify` commits while a recording is still to come.
 - **Budgets:** four of the nine other pages are planned to reach a recording, and the plan stops at 1,400 agent runs. That four is a guess; the baselines replace it. Rejected: the program's full 1,520 for the attempts alone.
 - **The routed arm is measured once more at the close.** M4 adds contract lines, index rows and pages, and M3 showed that added text can cost passes.
+- **A plan's red team triage lives in the record, and the plan links each record** (L7). Rejected: the table stays in the plan. The maintainer chose the record for the decision queue plan, the record already has a Disposition column that every other document uses, and M3's plan carried about 225 lines of triage tables. This plan's own Red team section takes that form now, ahead of the template.
 - **New pages name M6 in `prove-by`.** A page cannot be proven by the milestone that writes it, and M6 uses the review loop on real fixes.
 - **Machine-state records go to M5**, with the first instance. M3 left the choice between M4 and M5 open.
 - **Names:** see [names this plan fixes](#names-this-plan-fixes).
@@ -108,7 +113,7 @@ Three things are true at the end. The work starts from M3's open ends: the "Know
 - **No guard on what an interpreter or a script does.** A hook reads a command line. What `python3 -c`, a script file or `curl` then does stays out of reach, and the README keeps saying so.
 - **No signature on a mark.** A mark shows that a process ran on this content. It does not stop a person who edits files by hand, and the pages say so.
 - **No change, after the first recording, to a file that decides what an agent is given:** `run.py`, `proofkeys.py` and the hash itself. Grading files may change on a re-grade, as H0 sets out.
-- **No edit to a page the eval hashes outside the closing slice.** A proof attempt's own case files are the one exemption.
+- **No edit outside the closing slice to a page a gated record hashes:** the contract, the index, `fix-a-bug.md`, the definition of done and the order service's rule page. A file hashed only into an unproven page's own cases may change before that page's attempt.
 - **No edit to a page under a proof attempt once its M4 attempt has started.**
 - **No reading of an agent tool's transcripts outside one adapter per tool.**
 - **No machine-state records.** They go to M5, with the first instance.
@@ -160,7 +165,7 @@ H0 starts beside G2, in its own lane. H2 starts after H1 merges. H3 starts after
 | L4 | The finding lifecycle | Verify before fixing. "Fixed" names the check that fails without the fix. A decline names where the defect now lives. A direction rule in place of a round count. A nit cap. The defect register's cross-check. See "L4" below. | driver | Criteria 41–42 |
 | L5 | Teach-back | A playbook, a grader template and a teach-back mark at the commit. A trivial change gets one question or a recorded skip. See "L5" below. | driver | Criterion 43 |
 | L6 | Merge policy | A `merge_policy` entry per repository in the manifest, `agent` or `person`; none means `person`. The review gate reads it. See "L6" below. | driver | Criteria 44–45 |
-| L7 | Small pieces | The `lifecycle_map` check. Red team review's form for a milestone's outside check. Handoff's keep mode. One rule for where a review's record is committed. See "L7" below. | driver | Criteria 46–47 |
+| L7 | Small pieces | The `lifecycle_map` check. Red team review's form for a milestone's outside check. One home for a plan's red team triage. Handoff's keep mode. One rule for where a review's record is committed. See "L7" below. | driver | Criteria 46–48 |
 
 L0 starts beside G2. L1 to L4 run in order after G1 merges. L5 and L6 follow L3, and L7 may run beside them.
 
@@ -170,7 +175,7 @@ L0 starts beside G2. L1 to L4 run in order after G1 merges. L5 and L6 follow L3,
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| Z | Contract, index and recordings | The queued edits to hashed pages, each with its instruction review. The version goes to 0.5.0. Then R4, 135 runs, and the routed arm, 45 runs, in separate batches. Then the records. See "Z" below. | driver | Criteria 48–55 |
+| Z | Contract, index and recordings | The queued edits to hashed pages, each with its instruction review. The version goes to 0.5.0. Then R4, 135 runs, and the routed arm, 45 runs, in separate batches. Then the records. See "Z" below. | driver | Criteria 49–56 |
 
 After slice Z, the program's outside checks run before sign-off: CI, a fresh-session red team under L7's form, and private attack scripts written by a session that built nothing here, against the guards, the review gate and the mark. The tag `v0.5.0` follows sign-off.
 
@@ -343,6 +348,11 @@ The rules go on [the review orchestrator's page](../playbooks/review-orchestrato
 
 - **`lifecycle_map`,** a check with cases. It fails a playbook or how-to with no row on the [lifecycle map](../lifecycle-map.md), and a row that links an archived page.
 - **Red team review's second form** (the red team's finding 10): what a red team is sent for a milestone's outside check, that it may re-run the commands the record cites, and that it writes its record and commits nothing. The page stays thin, and gains no method.
+- **One home for a plan's red team triage** (Q3, pull request 59). Each finding's disposition goes in the record's Disposition column, for a plan as for any other document, with the fix made or the place it is queued. The plan's Red team section holds one line per round: the record's link, its verdict, and the count of findings per disposition.
+  - **The pages:** the plan template's rule 4 and skeleton, red team review's steps 1 and 5, the three places [size the work](../size-the-work.md) names the plan's table, and the milestone record template's row. An approved plan is frozen and keeps its tables.
+  - **A check,** since nothing enforces either form today: a draft plan whose Red team section holds a findings table fails.
+  - **The eval cases.** Red team review's two cases hash the page. Their hidden tests look for each disposition in the plan's table, and their two-line text names that table. All three change with the page, and so does the harness test's stand-in run.
+  - **No recording is needed in M4.** The page is unproven, so no gate reads its record. Its one stored record, a 10-run baseline of one case, goes stale; the eval page says so. M9, which is to prove the page, runs the baseline again.
 - **Handoff's keep mode** (Q35): where a tracked copy of a note lives, and the rule that a path on the author's machine is flagged.
 - **One rule for a review's record** (Q41): a record about a branch is committed on that branch and reaches main with its pull request. [Procedure endings](../procedure-endings.md) states it once, and the three known defects M3's review records list are fixed against it.
 
@@ -429,17 +439,18 @@ Sub-batch L:
 45. In a `person` repository, a recorded run shows an agent's `gh pr ready` refused without a passed teach-back mark at the head commit, and allowed with it. An agent's `ws.py merge` is refused there. (V1)
 46. `lifecycle_map` fails a playbook or how-to with no row on the map, and a row that links an archived page. (V2)
 47. Red team review states its form for a milestone's outside check. Handoff states keep mode. Procedure endings states where a review's record is committed. Each edit names its instruction review. (V2)
+48. The plan template, red team review and size the work each say a plan's red team triage lives in the record. A draft plan whose Red team section holds a findings table fails a check. The two red team cases' hidden tests read each disposition in the record. (V2)
 
 Closing:
 
-48. `AGENTS.md` routes a branch to its review, and names the merge policy and the push gate. `loaded_size` passes at both ceilings. `INDEX.md` has a row for each new page, part and chain. (V2)
-49. R4 passes the gate. Its guided arm passes no more than 3 runs fewer, pooled, than R3's or the anchor's. (V3)
-50. The routed arm passes at least R4's guided count less 3; after one re-record, the pooled 90 pass at least twice that count less 6. The eval page reports every measurement. (V3)
-51. No page still says something waits for M4. The command under V8 prints nothing. (V8)
-52. From L3's merge on, every pull request of this plan that changed a machinery path or `src/` had a mark at its head when it was published. `docs/milestones/m4.md` lists each. (V4)
-53. The private port ledger maps every catalog item it gives M4 to a page, a part, a later milestone or a reason. Its check prints 0 unmapped items. (V5)
-54. Every pull request of this plan merged with every required check passing on Linux, macOS and Windows. (V4)
-55. `docs/milestones/m4.md` marks each criterion with its evidence, and reports the eval runs used per slice against its budget, the review sessions per slice, the always-loaded size and the outside checks' outcomes. (V2, V9)
+49. `AGENTS.md` routes a branch to its review, and names the merge policy and the push gate. `loaded_size` passes at both ceilings. `INDEX.md` has a row for each new page, part and chain. (V2)
+50. R4 passes the gate. Its guided arm passes no more than 3 runs fewer, pooled, than R3's or the anchor's. (V3)
+51. The routed arm passes at least R4's guided count less 3; after one re-record, the pooled 90 pass at least twice that count less 6. The eval page reports every measurement. (V3)
+52. No page still says something waits for M4. The command under V8 prints nothing. (V8)
+53. From L3's merge on, every pull request of this plan that changed a machinery path or `src/` had a mark at its head when it was published. `docs/milestones/m4.md` lists each. (V4)
+54. The private port ledger maps every catalog item it gives M4 to a page, a part, a later milestone or a reason. Its check prints 0 unmapped items. (V5)
+55. Every pull request of this plan merged with every required check passing on Linux, macOS and Windows. (V4)
+56. `docs/milestones/m4.md` marks each criterion with its evidence, and reports the eval runs used per slice against its budget, the review sessions per slice, the always-loaded size and the outside checks' outcomes. (V2, V9)
 
 ## Verification
 
@@ -469,8 +480,8 @@ For a guard, blocking means what the private attack scripts' report means by it:
 Stop the plan and report when any of these happens:
 
 - A slice goes past two fix rounds on a failure it caused.
-- R3 fails criterion 20, or R4 criterion 49, after the one re-record a margin miss allows. Publish the result and stop.
-- The routed arm fails criterion 50 after its one re-record. Publish the result and stop; the new index rows stay out until a person decides.
+- R3 fails criterion 20, or R4 criterion 50, after the one re-record a margin miss allows. Publish the result and stop.
+- The routed arm fails criterion 51 after its one re-record. Publish the result and stop; the new index rows stay out until a person decides.
 - After R3, a slice needs a change to a file criterion 21 names. That costs a recording, so the maintainer decides.
 - The eval runs reach 1,400 agent runs, or the selection and routing runs 300. Re-records, probes, failed runs and dispatched sessions count.
 - A slice's batch is used up before its "Done when" holds.
@@ -509,6 +520,7 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 - **The stop is 1,400 agent runs.** If all nine other pages went to a recording, the total would be about 1,970. The maintainer chooses the pages after the baselines; nothing past 1,400 runs without a change of plan.
 - **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. A full selection rerun, 174, happens only if a wrapper's description changes. The stop is 300.
 - **Review sessions are not eval runs, and cost more each.** A review round is five or more fresh sessions at the driver tier. No cap is set; each slice's report counts them.
+- **Red team review's cases change in L7 and cost no run here.** Its stored 10-run baseline goes stale and is named so; M9 runs it again, 20 runs for both cases, with that page's recording.
 - G0 to G4, H0, H2's build, and L0 to L7 start no eval run. L0's recorded tool runs are a handful of headless sessions.
 
 ## Execution profile
@@ -556,10 +568,9 @@ About 6 hours, as the program estimates.
 
 ## Red team
 
-Record: none yet. No red team runs until the maintainer's hands-on review of M3 has fed this draft.
+Records: none yet. No red team runs until the maintainer's hands-on review of M3 has fed this draft.
 
-| # | Finding | Disposition | Action |
-|---|---|---|---|
+This section takes the form slice L7 sets, which the decision queue plan has had since pull request 59. Each round's triage is written in its record's Disposition column. This section then gains one line per round: the record's link, its verdict, and the count of findings per disposition.
 
 ## Approval
 
@@ -576,5 +587,6 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Verified, by reading:** the contract, the size gate, the plan template, the red team review page, M3's plan with its results, M3's milestone record, the red team's record, the defect register, the eval page, the review orchestrator's page and the manifest, all at `2d00f5b`.
 - **Verified, by reading:** the program plan's section for M4, the private attack scripts' report, and the maintainer's answers to M3's queue.
 - **Verified:** the eval's hash covers the shell parser, as the eval page's "The gate" says, so a parser change stales the three fix-a-bug records. The wrappers' descriptions hold 8,542 of 9,000 bytes, by M3's record. Ten pages or sections name M4 in `prove-by`, by the README's table.
+- **Verified, for the red team triage item:** pull request 59 merged on 2026-11-25 as `cb07903`, and the decision queue plan's Red team section now links seven records. The plan template's rule 4, red team review's step 5 and three places in size the work still name the plan's table. Both red team cases give their guided arm the page, both hidden tests assert a Disposition in the plan's table, and one baseline record is stored, for `red-team-fail-closed`. Red team review is unproven, and `eval_record` gates proven pages only, by its own docstring.
 - **Inferred:** every budget figure for H3 beyond the baselines, since the baselines decide which pages are recorded. That the two existing review marks do what the program plan says, until L0 runs them. That grading files can leave the recording's hash without loss, which the red team should attack.
 - **Not run:** no eval or selection run, no guard attack, and no red team.
