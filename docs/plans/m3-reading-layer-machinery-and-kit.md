@@ -1071,6 +1071,14 @@ How slice Z goes on after its sixth stop, from the maintainer's answer to Q81 in
 
 **Diagnose the wrappers first (Q81).** Run the routed arm once without the wrappers' plugin, 45 runs, 15 per case, with no page change. Compare it with the routed arm's 90 runs, and say whether the wrappers or the pages drive the loss of the "claim marked verified" label. Propose the fix and its run count, then stop for the maintainer's choice. These 45 runs count toward the stop rule's 1,000. #55 is not merged.
 
+### 2026-11-25
+
+Approved by: the maintainer, 2026-11-25
+
+How slice Z finishes after its seventh stop, from the maintainer's answer to Q83 in the workspace queue on 2026-11-25. It is step 2 of the entry above that names Q78, with the fix and run count chosen. No criterion is dropped or weakened.
+
+**Fix the unhashed pages and the wrapper, then measure the routed arm again, up to 90 runs (Q83).** The fix record template and procedure endings say the reply ends with the report in the definition of done's shape, every claim marked, and the record keeps a copy. The fix-a-bug wrapper says to follow the page through that report. No file a case hashes changes, so R2 stays current. Then the routed arm runs once more, 45 runs, 15 per case, and passes at 39 of 45, R2's guided 42 less a margin of 3. On a miss, one 45-run re-record is allowed, judged pooled, passing at 78 of 90. A miss after it is a stop, as the stop rule says. If the routed arm passes, #55 is published and merged once CI passes on Linux, macOS and Windows. These runs count toward the stop rule's 1,000.
+
 ## Results
 
 ### C1, launcher and baselines
