@@ -17,7 +17,7 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **The parser fix merges after recording R3.** The eval hashes the parser. Slice H0 lets a re-grade hold grading files, so the fix then costs no runs.
 - **The review loop:** dispatch, a completion record, a review mark, a gate at pull-request creation, teach-back and a merge policy.
 - **The eval system:** suites, a gate at the push, and proof attempts for ten pages.
-- **Eval runs:** about 1,175 planned, a stop at 1,400. Each batch needs the maintainer's yes with a count.
+- **Eval runs:** about 1,085 planned, a stop at 1,400. Each batch needs the maintainer's yes with a count.
 - **Review sessions:** about 180 planned, a stop at 250. A review scales to its diff, and a pull request is capped at 16.
 - **Harness changes land in one slice, before any recording.**
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap already open on main is recorded instead.
@@ -68,6 +68,12 @@ The maintainer, answering this plan's queue, 2026-11-26:
 - **Q90.** In G4 the outward-write guard also reads a list kept outside every repository, as `deny_list` reads its list. G4 updates the guard's cases and decision 0004.
 - **Q91.** A review scales to its diff. A pull request is capped at 16 review sessions, and M4 stops at 250. Reuse, docs drift and the re-check run at the worker tier, unless the change touches a gate.
 
+The maintainer, 2026-11-26, on three recommendations of the session that drafted this plan:
+
+- **Q91, narrowed.** Reuse and docs drift run at the worker tier always, since their findings never block. The gate exception is the re-check's alone.
+- **One arm is re-recorded alone.** An edit that changes only what one arm is given needs that arm's runs again, and not the other arms'. A change of model, or of a file every arm shares, still needs every arm.
+- **The decision queue plan is marked abandoned now,** and not by a slice of M4. It was, on 2026-11-26.
+
 The maintainer, on the program, 2026-11-17 to 2026-11-24:
 
 - M4 carries the proof attempts for the six procedures that may be model coaching, and for the four other pages M3 shipped with `prove-by: M4`.
@@ -117,7 +123,7 @@ Three things are true at the end. The work starts from M3's open ends: the "Know
 
 ## Non-goals
 
-- **No decision queue.** It is cut (Q86): its trial closed no item from evidence before M3's sign-off. Slice G0 marks [its plan](decision-queue.md) abandoned, and M4 builds none of its slices.
+- **No decision queue.** It is cut (Q86): its trial closed no item from evidence before M3's sign-off. [Its plan](decision-queue.md) was marked abandoned on 2026-11-26, and M4 builds none of its slices.
 - **No matching of findings to existing threads, and no posting of comments.** Both need a git-host provider, which is M8. The guard that refuses every `gh api graphql` call stays as it is.
 - **No live agent run in CI.** CI re-grades stored transcripts and checks marks. Agent runs stay on the author's machine.
 - **No new wrapper, and no rise in either always-loaded ceiling:** 6,000 bytes for the contract and pointer files, 9,000 for the wrappers' descriptions. No copy of the wrappers for a second agent tool.
@@ -146,7 +152,7 @@ Recordings are numbered on from M3's: R3 follows the harness slice, and R4 close
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| G0 | Open M4 | `building` becomes `["M4"]`. The test that pins it to M3, the parts page's row and the adoption page are corrected. A check fails a `building` entry whose milestone record is signed off. `.env` joins `.gitignore`. The decision queue plan is marked abandoned. | driver | Criterion 1 |
+| G0 | Open M4 | `building` becomes `["M4"]`. The test that pins it to M3, the parts page's row and the adoption page are corrected. A check fails a `building` entry whose milestone record is signed off. `.env` joins `.gitignore`. | driver | Criterion 1 |
 | G1 | Push check and merge helper | The pre-push check loads a part's cases and the library they call from one commit (Q82). `ws.py merge` retargets pull requests stacked on a branch before it deletes that branch (Q84). | driver | Criteria 2–3 |
 | G2 | The one rule, in the parser | The parser marks each word literal or not. A guard refuses a command whose deciding word is not literal. The stopgaps in the guards' own files go. See "G2" below. | driver | Criteria 4–8 |
 | G3 | Commands git itself runs | A git setting passes only when it is on a list of settings known to run no command. A git option that takes a command is read as that command. See "G3" below. | driver | Criteria 9–10 |
@@ -158,7 +164,7 @@ G0 and G1 touch no file the eval hashes. They branch from main and merge at once
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| H0 | Harness changes, before any recording | Every harness change M4 needs, in one slice: the grader stamp, the model in a record, the leak rule's open items, debugging's fixture and cases, batch budgets, one-time arms' re-record, and the proof checks' two gaps. See "H0" below. | driver | Criteria 13–19 |
+| H0 | Harness changes, before any recording | Every harness change M4 needs, in one slice: the grader stamp, the model in a record, the leak rule's open items, debugging's fixture and cases, batch budgets, one-time arms' re-record, the proof checks' two gaps, a usage check, and one arm's re-record. See "H0" below. | driver | Criteria 13–19, 60 |
 | H1 | Recording R3 | The three fix-a-bug cases, 15 runs per arm in each: 135 runs. A guided arm that misses its margin is recorded once more, 45 runs, in a new batch. H0 and H1 share one pull request. | driver | Criteria 20–21 |
 | H2 | Suites, marks and the push gate | One suite per wrapped page, and a routing suite. A runner that picks suites from changed paths and runs the base and the head. A mark by content fingerprint. The gate at the push and in CI. See "H2" below. | driver | Criteria 22–27 |
 | H3 | Proof attempts | The ten pages that name M4: a baseline of the bare model, then a recording where the baseline calls for one. Debugging goes first, with its fixed cases. See "H3" below. | driver | Criteria 28–30 |
@@ -186,13 +192,13 @@ L0 starts beside G2. L1 to L4 run in order after G1 merges. L5 and L6 follow L3,
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| Z | Contract, index and recordings | The queued edits to hashed pages, each with its instruction review. The version goes to 0.5.0. Then R4, 135 runs, and the routed arm, 45 runs, in separate batches. Then the records. See "Z" below. | driver | Criteria 49–56 |
+| Z | Contract, index and recordings | The queued edits to hashed pages, each with its instruction review. The version goes to 0.5.0. Then R4, the guided arm's 45 runs, and the routed arm, 45 runs, in separate batches. Then the records. See "Z" below. | driver | Criteria 49–56 |
 
 After slice Z, the program's outside checks run before sign-off: CI, a fresh-session red team under L7's form, and private attack scripts written by a session that built nothing here, against the guards, the review gate and the mark. The tag `v0.5.0` follows sign-off.
 
 ### G0: Open M4
 
-The [defect register](../records/defects.md) holds the row this slice closes: M3's sign-off left M3 in `building`, because a test pins the list to M3 and the adoption page says it names M3. The test stops pinning a number. The `proof` check gains one rule: a `building` entry whose record in `docs/milestones/` has `status: signed off` fails. M4 then removes itself in its own sign-off commit, and that rule holds every later milestone to the same step. The register's `.env` row closes here too: the secrets file joins `.gitignore`, in the repository and in the kit. The slice also sets the decision queue plan's `status` to `abandoned`, with a dated line that gives Q86's reason, and corrects each page that still calls the queue planned.
+The [defect register](../records/defects.md) holds the row this slice closes: M3's sign-off left M3 in `building`, because a test pins the list to M3 and the adoption page says it names M3. The test stops pinning a number. The `proof` check gains one rule: a `building` entry whose record in `docs/milestones/` has `status: signed off` fails. M4 then removes itself in its own sign-off commit, and that rule holds every later milestone to the same step. The register's `.env` row closes here too: the secrets file joins `.gitignore`, in the repository and in the kit.
 
 ### G2: The one rule, in the parser
 
@@ -256,6 +262,7 @@ M3's slice Z changed the harness inside the slice that recorded, and stopped thr
 6. **One-time arms.** `--rerecord` takes a one-time arm and keeps its first batch, and `pool.py` prints one-time arms with their pooled counts. M3 moved folders and pooled by hand.
 7. **The proof checks' two gaps (Q6).** `eval_record` gates a page marked proven wherever it sits under `docs/`, not only in `docs/playbooks/`. `proof` fails a proof key on a page whose kind carries none.
 8. **A usage check before a batch (Q89).** Before a batch, `run.py` reads a usage reading from a file kept outside the repository, which the maintainer's own tooling writes, and refuses the batch when the reading is over limits he sets there. No file means the check is off. A stale file counts as unknown: `run.py` names the reading's age and refuses, unless the batch's yes allowed a run without a reading. The call sits in `run.py`; its rules sit in a file outside the eval's hash, so tuning them stales no record.
+9. **One arm re-recorded alone.** The bare arm is given no files, and the two-line arm only its two lines. So an edit to a page changes nothing either of them reads, yet today it makes all three arms stale. The record's hash over what an agent is given splits per arm, beside one hash over what the arms share: the case, its hidden test, the scaffold and the harness. When only one arm's files change, `eval_record` asks for that arm alone, and `run.py` records it in place of the old runs. The other arms' runs stand, and the gate compares as before. When a shared file or the model changes, every arm is recorded. A tool version that differs between the arms is the warning item 2 gives. An edit to a proven page then costs about 44 runs where it would cost 132, and a contract or index edit 45 where it costs 135. Decision 0006 is amended.
 
 H0's commits use `--no-verify` until R3's records are in, as the [machinery page's trap](../changing-the-machinery.md#traps) requires. H2 then moves that refusal to the push.
 
@@ -285,7 +292,7 @@ Each attempt runs as M3's slice B7 did. Two cases are drawn from M1 to M3's real
 - **Order.** Debugging first: its cases exist, and H0 fixes them. Then the pages no M4 slice edits. `orchestration.md`, its delegating section and the instruction review come after L1 and L4, which edit them. `parts.md` and `changing-the-machinery.md` come last, after every slice that adds a part.
 - **A stop after the baselines.** Once the nine baselines are in, the slice stops for the maintainer's choice of which pages go to a recording. A page the budget does not reach stays unproven by his decision, with its baseline as the failed attempt, as red team review did in M3.
 - **Proven needs a real run too.** A page's `proven-by` names the M4 slice report where the page was used, beside its record.
-- **A proven page is gated from then on, and each later edit costs its recording again:** about 132 runs a page, as an edit to `fix-a-bug.md` costs 135 today. So the stop after the baselines also shows, for each page, how often it has changed. Up to M3's sign-off `parts.md` changed in 55 commits and `changing-the-machinery.md` in 22; the other pages in 1 to 6 (verified, `git log` on main). A page that changes that often is not sent to a recording whole: the slice first proposes which of its tables move to a reference page, so the proven part is the procedure alone.
+- **A proven page is gated from then on, and each later edit costs its guided arm again:** about 44 runs a page under H0's item 9, where the whole recording is 132. So the stop after the baselines also shows, for each page, how often it has changed. Up to M3's sign-off `parts.md` changed in 55 commits and `changing-the-machinery.md` in 22; the other pages in 1 to 6 (verified, `git log` on main). A page that changes that often is not sent to a recording whole: the slice first proposes which of its tables move to a reference page, so the proven part is the procedure alone.
 - **A cut is queued for slice Z,** since it removes index rows: the page's steps, its wrapper and its rows leave in one commit.
 - A run that dispatches a helper session, as the instruction review's and delegating's cases do, counts each dispatched session toward its batch.
 
@@ -315,7 +322,7 @@ Then test two existing review marks in a scratch repository, against criteria 35
 | Any other machinery path, or code under `src/` | Code, architecture, security and test adequacy. Reuse, when the range adds a file or a function. Docs drift and the other triggered dimensions, as their triggers say. |
 
 - **A fix round runs less.** On a delta round the dispatch starts code over the delta; security, when the delta changes a hook, a guard, a check or CI; each dimension that has a finding from an earlier round; and the re-check of the rows marked fixed. The whole-branch pass runs once, at the tip that is to get the mark.
-- **Advisory work runs a tier lower** (Q91). Reuse, docs drift and the re-check run at the worker tier. When the range changes a gate, which is a check, a hook, a grader, CI or the commit hook, they run at the driver tier like the rest. The review orchestrator's page and [orchestration](../orchestration.md) say so, where both call every review driver work today.
+- **Advisory work runs a tier lower** (Q91). Reuse and docs drift run at the worker tier always: their findings never block, so a gate change does not raise them. The re-check runs at the worker tier too, and at the driver tier when the range changes a gate, which is a check, a hook, a grader, CI or the commit hook. The review orchestrator's page and [orchestration](../orchestration.md) say so, where both call every review driver work today.
 - **It counts review sessions.** Every session a dispatch starts for a review is one: a dimension, a retry, a re-check, a whole-branch pass, an instruction review, a red team, a teach-back grader. Each dispatch record holds its tier, model, effort and duration, and its token use where the agent tool reports it.
 - **A pull request has a cap.** The manifest's `review` entry sets the most review sessions one pull request may start: 16 here, and the same in the kit. At the cap the dispatch refuses and names the count. The loop stops for the person, who raises the cap for that branch or ends the review. `python3 ws.py review status` prints the branch's count against the cap.
 
@@ -388,7 +395,7 @@ The rules go on [the review orchestrator's page](../playbooks/review-orchestrato
 - **The queued edits,** from the list under "Results". `AGENTS.md` routes a branch to its review before its pull request, names the merge policy in its pull-request rule, and names the push in its eval rule. `INDEX.md` gains a row for each new page, part and chain, and the lifecycle map's row, which has waited since M3. `fix-a-bug.md` gains the review gates and the fix brief's two fields. The definition of done names the review mark. Each cut from H3 is made here.
 - **The waiting list.** The `wrappers` check's entry for the review orchestrator moves to M6, the milestone that proves it, and teach-back joins it.
 - **The version** goes to 0.5.0, the engine's and the manifest's in one step.
-- **R4,** 135 runs, as R3. Then, in a second batch, the routed arm: 45 runs to a one-time record. An arm that misses its margin is recorded once more, 45 runs, and judged pooled.
+- **R4,** the guided arm alone, 45 runs: slice Z changes only files the guided arm is given, so H0's item 9 applies. Then, in a second batch, the routed arm: 45 runs to a one-time record. An arm that misses its margin is recorded once more, 45 runs, and judged pooled.
 - **The records:** `docs/milestones/m4.md`, the changelog and the evidence page at M4's numbers, written before the outside checks run. M3's red team found all three stale.
 
 ### Names this plan fixes
@@ -414,7 +421,7 @@ New pages: `docs/playbooks/teach-back.md`, as L5 gives it, and one decision reco
 
 Sub-batch G:
 
-1. `building` in the manifest is `["M4"]`. When `building` names a milestone whose record has `status: signed off`, the `proof` check fails. `git check-ignore -q .env` exits 0. The decision queue plan's `status` is `abandoned`. (V2)
+1. `building` in the manifest is `["M4"]`. When `building` names a milestone whose record has `status: signed off`, the `proof` check fails. `git check-ignore -q .env` exits 0. (V2)
 2. When a push holds a guard change that turns a passing case into a refusal, the pre-push check judges it without `--no-verify`: the cases it runs and the library they call come from one commit. (V1)
 3. When `ws.py merge` merges a pull request whose branch is the base of open pull requests, it retargets each to the merged one's base before it deletes the branch. When a retarget fails, it deletes nothing and says so. Its tests run on recorded `gh` output. (V1)
 4. The shell guards never pass a command in which a word that decides what runs, or what it acts on, is not literal. Each line "G2" names is refused, with a case. (V2)
@@ -483,8 +490,12 @@ Closing:
 Sub-batch L, review sessions. They are numbered after the closing criteria because they joined the draft later:
 
 57. When a range changes only guidance pages, plans or records, the dispatch starts no dimension. When it changes only tests or eval cases, it starts code and test adequacy. Otherwise it starts the four, and reuse and each triggered dimension only when its trigger holds. A test covers each row. (V1)
-58. On a delta round the dispatch starts code, security when the delta changes a hook, a guard, a check or CI, each dimension with an earlier finding, and the re-check. A mark needs one whole-branch pass at its tip, and no more. Reuse, docs drift and the re-check start at the worker tier, and at the driver tier when the range changes a gate. (V1)
+58. On a delta round the dispatch starts code, security when the delta changes a hook, a guard, a check or CI, each dimension with an earlier finding, and the re-check. A mark needs one whole-branch pass at its tip, and no more. Reuse and docs drift start at the worker tier. The re-check starts at the worker tier, and at the driver tier when the range changes a gate. (V1)
 59. `ws.py dispatch` never starts a review session past the manifest's cap for a pull request, and its refusal names the count. Each dispatch record holds its tier, model, effort and duration. `ws.py review status` prints the branch's count against the cap. (V1)
+
+Sub-batch H, added on the maintainer's yes of 2026-11-26:
+
+60. When only the files one arm is given change, `eval_record` asks for that arm alone, and passes once that arm is recorded again on the same model. When a file every arm shares changes, or the model, it asks for every arm. A test covers each. (V1)
 
 ## Verification
 
@@ -550,14 +561,14 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 | H3 | Debugging: a baseline of 20, then 132 | 152 | 152 |
 | H3 | Baselines for the nine other pages, 20 each | 180 | 180 |
 | H3 | Recordings, 132 a page; four pages planned | 528 | 528 |
-| Z | R4 | 135 | 180 |
+| Z | R4, the guided arm alone | 45 | 90 |
 | Z | The routed arm | 45 | 90 |
-| | **Agent runs on the small model** | **1,175** | **1,310** |
+| | **Agent runs on the small model** | **1,085** | **1,220** |
 
-- **The stop is 1,400 agent runs, staged (Q87).** If all nine other pages went to a recording, the total would be about 1,970. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
+- **The stop is 1,400 agent runs, staged (Q87).** If all nine other pages went to a recording, the total would be about 1,880. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
 - **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. A full selection rerun, 174, happens only if a wrapper's description changes. The stop is 300.
 - **Review sessions are not eval runs, and are budgeted apart,** in the next section.
-- **The stop covers M4's build only.** After M4, each edit to a page M4 proves costs that page's recording again, about 132 runs, and the stop does not count it. Edits to a proven page are batched, as the contract already asks.
+- **The stop covers M4's build only.** After M4, each edit to a page M4 proves costs that page's guided arm again, about 44 runs, and the stop does not count it. Edits to a proven page are batched, as the contract already asks.
 - **Red team review's cases change in L7 and cost no run here.** Its stored 10-run baseline goes stale and is named so; M9 runs it again, 20 runs for both cases, with that page's recording.
 - G0 to G4, H0, H2's build, and L0 to L7 start no eval run. L0's recorded tool runs are a handful of headless sessions.
 
@@ -591,7 +602,7 @@ Per slice, for M4's own build:
 | The plan and the close | Three red team rounds on this plan, the outside red team, and three teach-back graders. | 7 |
 | | **Review sessions** | **178** |
 
-- **Few of these drop a tier in M4.** Nearly every range here changes a gate, so reuse, docs drift and the re-check mostly stay at the driver tier. The saving shows in an instance, where most changes are product code.
+- **About a dozen of these run at the worker tier in M4:** docs drift and reuse, on each full round of machinery code through the loop. The re-check mostly stays at the driver tier, since nearly every range here changes a gate. The larger saving shows in an instance, where most changes are product code.
 - **The stop is 250 review sessions.** A slice that passes twice its row says so in its report before it goes on.
 - **A guard slice still open when L3 merges goes through the loop,** as "First real use" says. Each adds about 11 to its row.
 - **Where the count is reported.** In each dispatch record. In the completion record, per round. By `python3 ws.py review status`, against the cap. In one line of the pull request's review record, such as `Sessions: 11 of 16`. In each slice's report under "Results", against its row here. And in `docs/milestones/m4.md`, in a "Review sessions used" table beside "Eval runs used".
@@ -665,4 +676,6 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Inferred, for the review session budgets:** every count in that section. It rests on the review orchestrator's page, read at `2d00f5b`: five dimensions that always run today, one retry each, and a re-check and a whole-branch pass on a delta round. No review has run through a dispatch yet, so no session's cost is measured.
 - **Inferred:** every budget figure for H3 beyond the baselines, since the baselines decide which pages are recorded. That the two existing review marks do what the program plan says, until L0 runs them. That grading files can leave the recording's hash without loss, which the red team should attack.
 - **Applied, 2026-11-26:** the maintainer's answers to Q86 to Q91, each under "Settled decisions". Three choices left "Decisions made without asking" because he settled them: the decision queue, the grader stamp and the parser's merge order.
+- **Applied, 2026-11-26, on the maintainer's yes:** Q91's narrowing, the re-record of one arm alone as H0's item 9, and the decision queue plan marked abandoned on main as `f45ea0d`. R4's budget fell from 135 runs to 45.
+- **Inferred:** that a newly recorded guided arm can be judged against older two-line and bare runs without loss, which the red team should attack. The arms file gives the bare arm no files and the two-line arm one (verified, `evals/arms.json`).
 - **Not run:** no eval or selection run, no guard attack, and no red team.
