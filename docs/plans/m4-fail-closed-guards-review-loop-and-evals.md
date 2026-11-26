@@ -14,15 +14,15 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 ## Key points
 
 - **The guards come first, under one rule.** A shell guard refuses any command whose deciding word the parser cannot resolve to a literal.
-- **The parser fix merges after recording R3.** The eval hashes the parser. Slice H0 lets a re-grade hold grading files, so the fix then costs no runs. Landing it sooner costs 135 runs.
+- **The parser fix merges after recording R3.** The eval hashes the parser. Slice H0 lets a re-grade hold grading files, so the fix then costs no runs.
 - **The review loop:** dispatch, a completion record, a review mark, a gate at pull-request creation, teach-back and a merge policy.
 - **The eval system:** suites, a gate at the push, and proof attempts for ten pages.
 - **Eval runs:** about 1,175 planned, a stop at 1,400. Each batch needs the maintainer's yes with a count.
 - **Review sessions:** about 180 planned, a stop at 250. A review scales to its diff, and a pull request is capped at 16.
 - **Harness changes land in one slice, before any recording.**
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap already open on main is recorded instead.
-- **The decision queue is not built in M4.**
-- **Not red-teamed and not approved.** The maintainer's review of M3 comes first. Five questions wait in his queue.
+- **The decision queue is cut.** Its trial closed no item from evidence.
+- **Not red-teamed and not approved.** The maintainer's review of M3 comes first. His six queue answers are applied.
 
 ## Settled decisions
 
@@ -61,6 +61,11 @@ The maintainer, answering M3's queue, 2026-11-21 to 2026-11-25:
 
 The maintainer, answering this plan's queue, 2026-11-26:
 
+- **Q86.** The decision queue is cut. Its trial's bar C2 failed on one count: no item was closed from evidence before M3's sign-off. So, as that plan's own settled decision says, its plan is marked abandoned. The earlier count of answers acted on looks too low and is not the reason. His private decide pass stays private.
+- **Q87.** The eval ceiling is 1,400 runs, staged. All ten baselines run first, about 200 runs. He then picks which pages get a recording. A page past the ceiling stays unproven and moves to M6.
+- **Q88.** A re-grade holds grading files. A parser or grader change needs no new runs when re-grading every stored transcript changes no grade; a changed grade still needs a recording. The parser fix, G2, merges after R3.
+- **Q89.** Slice H0 adds a usage check. `run.py` reads a usage file kept outside the repository before a batch, and refuses when over his limits. No file means the check is off. Only a stale file counts as unknown. Its rules sit outside the eval's hash.
+- **Q90.** In G4 the outward-write guard also reads a list kept outside every repository, as `deny_list` reads its list. G4 updates the guard's cases and decision 0004.
 - **Q91.** A review scales to its diff. A pull request is capped at 16 review sessions, and M4 stops at 250. Reuse, docs drift and the re-check run at the worker tier, unless the change touches a gate.
 
 The maintainer, on the program, 2026-11-17 to 2026-11-24:
@@ -87,14 +92,12 @@ Carried from M1 to M3:
 
 Each is the author's. A reviewer reads this section to challenge them.
 
-- **The decision queue is not built in M4.** Rejected: building it now. Its own gate, the trial's bar C2, was counted at M3's sign-off and missed: no item closed from evidence, and two of three answers acted on (inferred: from the sign-off session's count, not recounted here). Its plan also needs 600 bytes of room under the wrappers' ceiling, and 458 are left (verified: 8,542 of 9,000 in M3's record). Whether the queue is cut or its trial extended is the maintainer's; it is in his queue.
-- **Grading files leave the recording's hash, and a re-grade holds them** (H0). Rejected: one hash, as today, where each parser change costs 135 runs although no agent would act differently. A changed grade still needs a new recording.
-- **The parser fix is built first and merged after R3.** Rejected: the parser on H0's branch, where a stall in one blocks the other; and the parser with a recording of its own, 135 more runs. If G2 is ready before R3's records merge, the maintainer may still choose the second.
 - **Git settings pass by an allow list** (G3). Rejected: a list of the settings that run a command. Git has too many, and each one missed is a route to main.
 - **A path inside a git folder passes only for a program that only reads** (G4). Rejected: the list of writers, which missed `tar`, `unzip` and `patch`.
 - **No copy of the wrappers for Codex** (Q45). Rejected: a second skills folder. The selection cases run only on `claude plugin eval`, so a copy would ship untested, and the maintainer's own records retired prompt wrappers for a second tool. The README keeps the limit.
 - **The eval gate moves from the commit to the push** (H2). A commit and a branch push warn; a push to main is refused; CI fails the pull request. Rejected: refusing the commit, which forces `--no-verify` commits while a recording is still to come.
-- **Budgets:** four of the nine other pages are planned to reach a recording, and the plan stops at 1,400 agent runs. That four is a guess; the baselines replace it. Rejected: the program's full 1,520 for the attempts alone.
+- **Four of the nine other pages are planned to reach a recording.** That four is a guess, and the baselines replace it. The ceiling of 1,400 is the maintainer's (Q87).
+- **A stale usage reading stops a batch** (H0, item 8). Q89 says a stale file counts as unknown, and leaves open what unknown does. Here `run.py` names the reading's age and refuses, unless the batch's yes allowed a run without a reading. Rejected: going on, which would spend quota on a reading nobody trusts.
 - **The routed arm is measured once more at the close.** M4 adds contract lines, index rows and pages, and M3 showed that added text can cost passes.
 - **A plan's red team triage lives in the record, and the plan links each record** (L7). Rejected: the table stays in the plan. The maintainer chose the record for the decision queue plan, the record already has a Disposition column that every other document uses, and M3's plan carried about 225 lines of triage tables. This plan's own Red team section takes that form now, ahead of the template.
 - **A review scales to its diff, and a pull request is capped at 16 review sessions** (L1). Rejected: every dimension on every round, which makes about 22 sessions for a pull request with two fix rounds; and a cap alone, which stops a loop late without making it cheaper. Reuse runs when the range adds a file or a function, where the page runs it always today: the program counts four dimensions that always run. The maintainer settled the cap and the tiers on 2026-11-26 (Q91); the reuse trigger is still the author's.
@@ -114,7 +117,7 @@ Three things are true at the end. The work starts from M3's open ends: the "Know
 
 ## Non-goals
 
-- **No decision queue.** [Its plan](decision-queue.md) stays a draft, and M4 builds none of its slices.
+- **No decision queue.** It is cut (Q86): its trial closed no item from evidence before M3's sign-off. Slice G0 marks [its plan](decision-queue.md) abandoned, and M4 builds none of its slices.
 - **No matching of findings to existing threads, and no posting of comments.** Both need a git-host provider, which is M8. The guard that refuses every `gh api graphql` call stays as it is.
 - **No live agent run in CI.** CI re-grades stored transcripts and checks marks. Agent runs stay on the author's machine.
 - **No new wrapper, and no rise in either always-loaded ceiling:** 6,000 bytes for the contract and pointer files, 9,000 for the wrappers' descriptions. No copy of the wrappers for a second agent tool.
@@ -143,7 +146,7 @@ Recordings are numbered on from M3's: R3 follows the harness slice, and R4 close
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| G0 | Open M4 | `building` becomes `["M4"]`. The test that pins it to M3, the parts page's row and the adoption page are corrected. A check fails a `building` entry whose milestone record is signed off. `.env` joins `.gitignore`. | driver | Criterion 1 |
+| G0 | Open M4 | `building` becomes `["M4"]`. The test that pins it to M3, the parts page's row and the adoption page are corrected. A check fails a `building` entry whose milestone record is signed off. `.env` joins `.gitignore`. The decision queue plan is marked abandoned. | driver | Criterion 1 |
 | G1 | Push check and merge helper | The pre-push check loads a part's cases and the library they call from one commit (Q82). `ws.py merge` retargets pull requests stacked on a branch before it deletes that branch (Q84). | driver | Criteria 2–3 |
 | G2 | The one rule, in the parser | The parser marks each word literal or not. A guard refuses a command whose deciding word is not literal. The stopgaps in the guards' own files go. See "G2" below. | driver | Criteria 4–8 |
 | G3 | Commands git itself runs | A git setting passes only when it is on a list of settings known to run no command. A git option that takes a command is read as that command. See "G3" below. | driver | Criteria 9–10 |
@@ -189,7 +192,7 @@ After slice Z, the program's outside checks run before sign-off: CI, a fresh-ses
 
 ### G0: Open M4
 
-The [defect register](../records/defects.md) holds the row this slice closes: M3's sign-off left M3 in `building`, because a test pins the list to M3 and the adoption page says it names M3. The test stops pinning a number. The `proof` check gains one rule: a `building` entry whose record in `docs/milestones/` has `status: signed off` fails. M4 then removes itself in its own sign-off commit, and that rule holds every later milestone to the same step. The register's `.env` row closes here too: the secrets file joins `.gitignore`, in the repository and in the kit.
+The [defect register](../records/defects.md) holds the row this slice closes: M3's sign-off left M3 in `building`, because a test pins the list to M3 and the adoption page says it names M3. The test stops pinning a number. The `proof` check gains one rule: a `building` entry whose record in `docs/milestones/` has `status: signed off` fails. M4 then removes itself in its own sign-off commit, and that rule holds every later milestone to the same step. The register's `.env` row closes here too: the secrets file joins `.gitignore`, in the repository and in the kit. The slice also sets the decision queue plan's `status` to `abandoned`, with a dated line that gives Q86's reason, and corrects each page that still calls the queue planned.
 
 ### G2: The one rule, in the parser
 
@@ -238,6 +241,7 @@ Each is a route M3's private attack scripts found and marked non-blocking. None 
 - **Secret reads, `secrets_shell`.** `gh auth status --show-token`, `gh auth token`, `git credential fill`, the macOS keychain's password commands, a plain read after a `cd` into a secrets folder, `/proc/*/task/*/environ`, and `${!v}` over a list of every variable's name.
 - **The ledger, `stop_gate`.** `python3 ws.py ledger --close`, run by an agent session that holds entries of its own, is refused. A person runs it from a terminal.
 - **Repository copies, `outward_write`.** A `gh api` write to a `forks` or `generate` path creates a repository, and is judged as `gh repo fork` is.
+- **A second list, outside every repository (Q90).** The tracked list is public, so it cannot name a repository whose name must stay private. `outward_write` also reads a list from the file a variable names, or from a default path beside the deny list, as `deny_list` reads its own. One file then serves every worktree, and nothing can commit it. `outward_list` refuses an agent's edit to that file as it refuses one to the tracked list. A missing file adds nothing. Decision 0004 is amended.
 - **Paths inside a git folder, `git_folder_shell` and `outward_write`.** Today a named list of writers is refused, and `tar`, `unzip` and `patch` are not on it. The rule turns round: a command that names a path inside a git folder, or the outward-write list, passes only when its program is on a short list of programs that only read.
 
 ### H0: Harness changes, before any recording
@@ -251,7 +255,7 @@ M3's slice Z changed the harness inside the slice that recorded, and stopped thr
 5. **Batches.** A batch is every run started under one yes from the maintainer, across calls of `run.py`. `run.py` takes the batch's name and count, counts each started run in a batch file, probes and failed runs included, and refuses to start a run past the count. The eval page defines a batch, and no longer caps a "session": M3's slice Z ran 225 runs against a cap of 150 because that word was loose.
 6. **One-time arms.** `--rerecord` takes a one-time arm and keeps its first batch, and `pool.py` prints one-time arms with their pooled counts. M3 moved folders and pooled by hand.
 7. **The proof checks' two gaps (Q6).** `eval_record` gates a page marked proven wherever it sits under `docs/`, not only in `docs/playbooks/`. `proof` fails a proof key on a page whose kind carries none.
-8. **A usage check before a batch,** if the maintainer says yes in his queue: `run.py` reads a usage reading from a file outside the repository and refuses a batch over limits he sets. It sits outside the eval's hash, so tuning it stales no record.
+8. **A usage check before a batch (Q89).** Before a batch, `run.py` reads a usage reading from a file kept outside the repository, which the maintainer's own tooling writes, and refuses the batch when the reading is over limits he sets there. No file means the check is off. A stale file counts as unknown: `run.py` names the reading's age and refuses, unless the batch's yes allowed a run without a reading. The call sits in `run.py`; its rules sit in a file outside the eval's hash, so tuning them stales no record.
 
 H0's commits use `--no-verify` until R3's records are in, as the [machinery page's trap](../changing-the-machinery.md#traps) requires. H2 then moves that refusal to the push.
 
@@ -410,7 +414,7 @@ New pages: `docs/playbooks/teach-back.md`, as L5 gives it, and one decision reco
 
 Sub-batch G:
 
-1. `building` in the manifest is `["M4"]`. When `building` names a milestone whose record has `status: signed off`, the `proof` check fails. `git check-ignore -q .env` exits 0. (V2)
+1. `building` in the manifest is `["M4"]`. When `building` names a milestone whose record has `status: signed off`, the `proof` check fails. `git check-ignore -q .env` exits 0. The decision queue plan's `status` is `abandoned`. (V2)
 2. When a push holds a guard change that turns a passing case into a refusal, the pre-push check judges it without `--no-verify`: the cases it runs and the library they call come from one commit. (V1)
 3. When `ws.py merge` merges a pull request whose branch is the base of open pull requests, it retargets each to the merged one's base before it deletes the branch. When a retarget fails, it deletes nothing and says so. Its tests run on recorded `gh` output. (V1)
 4. The shell guards never pass a command in which a word that decides what runs, or what it acts on, is not literal. Each line "G2" names is refused, with a case. (V2)
@@ -420,7 +424,7 @@ Sub-batch G:
 8. After G2, G3 and G4 each, `python3 evals/grade.py --recorded` finds no difference, and the slice's report lists every stored eval command whose answer changed. (V3)
 9. When a git call sets or writes a setting that is not on the allow list, the guards refuse it and name the setting. A case covers `-c`, `GIT_CONFIG_*`, an environment variable and `git config`. (V2)
 10. When a git option takes a command, the guards judge its text as a command line, with a case for each option "G3" names. A remote whose transport is not on the allow list is refused. (V2)
-11. Each route "G4" names is refused, with a case. (V2)
+11. Each route "G4" names is refused, with a case. When a repository is named only in the list kept outside the repository, `outward_write` allows a write to it from the main copy and from a worktree, and `outward_list` refuses an agent's edit to that file. (V2)
 12. A command that names a path inside a git folder, or the outward-write list, passes only for a program on the readers' list. `python3 tests/hook_cases.py` holds every hook row under its budget. (V2, V7)
 
 Sub-batch H:
@@ -429,7 +433,7 @@ Sub-batch H:
 14. `eval_record` fails a record whose arms ran on different models, or on a model other than the manifest's eval model. (V1)
 15. `run.py` passes the placeholder's path written in quotes, and refuses a `..` route to another account's folder. (V1)
 16. Debugging's fixture names `/home/user`, and the transcript test lists no stored transcript as stale. (V1)
-17. `run.py` never starts a run past its batch's count. A batch spans calls, and probes and failed runs count. (V1)
+17. `run.py` never starts a run past its batch's count. A batch spans calls, and probes and failed runs count. When the usage file shows a reading over the limits, `run.py` refuses the batch; with no file it runs; with a stale file it refuses unless the batch allowed it. (V1)
 18. `run.py --rerecord` takes a one-time arm and keeps its first batch, and `pool.py` prints one-time arms. (V1)
 19. `eval_record` gates a proven page anywhere under `docs/`. `proof` fails a proof key on a page whose kind carries none. (V2)
 20. R3 passes the gate. Its guided arm passes no more than 3 runs fewer, pooled, than R2's 42 of 45, or than the anchor's 40. After one re-record, the pooled 90 pass no fewer than 78. (V3)
@@ -550,7 +554,7 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 | Z | The routed arm | 45 | 90 |
 | | **Agent runs on the small model** | **1,175** | **1,310** |
 
-- **The stop is 1,400 agent runs.** If all nine other pages went to a recording, the total would be about 1,970. The maintainer chooses the pages after the baselines; nothing past 1,400 runs without a change of plan.
+- **The stop is 1,400 agent runs, staged (Q87).** If all nine other pages went to a recording, the total would be about 1,970. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
 - **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. A full selection rerun, 174, happens only if a wrapper's description changes. The stop is 300.
 - **Review sessions are not eval runs, and are budgeted apart,** in the next section.
 - **The stop covers M4's build only.** After M4, each edit to a page M4 proves costs that page's recording again, about 132 runs, and the stop does not count it. Edits to a proven page are batched, as the contract already asks.
@@ -630,13 +634,11 @@ About 6 hours, as the program estimates.
 
 ## Later
 
-- **The decision queue.** Not in M4. Its plan stays a draft until the maintainer decides between cutting it and a later trial.
 - **Matching findings to threads, and posting comments.** M8, with a git-host provider.
 - **Machine-state records.** M5.
 - **Wrappers for the review orchestrator and teach-back.** M6, the milestone that proves them.
 - **A second agent tool loading the wrappers.** Not planned; the README states the limit.
 - **A signed mark.** Nothing here needs one yet.
-- **A list of outward-write repositories kept outside the repository.** Proposed during M3. It is in the maintainer's queue, and joins G4 on a yes.
 
 ## Red team
 
@@ -662,4 +664,5 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Verified, for the red team triage item:** pull request 59 merged on 2026-11-25 as `cb07903`, and the decision queue plan's Red team section now links seven records. The plan template's rule 4, red team review's step 5 and three places in size the work still name the plan's table. Both red team cases give their guided arm the page, both hidden tests assert a Disposition in the plan's table, and one baseline record is stored, for `red-team-fail-closed`. Red team review is unproven, and `eval_record` gates proven pages only, by its own docstring.
 - **Inferred, for the review session budgets:** every count in that section. It rests on the review orchestrator's page, read at `2d00f5b`: five dimensions that always run today, one retry each, and a re-check and a whole-branch pass on a delta round. No review has run through a dispatch yet, so no session's cost is measured.
 - **Inferred:** every budget figure for H3 beyond the baselines, since the baselines decide which pages are recorded. That the two existing review marks do what the program plan says, until L0 runs them. That grading files can leave the recording's hash without loss, which the red team should attack.
+- **Applied, 2026-11-26:** the maintainer's answers to Q86 to Q91, each under "Settled decisions". Three choices left "Decisions made without asking" because he settled them: the decision queue, the grader stamp and the parser's merge order.
 - **Not run:** no eval or selection run, no guard attack, and no red team.
