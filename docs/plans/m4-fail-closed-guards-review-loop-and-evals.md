@@ -17,11 +17,11 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **The guard fixes wait for one small slice.** H0a moves grading files out of the recording's hash, so G2 to G4 merge on a re-grade.
 - **The review loop:** dispatch, a completion record, a review mark, a gate at pull-request creation, teach-back and a merge policy.
 - **The eval system:** suites, a gate at the push, and proof attempts for ten pages.
-- **Eval runs:** about 1,085 planned, a stop at 1,400. After M4, an edit batch to a proven page costs 44 to 132 runs.
-- **Review sessions:** about 186 planned, stop at 250, 16 per pull request.
+- **Eval runs:** about 1,085 planned, a stop at 1,400. After M4, an edit batch to a proven page costs about 132 runs.
+- **Review sessions:** about 216 planned, stop at 250, 16 per pull request.
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
-- **Red team:** two rounds held with fixes; 30 findings settled.
+- **Red team:** three rounds held with fixes; 42 findings settled.
 - **Not approved.** Every queue answer through Q103 is applied. One question waits, on selection runs.
 
 ## Settled decisions
@@ -202,7 +202,7 @@ H0a starts on the first day, beside G0, and merges first. H0b starts after H0a, 
 | L6 | Merge policy | A `merge_policy` entry per repository in the manifest, `agent` or `person`; none means `person`. The review gate reads it. See "L6" below. | driver | Criteria 44–45 |
 | L7 | Small pieces | The `lifecycle_map` check. Red team review's form for a milestone's outside check. Handoff's keep mode. One rule for where a review's record is committed. See "L7" below. | driver | Criteria 46–47 |
 
-L0 starts beside G2. L1 to L4 run in order after G1 merges. L5 and L6 follow L3, and L7 may run beside them.
+L0 starts beside G2. L1 and L2 run in order after G1 merges. L3 waits for L2 and for G2, whose rule its gate calls. L4 follows L3. L5 follows L3; L6 follows L3 and G4, whose list it reads. L7 may run beside them.
 
 **First real use.** From L3's merge on, every pull request of this plan that changes a machinery path passes the gate: reviewed through the loop, marked, then opened. Before L3, a guard or harness slice ends with one fresh driver-tier re-check instead, as M3's did. A defect found later in code a marked review covered goes to [escape analysis](../playbooks/escape-analysis.md) and becomes an outcome case, or a recorded reason why not.
 
@@ -220,7 +220,7 @@ The [defect register](../records/defects.md) holds the row this slice closes: M3
 
 ### G2: The one rule, in the parser
 
-**The rule.** The parser reports, for each word it reads, whether the word is literal: bash and zsh would both hand the program exactly the text the parser reports. A word is not literal when it holds, outside quotes, a variable, a substitution, braces, a glob, zsh's extended glob, `=name`, or a `(` that zsh reads as a glob group or a glob qualifier. It is not literal when it holds an ANSI-C escape other than the seven both shells read alike, or a quote the parser cannot close as the shells do, as inside `${...}` or `((`.
+**The rule.** The parser reports, for each word it reads, whether the word is literal: bash and zsh would both hand the program exactly the text the parser reports. A word is not literal when it holds, outside quotes, a variable, a substitution, braces the shell expands (a comma or a range inside, so `HEAD@{1}` and `stash@{0}` stay literal), a glob, zsh's extended glob, `=name`, or a `(` that zsh reads as a glob group or a glob qualifier. It is not literal when it holds an ANSI-C escape other than the seven both shells read alike, or a quote the parser cannot close as the shells do, as inside `${...}` or `((`.
 
 A command is unresolved, and every shell guard refuses it, when a word that decides what runs, or what it acts on, is not literal:
 
@@ -231,8 +231,8 @@ A command is unresolved, and every shell guard refuses it, when a word that deci
 Two cases follow from the same rule, and replace M3's rule about unread programs:
 
 - **A word that may be a program is judged as one.** After a program the parser does not read, a word that is not literal may become `git` or `gh`. The words after it are judged as that program's, and the line is refused when either reading would be. So `arch $(command -v git) push -f origin main` is refused, and `ls *.md` passes.
-- **Text that may be a command is judged as one.** A quoted argument of a program the parser does not read is parsed as a command line, as the text of `sh -c` is today. So `flock FILE -c 'git push -f origin main'` and `man -P '...' ls` are refused. A message body, such as `-m` or `--body`, is still never read so.
-- **Text on standard input is judged too.** Text piped or redirected into a program the parser does not read is parsed as a command line, as text piped into a shell is today. So `printf 'git push -f origin main' | script -q /dev/null` is refused.
+- **Text that may be a command is judged as one.** A quoted argument of a program the parser does not read is parsed as a command line, as the text of `sh -c` is today. So `flock FILE -c 'git push -f origin main'` and `man -P '...' ls` are refused. A message body, such as `-m` or `--body`, is still never read so. In text read only because it may be a command, a program word that is not literal does not refuse the line by itself. The line is refused when a reading reaches a program a guard judges, or when that word could expand to such a program's name. So `curl -s 'https://example.com/v1/jobs?content=true'` and `tr '[:upper:]' '[:lower:]'` pass.
+- **Known text on standard input is judged too.** Text the line itself holds, such as a `printf` or `echo` literal or a heredoc, piped or redirected into a program the parser does not read, is parsed as a command line, as text piped into a shell is today. So `printf 'git push -f origin main' | script -q /dev/null` is refused, and `git log --oneline | head -5` passes. Text whose content the line does not hold, such as a download piped into such a program, is not judged; the README's Limits names that route.
 - **A variable the line sets is read with its value.** When a word is a variable assigned earlier in the same line, the parser judges the word as that value, so `C='git push -f origin main'; flock /tmp/l -c "$C"` is judged as the text it runs. A variable the line does not set stays not literal.
 - **Programs that never run their arguments are listed.** A short list beside the parser, such as `echo`, `printf`, `grep`, `rg`, `cat` and `ls`, names programs whose quoted arguments are never read as commands, so `grep -rn 'git push -f origin main' docs` passes. Every program not on the list is judged as above. G4's list of readers is the same list. Q79 kept no list until M4; this is the list M4 brings.
 - **An interpreter's code is not a shell line.** A second short list names programs whose quoted argument is code in another language or a pattern: `python3`, `node`, `perl`, `ruby`, `awk`, `jq`, `sed`, and `find`'s `-name` and `-path` values. Their quoted arguments are not parsed as a shell line, so `python3 -c "import json; print(1)"`, `awk '{print $1}' notes.txt` and `find . -name '*.py'` pass. What that code then runs is the interpreter limit the README already states.
@@ -242,6 +242,8 @@ The parser also matches every program name it reads without regard to letter cas
 **What it must refuse, each with a case.** The rows F11 to F18 under [force-push routes](#force-push-routes-numbered-q101). Text on standard input of an unread program, and a variable the line sets given as its text. B3 and B4, such as `echo x > .gi?/config`, `git config {alias.p,!sh}` and `rm outward-repos.jso?`. The zsh glob qualifier outside a push, such as `ls README.md(e:'git push -f origin main':)`, and the same word in an array assignment and a `for` list. Glob grouping in a program word, `g(i)t` and `g@(i)t`. The lines M3's last re-checks left: a quote inside `${...}` or `((`, runner text, a shell or `env` in another letter case, a shell the parser does not read when it is given text, and a word of only `\0` among the words of `sudo -s`. A brace in a discard, such as `git reset --{hard,}`.
 
 **What goes.** The block of stopgap rules that M3 held twice, the guards' own refusals of a program word the shell expands, and the rule that refused any word naming a judged program after an unread one. So `which git` and `grep -n git notes.txt` pass again. `no_stage_all` does not take the rule: it only reminds, and it is the staging grader of the fix-a-bug cases, so a change to what it flags would change stored grades.
+
+**A runner's own options end at its first operand.** The parser reads `watch`'s options across the whole line today, so a `-f`, `--force` or `--delete` after `git` is taken as `watch`'s own and dropped from the push (row F19). Each runner's options end at its first operand, as the runner itself reads them, and G2's re-check also covers how the parser reads each known runner's options.
 
 **The `with-secrets` wrapper (Q53).** The parser unwraps `python3 ws.py with-secrets NAME -- PROGRAM`, so each guard judges PROGRAM as it judges any command. `secrets_shell` stops refusing git, gh and writes under it outright. Each route M3's slice Z found has a case.
 
@@ -257,7 +259,9 @@ Git runs a program named by many settings: an editor, a pager, a credential help
 
 - **Settings pass by an allow list.** A `-c KEY=VALUE`, a `GIT_CONFIG_*` pair, a variable git reads that is set on a git call, such as `GIT_EDITOR`, `EDITOR` or `GIT_SSH_COMMAND`, and a key `git config` writes, each passes only when it is on a list of settings known to run no command. `user.name`, `color.ui` and `GIT_AUTHOR_DATE` are on it. Anything else is refused, with a message that names the setting and the list. The list lives in one place, beside the parser.
 - **A variable set earlier in the line counts as set on the call.** `export GIT_EDITOR=...; git commit --amend` is judged as `GIT_EDITOR=... git commit --amend`, since the parser already carries an export into the commands after it.
-- **A git folder other than this repository's own is unresolved.** `--git-dir`, `GIT_DIR` and `-C` naming a folder whose config the guards have not read make the call unresolved, since that folder's config may name a command.
+- **A safe value passes.** A setting that names a command passes when its value is `true`, `:` or a program on G2's never-run list, so `GIT_EDITOR=true git rebase --continue` passes.
+- **Config written at clone or init counts as `-c`.** `git clone -c` and `--config` write the new repository's config, and `git init --template=DIR` copies one in. Each is judged as `-c` is (row F20).
+- **A git folder other than this repository's own is unresolved, unless the guard reads it.** `--git-dir`, `GIT_DIR`, `-C` and a `cd` before a git call that name a folder whose config the guards have not read make the call unresolved, since that folder's config may name a command. A folder the guard reads at hook time, such as a pinned repository under `src/`, counts as known, so `git -C src/REPO log` passes.
 - **An option that takes a command is read as that command.** `rebase --exec` is read so today. The same reading covers `bisect run`, `submodule foreach`, `filter-branch`'s filters, `difftool --extcmd`, `grep --open-files-in-pager`, and `--upload-pack`, `--receive-pack` and `--exec` on the commands that reach a remote.
 - **A remote's transport passes by an allow list too:** `https`, `ssh`, `git` and a local path. `ext::` runs a command and is refused.
 
@@ -287,6 +291,8 @@ Each route below force-pushes or deletes main past every shell guard on main tod
 | F16 | A shell the parser does not read, given text | `arch -arm64 tcsh -c '...'` | G2 |
 | F17 | A word of only `\0` among `sudo -s`'s words | `sudo -s $'\0' ...` | G2 |
 | F18 | Glob grouping in a program word | `g(i)t push -f origin main`, `g@(i)t ...` | G2 |
+| F19 | A runner's options read past its first operand | `watch git push -f origin main`, and its `--force`, `--delete` and `-x` forms | G2 |
+| F20 | Config written by `clone` or `init`, then run after a `cd` | `git clone --config core.fsmonitor='...' . /tmp/c && cd /tmp/c && git status` | G3 |
 
 Examples shortened with `...` run the same push as F1. The cases hold each line in full.
 
@@ -334,6 +340,7 @@ H0b's commits use `--no-verify` until R3's records are in, as the [machinery pag
 - **Cases come from real work.** Each outcome and routing case names what it was drawn from: a commit, a pull request, a record or a question-log row. The names live in one file, `evals/sources.json`, outside every case's hash, so naming the fix-a-bug cases' sources stales no record. A check fails a case with no entry. Every grader is deterministic; none is judged by a model.
 - **The suite runner.** `python3 evals/suites.py` picks suites from the changed paths: a wrapper, its cases, or any page a wrapper names. A change to the contract or the index picks routing. It runs each picked suite at the merge base and at the head, in temporary working copies, under the run cap it is given. A case that passed at the base and failed at the head runs at the head up to twice more, and counts as a regression at two failures of three: one run's difference is noise as often as signal. It exits 1 only for pass-to-fail, and 2 when the cap or the runner gave no verdict.
 - **What passing means.** A selection case runs three times and passes when at least two of its runs pass. An outcome case passes as the eval page says. A suite passes when every case passes.
+- **The routing suite is held to its base, not to every case.** It covers the contract and the index, which every session reads, so one routing case that misses at the small model must not block every contract edit. Its mark is written when no case passed at the base and failed at the head, at two failures of three, as the runner's regressions are counted. Its baseline in H2 shows which cases miss.
 - **A suite with no mark.** For content a suite covers, the gate treats no mark as a failed suite. A wrapper whose suite cannot pass after Q49's rerun and one more rewrite is listed in the manifest's `wrappers` entry, with its reason and the milestone that is to fix it. The gate warns on a listed suite and refuses nothing for it, and the milestone record names each one. The list starts with the four that miss today, and is empty when its milestone closes.
 - **The base run is reused.** When the base's fingerprint matches a stored result, the runner reads that result and runs only the head.
 - **The mark.** A suite's mark is a committed file, named by suite. It holds the git object ids of the wrapper's folder, its cases and each page it names, with the model and the tool version. The runner writes it only when every case passed at the head: passing, not merely no worse than the base. A check fails a mark that does not match the tree.
@@ -354,7 +361,7 @@ Each attempt runs as M3's slice B7 did. Two cases are drawn from M1 to M3's real
 | Anything between | The page stays unproven. The baseline is its failed attempt, and `prove-by` moves to M6, once. |
 
 - **Order.** Debugging's baseline first: its cases exist, and H0b fixes them. Its recording waits with the rest for the maintainer's pick, as Q87 says. Then the pages no M4 slice edits. `orchestration.md`, its delegating section and the instruction review come after L1 and L4, which edit them. `parts.md` and `changing-the-machinery.md` come last, after every slice that adds a part.
-- **A stop after the baselines.** Once the nine baselines are in, the slice stops for the maintainer's choice of which pages go to a recording. A page the budget does not reach stays unproven by his decision, with its baseline as the failed attempt, as red team review did in M3.
+- **A stop after the baselines.** Once the ten baselines are in, the slice stops for the maintainer's choice of which pages go to a recording. A page the budget does not reach stays unproven by his decision, with its baseline as the failed attempt, as red team review did in M3.
 - **Proven needs a real run too.** A page's `proven-by` names the M4 slice report where the page was used, beside its record.
 - **A proven page is gated from then on, and each later edit costs its guided arm again:** about 44 runs a page under H0b's item 8, where the whole recording is 132. So the stop after the baselines also shows, for each page, how often it has changed. Up to M3's sign-off `parts.md` changed in 55 commits and `changing-the-machinery.md` in 22; the other pages in 1 to 6 (verified, `git log` on main). A page that changes that often is not sent to a recording whole: the slice first proposes which of its tables move to a reference page, so the proven part is the procedure alone.
 - **A cut is queued for slice Z,** since it removes index rows: the page's steps, its wrapper and its rows leave in one commit.
@@ -431,7 +438,7 @@ The rules go on [the review orchestrator's page](../playbooks/review-orchestrato
 
 ### L5: Teach-back
 
-`docs/playbooks/teach-back.md`, a playbook, `proof: unproven`, `prove-by: M6`.
+`docs/playbooks/teach-back.md`, a playbook, `proof: unproven`, `prove-by: M6`. L5's pull request adds its entry to the `wrappers` check's waiting list, for M8 until slice Z widens the part, so the check passes with no wrapper.
 
 - **What it is.** Before a person approves a plan, or publishes a pull request in a `person` repository, they explain it in their own words. A fresh session, sent the grader template through L1, grades the explanation against the plan or the diff, and against the plan's "Decisions made without asking". It asks follow-up questions only where the explanation had gaps.
 - **The mark.** `python3 ws.py teach-back mark` records `passed` or `skipped` at that commit, beside the review mark. It reads the grader's transcript, bound to its dispatch as L2 binds a reviewer's, and has no mode that takes the caller's word. A skip names its reason and the person who gave it. The guards protect its store as L3 protects the review's.
@@ -443,7 +450,7 @@ The rules go on [the review orchestrator's page](../playbooks/review-orchestrato
 
 - **`merge_policy` in the manifest** maps a repository, named as the outward-write list names it, to `agent` or `person`.
 - **`agent`:** agents publish and merge after CI passes, and teach-back runs at plan approval only.
-- **`person`:** agents open drafts only. `review_gate` refuses an agent's `gh pr ready` unless a passed teach-back mark sits at the head commit. It refuses an agent's `ws.py merge`, `gh pr merge` in every form, and a `gh api` merge there: a person or human reviewers merge.
+- **`person`:** an agent opens drafts, and may publish one only with a passed teach-back mark at the head commit; `review_gate` refuses an agent's `gh pr ready` without it. It refuses an agent's `ws.py merge`, `gh pr merge` in every form, and a `gh api` merge there: a person or human reviewers merge.
 - **No entry means `person`.** This repository's entry is `agent`, as the maintainer has allowed since M1. The kit seeds none, so an adopted instance starts as `person`.
 - **The policy never widens where agents may write.** `outward_write` still decides that.
 
@@ -457,7 +464,8 @@ The rules go on [the review orchestrator's page](../playbooks/review-orchestrato
 ### Z: Contract, index and recordings
 
 - **The queued edits,** from the list under "Results". `AGENTS.md` routes a branch to its review before its pull request, names the merge policy in its pull-request rule, and names the push in its eval rule. `INDEX.md` gains a row for each new page, part and chain, and the lifecycle map's row, which has waited since M3. `fix-a-bug.md` gains the review gates and the fix brief's two fields. The definition of done names the review mark. Each cut from H3 is made here.
-- **The waiting list.** The `wrappers` check's entry for the review orchestrator moves to M6, the milestone that proves it, and teach-back joins it.
+- **The waiting list.** The `wrappers` check's entry for the review orchestrator moves to M6, the milestone that proves it. The part today accepts a waiting entry for M4 or M8 only; slice Z changes its code and cases to accept any later milestone.
+- **Pages that still say "waits for M4".** Each slice that builds a piece edits the pages that name it as planned: L3 `docs/code-review.md`, `docs/playbooks/git-host-operations.md` and `docs/playbooks/README.md`; L1 `docs/playbooks/architecture-review.md` and `docs/playbooks/reuse-checklist.md`; L4 `docs/playbooks/escape-analysis.md` and `docs/playbooks/feedback-walkthrough.md`; H2 `docs/maintain-the-workspace.md` and `docs/extend-the-workspace.md`. Each edit takes its instruction review in that slice. Slice Z re-runs V8 and fixes any line left. Their suite runs sit inside the later pull requests the selection budget already counts.
 - **The version** goes to 0.5.0, the engine's and the manifest's in one step.
 - **R4,** the guided arm alone, 45 runs: slice Z changes only files the guided arm is given, so H0b's item 8 applies. Then, in a second batch, the routed arm: 45 runs to a one-time record. An arm that misses its margin is recorded once more, 45 runs, and judged pooled.
 - **The records:** `docs/milestones/m4.md`, the changelog and the evidence page at M4's numbers, written before the outside checks run. M3's red team found all three stale.
@@ -493,7 +501,7 @@ Sub-batch G:
 4. The shell guards never pass a command in which a word that decides what runs, or what it acts on, is not literal. Each line "G2" names is refused, with a case. (V2)
 5. The rule lives in the parser. No part file and no second library file holds a copy of it, and the test that held two copies equal is gone. (V1)
 6. When a command runs under `ws.py with-secrets`, each guard judges the wrapped program as it judges any command. (V2)
-7. The lines that must keep passing each have a case: the heredoc commit and pull-request idioms, `cd "$D" && make`, `ls *.md`, `which git`, `grep -n git notes.txt`, `command -v git`, `grep -rn 'git push -f origin main' docs`, `echo 'git push --force origin main'`, `python3 -c "import json; print(1)"`, `awk '{print $1}' notes.txt`, `jq '.tiers' workspace.json` and `find . -name '*.py'`. Each line the red team's record of 2026-11-26 names in its finding 4 is refused, with a case. (V2)
+7. The lines that must keep passing each have a case: the heredoc commit and pull-request idioms, `cd "$D" && make`, `ls *.md`, `which git`, `grep -n git notes.txt`, `command -v git`, `grep -rn 'git push -f origin main' docs`, `echo 'git push --force origin main'`, `python3 -c "import json; print(1)"`, `awk '{print $1}' notes.txt`, `jq '.tiers' workspace.json`, `find . -name '*.py'`, `git log --oneline | head -5`, `curl -s 'https://example.com/v1/jobs?content=true'`, `tr '[:upper:]' '[:lower:]'`, `git reset --hard HEAD@{1}`, `GIT_EDITOR=true git rebase --continue` and `git -C src/REPO log` in a workspace with a pinned repository. Each line the red team's record of 2026-11-26 names in its finding 4 is refused, with a case. (V2)
 8. After G2, G3 and G4 each, `python3 evals/grade.py --recorded` finds no difference, and the slice's report lists every stored eval command whose answer changed. (V3)
 9. When a git call sets or writes a setting that is not on the allow list, the guards refuse it and name the setting. A case covers `-c`, `GIT_CONFIG_*`, an environment variable and `git config`. (V2)
 10. When a git option takes a command, the guards judge its text as a command line, with a case for each option "G3" names. A remote whose transport is not on the allow list is refused. (V2)
@@ -562,7 +570,7 @@ Sub-batch L, review sessions. They are numbered after the closing criteria becau
 Added on the maintainer's answers of 2026-11-26, numbered as they came:
 
 61. H0a's commit holds no new run. It migrates only the records current under the old hash at its base, and a record stale there stays stale. A test shows this, and that no file an agent is given changed. After H0a, a change to a grading file alone passes `eval_record` once `grade.py --recorded --stamp` finds no difference. (V1, V3)
-62. Each row F1 to F18 under "Force-push routes, numbered" has a case under its row's name. The case is refused by the slice that row names, and was allowed on that slice's base. (V2)
+62. Each row F1 to F20 under "Force-push routes, numbered" has a case under its row's name. The case is refused by the slice that row names, and was allowed on that slice's base. (V2)
 
 60. When only the files one arm is given change, `eval_record` asks for that arm alone, and passes once that arm is recorded again on the same model. When a file every arm shares changes, or the model, it asks for every arm. A test covers each. (V1)
 
@@ -648,15 +656,15 @@ A proven page is gated from the day it is marked. Each edit to it makes its reco
 
 | Edit | Runs it costs, after H0b's item 8 | Before H0b |
 |---|---|---|
-| A page M4 proves, two cases | 44, its guided arm, when the other arms were recorded this milestone; else 132 | 132 |
-| `fix-a-bug.md`, the definition of done, the contract or the index | 45: the guided arm of the three fix-a-bug cases | 135 |
+| A page M4 proves, two cases | 132 after M4, since the other arms are then older; 44 within the milestone of a full recording | 132 |
+| `fix-a-bug.md`, the definition of done, the contract or the index | 135 after M4; 45 within the milestone of a full recording, as R4 is | 135 |
 | A file every arm shares, or a change of model | Every arm: 132 a page, 135 for fix-a-bug | The same |
 | A grading file alone | None, when a re-grade changes no grade (H0a) | 135 |
 
 - **How many pages.** After M4, at most about five pages are proven: `fix-a-bug.md` and the pages H3 records and passes. The number is the maintainer's choice after the baselines.
 - **How often.** Up to M3's sign-off the ten pages changed in 1 to 55 commits each. H3 weighs that before a page is recorded, and moves a high-churn page's tables to a reference page first.
 - **Batching.** An edit to a proven page does not land on its own. It waits in a list under the current milestone's plan, "Results", as M3's "Queued for slice Z" did, and the queued edits land together in that milestone's closing slice, with one recording of the guided arm per page. A fix the maintainer will not wait for lands with its own recording, on his yes with its count.
-- **For scale.** M3's two recordings, R1 and R2, each changed the harness or the cases, which every arm shares, so this rule would not have cut them. It cuts an edit to pages alone, such as slice Z's queued edits would have been without the case change.
+- **For scale.** Re-recording one arm alone saves runs inside a milestone: R4's 90, and a rush fix's. A batch in a later milestone records every arm, so the batching rule, one recording per page per milestone, is what holds upkeep down after M4. With five pages proven and each edited once a milestone, that is about 795 runs a milestone.
 - **Drift between arms.** A guided arm recorded alone is compared with two-line and bare runs that may be older. A record names each arm's agent tool version and milestone. A batch records the guided arm alone when the other arms were recorded in the same milestone. When they are older, or the model a run resolves to changed, it records every arm. So a page's first edit batch in a milestone after a full recording costs 44, and a batch in a later milestone costs 132. M4's own slice Z records R4's guided arm alone, since R3 recorded every arm in M4. A version that differs between arms is a warning, and the eval page reports it, as it did for M3's routed arm.
 - **An instance pays none of this for the kit's pages.** A synced page the kit's lock marks proven is not gated in an instance. An instance pays only for pages it proves itself.
 - **Each milestone record reports** the upkeep runs spent, beside its own eval runs.
@@ -685,11 +693,11 @@ Per slice, for M4's own build:
 | L0 to L3 | The same: the loop does not exist yet. | 15 |
 | L4 to L7 | Through the loop: one pull request each with one fix round, 11, and two for its pages' instruction review. | 52 |
 | H2 | Through the loop, as two pull requests, the runner and mark, then the gate: one fix round each, 22, and two for their pages. | 24 |
-| H3 | Through the loop: about five pull requests of cases, 5 each. | 25 |
+| H3 | Through the loop: about five pull requests of cases and a page's proof keys, a mixed range, 11 each. | 55 |
 | Z | Through the loop, 11, and four for the hashed pages' instruction reviews. | 15 |
 | Two fix pull requests nobody planned | Through the loop, 11 each. | 22 |
 | The plan and the close | Three red team rounds on this plan, the outside red team, and three teach-back graders. | 7 |
-| | **Review sessions** | **186** |
+| | **Review sessions** | **216** |
 
 - **About a dozen of these run at the worker tier in M4:** docs drift and reuse, on each full round of machinery code through the loop. The re-check mostly stays at the driver tier, since nearly every range here changes a gate. The larger saving shows in an instance, where most changes are product code.
 - **The stop is 250 review sessions.** A slice that passes twice its row says so in its report before it goes on.
@@ -746,6 +754,8 @@ Round 1: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guard
 
 Round 2: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guards-review-loop-and-evals-round-2.md), holds with fixes, 14 findings, rows R2-1 to R2-14. Findings R2-1 and R2-6 were verified by running the hook.
 
+Round 3: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guards-review-loop-and-evals-round-3.md), holds with fixes, 12 findings, rows R3-1 to R3-12. Findings R3-1, R3-4 and R3-6 were verified by running the hook.
+
 | # | Finding | Disposition | Action |
 |---|---|---|---|
 | 1 | The review mark cannot sit at the tip it reviewed: committing the review's record makes a new tip with no mark. | Accepted | L3: a commit after the marked one that changes only the review's record paths keeps the mark; any other path makes it `delta`. Criterion 39 tests both. |
@@ -778,6 +788,18 @@ Round 2: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guard
 | R2-12 | L3's mark refusals depend on L4's rules, which merge after it. | Accepted | The fixed-row and declined-row refusals leave L3; L4 adds them, as criterion 41 already tests. |
 | R2-13 | A new recording carries no grader hash, and no step writes one. | Accepted | H0b's item 8: `run.py` writes the grader hash into each new record, and `eval_record` fails a record without one after H0b. |
 | R2-14 | The cap still equals the clean two-fix-round count, and mixed ranges fit no scale row. | Accepted in part | A mixed range takes the full machinery row. The cap is rejected as a fault: the maintainer set 16 (Q91), and stopping a loop that needs a retry on top of two fix rounds, for a person, is its purpose. |
+| R3-1 | `watch git push -f origin main` passes every guard: the parser reads `watch`'s options past `git` and drops the force flag. | Accepted | Row F19 with a case. G2: a runner's options end at its first operand, and the re-check covers each known runner's options. |
+| R3-2 | G2's standard-input rule, as written, makes most piped lines unresolved; narrowing it is left to the builder. | Accepted | G2 judges text the line itself holds; a download piped into an unread program is not judged, and the README's Limits names it. Criterion 7 keeps `git log --oneline \| head -5` passing. |
+| R3-3 | The routing suite can block slice Z: it needs every case to pass, and no list excuses it. | Accepted | H2: the routing suite's mark is written when no case regresses from the base, at two failures of three, not when every case passes. |
+| R3-4 | `git clone --config` and `git init --template` write a command-running setting, and a `cd` into the clone runs it. | Accepted | G3 judges both as `-c`, and treats a folder named by a `cd` as it treats `-C`. Row F20 with a case. |
+| R3-5 | Reading quoted data as a possible command refuses URLs with `?` and `tr '[:upper:]'`. | Accepted | G2: in such text a non-literal program word refuses only when a reading reaches a judged program or could expand to one's name. Criterion 7 names both lines. |
+| R3-6 | G3's allow list refuses `GIT_EDITOR=true` and `git -C src/REPO`. | Accepted | G3: a setting whose value is `true`, `:` or a never-run program passes, and a folder the guard reads at hook time counts as known. Criterion 7 names both. |
+| R3-7 | After M4 every batch records every arm, so 44 and 45 hold only inside a milestone. | Accepted | The upkeep table and key point now say about 132 a page after M4, with 44 only inside the milestone of a full recording. |
+| R3-8 | The `wrappers` check refuses slice Z's M6 entry and L5's teach-back page. | Accepted | L5 adds teach-back's waiting entry for M8; slice Z widens the part's code and cases to any later milestone. |
+| R3-9 | Nine pages still say something waits for M4, and no slice names their edits. | Accepted | Slice Z's detail names the slice that edits each page; Z re-runs V8. |
+| R3-10 | L3 and L6 depend on G2 and G4, but the order does not wait for them. | Accepted | L3 waits for G2; L6 waits for G4. |
+| R3-11 | H3's review sessions are priced on the wrong scale row. | Accepted | H3 at 11 a pull request, 55; review sessions rise to 216 of 250. |
+| R3-12 | Braces with no comma marked non-literal; L6's `person` wording; nine baselines for ten. | Accepted | Braces count only with a comma or a range; L6 reworded; ten baselines. |
 ## Approval
 
 Not yet approved.
@@ -804,4 +826,5 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Inferred, for H0a:** that the stored records can be re-hashed with no new run because no file an agent is given changes. The red team should attack this.
 - **Red team round 1, 2026-11-26:** holds with fixes, 16 findings, each verified and accepted; the triage is in the Red team table. Verified: the four routes of finding 4 exit 0 at the before-shell hook; V8's first grep matches 64 instruction-review records; five of eight stored records are stale at `78e4dfd`.
 - **Red team round 2, 2026-11-26:** holds with fixes, 14 findings; 13 accepted, one in part. Verified: `gh pr merge 5` and `python3 -c` lines exit 0 at the hook today; 32 stored fix-a-bug transcripts hold a `python3 -c` line.
+- **Red team round 3, 2026-11-26:** holds with fixes, 12 findings, all accepted. Verified: `watch git push -f origin main` and `git clone --config core.fsmonitor=... . /tmp/c && cd /tmp/c && git status` exit 0 at the hook today.
 - **Not run:** no eval or selection run, and no guard attack.
