@@ -1,7 +1,7 @@
 ---
 kind: plan
-last-reviewed: 2026-11-18
-status: draft
+last-reviewed: 2026-11-26
+status: abandoned
 milestone: M4
 ---
 
@@ -10,6 +10,8 @@ milestone: M4
 The plan for one queue of the questions agents leave for a person, answered one at a time in a single pass. Building sessions work from it.
 
 **In short:** sessions file each question as a queue item, with its options and the consequence of each. A pass answers what the evidence already answers, then asks the person the rest, one at a time. The first version sends nothing to any session: the session that asked picks its answer up when it next starts, or the person hands it to another session.
+
+**Abandoned on 2026-11-26.** The maintainer cut the queue. The trial's bar, C2 under "The two bars", was checked at M3's sign-off and failed on one count: no item had been closed from evidence without asking. This plan's settled decisions say a failed trial cuts the queue. No slice was built. The maintainer's private pass stays private.
 
 ## Key points
 
@@ -240,3 +242,7 @@ Approved by the maintainer on 2026-11-18, on one condition: round 8 of the red t
 ## Changes after approval
 
 ## Results
+
+### Abandoned, 2026-11-26
+
+The maintainer cut the queue on 2026-11-26, answering Q86 of the workspace's queue. C2 failed on its evidence bar: no item was closed from evidence before M3's sign-off. The count of answers acted on was not the reason. No slice ran, and nothing in this repository was built from this plan. The seven red team records stay as the record of the design. M4's hand-off plan names the cut among its non-goals.
