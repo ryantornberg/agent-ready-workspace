@@ -22,7 +22,7 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **Harness changes land in one slice, before any recording.**
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap already open on main is recorded instead.
 - **The decision queue is not built in M4.**
-- **Not red-teamed and not approved.** The maintainer's review of M3 comes first. Six questions wait in his queue.
+- **Not red-teamed and not approved.** The maintainer's review of M3 comes first. Five questions wait in his queue.
 
 ## Settled decisions
 
@@ -59,6 +59,10 @@ The maintainer, answering M3's queue, 2026-11-21 to 2026-11-25:
 - **Q84.** The merge helper retargets every open pull request based on a merged branch before it deletes that branch, with a case.
 - **Q85, and the sign-off.** B3, B4 and the zsh glob qualifier outside a push go to M4 with the parser work.
 
+The maintainer, answering this plan's queue, 2026-11-26:
+
+- **Q91.** A review scales to its diff. A pull request is capped at 16 review sessions, and M4 stops at 250. Reuse, docs drift and the re-check run at the worker tier, unless the change touches a gate.
+
 The maintainer, on the program, 2026-11-17 to 2026-11-24:
 
 - M4 carries the proof attempts for the six procedures that may be model coaching, and for the four other pages M3 shipped with `prove-by: M4`.
@@ -93,7 +97,7 @@ Each is the author's. A reviewer reads this section to challenge them.
 - **Budgets:** four of the nine other pages are planned to reach a recording, and the plan stops at 1,400 agent runs. That four is a guess; the baselines replace it. Rejected: the program's full 1,520 for the attempts alone.
 - **The routed arm is measured once more at the close.** M4 adds contract lines, index rows and pages, and M3 showed that added text can cost passes.
 - **A plan's red team triage lives in the record, and the plan links each record** (L7). Rejected: the table stays in the plan. The maintainer chose the record for the decision queue plan, the record already has a Disposition column that every other document uses, and M3's plan carried about 225 lines of triage tables. This plan's own Red team section takes that form now, ahead of the template.
-- **A review scales to its diff, and a pull request is capped at 16 review sessions** (L1). Rejected: every dimension on every round, which makes about 22 sessions for a pull request with two fix rounds; and a cap alone, which stops a loop late without making it cheaper. Reuse runs when the range adds a file or a function, where the page runs it always today: the program counts four dimensions that always run. Every dimension stays at the driver tier. The cap's number, and whether advisory work may drop a tier, are in the maintainer's queue.
+- **A review scales to its diff, and a pull request is capped at 16 review sessions** (L1). Rejected: every dimension on every round, which makes about 22 sessions for a pull request with two fix rounds; and a cap alone, which stops a loop late without making it cheaper. Reuse runs when the range adds a file or a function, where the page runs it always today: the program counts four dimensions that always run. The maintainer settled the cap and the tiers on 2026-11-26 (Q91); the reuse trigger is still the author's.
 - **A range of tests or eval cases alone gets two dimensions,** code and test adequacy. Rejected: the four. A test or a case holds no architecture to judge, and the code dimension reads what it could weaken.
 - **New pages name M6 in `prove-by`.** A page cannot be proven by the milestone that writes it, and M6 uses the review loop on real fixes.
 - **Machine-state records go to M5**, with the first instance. M3 left the choice between M4 and M5 open.
@@ -277,7 +281,7 @@ Each attempt runs as M3's slice B7 did. Two cases are drawn from M1 to M3's real
 - **Order.** Debugging first: its cases exist, and H0 fixes them. Then the pages no M4 slice edits. `orchestration.md`, its delegating section and the instruction review come after L1 and L4, which edit them. `parts.md` and `changing-the-machinery.md` come last, after every slice that adds a part.
 - **A stop after the baselines.** Once the nine baselines are in, the slice stops for the maintainer's choice of which pages go to a recording. A page the budget does not reach stays unproven by his decision, with its baseline as the failed attempt, as red team review did in M3.
 - **Proven needs a real run too.** A page's `proven-by` names the M4 slice report where the page was used, beside its record.
-- **A proven page is gated from then on.** If the baseline sends `parts.md` to a recording, the slice first stops and proposes where its table of parts lives. A proven page that every new part edits would cost a recording per part.
+- **A proven page is gated from then on, and each later edit costs its recording again:** about 132 runs a page, as an edit to `fix-a-bug.md` costs 135 today. So the stop after the baselines also shows, for each page, how often it has changed. Up to M3's sign-off `parts.md` changed in 55 commits and `changing-the-machinery.md` in 22; the other pages in 1 to 6 (verified, `git log` on main). A page that changes that often is not sent to a recording whole: the slice first proposes which of its tables move to a reference page, so the proven part is the procedure alone.
 - **A cut is queued for slice Z,** since it removes index rows: the page's steps, its wrapper and its rows leave in one commit.
 - A run that dispatches a helper session, as the instruction review's and delegating's cases do, counts each dispatched session toward its batch.
 
@@ -307,6 +311,7 @@ Then test two existing review marks in a scratch repository, against criteria 35
 | Any other machinery path, or code under `src/` | Code, architecture, security and test adequacy. Reuse, when the range adds a file or a function. Docs drift and the other triggered dimensions, as their triggers say. |
 
 - **A fix round runs less.** On a delta round the dispatch starts code over the delta; security, when the delta changes a hook, a guard, a check or CI; each dimension that has a finding from an earlier round; and the re-check of the rows marked fixed. The whole-branch pass runs once, at the tip that is to get the mark.
+- **Advisory work runs a tier lower** (Q91). Reuse, docs drift and the re-check run at the worker tier. When the range changes a gate, which is a check, a hook, a grader, CI or the commit hook, they run at the driver tier like the rest. The review orchestrator's page and [orchestration](../orchestration.md) say so, where both call every review driver work today.
 - **It counts review sessions.** Every session a dispatch starts for a review is one: a dimension, a retry, a re-check, a whole-branch pass, an instruction review, a red team, a teach-back grader. Each dispatch record holds its tier, model, effort and duration, and its token use where the agent tool reports it.
 - **A pull request has a cap.** The manifest's `review` entry sets the most review sessions one pull request may start: 16 here, and the same in the kit. At the cap the dispatch refuses and names the count. The loop stops for the person, who raises the cap for that branch or ends the review. `python3 ws.py review status` prints the branch's count against the cap.
 
@@ -474,7 +479,7 @@ Closing:
 Sub-batch L, review sessions. They are numbered after the closing criteria because they joined the draft later:
 
 57. When a range changes only guidance pages, plans or records, the dispatch starts no dimension. When it changes only tests or eval cases, it starts code and test adequacy. Otherwise it starts the four, and reuse and each triggered dimension only when its trigger holds. A test covers each row. (V1)
-58. On a delta round the dispatch starts code, security when the delta changes a hook, a guard, a check or CI, each dimension with an earlier finding, and the re-check. A mark needs one whole-branch pass at its tip, and no more. (V1)
+58. On a delta round the dispatch starts code, security when the delta changes a hook, a guard, a check or CI, each dimension with an earlier finding, and the re-check. A mark needs one whole-branch pass at its tip, and no more. Reuse, docs drift and the re-check start at the worker tier, and at the driver tier when the range changes a gate. (V1)
 59. `ws.py dispatch` never starts a review session past the manifest's cap for a pull request, and its refusal names the count. Each dispatch record holds its tier, model, effort and duration. `ws.py review status` prints the branch's count against the cap. (V1)
 
 ## Verification
@@ -548,12 +553,13 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 - **The stop is 1,400 agent runs.** If all nine other pages went to a recording, the total would be about 1,970. The maintainer chooses the pages after the baselines; nothing past 1,400 runs without a change of plan.
 - **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. A full selection rerun, 174, happens only if a wrapper's description changes. The stop is 300.
 - **Review sessions are not eval runs, and are budgeted apart,** in the next section.
+- **The stop covers M4's build only.** After M4, each edit to a page M4 proves costs that page's recording again, about 132 runs, and the stop does not count it. Edits to a proven page are batched, as the contract already asks.
 - **Red team review's cases change in L7 and cost no run here.** Its stored 10-run baseline goes stale and is named so; M9 runs it again, 20 runs for both cases, with that page's recording.
 - G0 to G4, H0, H2's build, and L0 to L7 start no eval run. L0's recorded tool runs are a handful of headless sessions.
 
 ## Review session budgets
 
-A review session is a fresh session at the driver tier. It costs more of the maintainer's quota than an eval run on the small model. How much more is not measured: L0 records whether each agent tool reports a session's token use, and the first three reviews through the loop put a figure in the milestone record. Every count in this section is an estimate, from the scale rule in "L1".
+A review session is a fresh session at the driver tier, or at the worker tier for advisory work (Q91). It costs more of the maintainer's quota than an eval run on the small model. How much more is not measured: L0 records whether each agent tool reports a session's token use, and the first three reviews through the loop put a figure in the milestone record. Every count in this section is an estimate, from the scale rule in "L1".
 
 Per pull request, through the loop:
 
@@ -579,8 +585,9 @@ Per slice, for M4's own build:
 | Z | Through the loop, 11, and four for the hashed pages' instruction reviews. | 15 |
 | Two fix pull requests nobody planned | Through the loop, 11 each. | 22 |
 | The plan and the close | Three red team rounds on this plan, the outside red team, and three teach-back graders. | 7 |
-| | **Review sessions at the driver tier** | **178** |
+| | **Review sessions** | **178** |
 
+- **Few of these drop a tier in M4.** Nearly every range here changes a gate, so reuse, docs drift and the re-check mostly stay at the driver tier. The saving shows in an instance, where most changes are product code.
 - **The stop is 250 review sessions.** A slice that passes twice its row says so in its report before it goes on.
 - **A guard slice still open when L3 merges goes through the loop,** as "First real use" says. Each adds about 11 to its row.
 - **Where the count is reported.** In each dispatch record. In the completion record, per round. By `python3 ws.py review status`, against the cap. In one line of the pull request's review record, such as `Sessions: 11 of 16`. In each slice's report under "Results", against its row here. And in `docs/milestones/m4.md`, in a "Review sessions used" table beside "Eval runs used".
