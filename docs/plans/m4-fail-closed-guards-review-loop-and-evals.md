@@ -21,8 +21,8 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **Review sessions:** about 217 planned, stop at 250, 16 per pull request.
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
-- **Red team:** five rounds held with fixes; 64 findings settled; stopped on a plateau.
-- **Not approved.** Every queue answer through Q103 is applied. Two questions wait, on selection runs.
+- **Red team:** five rounds held with fixes; 64 findings settled; round 6 next.
+- **Not approved.** Every queue answer through Q106 is applied.
 
 ## Settled decisions
 
@@ -85,6 +85,9 @@ The maintainer, answering the workspace's queue, 2026-11-26:
 - **Q101.** Every force-push route the private attack scripts' report lists is a numbered row in this plan, with a case. M3's record names them as known limits.
 - **Q102.** Slice H0 splits. H0a is the grader stamp alone, landed on a re-grade. G2 to G4 depend on H0a only. The stop rule names the fallback: the parser fix gets its own 135-run recording. Q88's line above is amended.
 - **Q103.** H0b changes the hand-off plan template's Red team section, red team review's step 5 and `evals/acceptance/red-team-lease.py`, so a plan's triage may live in each linked record. It lands in H0b, before R3. Q95's earlier answer put the same change in M4's first slice; Q103 is the later answer and governs.
+- **Q104.** The selection and routing stop rises from 300 to 400.
+- **Q105.** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request. A larger run and the routing suite still need his yes with a count.
+- **Q106.** The red team loop runs on until a round only finishes earlier work.
 - **Upkeep.** The plan states what each proven page costs to edit after M4, and how edits to proven pages are batched. From his notes of 2026-11-25.
 
 The maintainer, on the program, 2026-11-17 to 2026-11-24:
@@ -128,7 +131,6 @@ Each is the author's. A reviewer reads this section to challenge them.
 - **New pages name M6 in `prove-by`.** A page cannot be proven by the milestone that writes it, and M6 uses the review loop on real fixes.
 - **Machine-state records go to M5**, with the first instance. M3 left the choice between M4 and M5 open.
 - **Names:** see [names this plan fixes](#names-this-plan-fixes).
-- **The red team loop stops after round 5, on a plateau** (see the Red team section). Rejected: a sixth round, since the last two found the same count and mostly new guard routes, which the build's re-checks and attack scripts are built to find.
 - **A plan of four sub-batches, approved once,** as M3 was. Rejected: a plan per sub-batch, which would need four red teams.
 
 ## Goal
@@ -617,7 +619,7 @@ Stop the plan and report when any of these happens:
 - The routed arm fails criterion 51 after its one re-record. Publish the result and stop; the new index rows stay out until a person decides.
 - After R3, a slice needs a change to a file criterion 21 names. That costs a recording, so the maintainer decides.
 - **The fallback (Q102).** H0a cannot migrate the stored records with no new run, or a re-grade after G2, G3 or G4 changes a stored grade. The guard slice stops before it merges. The maintainer then decides between giving the parser fix its own recording, the three fix-a-bug cases at 135 runs, so it merges first, and holding it until R3.
-- The eval runs reach 1,400 agent runs, or the selection and routing runs 300. Re-records, probes, failed runs and dispatched sessions count.
+- The eval runs reach 1,400 agent runs, or the selection and routing runs 400. Re-records, probes, failed runs and dispatched sessions count.
 - A slice's batch is used up before its "Done when" holds.
 - The review sessions reach 250, counted as [review session budgets](#review-session-budgets) says.
 - G2's measure shows it refuses a line agents need and no wording of the rule passes it.
@@ -655,7 +657,7 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 
 - **The stop is 1,400 agent runs, staged (Q87).** If all ten pages went to a recording, the total would be about 1,745, or 1,880 with every re-record. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
 - **Dispatched sessions.** A case whose agent dispatches a helper, as delegating's, orchestration's and the instruction review's cases may, counts each helper toward its batch. Such a page's recording may cost about twice 132. The maintainer sees that price for each page after the baselines, before he picks.
-- **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. After H2, each pull request that edits a page a wrapper names runs that suite at the base and the head the first time, about 12 runs, since M3's stored results carry no fingerprint; M4's later slices hold about ten such pull requests, about 120. Slice Z runs the routing suite at its head, about 40 once per case or 120 at three runs. That is about 316 to 396 against a stop of 300, so the stop fires near slice Z unless the maintainer raises it; that is in his queue. Two more wrappers, debugging and the reuse checklist, passed their fire case at exactly two of three in M3's last run, so their suites may need a rerun on noise alone. A full selection rerun, 174, happens only if a wrapper's description changes.
+- **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. After H2, each pull request that edits a page a wrapper names runs that suite at the base and the head the first time, about 12 runs, since M3's stored results carry no fingerprint; M4's later slices hold about ten such pull requests, about 120. Slice Z runs the routing suite at its head, about 40 once per case or 120 at three runs. That is about 316 to 396 against a stop of 400 (Q104), so slice Z runs the routing suite three times per case. Two more wrappers, debugging and the reuse checklist, passed their fire case at exactly two of three in M3's last run, so their suites may need a rerun on noise alone. A full selection rerun, 174, happens only if a wrapper's description changes.
 - **Review sessions are not eval runs, and are budgeted apart,** in the next section.
 - **The stop covers M4's build only.** Upkeep after M4 is in the next section.
 - **Red team review's cases change in H0b and cost no run here.** Its stored 10-run baseline goes stale and is named so; M9 runs it again, 20 runs for both cases, with that page's recording.
@@ -675,7 +677,7 @@ A proven page is gated from the day it is marked. Each edit to it makes its reco
 | The contract or the index | The routing suite at the head: about 40 to 120 selection runs | None |
 
 - **How many pages.** After M4, at most about six pages are proven: `fix-a-bug.md` and up to five pages H3 records and passes. 28 wrappers name 29 pages, and each of those pays the selection row above.
-- **Who says yes to a suite run.** Q46 lets an agent start a batch only on the maintainer's yes with a count. A suite run at a pull request's head is a batch. Whether he gives a standing yes for those, up to a count per pull request, is in his queue; until then each waits for him. The number is the maintainer's choice after the baselines.
+- **Who says yes to a suite run (Q105).** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request. A larger run, and the routing suite, still need the maintainer's yes with a count, as Q46 says. The number of proven pages is his choice after the baselines.
 - **How often.** Up to M3's sign-off the ten pages changed in 1 to 55 commits each. H3 weighs that before a page is recorded, and moves a high-churn page's tables to a reference page first.
 - **Batching.** An edit to a proven page does not land on its own. It waits in a list under the current milestone's plan, "Results", as M3's "Queued for slice Z" did, and the queued edits land together in that milestone's closing slice, with one recording of the guided arm per page. A fix the maintainer will not wait for lands with its own recording, on his yes with its count.
 - **For scale.** Re-recording one arm alone saves runs inside a milestone: R4's 90, and a rush fix's. A batch in a later milestone records every arm, so the batching rule, one recording per page per milestone, is what holds upkeep down after M4. With five pages proven and each edited once a milestone, that is about 795 runs a milestone.
@@ -774,7 +776,7 @@ Round 4: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guard
 
 Round 5: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guards-review-loop-and-evals-round-5.md), holds with fixes, 11 findings, rows R5-1 to R5-11. Findings R5-2 and R5-4 were verified by running the hook.
 
-**The loop stops here.** The rounds found 16, 14, 12, 11 and 11 findings, and every verdict was "holds with fixes". No round found the core failing. Most of what each later round found is another route past the guards, a class with no fixed end, which the build's re-checks and the outside attack scripts exist to find. Round 5's fixes turned two route families into allow lists, `gh api` endpoints and git variables, which ends a class rather than a route. Another round on the plan would buy little the build does not. The maintainer may still ask for round 6.
+**The loop goes on (Q106).** The rounds found 16, 14, 12, 11 and 11 findings, each "holds with fixes". Round 5 changed the plan in substance, so round 6 runs, and the loop ends on a round that only finishes earlier work.
 
 | # | Finding | Disposition | Action |
 |---|---|---|---|
@@ -800,7 +802,7 @@ Round 5: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guard
 | R2-4 | The gate holds only at `gh pr create`; nothing checks the mark at publish or merge. | Accepted | L3: `review_gate` also refuses `gh pr ready`, `gh pr merge` and `ws.py merge` without a mark at the head, and CI checks the mark's fingerprint. Criterion 40. |
 | R2-5 | The upkeep rules contradict each other, so "about 44 runs" rarely holds. | Accepted | One rule: a batch records the guided arm alone when the other arms are from the same milestone, else every arm. Key point now says 44 to 132. Slice Z's guided-only R4 fits it. |
 | R2-6 | In a `person` repository an agent can still run `gh pr merge`. | Accepted | Verified: `gh pr merge 5` exits 0 today. L6 refuses every merge form there. Criterion 45. |
-| R2-7 | The plan budgets about 336 selection runs against its own stop of 300, an open question. | Accepted | The plan stays within 300 until Q104 is answered: routing runs once per case at Z, about 256 in all. |
+| R2-7 | The plan budgets about 336 selection runs against its own stop of 300, an open question. | Accepted | The stop is now 400, by Q104; slice Z runs the routing suite three times per case. |
 | R2-8 | L1's tier floor contradicts worker-tier dimensions, since the templates open `Tier: driver`. | Accepted | Advisory dimensions and the re-check get their own worker-tier templates; the floor holds per template. |
 | R2-9 | The teach-back mark has no rule for its evidence, so an agent could write it. | Accepted | L5: the mark reads the grader's dispatched transcript, takes no caller's word, and its store is guarded. Criterion 43. |
 | R2-10 | Guarding the transcript folder would also refuse the agent tool's memory writes. | Accepted | The guards name the session transcript files, not their folder. |
