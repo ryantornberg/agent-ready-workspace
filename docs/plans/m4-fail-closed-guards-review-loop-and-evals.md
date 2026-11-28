@@ -21,7 +21,7 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **Review sessions:** about 231 planned, stop at 250, 16 per pull request.
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
-- **Red team:** eighteen rounds held with fixes; round 19 next.
+- **Red team:** nineteen rounds held with fixes; round 20 next.
 - **Not approved.** Queue answers through Q114 are applied.
 
 ## Settled decisions
@@ -138,7 +138,8 @@ Each is the author's. A reviewer reads this section to challenge them.
 - **Machine-state records go to M5**, with the first instance. M3 left the choice between M4 and M5 open.
 - **Names:** see [names this plan fixes](#names-this-plan-fixes).
 - **The red team ran before the spec was agreed.** The maintainer's brief asked for the red team before his approval, and size the work puts the spec's agreement first. He agrees the spec and approves the plan in one step, after the loop. Its risk: a goal, non-goal or criterion he changes then sends the plan back for another round.
-- **The fast CI path stays after Q114** (G0), on the maintainer's ruling that a 30-minute CI wait for a page edit is not acceptable. It now serves the wrapped-page pull requests Q110 requires. Rejected: dropping it, which makes every wrapped-page edit wait the full run.
+- **The fast CI path stays after Q114** (H2), on the maintainer's ruling that a 30-minute CI wait for a page edit is not acceptable. It now serves the wrapped-page pull requests Q110 requires. Rejected: dropping it, which makes every wrapped-page edit wait the full run.
+- **Q110 covers a wrapper and its cases too** (H2). They pick the same suite as the page, and a wrapper's description decides selection. Rejected: pages alone, which leaves the wrapper on the direct route with a fresh mark.
 - **A plan of four sub-batches, approved once,** as M3 was. Rejected: a plan per sub-batch, which would need four red teams.
 
 ## Goal
@@ -180,9 +181,9 @@ Recordings are numbered on from M3's: R3 follows the harness slices, and R4 clos
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| G0 | Open M4 | `building` becomes `["M4"]`, with its test, parts row and adoption page. A check fails a `building` entry whose record is signed off. `.env` joins `.gitignore`. Page-only pull requests get a fast CI path. | driver | Criteria 1, 64, 65 |
+| G0 | Open M4 | `building` becomes `["M4"]`, with its test, parts row and adoption page. A check fails a `building` entry whose record is signed off. `.env` joins `.gitignore`. | driver | Criterion 1 |
 | G1 | Push check and merge helper | The pre-push check loads a part's cases and the library they call from one commit (Q82). `ws.py merge` retargets pull requests stacked on a branch before it deletes that branch (Q84), and reads only the `pull_request` run of each required check. | driver | Criteria 2–3 |
-| G2 | The one rule, in the parser | The parser marks each word literal or not. A guard refuses a command whose deciding word is not literal. The stopgaps in the guards' own files go. See "G2" below. | driver | Criteria 4–8 |
+| G2 | The one rule, in the parser | The parser marks each word literal or not. A guard refuses a command whose deciding word is not literal. The stopgaps in the guards' own files go. See "G2" below. | driver | Criteria 4–8, 64 |
 | G3 | Commands git itself runs | A git setting passes only when it is on a list of settings known to run no command. A git option that takes a command is read as that command. See "G3" below. | driver | Criteria 9–10, 62 |
 | G4 | Guard gaps outside the parser | The routes the private attack scripts marked non-blocking: discards, secret reads, the ledger's close, repository copies through `gh api`, and writers into a git folder. See "G4" below. | driver | Criteria 11–12 |
 
@@ -195,7 +196,7 @@ G0 and G1 touch no file the eval hashes. They branch from main and merge at once
 | H0a | The grader stamp | Grading files leave the recording's hash and get a stamp a re-grade writes. Stored records are migrated with no new run. Nothing an agent is given changes. See "H0a" below. | driver | Criteria 13, 61 |
 | H0b | The other harness changes, before R3 | The model in a record, the leak rule, debugging's fixture and cases, batches, one-time arms' re-record, the proof checks' two gaps, a usage check, one arm's re-record, where a plan's red team triage lives, and a baseline of two arms. See "H0b" below. | driver | Criteria 14–19, 48, 60, 63 |
 | H1 | Recording R3 | The three fix-a-bug cases, 15 runs per arm in each: 135 runs. A guided arm that misses its margin is recorded once more, 45 runs, in a new batch. H0b and H1 share one pull request. | driver | Criteria 20–21 |
-| H2 | Suites, marks and the push gate | One suite per wrapped page, and a routing suite. A runner that picks suites from changed paths and runs the base and the head. A mark by content fingerprint. The gate at the push and in CI. See "H2" below. | driver | Criteria 22–27, 66 |
+| H2 | Suites, marks and the push gate | One suite per wrapped page, and a routing suite. A runner that picks suites from changed paths and runs the base and the head. A mark by content fingerprint. The gate at the push and in CI. A fast CI path for pages. See "H2" below. | driver | Criteria 22–27, 65, 66 |
 | H3 | Proof attempts | The ten pages that name M4: a baseline of the bare model, then a recording where the baseline calls for one. Debugging goes first, with its fixed cases. See "H3" below. | driver | Criteria 28–30 |
 
 H0a starts on the first day, beside G0, and merges first. H0b starts after H0a, in its own lane. H2 starts after H1 merges. Its gate merges after L4 and L7, which edit most of the wrapped pages M4 touches, so their edits run no suite. H3 starts after H1, and takes each page only after the last slice that edits that page.
@@ -228,8 +229,6 @@ After slice Z, the program's outside checks run before sign-off: CI, a fresh-ses
 ### G0: Open M4
 
 The [defect register](../records/defects.md) holds the row this slice closes: M3's sign-off left M3 in `building`, because a test pins the list to M3 and the adoption page says it names M3. The test stops pinning a number. The `proof` check gains one rule: a `building` entry whose record in `docs/milestones/` has `status: signed off` fails. M4 then removes itself in its own sign-off commit, and that rule holds every later milestone to the same step. The register's `.env` row closes here too: the secrets file joins `.gitignore`, in the repository and in the kit.
-
-**A fast CI path for pages.** Full CI runs took 20 to 35 minutes, mostly on Windows, and the maintainer ruled a 30-minute wait for a page edit not acceptable (Q113's ruling, kept after Q114). After Q114 the pull requests it serves are edits to wrapped pages (Q110). Each of the five `check` jobs first classes its range against `direct_push`'s machinery list. The list and the classing code are both read from the base commit with `git show`, and a test holds the code's reading of the list to `direct_push`'s. So a pull request cannot widen its own path through either; only an edit to the workflow file itself can, and a person merges that, as below. A range takes the fast path only when no path is on the machinery list and every path is a page or a mark: a `.md` file outside `plugin/`, `evals/` and `src/`, or a file under `evals/selection/` that the suite store's log lists, as L3's record-only rule trusts. So a wrapped-page edit with its new suite mark (H2) qualifies. The fast path skips the unit tests that read no page, and the hook timing rows. It still runs `ws.py check --phase ci`, which holds H2's mark check, the commit-message checks, `grade.py --recorded`, the history secret scan, and the unit tests that read pages. Those are named in a `page_tests` list in the classing part's manifest entry, as `stop_gate` names its fast tests: today `tests.test_core`, `tests.test_kit`, `tests.test_m3_b7`, `tests.test_instruction_review`, `tests.test_m3_a`, `tests.test_tutorials` and `tests.test_cold_clone`. A test fails a test module that opens a file under `docs/`, the README or the contract and is not on the list. G0 measures their time; a slow module's page checks move into a check part. Any other range runs everything, so H2's suite step, the re-grade and the `src/` mark step always run where they judge. A pull request classes its base against its head. A push to main and the weekly run always run everything: main's push run is the only check of a page pushed straight to main, and of main's tree after a merge onto a moved main, and the weekly run is there to catch a new runner image. A push to another branch classes `github.event.before` against the pushed commit, and its merge base with main only on its first push. A fast job ends green, so all five required checks report within a few minutes (inferred until G0 measures it). The mark and suite steps sit inside the same required jobs and run on `pull_request` events; `ws.py merge` reads the checks of the pull request's own run, not a push run: G1 teaches its check reader to filter by the `pull_request` event (criterion 3). The classing step is a workflow change. Until L3's refusal exists, nothing in `ws.py merge` stops an agent merging one, so from G0 on a person merges, after its own review, every pull request that changes `.github/workflows/` (`prose` until L3).
 
 ### G2: The one rule, in the parser
 
@@ -386,11 +385,20 @@ H0b's commits use `--no-verify` until R3's records are in, as the [machinery pag
 - **Only the runner writes a mark.** `suites.py` writes a suite's mark, its stored results and its per-branch run count into a store under `evals/selection/` that the guards protect, as L3's review store is. A selection result counts as a record-only path only when that store's log lists it.
 - **The mark.** A suite's mark is a committed file, named by suite. It holds a fingerprint of the wrapper's folder, its selection cases and each page it names, taken through `eval_record`'s own hash, which drops the review date and the proof keys, with the model and the tool version. So moving a review date or marking a page proven leaves the mark current. The runner writes it only when every case passed at the head: passing, not merely no worse than the base. A check fails a mark that does not match the tree, in CI and at a push to main; a commit only warns.
 - **The gate.** For content a suite's mark or a proven page's record covers, a commit and a push of a branch warn, the pre-push check refuses a push to main, and CI fails a pull request.
-- **Wrapped pages take a pull request (Q110).** From H2's merge, every edit to a page a wrapper names goes through a pull request. [Changing the machinery](../changing-the-machinery.md) says so beside its rule that sends pages to main. The pre-push check refuses a push to main that changes such a page, with a case. The suite runs on the author's machine, under Q105, since CI runs no agent; the pull request adds CI's mark check and the page tests.
+- **Wrapped pages take a pull request (Q110).** From H2's merge, every edit to a page a wrapper names, or to a wrapper or its cases, goes through a pull request. H2 states this on each page that says where a page commit goes: [changing the machinery](../changing-the-machinery.md), beside its rule that sends pages to main; [procedure endings](../procedure-endings.md)' push table, as a row that sends such a file to its own branch and a draft pull request, as machinery goes; and [extend the workspace](../extend-the-workspace.md)'s step 8, beside its branch exception. The pre-push check refuses a push to main that changes such a file. It reads the wrappers from the remote's tip, as `direct_push` reads its list, with a case for a push that edits a wrapper and its page together. Its refusal names the route, and how to move an unpushed commit from main to a branch. The suite runs on the author's machine, under Q105, since CI runs no agent; the pull request adds CI's mark check and the page tests.
 - **Machinery paths.** `evals/proof/` and `evals/sources.json` join `direct_push`'s machinery list, as `evals/cases/` and `evals/acceptance/` are on it.
 - **Kit classes.** `evals/suites.py` is synced, as `run.py` is. `evals/sources.json`, the suites' stored results and the review's mark store are never synced. The dispatch templates are synced. In an instance, the suite gate does not bind a synced page, as `eval_record` already exempts one.
 - **The routing baseline** is recorded once, with its table on the eval page.
 - **Q49.** The four fire cases that still miss run again at five turns, about 12 runs. Only a wrapper that still misses is rewritten a second time.
+
+**A fast CI path for pages.** Full CI runs took 20 to 35 minutes, mostly on Windows, and the maintainer ruled a 30-minute wait for a page edit not acceptable (Q113's ruling, kept after Q114). The pull requests it serves are Q110's wrapped-page edits, so it lands in H2's gate pull request, built against the suite store it reads, and after L3, whose refusal holds its workflow change for a person.
+
+- **The classing.** Each of the five `check` jobs first classes its range with `tools/ci_class.py`. The script and `direct_push`'s machinery list are both read from the base commit with `git show`, and a test holds the script's reading of the list to `direct_push`'s. Only an edit to the workflow file itself could widen a pull request's path, and a person merges that, as L3 says.
+- **What qualifies.** No path is on the machinery list or under `plugin/` or `src/`, and every path is a page or a suite store file. A page is a tracked `.md` file outside `plugin/`, `evals/` and `src/`. A suite store file matches the store's path patterns under `evals/selection/`: a mark, stored results, a run count or the log. The classing trusts no file's content; the mark check judges it. So a wrapped-page edit with its new mark qualifies, and a wrapper's pull request takes the full run.
+- **What it runs.** It skips the unit test step and the `hook_cases.py` step. It still runs `ws.py check --phase ci`, which holds H2's mark check, and, as their own steps, the commit-message checks, `grade.py --recorded` and the history secret scan. It also runs the tests that read pages. Each such unit test carries a `reads_pages` marker, and `ci_class.py` runs the marked tests alone. A test fails an unmarked test whose code names a tracked page through the repository root: a file under `docs/` or a `.md` file at the root. A fixture page in a scratch folder does not count. The hook parts whose code reads pages, today `chain_reminder`, `rule_pages` and `stale_pages`, are listed under `page_parts` in `direct_push`'s entry, and the fast path runs their rows of `hook_cases.py` alone.
+- **Which runs class.** A pull request classes its base against its head. A push to main and the weekly run always run everything: main's push run is the only check of a page pushed straight to main, and of main's tree after a merge onto a moved main, and the weekly run is there to catch a new runner image. A push to another branch, which L3's trigger adds, classes `github.event.before` against the pushed commit, and its merge base with main only on its first push.
+- **Its time.** A fast job ends green. H2 times the fast path on all five jobs before criterion 65 is judged. The marked tests are inferred to fit in 5 minutes: round 19 found about 7 of `test_core`'s 229 tests read pages.
+- **The merge reads the right run.** The mark and suite steps sit inside the same required jobs and run on `pull_request` events, and `ws.py merge` reads only the pull request's own run (G1, criterion 3).
 
 ### H3: Proof attempts
 
@@ -539,6 +547,7 @@ Settled before any page or part is written. A builder who finds a name wrong pro
 | Batch | Every eval run started under one yes from the maintainer. | "Session", which M3's cap used and a builder read three ways. |
 | Review session | One fresh session a dispatch starts for a review, a re-check, an instruction review, a red team or a teach-back. | "Reviewer": one reviewer may take two sessions, a first and a retry. |
 | Dispatch template | The fixed text a fresh session is sent. | "Prompt template": the pages already say dispatch. |
+| Fast path, `tools/ci_class.py`, `reads_pages`, `page_parts` | CI's shorter run for a range of pages; the script that classes a range; the marker on a unit test that reads pages; the hook parts that read pages. | "Docs-only CI": a range may also hold suite store files. |
 
 New pages: `docs/playbooks/teach-back.md`, as L5 gives it; one decision record each for the guards' rule, the review mark, the merge policy and teach-back; and the two reference pages H3 moves `parts.md`'s and `changing-the-machinery.md`'s tables to, with their how-to index rows in the same commit and their `INDEX.md` rows queued for slice Z. Everything else is an edit to a page that exists.
 
@@ -631,8 +640,8 @@ Added on the maintainer's answers of 2026-11-26, numbered as they came:
 Added on the maintainer's answers of 2026-11-27:
 
 64. The README's Limits and row F35 say that nothing in the repository stops an agent that disables its own guards, that it uses the owner's sign-in, and that M10 closes the route with a separate, sandboxed identity. (V2)
-65. On a pull request that changes only pages, or a wrapped page with its new suite mark, every required check reports success in under 5 minutes, with the tests that read no page skipped. A page-only range that breaks the machinery table fails. On one that changes a machinery path, the full run happens, and a push to main and the weekly run always run in full. The classing reads the machinery list and its own code from the base commit. (V4)
-66. From H2, the pre-push check refuses a push to main that changes a page a wrapper names, with a case, and changing the machinery states the rule. (V1, V2)
+65. On a pull request that changes only pages, or a wrapped page with its new suite mark, every required job ends green in under 5 minutes, by `gh run view --json jobs`, with the unit test and `hook_cases.py` steps skipped. A page-only range that breaks the machinery table fails. On one that changes a machinery path, the full run happens, and a push to main and the weekly run always run in full. The classing reads the machinery list and its own code from the base commit. A test fails an unmarked test that names a tracked page through the repository root. (V4)
+66. From H2, the pre-push check refuses a push to main that changes a page a wrapper names, a wrapper or its cases. It reads the wrappers from the remote's tip, with a case for a push that edits a wrapper and its page together. Changing the machinery, procedure endings and extend the workspace state the rule. (V1, V2)
 
 ## Verification
 
@@ -726,7 +735,7 @@ A proven page is gated from the day it is marked. Each edit to it makes its reco
 | The contract or the index | The routing suite at the head: about 40 to 120 selection runs | None |
 
 - **How many pages.** After M4, at most about six pages are proven: `fix-a-bug.md` and up to five pages H3 records and passes. 28 wrappers name 29 pages, and each of those pays the selection row above.
-- **An edit to a wrapped page (Q110).** From H2 on, an edit to one of the 29 wrapped pages goes through a pull request. Its suite runs on the author's machine, under Q105's standing yes. The pull request adds CI's mark check and the page tests, and G0's fast path keeps that CI to minutes. Other pages go straight to main (Q114).
+- **An edit to a wrapped page (Q110).** From H2 on, an edit to one of the 29 wrapped pages goes through a pull request. Its suite runs on the author's machine, under Q105's standing yes. The pull request adds CI's mark check and the page tests, and H2's fast path keeps that CI to minutes. Other pages go straight to main (Q114).
 - **Who says yes to a suite run (Q105).** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request; `suites.py` counts them in a file per branch and refuses the 13th without a batch yes. A larger run, and the routing suite, still need the maintainer's yes with a count, as Q46 says. The number of proven pages is his choice after the baselines.
 - **How often.** Up to M3's sign-off the ten pages changed in 1 to 55 commits each. H3 weighs that before a page is recorded, and moves a high-churn page's tables to a reference page first.
 - **Batching.** An edit to a proven page does not land on its own. It waits in a list under the current milestone's plan, "Results", as M3's "Queued for slice Z" did, and the queued edits land together in that milestone's closing slice, with one recording per page: the guided arm alone when the other arms were recorded that milestone, else every arm. A fix the maintainer will not wait for lands with its own recording, on his yes with its count.
@@ -790,7 +799,7 @@ About 6 hours, as the program estimates.
 - Raise a pull request's cap of review sessions, or end its review, when a loop stops there.
 - Sit two teach-backs: one on the first plan awaiting approval after L5 merges, or a change entry to this plan, and one on a pull request.
 - Confirm this repository's merge policy, and set any other repository's.
-- Merge, after its own review, each pull request that changes `.github/workflows/`: G0's classing step, L3's push trigger and mark step, and H2's suite step.
+- Merge, after its own review, each pull request that changes `.github/workflows/`: L3's push trigger and mark step, and H2's suite step and classing step.
 - Read the ten proof results, and strike any page he disagrees with.
 - Decide any declined security or architecture finding.
 - Run the private checks: the ledger's, the attack scripts, and G2's measure over the session logs.
@@ -854,6 +863,8 @@ Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guar
 Round 17: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-17.md), holds with fixes, 10 findings, rows R17-1 to R17-10; six were settled by Q114 and four accepted. Round 17 changed the plan in substance, so round 18 runs.
 
 Round 18: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-18.md), holds with fixes, 7 findings, rows R18-1 to R18-7, all accepted. Round 18 changed the plan in substance, so round 19 runs.
+
+Round 19: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-19.md), holds with fixes, 7 findings, rows R19-1 to R19-7, all accepted. Every finding was on round 18's remedies, but the fast path moved to H2 and gained a test marker, so round 20 runs.
 
 | # | Finding | Disposition | Action |
 |---|---|---|---|
@@ -1014,6 +1025,13 @@ Round 18: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guar
 | R18-5 | G0's workflow change is missing from the maintainer's steps, and nothing before L3 stops an agent merging a workflow change. | Accepted | G0 joins the maintainer's steps; from G0 a person merges every `.github/workflows/` change, `prose` until L3. Verified: `wslib/merge.py` reads no workflow path. |
 | R18-6 | G1's event filter has no criterion. | Accepted | Criterion 3 gains the case. Verified: `judge` picks the newest run by id, with no event. |
 | R18-7 | Small slips: a repeated sentence, a run-on bullet, a repeated rule, CI's phase, the Slices paragraph's exception. | Accepted | Each fixed. |
+| R19-1 | Procedure endings and extend the workspace still send a wrapped page to main, and the refusal strands the commit. | Accepted | H2 states Q110 on all three pages; the refusal names the route and how to move an unpushed commit. Criterion 66 names the pages. Verified: procedure endings' push table has no such row. |
+| R19-2 | `page_tests` by module likely misses 5 minutes on Windows. | Accepted | Tests that read pages carry a `reads_pages` marker and run alone; H2 times all five jobs before criterion 65 is judged. |
+| R19-3 | The fast path has no user before H2 and stops G0 merging at once. | Accepted | Moved to H2's gate pull request, after L3; G0 merges at once. Criterion 64 moved to G2, which edits the README. |
+| R19-4 | The fast path's mark clause cannot be built: the store's log is either the base's or the pull request's own. | Accepted | Store files qualify by path pattern; the classing trusts no content, and the mark check judges it. |
+| R19-5 | The page-test guard and the classing part are underspecified, and page-reading hook parts are skipped. | Accepted | `tools/ci_class.py` is a script, not a part; the guard reads tests that name a tracked page through the repository root; `page_parts` names the hook parts whose rows run. Names table gains the four names. |
+| R19-6 | Q110's refusal names no source for the wrapper list, and leaves the wrapper on the direct route. | Accepted | It reads the wrappers from the remote's tip, with a case. Q110 is read to cover a wrapper and its cases, under "Decisions made without asking"; the maintainer may strike it. |
+| R19-7 | Small slips: criterion 64's slice, the branch-push clause before L3, the check's wording, the timing rows, criterion 65's measure. | Accepted | Each fixed; criterion 65 is read from `gh run view --json jobs`. |
 ## Approval
 
 Not yet approved.
@@ -1056,4 +1074,5 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Red team round 16, 2026-11-27:** holds with fixes, 7 findings; 2 accepted, then 5 settled under Q113. Verified by its author: the agents' `gh` sign-in has admin rights on the repository, and the repository is owned by a user account.
 - **Red team round 17, 2026-11-27:** holds with fixes, 10 findings; 6 settled by Q114, 4 accepted. Verified by its author: `git push origin HEAD:main` passes the before-shell hook; full CI runs on `m4/plan` took 32 to 35 minutes.
 - **Red team round 18, 2026-11-27:** holds with fixes, 7 findings, all accepted. Verified by its author: Windows CI steps but the unit tests and `hook_cases.py` take at most 7 seconds; seven unit test modules read pages.
+- **Red team round 19, 2026-11-27:** holds with fixes, 7 findings, all accepted. Verified by its author: the seven page-reading test modules took 120 of the suite's 309 seconds locally; about 7 of `test_core`'s 229 tests read pages.
 - **Not run:** no eval or selection run, and no guard attack.
