@@ -326,3 +326,4 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-25-signoff-0004.md](2026-11-25-signoff-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
 | [2026-11-25-signoff-parts.md](2026-11-25-signoff-parts.md) | `docs/parts.md` | enforcement, contradiction |
 | [2026-11-25-signoff-readme.md](2026-11-25-signoff-readme.md) | `README.md` | enforcement, contradiction |
+| [2026-11-28-l0-decision-0021.md](2026-11-28-l0-decision-0021.md) | `docs/decisions/0021-the-review-mark.md` | contradiction |
