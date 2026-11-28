@@ -8,13 +8,20 @@ step on recorded output (tests/records/merge-gh.json):
 2. The checks required are read from the branch rule of the pull request's base: the classic branch protection
    and any ruleset. A base that requires none is refused, since nothing would show that CI passed.
 3. Each required check must have passed on exactly the pull request's head commit: its newest run of that name,
-   from the app the rule names, completed with success. A legacy commit status of that name counts too.
+   from the app the rule names, completed with success. A run from GitHub Actions counts only when its check suite
+   is a workflow run of the pull_request event, read from the commit's workflow runs, so a push or a scheduled run
+   of the same name on the same commit is not read (M4 plan, criterion 3). A run from another app, and a legacy
+   commit status of that name, count as before.
 4. It merges on GitHub with a merge commit, never a squash or a rebase, and only if the head is still that
    commit: `gh pr merge NUMBER --merge --match-head-commit SHA`. A squash would leave the branch's own commits
    unreachable once the branch is gone, and a proof anchor pinned to one of them with it (decision 0006). It then
    reads the pull request back and checks that its merge commit has two parents.
-5. It deletes the branch on GitHub. A branch that is already gone is noted, not an error.
-6. It brings the main working copy up to date, under the conditions of the session-start fast-forward
+5. It retargets each open pull request based on the merged branch to the merged one's base, and reads the answer
+   back (Q84). GitHub closes a pull request whose base branch is deleted, so when a retarget fails, or the list of
+   such pull requests cannot be read, nothing is deleted: the merge went through, and the message says which pull
+   requests moved and which did not.
+6. It deletes the branch on GitHub. A branch that is already gone is noted, not an error.
+7. It brings the main working copy up to date, under the conditions of the session-start fast-forward
    (wslib/lease.py): only a clean main, never while another live session holds the lease. Otherwise it says why.
 
 No working copy takes part in the merge, so the lease and the caller's own files play no part in it. No variable
@@ -40,6 +47,8 @@ REMOVED = ("GH_REPO", "GH_HOST")
 GIT_CONFIG_VARIABLES = ("GIT_CONFIG_PARAMETERS", "GIT_CONFIG_COUNT", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM",
                         "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG")
 ANY_APP = (None, -1)
+ACTIONS = "github-actions"   # the app slug of GitHub Actions' check runs
+PAGE_SIZE = 100
 
 
 class MergeError(RuntimeError):
@@ -121,6 +130,10 @@ def build_check_runs(repo, sha):
     return ["gh", "api", "--hostname", repo["host"], _path(repo, "commits", sha, "check-runs") + "?per_page=100"]
 
 
+def build_workflow_runs(repo, sha):
+    return ["gh", "api", "--hostname", repo["host"], _path(repo, "actions", "runs") + f"?head_sha={sha}&per_page={PAGE_SIZE}"]
+
+
 def build_statuses(repo, sha):
     return ["gh", "api", "--hostname", repo["host"], _path(repo, "commits", sha, "status") + "?per_page=100"]
 
@@ -135,6 +148,16 @@ def build_merged(repo, number):
 
 def build_commit(repo, sha):
     return ["gh", "api", "--hostname", repo["host"], _path(repo, "commits", sha)]
+
+
+def build_dependents(repo, branch):
+    """The open pull requests whose base is branch."""
+    value = urllib.parse.quote(branch, safe="")
+    return ["gh", "api", "--hostname", repo["host"], _path(repo, "pulls") + f"?state=open&base={value}&per_page={PAGE_SIZE}"]
+
+
+def build_retarget(repo, number, base):
+    return ["gh", "api", "--hostname", repo["host"], "-X", "PATCH", _path(repo, "pulls", str(number)), "-f", f"base={base}"]
 
 
 def build_delete(repo, branch):
@@ -208,20 +231,43 @@ def parse_check_runs(answer, sha):
     return runs
 
 
+def parse_workflow_runs(answer, sha):
+    """The check suites of the commit's workflow runs, as {check suite id: event}."""
+    data = _json(answer, f"the workflow runs of {sha[:7]}")
+    runs = data.get("workflow_runs") if isinstance(data, dict) else None
+    if not isinstance(runs, list):
+        raise MergeError(f"gh's answer about the workflow runs of {sha[:7]} holds no list")
+    if isinstance(data.get("total_count"), int) and data["total_count"] > len(runs):
+        raise Refused([f"{sha[:7]} has {data['total_count']} workflow runs, more than one page; this helper reads one "
+                       f"page of {PAGE_SIZE}, so a person merges it"])
+    return {run["check_suite_id"]: run.get("event") for run in runs
+            if isinstance(run, dict) and run.get("head_sha") == sha and isinstance(run.get("check_suite_id"), int)}
+
+
+def pull_request_run(run, suites):
+    """Whether a check run may count: one from GitHub Actions only when its workflow run is the pull request's."""
+    if (run.get("app") or {}).get("slug") != ACTIONS:
+        return True
+    suite = (run.get("check_suite") or {}).get("id")
+    return suite in suites and suites[suite] == "pull_request"
+
+
 def parse_statuses(answer, sha):
     data = _json(answer, f"the commit statuses of {sha[:7]}")
     statuses = data.get("statuses") if isinstance(data, dict) else None
     return statuses if isinstance(statuses, list) else []
 
 
-def judge(required, runs, statuses, sha):
-    """Why the head commit has not passed every required check, one reason per check; empty when it has."""
+def judge(required, runs, statuses, sha, suites):
+    """Why the head commit has not passed every required check, one reason per check; empty when it has.
+    suites: {check suite id: event} of the commit's workflow runs (parse_workflow_runs)."""
     reasons = []
     for need in required:
         name, app = need["context"], need.get("app_id")
         mine = [run for run in runs if isinstance(run, dict) and run.get("name") == name
                 and run.get("head_sha") == sha
-                and (app in ANY_APP or (run.get("app") or {}).get("id") == app)]
+                and (app in ANY_APP or (run.get("app") or {}).get("id") == app)
+                and pull_request_run(run, suites)]
         if mine:
             newest = max(mine, key=lambda run: run.get("id") or 0)
             if newest.get("status") != "completed":
@@ -234,7 +280,7 @@ def judge(required, runs, statuses, sha):
             if status.get("state") != "success":
                 reasons.append(f"{name}: {status.get('state')} on {sha[:7]}")
             continue
-        reasons.append(f"{name}: has not run on {sha[:7]}, the pull request's head commit")
+        reasons.append(f"{name}: has not run on {sha[:7]} for the pull request; a push or a scheduled run does not count")
     return reasons
 
 
@@ -260,6 +306,53 @@ def parse_commit(answer, sha):
     if not isinstance(parents, list):
         raise MergeError(f"gh's answer about commit {sha[:7]} lists no parents")
     return len(parents)
+
+
+def _kept(branch, done, why):
+    moved = "".join(f" Retargeted already: #{number}." for number in done)
+    return MergeError(f"the merge went through, but the branch {branch} was not deleted: {why}.{moved} GitHub closes "
+                      f"an open pull request whose base branch is deleted, so retarget each one still based on {branch} "
+                      f"with gh pr edit NUMBER --base BASE, then delete the branch with git push origin --delete {branch}")
+
+
+def parse_dependents(answer, branch):
+    """[{"number", "head"}] of the open pull requests based on branch."""
+    code, out, err = answer
+    if code != 0:
+        raise _kept(branch, [], f"the open pull requests based on it could not be listed: "
+                                f"{(err or out).strip() or f'exit {code}'}")
+    try:
+        data = json.loads(out)
+    except ValueError:
+        data = None
+    if not isinstance(data, list):
+        raise _kept(branch, [], "gh's list of the open pull requests based on it is not a list")
+    if len(data) >= PAGE_SIZE:
+        raise _kept(branch, [], f"{PAGE_SIZE} or more open pull requests are based on it, more than one page")
+    found = []
+    for item in data:
+        if not isinstance(item, dict) or not isinstance(item.get("number"), int):
+            raise _kept(branch, [], "gh's list of the open pull requests based on it holds an entry with no number")
+        if item.get("state") == "open" and (item.get("base") or {}).get("ref") == branch:
+            found.append({"number": item["number"], "head": (item.get("head") or {}).get("ref")})
+    return found
+
+
+def parse_retarget(answer, number, base):
+    """None when GitHub's answer shows the pull request on base; else what went wrong."""
+    code, out, err = answer
+    if code != 0:
+        return (err or out).strip() or f"exit {code}"
+    try:
+        data = json.loads(out)
+    except ValueError:
+        return "gh's answer is not JSON"
+    if not isinstance(data, dict):
+        return "gh's answer is not a pull request"
+    got = (data.get("base") or {}).get("ref")
+    if data.get("number") != number or got != base:
+        return f"GitHub's answer names its base as {got}, not {base}"
+    return None
 
 
 def parse_delete(answer, branch):
@@ -297,8 +390,9 @@ def merge(root, number, call=call_gh, say=print, update=None, environ=None):
         sha, base, branch = pr["headRefOid"], pr["baseRefName"], pr["headRefName"]
         required = parse_required(call(build_branch_rule(repo, base)), call(build_rulesets(repo, base)), base)
         runs = parse_check_runs(call(build_check_runs(repo, sha)), sha)
+        suites = parse_workflow_runs(call(build_workflow_runs(repo, sha)), sha)
         statuses = parse_statuses(call(build_statuses(repo, sha)), sha)
-        reasons = judge(required, runs, statuses, sha)
+        reasons = judge(required, runs, statuses, sha, suites)
         if reasons:
             raise Refused(reasons)
     except Refused as refused:
@@ -315,6 +409,7 @@ def merge(root, number, call=call_gh, say=print, update=None, environ=None):
         raise MergeError(f"pull request {number} merged as {oid[:7]}, which has {parents} parent(s), not a merge "
                          f"commit. Allow merge commits only in the repository's settings; see {PAGE}")
     say(f"Merged {slug}#{number} into {base} as {oid[:7]}, a merge commit.")
+    retarget(repo, branch, base, call, say)
     deleted = parse_delete(call(build_delete(repo, branch)), branch)
     say(f"Deleted the branch {branch} on GitHub." if deleted == "deleted" else f"The branch {branch} was already gone.")
     outcome, note = (update or _update)(root)
@@ -325,6 +420,19 @@ def merge(root, number, call=call_gh, say=print, update=None, environ=None):
     else:
         say(f"Did not bring the main working copy up to date. {note or ''}".rstrip())
     return 0
+
+
+def retarget(repo, branch, base, call, say):
+    """Move each open pull request based on branch to base. Raises MergeError, so nothing is deleted, when one fails."""
+    done = []
+    for item in parse_dependents(call(build_dependents(repo, branch)), branch):
+        number = item["number"]
+        problem = parse_retarget(call(build_retarget(repo, number, base)), number, base)
+        if problem is not None:
+            raise _kept(branch, done, f"#{number} could not be retargeted to {base}: {problem}")
+        done.append(number)
+        say(f"Retargeted #{number} ({item['head']}) from {branch} to {base}. Its earlier review covered the old range: "
+            f"do not publish it until the person says whether that review stands.")
 
 
 def _update(root):
