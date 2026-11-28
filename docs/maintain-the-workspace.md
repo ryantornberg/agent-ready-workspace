@@ -23,7 +23,7 @@ These need no duty: a check finds them on its own. `python3 ws.py list` shows ev
 | A search alias, or a code name in the contract, that left the code | `aliases` | At the commit and in CI |
 | A path in the index's cross-cutting chains that does not exist | `chains` | At the commit and in CI |
 | A rules-table tag naming a part or case that does not exist | `rules` | At the commit and in CI |
-| A proof mark out of step: the README's table, or an unproven page whose `prove-by` milestone is signed off | `proof` | At the commit and in CI |
+| A proof mark out of step: the README's table, or an unproven page whose `prove-by` milestone is signed off. A milestone left in `building` after its record is signed off | `proof` | At the commit and in CI |
 | A guidance change that names no instruction review | `review_trailer` | At the commit, the push to main, and in CI |
 | A change to what the eval covers, with no new run on record | `eval_record` | At the commit and in CI |
 | A pinned repository behind its upstream, or pinned to a commit the upstream never merged | `stale_pins`, `pin_on_default` | A notice when a session starts; at the commit and in CI |
@@ -54,13 +54,14 @@ The session whose change sets off the event does the duty, in the same piece of 
 
 ## Periodic duties
 
-The owner of each periodic duty is the workspace's maintainer: the person named as approver in the current plan. The current plan is the one whose `milestone` is listed under `building` in [workspace.json](../workspace.json); its `Approved by:` line names the person.
+The owner of each periodic duty is the workspace's maintainer: the person named as approver in the current plan. The current plan is the approved or done one whose `milestone` is listed under `building` in [workspace.json](../workspace.json); its `Approved by:` line names the person. An abandoned plan may name the same milestone, and does not count. When `building` is empty, as between a sign-off and the first merged slice of the next milestone, the current plan is the approved or done plan with a `milestone` key and the latest date in its Approval section. In an instance with no approved plan yet, the person who adopted it owns the duties.
 
 | Duty | When | How |
 |---|---|---|
 | The docs audit | Until M10 schedules the docs audit, a person runs it by hand once per milestone, before the milestone's record is signed off, and whenever this page's event list says so. | Run the [docs audit](playbooks/docs-audit.md) when its cadence or an event above calls for it. It reads the whole `docs/` tree for drift between pages, and reports a ranked cleanup list. |
 | A prompt retrospective | Once per milestone, before the milestone's record is signed off, and whenever this page's event list says so. | Run a [prompt retrospective](playbooks/prompt-retrospective.md) when its cadence or an event above calls for it. Its first step says which transcript it reads. |
 | Pages due for proof | Before the milestone's record is signed off. | List the pages it is to prove with `git grep -l "^prove-by: M<n>" -- docs`, and the merged sections with `git grep -n "prove-by M<n>\." -- docs`. Each one is proven by then, or its `prove-by` is moved later on a failed attempt on record, as [decision 0006](decisions/0006-what-proven-means.md) says. Otherwise the `proof` check fails once the record is signed off. |
+| Leaving `building` | In the commit that signs the milestone's record off. | Remove the milestone from `building` in [workspace.json](../workspace.json) in that commit. The manifest is machinery, so the sign-off goes to a branch and merges through a pull request, as [changing the machinery](changing-the-machinery.md) says. Otherwise the `proof` check fails the sign-off. |
 | Pruning unused wrappers | Not set yet: nothing here records which wrappers fire in real sessions. | Until a milestone sets it, a wrapper leaves only with its page, as a strike does; the `wrappers` check fails one left behind. |
 | The routing eval | Waits for M4, which builds the eval system for procedures and routing evals. | Nothing to run until then. |
 
@@ -81,6 +82,7 @@ The owner of each periodic duty is the workspace's maintainer: the person named 
 | A page found pointing at an agent's private memory, a session's scratch folder, or a file only one machine holds gets the fact written on it instead. | `prose` |
 | The docs audit and the prompt retrospective run once per milestone, before its record is signed off, and on the events listed here. The maintainer owns them. | `prose` |
 | Each page due for proof is proven before its milestone's record is signed off, or its `prove-by` is moved later on a failed attempt on record. | `proof#an unproven page whose prove-by milestone is signed off fails` |
+| A milestone leaves `building` in the commit that signs its record off. | `proof#a building entry whose milestone record is signed off fails` |
 | A change to a file the eval covers is listed for the maintainer to batch. When a check needs it now, or an approved plan makes it, its branch is not merged until the eval run is on record. | `prose` |
 | A session that sets off the docs audit or a prompt retrospective, and is not running it, names it as due in its report. | `prose` |
 | Mark every claim in the report verified or inferred. | `eval:fix-a-bug` |
