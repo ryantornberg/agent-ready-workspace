@@ -33,3 +33,37 @@ Run in a clone of the branch with the uncommitted pages applied, in a scratch fo
 - enforcement: the new sentences add no must or never of their own; the stamp's refusal on a differing grade is held by `test_a_grade_that_differs_stamps_nothing_and_the_record_keeps_failing`, which passes (verified). The records the stamp rewrites are written by a script, so a commit while the edit ledger is open needs `python3 ws.py ledger --add PATH` for each; the contract states that rule and `edit_ledger`'s refusal names it, so the page need not restate it (verified: `parts/edit_ledger.py`).
 - placement: the stamp's procedure sits in the trap about the eval, beside the costly-run path, and the gate's details are left to the eval page. Verified.
 - eval-case: the page is marked unproven, `prove-by: M4`. Verified.
+
+## Re-check
+
+A fresh session re-read the page and the code on 2026-11-28, after the fix round, at 43c4f7f with the uncommitted change of the H0a builder: the page's uncommitted diff, and `evals/grade.py`, `parts/eval_record.py`, its cases and `tests/test_m4_h0a.py` against the old head 66223f0 and the base f04fddf. In the worktree it ran `python3 -m unittest discover -b tests` (825 tests, OK, 3 skipped), `python3 ws.py selftest` (exit 0), `python3 ws.py check` (exit 0) and `python3 evals/grade.py --recorded` (no difference). The probes below ran in a scratch clone in which the uncommitted change was committed, standing in for main after the merge; "the base" is that commit.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed, holds | The trap labels the exception for a graded hook and its imports as the eval page's until H0b. A change to `evals/grade.py` now needs a new run, as the contract says. Verified: both texts. |
+| 2 | fixed, holds | The trap says to run the stamp after every recording, before the commit. `run.py` still writes no `grader_sha256`. Verified. |
+| 3 | fixed, holds, by another route | The trap now says "A change to `evals/grade.py` itself is not stamped: record every case again, then stamp". After a comment added to `grade.py`, `ws.py check --phase ci --changed-from <base>` refused the three gated records, and passed once their transcripts held new content. Verified. The stamp's exit after that is Missed, item 1. |
+| 4 | fixed, holds | The bold lead names the stamp for a graded hook or its imports. The Rules row is tagged with three cases that exist in `parts/eval_record.cases.json` and pass `ws.py selftest`, and `ws.py check` has no `rules` finding. A hook and parser edit failed the check until the stamp, then passed, exit 0. Verified. |
+| 5 | fixed, holds | The sentence reads "To save a change that needs the runs", and the hook path says no `--no-verify`. Verified. |
+
+Broke: nothing found.
+
+Missed:
+
+1. Blocking. "Record every case again, then stamp" ends in a failing command. After the three gated cases are recorded again, the stamp writes their records but refuses the twelve one-time records, whose runs the base holds, and exits 1, telling the agent to record again a case it has just recorded. Verified in the scratch clone: twelve "not stamped" lines, "stamped the grader hash into 3 record(s)", exit 1, while `ws.py check --phase ci` exited 0. An agent following the trap records the named case again, 45 runs, and gets the same exit. Fix: in the stamp, report the one-time records as left, since the gate never reads them, or name `--one-time <arm>`; and say here what the exit means.
+2. Not blocking. The Rules row sits under "fails the commit check", but the commit check judges against `HEAD`. A branch that commits the `grade.py` change first, then runs `--stamp --base HEAD`, passes the commit check on the second commit; CI's check against the pull request's base refuses it. Verified: `ws.py check --phase ci --changed-from HEAD~1` exited 0 and `--changed-from <base>` exited 1, naming the three gated cases. CI holds the rule, so nothing reaches main; the row could say the rule is held against the pull request's base.
+
+## Re-check of fix round 2, 2026-11-28
+
+A fresh session re-read the page and the code after the second fix round, at e1b6f3c with the uncommitted change of the H0a builder: the page's uncommitted diff, and `evals/grade.py` (`stamp`), `parts/eval_record.py`, `.github/workflows/ci.yml` and `tests/test_m4_h0a.py` against the previous head 43c4f7f and the base f04fddf. In the worktree it ran `python3 -m unittest discover -b tests` (826 tests, OK, 3 skipped), `python3 ws.py selftest` (exit 0), `python3 ws.py check` (exit 0) and `python3 evals/grade.py --recorded` (no difference). The probes below ran in a scratch clone in which the uncommitted change was committed, standing in for main after the merge; "the base" is that commit.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| Missed 1 | fixed, holds | The trap now says "record every gated case again, then stamp", and that the stamp then leaves the one-time and baseline records, names them, and exits 0. After a comment added to `grade.py` and new content in every transcript of the three gated records, the stamp printed twelve "left as it is" lines and "stamped the grader hash into 3 record(s)", exit 0, and `ws.py check --phase ci --changed-from <base>` exited 0. Verified. With fix-a-bug alone not recorded again, the stamp named only its record, exit 1, and the check failed on it. Verified. |
+| Missed 2 | fixed, holds | The Rules row now says CI's check against the pull request's base holds the rule on `grade.py` itself, not the commit check. CI runs `ws.py check --phase ci --changed-from` the pull request's base, and that check failed a `grade.py` change whose gated runs the base held unchanged. Verified: `ci.yml` and the probe above. The row's three tags name cases that exist and pass `ws.py selftest`. Verified. |
+
+Broke: nothing found.
+
+Missed:
+
+1. Not blocking. "Every gated case" reads as the cases of a proven page, but the stamp classes a record as gated by its path, `evals/runs/<case>/record.json`, whatever its page's proof state. A current record that holds a grader hash for an unproven page's case would be refused by the stamp after a `grade.py` change, exit 1, though `eval_record` never reads it. Verified: `stamp`, and `eval_record.run` skipping a playbook that is not proven. No such record exists today. Verified: the stamp left the four debugging and red team records as stale. That debugging's cases, stamped during M4 before the page is proven, would meet it is inferred. The stamp's message names the case to record again, so the agent is not stuck.

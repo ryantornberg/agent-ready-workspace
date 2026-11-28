@@ -174,7 +174,7 @@
   }
  },
  {
-  "name": "an edit to grade.py alone fails until the stamp writes the new grader hash",
+  "name": "an edit to grade.py alone fails the record's grader hash",
   "files": {
    "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
    "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",
@@ -196,7 +196,7 @@
   }
  },
  {
-  "name": "after the stamp, an edit to grade.py alone passes",
+  "name": "with no grade.py at the base to judge it, a stamped edit to grade.py passes",
   "files": {
    "evals/cases/fix.json": "{\"name\": \"fix\", \"playbook\": \"docs/fix.md\", \"scaffold_dir\": \"evals/scaffold\", \"acceptance\": \"evals/acceptance/fix.py\", \"graders\": [{\"id\": \"g1\"}, {\"id\": \"g2\"}]}",
    "evals/arms.json": "{\"guided\": {\"files\": {\"AGENTS.md\": \"AGENTS.md\", \"docs/fix.md\": \"docs/fix.md\"}}, \"two-line\": {\"files\": {\"CLAUDE.md\": \"evals/two-line.md\"}}, \"bare\": {\"files\": {}}}",

@@ -30,3 +30,16 @@ Run in a clone of the branch with the uncommitted pages applied, in a scratch fo
 - enforcement: the new sentences state what `eval_record` and the stamp do, and both are synced with the kit; the cases `eval_record#an edit to grade.py alone fails until the stamp writes the new grader hash` and `eval_record#after the stamp, an edit to grade.py alone passes` show it (verified: `parts/eval_record.cases.json`). "The cases" still calls the harness `run.py`, `grade.py`, `pool.py` and `proofkeys.py`; "The gate" now qualifies its hash as over "the harness that runs the agent", so the two do not conflict.
 - placement: the paragraph stays short and leaves the base copy and the migration to the kit's own eval page, which an instance does not need. Verified.
 - eval-case: the seed page is not a playbook or how-to; it asks no behavior an eval case would cover. Verified.
+
+## Re-check
+
+A fresh session re-read the page and the code on 2026-11-28, after the fix round, at 43c4f7f with the uncommitted change of the H0a builder: the page's uncommitted diff, and `evals/grade.py` and `parts/eval_record.py` against the old head 66223f0. In the worktree it ran `python3 -m unittest discover -b tests` (825 tests, OK, 3 skipped), `python3 ws.py selftest` (exit 0) and `python3 ws.py check` (exit 0, no `kit_drift` finding). The probes below ran in a scratch clone of this repository, not in an instance.
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | fixed, holds | The page says the stamp writes the second hash after every run, before the commit. The synced `run.py` still writes no `grader_sha256`. Verified. |
+| 2 | fixed, holds, by another route | The page now says a change to `grade.py` itself, as a kit upgrade may bring, is not stamped onto older runs: run each case again, then stamp. In the scratch clone, a `grade.py` edit failed `ws.py check --phase ci` against a stand-in main for the three gated records, and passed once their transcripts held new content. Verified here. That an instance meets the same rule on its own proven pages after a kit upgrade is inferred: `eval_record` and `grade.py` are synced. |
+
+Broke: nothing found.
+
+Missed: nothing found. The page names no one-time arm, so the stamp's exit 1 on one-time records, a blocking finding on the kit's own eval page, reaches an instance only if it adds one-time arms (inferred).
