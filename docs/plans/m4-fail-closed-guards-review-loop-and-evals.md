@@ -1096,3 +1096,41 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Red team round 20, 2026-11-27:** holds with fixes, 8 findings, all accepted, two by a simpler fast path. Verified: the Ubuntu 3.13 job's full run took 310 seconds, and Windows 3.13's 1,515, by `gh run view 46104249965 --json jobs`.
 - **Red team round 21, 2026-11-27:** holds with fixes, 5 findings, all accepted; the loop ended. Verified by its author: the Ubuntu job took 309 to 517 seconds over 17 page-only runs.
 - **Not run:** no eval or selection run, and no guard attack.
+
+### The build, from 2026-11-28
+
+One driver-tier coordinator session hands each slice to a builder session in its own worktree under `.claude/worktrees/`, on a branch `m4/<slice>` from the remote's main at `f04fddf`. Builders commit for themselves. The coordinator dispatches every review session, publishes and merges. Each slice's report follows under its own heading.
+
+### L0, facts and prior art
+
+Built on the branch `m4/l0` at the driver tier. The builder ran six headless sessions in a scratch repository under the session's temporary folder: three of Claude Code 2.1.332 (haiku, effort low) and three of Codex CLI 0.169.0 (`gpt-5.6-luna`, effort low). Two more launch attempts never started a session: this workspace's guards refused one, and macOS has no `timeout` command for the other.
+
+**Claude Code 2.1.332**
+
+- **Verified, start on a named model and effort:** `claude -p PROMPT --model haiku --effort low --setting-sources project --strict-mcp-config --output-format stream-json --verbose`. The init event named `claude-haiku-5-5`, and the transcript's request rows carry the effort.
+- **Verified, edit tools off:** `--tools "Read,Grep,Glob,Bash" --permission-mode dontAsk --settings FILE`, with the allow list in the file. The Write tool was absent and `echo x > b.txt` was denied. But an allowed `git diff --output=c.txt`, matched by `Bash(git diff:*)`, wrote its file: a prefix allow list does not stop writes. "Edit tools off" holds only with Bash removed, or with an allow list that has no command form that writes. The tool itself still writes its transcript and any background task's output. `--restricted` exists, by `--help`, and was not run.
+- **Verified, the transcript and its end:** `~/.claude/projects/<the folder, with / and . as ->/<session id>.jsonl`. `--no-session-persistence` writes none, by `--help`. A clean session ends its output with a `result` event and its file with a `cost-state` row. A killed session's file ends on `assistant` rows with no `cost-state`. The `result` event is not the process's end: one session reported it at 5.4 seconds and stayed alive, holding a background task, until it was killed at 30.
+- **Verified, a time limit:** there is no wall-time flag; `--max-budget-usd` limits spend. A SIGKILL stopped the session, but its child process kept running, so a dispatch must kill the process group.
+- **Verified, a person's turn:** a prompt is a `user` row with string content, marked `sdk` under `-p` and `human` when typed. A tool result is a `user` row holding a `tool_result` block. Text the harness adds is an `attachment` row in a headless run, or a `user` row marked `isMeta` or with a harness source in an interactive one. `--resume ID` appended a second prompt row with the same markers and session id, and `turnIndex: 2`: a second turn shows only by count.
+- **Inferred, from the tool's docs, waiting 30 minutes for a reviewer:** a foreground shell command is capped at 10 minutes, so the author runs the reviewer in the background and is told when it exits. Background commands default to a 30-minute limit, and 10 minutes in a `-p` run, so a dispatch sets it. `claude --bg` with `logs`, `attach` and `stop` is another route, by `--help`.
+- **Verified, token use:** the `result` event carries `usage`, `modelUsage` and `total_cost_usd`; the transcript carries `message.usage` on each response and a `cost-state` row.
+
+**Codex CLI 0.169.0**
+
+- **Verified, start on a named model and effort:** `codex exec -m gpt-5.6-luna -c model_reasoning_effort=low -s read-only --json -C DIR PROMPT`. The rollout's `turn_context` names the model, the effort and `read-only`, and `-s` overrode the person's configured `danger-full-access`.
+- **Verified, edit tools off:** under `-s read-only`, `apply_patch` was rejected, `echo >` was not permitted, and `git diff --output` could not open its file. Codex still writes its rollout and state files. **Inferred**, from `--help`: an MCP server's commands may run outside the sandbox.
+- **Verified, the transcript and its end:** `~/.codex/sessions/YYYY/MM/DD/rollout-<time>-<thread id>.jsonl`. A clean turn ends with an `event_msg` of type `task_complete`, and the output stream with `turn.completed`; a killed run has neither. The `--json` stream left out three of one session's four tool calls, and the rollout held all four, so an adapter reads the rollout.
+- **Verified, a time limit:** no wall-time flag. A SIGKILL at 40 seconds left the session's child process running.
+- **Verified, a person's turn:** a prompt is a `user` message with an `item_completed` event whose item is a `UserMessage`. The tool's own environment text is a `user` message with no such item; system text is a `developer` message. `codex exec resume ID` appended a second `UserMessage` to the same rollout, and that turn ran with the person's `danger-full-access`, since `-s` was not given again. So a Codex dispatch passes `-s read-only` every time and never resumes.
+- **Inferred, from the tool's docs, waiting 30 minutes:** a shell command hands back a session id within 30 seconds, and the author polls it in calls of up to 300 seconds, six or more for 30 minutes.
+- **Verified, token use:** `turn.completed.usage` and the rollout's `token_count` events report tokens; no cost is reported.
+
+**The two existing marks**
+
+- **Verified, both exist:** AI-DLC's `attest` is `core/tools/aidlc-attest.ts` in `awslabs/aidlc-workflows` at `c903d59`, MIT-0; Anthropic's `agent-approval-check/` is in `anthropics/claude-code-action` at `4411a9e`, MIT.
+- **Verified, `agent-approval-check` was run** offline on eight cases built from a scratch repository's commits, with local stand-ins for its three libraries and its GitHub client; nothing reached the network. A record-only commit dropped its approval count from 2 to 0. A later code commit sent its status back to `pending`. Approving reviews from an earlier head still counted at a later code head. Approvals from an agent's login, and from a user without write access, did not count. An agent's commit made under a person's email passed as having no agent activity.
+- **Inferred, `attest`:** read, not run. This departs from the L0 section, which asks for both to be run. Its tool imports 50 of the project's files, 134 with its logging command, and two of them import a Bun-only module; Bun is not installed here, and installing a runtime to run code too large to read first was ruled out. What decision 0021 says of `attest` rests on its source, its reference chapter and its tests.
+- **Verified, the stop rule's L0 line does not fire:** neither mark meets every criterion of L2 or L3.
+- Decision 0021, the review mark, records per criterion 35 to 40 what each meets, what M4 takes with credit and what it builds, and stores the mark under `docs/records/reviews/` on the branch it reviews, keyed by the reviewed tip and the patch id.
+
+Proposed for L1, owned by the coordinator, and passed to L1's builder: a dispatch kills the process group at its time limit; a Codex dispatch passes `-s read-only` every time and never resumes; a Claude Code reviewer gets no Bash, or an allow list with no writing form; and the allow list goes in a settings file, since this workspace's guards refused two `claude` lines whose arguments named `Bash` and `Bash(git diff:*)`. G2's builder was told of those two lines.
