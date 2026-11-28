@@ -2117,16 +2117,20 @@ class EvalThatCanLoseTests(Folder):
                 if f["level"] == "error"]
 
     def test_editing_the_harness_the_graders_the_contract_or_the_index_changes_the_hash(self):
+        """An edit to what an agent is given needs a new run; an edit to the graders alone, the stamp (M4 H0a)."""
         self.copy_of_this_repository()
         self.assertEqual(self.eval_findings(), [])
-        for name in ("evals/grade.py", "evals/run.py", "AGENTS.md", "INDEX.md"):
+        for name, finding in (("evals/run.py", "changed since the last recorded eval run"),
+                              ("AGENTS.md", "changed since the last recorded eval run"),
+                              ("INDEX.md", "changed since the last recorded eval run"),
+                              ("evals/grade.py", "python3 evals/grade.py --recorded --stamp")):
             with self.subTest(name):
                 original = (self.root / name).read_text(encoding="utf-8")
                 (self.root / name).write_text(original + "\n# one more line\n", encoding="utf-8")
                 try:
                     found = self.eval_findings()
                     self.assertEqual(len(found), 3, found)
-                    self.assertTrue(all("changed since the last recorded eval run" in f for f in found), found)
+                    self.assertTrue(all(finding in f for f in found), found)
                 finally:
                     (self.root / name).write_text(original, encoding="utf-8")
 
@@ -2367,22 +2371,30 @@ class EvalRerecordTests(Folder):
         self.assertEqual(len(rules), 1, "every case grades the report by the same rule")
 
     def test_the_hash_covers_the_code_of_every_hook_a_grader_runs(self):
+        """Since M4 slice H0a, in the grader hash, and not in the hash over what an agent is given."""
         from parts import eval_record
+        paths = subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True,
+                               check=True).stdout.splitlines()
+        def grading(root, name):
+            case = self.harness.load_case(name, root)
+            files = eval_record.grading_files(case, paths, lambda p: self.harness.read_text(root, p))
+            return eval_record.grader_hash({f: self.harness.read_text(root, f) for f in files})
         for name in self.CASES:
-            files = eval_record.covered_files(f"evals/cases/{name}.json", self.harness.load_case(name))
-            self.assertIn("parts/no_stage_all.py", files, name)
-        for name in ("parts/no_stage_all.py",):
+            case = self.harness.load_case(name)
+            self.assertIn("parts/no_stage_all.py", eval_record.grading_files(case, paths, lambda p: None), name)
+            self.assertNotIn("parts/no_stage_all.py", eval_record.covered_files(f"evals/cases/{name}.json", case), name)
+        for name in ("parts/no_stage_all.py", "wslib/shell.py"):
             with self.subTest(name):
                 copy = self.root / name.replace("/", "-")
-                for path in subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True,
-                                           check=True).stdout.splitlines():
+                for path in paths:
                     if (ROOT / path).is_file() and not path.startswith(("src/", "evals/runs/")):
                         (copy / path).parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy(ROOT / path, copy / path)
-                before = self.harness.covered("fix-a-bug", copy)[1]
+                before = self.harness.covered("fix-a-bug", copy)[1], grading(copy, "fix-a-bug")
                 with (copy / name).open("a", encoding="utf-8") as handle:
                     handle.write("\n# a looser hook\n")
-                self.assertNotEqual(self.harness.covered("fix-a-bug", copy)[1], before)
+                self.assertEqual(self.harness.covered("fix-a-bug", copy)[1], before[0])
+                self.assertNotEqual(grading(copy, "fix-a-bug"), before[1])
 
     def test_the_agent_gets_exactly_the_scaffold_files_the_hash_covers(self):
         from parts import eval_record
@@ -2497,11 +2509,17 @@ class EvalHarnessApartTests(Folder):
             handle.write("\n\ndef added_lines(path):\n    return []\n")
 
     def test_the_hash_leaves_the_engines_loader_out(self):
+        """Of the engine, only the package and the parser the graded hook imports are hashed: in the grader hash."""
         from parts import eval_record
+        paths = subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True,
+                               check=True).stdout.splitlines()
         for name in self.CASES:
-            files = eval_record.covered_files(f"evals/cases/{name}.json", self.harness.load_case(name))
-            self.assertIn("parts/no_stage_all.py", files, name)
-            self.assertEqual([f for f in files if f.startswith("wslib/")], ["wslib/shell.py"], name)
+            case = self.harness.load_case(name)
+            files = eval_record.covered_files(f"evals/cases/{name}.json", case, paths)
+            self.assertEqual([f for f in files if f.startswith(("wslib/", "parts/"))], [], name)
+            grading = eval_record.grading_files(case, paths, lambda p: self.harness.read_text(ROOT, p))
+            self.assertEqual(grading, ["evals/grade.py", "parts/no_stage_all.py", "wslib/__init__.py", "wslib/shell.py"],
+                             name)
 
     def test_an_engine_change_leaves_every_eval_record_as_it_was(self):
         """Criterion 2. Compared before and after the edit, so it holds whether or not the records are current."""
