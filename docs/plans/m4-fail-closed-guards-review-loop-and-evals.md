@@ -1,7 +1,7 @@
 ---
 kind: plan
-last-reviewed: 2026-11-26
-status: draft
+last-reviewed: 2026-11-28
+status: approved
 milestone: M4
 ---
 
@@ -9,7 +9,7 @@ milestone: M4
 
 The plan for the fourth milestone: close the shell guards' known gaps with one rule, then build the review loop and the eval system. Building sessions work from it; the maintainer approves it. It follows the [hand-off plan template](../templates/hand-off-plan.md).
 
-**In short:** M3 left routes past the shell guards, a review that runs by hand, and ten pages that name M4 as the milestone to prove them. This plan closes the routes with one rule in the parser, builds the review's dispatch, mark and gate with teach-back and a merge policy, and builds the eval system those ten pages are tested with. It is a draft: not yet approved.
+**In short:** M3 left routes past the shell guards, a review that runs by hand, and ten pages that name M4 as the milestone to prove them. This plan closes the routes with one rule in the parser, builds the review's dispatch, mark and gate with teach-back and a merge policy, and builds the eval system those ten pages are tested with. The maintainer approved it on 2026-11-28.
 
 ## Key points
 
@@ -22,7 +22,7 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
 - **Red team:** 21 rounds held with fixes; the loop has ended.
-- **Not approved.** Queue answers through Q114 are applied.
+- **Approved 2026-11-28,** teach-back deferred. Queue answers through Q114 are applied.
 
 ## Settled decisions
 
@@ -1052,7 +1052,7 @@ Round 21: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guar
 | R21-5 | Small slips: the commit check's branch fact, Python 3.9 on the fast path, Q110 in an instance. | Accepted | 0004's fact table gains the branch; "What it gives up" names 3.9; neither refusal binds a synced file in an instance. |
 ## Approval
 
-Not yet approved.
+Approved by: Ryan Tornberg, 2026-11-28. His teach-back on the plan is deferred to a later session; a gap it finds comes back as a change entry below.
 
 ## Changes after approval
 
