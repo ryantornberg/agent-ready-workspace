@@ -14,7 +14,7 @@ a section merged into another page says so in a line under its heading. This che
     fails unless a failed proof attempt is on record for the milestone it moves away from, under evals/runs/,
     added while that milestone was being built; a renamed page whose proof keys change fails; an existing
     anchor changed, or a proven page or section marked unproven again, fails unless an approved entry in
-    "Changes after approval" of a plan whose milestone is being built says so, in a line
+    "Changes after approval" of an approved plan whose milestone is being built says so, in a line
     "Anchor: <page> <old item> -> <new item>" or "Demote: <page>";
   - the README's table of proven and unproven pages matches the pages.
 
@@ -78,7 +78,7 @@ def _item(sha, path):
 
 
 def approvals(snapshot, plans, building, keys):
-    """The Anchor and Demote lines of approved entries in plans whose milestone is being built."""
+    """The Anchor and Demote lines of approved entries in approved plans whose milestone is being built."""
     lines = set()
     for plan in snapshot.paths(suffixes=(".md",), under=plans):
         text = snapshot.read(plan) or ""
@@ -86,7 +86,7 @@ def approvals(snapshot, plans, building, keys):
         for row in markdown.split_front_matter(text)[0]:
             key, _, value = row.partition(":")
             front[key.strip()] = value.strip()
-        if front.get("milestone") not in building:
+        if front.get("milestone") not in building or front.get("status") != "approved":
             continue
         inside, entry, approved = False, False, False
         rows = text.replace("\r\n", "\n").split("\n")
