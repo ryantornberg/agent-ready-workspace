@@ -354,8 +354,20 @@ class StructureTests(unittest.TestCase):
         self.assertEqual(done.returncode, 0, done.stderr)
         self.assertRegex(done.stdout, r"rule\(s\)\. Tags: eval \d+, part \d+, prose \d+")
 
-    def test_criterion_14_m3_is_being_built_and_the_template_names_a_milestone(self):
-        self.assertEqual(self.manifest()["building"], ["M3"])
+    def test_criterion_14_each_milestone_being_built_has_an_approved_plan_and_the_template_names_a_milestone(self):
+        """No milestone number is pinned here: each milestone adds itself to "building" and removes itself at
+        sign-off (docs/parts.md), and the proof check fails an entry whose record is signed off."""
+        def front(path):
+            text = path.read_text(encoding="utf-8")
+            block = text.split("\n---\n", 1)[0] if text.startswith("---\n") else ""
+            return dict(line.split(": ", 1) for line in block.splitlines()[1:] if ": " in line)
+        plans = [front(p) for p in sorted((ROOT / "docs/plans").glob("*.md"))]
+        for milestone in self.manifest()["building"]:
+            self.assertRegex(milestone, r"^M[1-9][0-9]*$")
+            self.assertTrue([p for p in plans if p.get("milestone") == milestone and p.get("status") == "approved"],
+                            f"{milestone} is being built with no approved plan that names it")
+            record = ROOT / "docs/milestones" / f"m{milestone[1:]}.md"
+            self.assertNotEqual(front(record).get("status") if record.is_file() else None, "signed off", milestone)
         self.assertIn("milestone: M<n>", (ROOT / "docs/templates/hand-off-plan.md").read_text(encoding="utf-8"))
         page = (ROOT / "docs/playbooks/fix-a-bug.md").read_text(encoding="utf-8")
         front = proofkeys.keys(page)[0]

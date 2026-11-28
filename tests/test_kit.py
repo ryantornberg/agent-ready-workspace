@@ -153,6 +153,12 @@ class AdoptTests(unittest.TestCase):
         self.assertNotIn(kit.PROOF_TABLE, readme)
         self.assertIn("| [docs/playbooks/fix-a-bug.md](docs/playbooks/fix-a-bug.md) | proven |", readme)
 
+    def test_the_instance_ignores_the_secrets_file(self):
+        """with-secrets reads .env at the top of the working copy; git must not stage it (M4 criterion 1)."""
+        for folder in (ROOT, self.instance):
+            done = subprocess.run(["git", "-C", str(folder), "check-ignore", "-q", ".env"])
+            self.assertEqual(done.returncode, 0, f"{folder}: .gitignore does not ignore .env")
+
     def test_the_index_loses_only_the_rows_that_name_what_stays_here(self):
         index = (self.instance / "INDEX.md").read_text(encoding="utf-8")
         self.assertNotIn("docs/plans/", index)

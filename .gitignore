@@ -3,3 +3,4 @@ __pycache__/
 .claude/worktrees/
 .playwright-mcp/
 .claude/settings.local.json
+.env
