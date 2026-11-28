@@ -452,6 +452,7 @@ class Library:
 
     def exec_module(self, module):
         file, text = self.texts[module.__name__]
+        module.__dict__["__builtins__"] = self.builtins()   # an absolute `from wslib import x` here is the commit's too
         exec(compile(text, f"{self.commit[:7]}:wslib/{file}", "exec"), module.__dict__)
 
     def builtins(self):

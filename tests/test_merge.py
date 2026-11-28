@@ -342,6 +342,17 @@ class PullRequestRunTests(Helper):
                                                                  lambda d: d["check_runs"][0].pop("check_suite")))), 1)
         self.assertIn("check (ubuntu-latest, 3.13): has not run on c57ded3", self.output())
 
+    def test_a_workflow_run_on_another_commit_does_not_vouch_for_this_one(self):
+        """Re-check finding 3: a pull_request workflow run counts only when its head is the pull request's head."""
+        def elsewhere(data):
+            for run in data["workflow_runs"]:
+                if run["name"] == "ci":
+                    run["head_sha"] = "0" * 40
+        gh = FakeGh(workflow_runs=edited("workflow_runs", elsewhere))
+        self.assertEqual(self.run_merge(gh), 1)
+        self.assertEqual(gh.named("merge"), [])
+        self.assertIn("check (ubuntu-latest, 3.13): has not run on c57ded3", self.output())
+
     def test_more_workflow_runs_than_one_page_refuses(self):
         gh = FakeGh(workflow_runs=edited("workflow_runs", lambda d: d.update(total_count=101)))
         self.assertEqual(self.run_merge(gh), 1)

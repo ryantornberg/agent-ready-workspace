@@ -2934,6 +2934,44 @@ class PushLibraryTests(PushRepository):
         self.assertFalse([name for name in sys.modules if "demo_rule" in name])
         self.assertFalse([finder for finder in sys.meta_path if type(finder).__name__ == "Library"])
 
+    def on_main(self, files, uses):
+        """Commit parts and library files straight to the remote's main, as if they had merged, then add a doc."""
+        manifest = json.loads((self.root / "workspace.json").read_text(encoding="utf-8"))
+        manifest["parts"] += [{"use": use, "why": "test"} for use in uses]
+        files = dict(files, **{"workspace.json": json.dumps(manifest)})
+        for path, text in files.items():
+            self.write(path, text)
+        self.git("add", "--", *files)
+        self.git("commit", "-q", "-m", "chore: more parts")
+        self.git("push", "-q", "--no-verify", "origin", "main")
+        self.commit("docs/b.md", "# B\n", "docs: b")
+
+    def test_a_check_that_cannot_load_at_the_tip_refuses_a_push_to_main(self):
+        """Re-check finding 1: a check is loaded at the tip to read its PHASES, so a broken one is not skipped."""
+        broken = 'KIND = "check"\n\nfrom wslib import no_such_module\n\n\ndef run(snapshot, config):\n    return []\n'
+        self.on_main({"parts/demo_broken.py": broken, "parts/demo_broken.cases.json": json.dumps(DEMO_PUSH_CASES)},
+                     ["demo_broken"])
+        code, output = self.push()
+        self.assertEqual(code, 2, output)
+        self.assertIn("part demo_broken: cannot be loaded", output)
+        self.assertEqual(self.push(remote_ref="refs/heads/x", local_ref="refs/heads/x")[0], 0)
+
+    def test_the_push_loads_no_hook(self):
+        """Re-check finding 2: a hook that would fail as it loads does not touch a push to main."""
+        broken = '"""A hook that fails as it loads."""\nKIND = "hook"\nEVENT = "before-shell"\n\nraise RuntimeError("loaded")\n'
+        self.on_main({"parts/demo_loud_hook.py": broken,
+                      "parts/demo_loud_hook.cases.json": json.dumps(DEMO_GUARD_CASES)}, ["demo_loud_hook"])
+        code, output = self.push()
+        self.assertEqual(code, 0, output)
+        self.assertNotIn("loaded", output)
+
+    def test_an_absolute_import_inside_the_tips_library_is_the_tips_too(self):
+        """Re-check finding 4: wslib/demo_rule.py at the tip imports wslib.demo_words, which only the tip holds."""
+        rule = "from wslib.demo_words import WORDS\n\n\ndef refused(command):\n    return False\n"
+        self.on_main({"wslib/demo_words.py": "WORDS = ('--force',)\n", "wslib/demo_rule.py": rule}, [])
+        code, output = self.push()
+        self.assertEqual(code, 0, output)
+
 
 class AdminMergeTests(Folder):
     """M2 slice 1: a merge past CI with the owner's administrator flag is refused (criterion 33)."""
