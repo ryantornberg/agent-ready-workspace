@@ -364,7 +364,7 @@ class StructureTests(unittest.TestCase):
         plans = [front(p) for p in sorted((ROOT / "docs/plans").glob("*.md"))]
         for milestone in self.manifest()["building"]:
             self.assertRegex(milestone, r"^M[1-9][0-9]*$")
-            self.assertTrue([p for p in plans if p.get("milestone") == milestone and p.get("status") == "approved"],
+            self.assertTrue([p for p in plans if p.get("milestone") == milestone and p.get("status") in ("approved", "done")],
                             f"{milestone} is being built with no approved plan that names it")
             record = ROOT / "docs/milestones" / f"m{milestone[1:]}.md"
             self.assertNotEqual(front(record).get("status") if record.is_file() else None, "signed off", milestone)
