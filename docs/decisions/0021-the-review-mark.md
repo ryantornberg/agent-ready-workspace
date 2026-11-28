@@ -8,11 +8,11 @@ last-reviewed: 2026-11-28
 
 # 0021: M4 builds its own review mark, takes six ideas from two published checks with credit, and stores the mark in the branch it reviews
 
-**In short:** two published checks were tested against the review mark's criteria: AI-DLC's `attest` and Anthropic's `agent-approval-check`. Neither meets every criterion of slice L2 or L3, so [the plan's stop rule](../plans/m4-fail-closed-guards-review-loop-and-evals.md#stop-rule) does not fire, and M4 builds the mark. It takes six ideas from them, credited below. The mark, its completion record and its dispatch records are files under `docs/records/reviews/`, committed on the branch they review.
+**In short:** two published checks were tested against the review mark's criteria: AI-DLC's `attest` and Anthropic's `agent-approval-check`. Neither meets every criterion of slice L2 or L3, so the stop rule of M4's plan does not fire, and M4 builds the mark. It takes six ideas from them, credited below. The mark, its completion record and its dispatch records are files under `docs/records/reviews/`, committed on the branch they review.
 
 ## Context
 
-[M4's plan](../plans/m4-fail-closed-guards-review-loop-and-evals.md#l0-facts-and-prior-art) builds a review mark: a record that a review completed on one commit's content. Before building it, slice L0 tests two existing checks against criteria 35 to 40. If one meets every criterion of a slice, that slice takes its design. No third-party package may join the engine, the parts or the tests CI runs.
+M4's plan, `docs/plans/m4-fail-closed-guards-review-loop-and-evals.md`, builds a review mark: a record that a review completed on one commit's content. Before building it, slice L0 tests two existing checks against criteria 35 to 40. If one meets every criterion of a slice, that slice takes its design. No third-party package may join the engine, the parts or the tests CI runs.
 
 Both checks exist. They were found and read on 2026-11-28:
 
@@ -24,7 +24,7 @@ How each was tested:
 - **`agent-approval-check` was run.** Its decision function was run offline against eight cases built from the commits of a scratch git repository. Its three libraries were replaced by stand-ins, and a stand-in client took the place of every GitHub call, so nothing reached the network. The results are what the table below cites as "the run".
 - **`attest` was read, not run. This departs from the plan,** which asks L0 to test both checks in a scratch repository. `attest` imports 50 of its project's files, and 134 with the logging command that writes its receipts. Two of them import a module only the Bun runtime has, and the machine L0 ran on does not have Bun. Installing a runtime to run code too large to read first was ruled out. What the table says of `attest` comes from its source, its reference chapter and its test suite, so each such line is inferred.
 
-The run, its cases and the facts about each agent tool's sessions are in [the plan's Results](../plans/m4-fail-closed-guards-review-loop-and-evals.md#results), under the entry for L0.
+The run, its cases and the facts about each agent tool's sessions are in that plan's "Results", under the entry for L0.
 
 ## Decision
 
