@@ -28,3 +28,17 @@ In scope: the milestone-state row of "What does not transfer", which the diff ag
 - enforcement: the new sentence's stated enforcement, that the `proof` check fails an entry whose record is signed off, is true: `proof#a building entry whose milestone record is signed off fails` (verified, case in the diff; `parts/` is synced to an instance per `kit/kit.json`).
 - placement: the sentence sits in the row that already tells an instance how to set `building`, beside the rule on choosing a milestone number (verified, read).
 - eval-case: the page is marked `proof: unproven` with `prove-by: M5` (verified, front matter).
+
+## Re-check
+
+A fresh session's reading after the fix round: commit d747952 with the uncommitted change of the G0 session to this page. It read the page's diff, which changes "set `building` to that milestone" to "add that milestone to `building` when the plan's first slice merges". It read beside it `docs/parts.md`'s `building` row, `docs/maintain-the-workspace.md`'s "Periodic duties", `kit/kit.json`'s `workspace.json` entry and this workspace's `workspace.json`. It ran `python3 ws.py selftest` and `python3 ws.py check` (both exit 0).
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | Holds. | The milestone-state row says the manifest is machinery, so the sign-off commit merges through a pull request, and links changing the machinery (verified, read). |
+
+What the fix broke: not blocking. In an instance the kit makes, `building` starts as `[]` (verified, `kit/kit.json`), so "add" and the old "set" agree. In a copy made by hand, which the page still supports in its rows on the rule page and on plans and records, `workspace.json` keeps this workspace's `["M4"]` (verified, read). "Add" then leaves M4 in the list beside the team's milestone, and M4's record is never signed off there, so it never leaves. Inferred: maintain the workspace would then name two current plans, one of them this workspace's with its maintainer, and anchor lines in this workspace's M4 plan would count in the copy. "Set `building` to that milestone alone when the plan's first slice merges" would keep the timing and close it.
+
+Disposition: fixed: the row now says "set `building` to that milestone alone when the plan's first slice merges", the reviewer's wording.
+
+What the first reading missed: not blocking. Its contradiction line compared "set `building`" once the plan is approved with the new test only. It did not compare it with `docs/parts.md`'s `building` row, which says a milestone adds itself when its first slice merges. The row now gives that timing, as do the parts page and maintain the workspace (verified, read).

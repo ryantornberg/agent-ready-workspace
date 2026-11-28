@@ -54,7 +54,7 @@ The session whose change sets off the event does the duty, in the same piece of 
 
 ## Periodic duties
 
-The owner of each periodic duty is the workspace's maintainer: the person named as approver in the current plan. The current plan is the approved one whose `milestone` is listed under `building` in [workspace.json](../workspace.json); its `Approved by:` line names the person. An abandoned plan may name the same milestone, and does not count. When `building` is empty, as between a sign-off and the first merged slice of the next milestone, the current plan is the approved plan with the latest `Approved by:` date. In an instance with no approved plan yet, the person who adopted it owns the duties.
+The owner of each periodic duty is the workspace's maintainer: the person named as approver in the current plan. The current plan is the approved or done one whose `milestone` is listed under `building` in [workspace.json](../workspace.json); its `Approved by:` line names the person. An abandoned plan may name the same milestone, and does not count. When `building` is empty, as between a sign-off and the first merged slice of the next milestone, the current plan is the approved or done plan with a `milestone` key and the latest date in its Approval section. In an instance with no approved plan yet, the person who adopted it owns the duties.
 
 | Duty | When | How |
 |---|---|---|

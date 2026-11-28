@@ -28,3 +28,18 @@ In scope: the opening paragraph of "Periodic duties", which the diff against c37
 - trigger: the change touches no purpose line, **In short** line or index row (verified, diff).
 - enforcement: the changed paragraph states a definition, not a must; the page's Rules table is unchanged and its tags pass the `rules` check (verified, `python3 ws.py check`).
 - eval-case: the page is marked `proof: unproven` with `prove-by: M5` (verified, front matter).
+
+## Re-check
+
+A fresh session's reading after the fix round: commit d747952 with the uncommitted change of the G0 session to this page. It read the page's diff, which makes the current plan "the approved or done one" and limits the fallback for an empty `building` to a plan with a `milestone` key. It read the front matter and `Approved by:` lines of every plan in `docs/plans/`, `parts/proof.py`'s `approvals`, and `tests/test_m3_a.py`. It ran `python3 ws.py selftest` and `python3 ws.py check` (both exit 0).
+
+| # | Verdict | Evidence |
+|---|---|---|
+| 1 | Holds. | With `building` empty, the fallback now picks among plans that are approved or done and carry `milestone`: the M3 plan (approved, latest `Approved by:` 2026-11-25) and the M4 plan (approved, 2026-11-28). The M1 and M2 plans have no `milestone` key and drop out; the decision queue's plan is abandoned. So it names the M4 plan's approver (verified, grep of front matter and `Approved by:` lines). "Approved or done" matches `approvals` in `parts/proof.py` and the `building` test in `tests/test_m3_a.py` (verified, read). |
+| 2 | Holds. | The "Leaving `building`" duty row, the `proof` row of "What the checks catch for you" and the Rules row tagging `proof#a building entry whose milestone record is signed off fails` are on the page, and the case passes (verified, read and selftest). |
+
+What a fix broke: not blocking. The fallback takes "the latest `Approved by:` date", and a plan carries one such line per change entry as well as its approval: the M3 plan has 48. Here both readings name the M4 plan, whose approval is later than every M3 line (verified). Inferred: in an instance, a change entry added to an older plan after the next plan's approval would make the older plan current under one reading. Saying "the date in its Approval section" would close it.
+
+Disposition: fixed: the fallback now takes the plan with "the latest date in its Approval section", the reviewer's wording.
+
+What the first reading missed: not blocking. It passed "the approved one" as matching the plans. It did not note that a `done` plan whose milestone is still in `building` would then name no maintainer, nor that its own fix's fallback could pick a plan with no `milestone` key, such as the M1 plan. The fix round closes both (verified, diff).

@@ -46,7 +46,7 @@ Amended 2026-11-21, M3 slice B1, after its instruction review; no rule changes, 
 
 Amended 2026-11-23, M3 slice B5: the reason behind cutting. A procedure was once written, and kept, for a task the model without it already passed, because nobody had run the model alone first. That is why M3's proof attempts start with a baseline of the bare model, and why its slice B7 says when that baseline alone cuts a page. No rule here changes.
 
-Amended 2026-11-28, M4 slice G0: a milestone leaves `building` when it is signed off. M3's sign-off left M3 in the list, and every rule above that reads `building` then still treated M3 as being built. So the `proof` check fails a `building` entry whose record in `docs/milestones/` has `status: signed off`. The sign-off commit removes the milestone from the list. Anchor and demotion lines now count only in a plan whose `status` is `approved`: an abandoned plan, such as the decision queue's, may name the milestone being built.
+Amended 2026-11-28, M4 slice G0: a milestone leaves `building` when it is signed off. M3's sign-off left M3 in the list, and every rule above that reads `building` then still treated M3 as being built. So the `proof` check fails a `building` entry whose record in `docs/milestones/` has `status: signed off`. The sign-off commit removes the milestone from the list. Anchor and demotion lines now count only in a plan whose `status` is `approved` or `done`: an abandoned plan, such as the decision queue's, may name the milestone being built.
 
 ## What it gave up
 
@@ -67,7 +67,7 @@ Amended 2026-11-28, M4 slice G0: a milestone leaves `building` when it is signed
 | Every playbook and how-to carries `proof`, and an unproven one names `prove-by`. | `page_kinds#a playbook without proof fails`, `proof#an unproven page with no prove-by fails` |
 | An unproven page fails once its `prove-by` milestone is signed off. | `proof#an unproven page whose prove-by milestone is signed off fails` |
 | A milestone leaves `building` in the commit that signs its record off. | `proof#a building entry whose milestone record is signed off fails` |
-| Anchor and demotion lines count only in an approved plan whose milestone is being built. | `proof#an approved anchor change in an abandoned plan whose milestone is being built fails`, `proof#an approved anchor change in a plan whose milestone is not being built fails` |
+| Anchor and demotion lines count only in an approved or done plan whose milestone is being built. | `proof#an approved anchor change in an abandoned plan whose milestone is being built fails`, `proof#an approved anchor change in a plan whose milestone is not being built fails`, `proof#an approved anchor change in a done plan whose milestone is still being built passes` |
 | `prove-by` moves later only with a failed attempt on record for the milestone it leaves. | `proof#prove-by moved later with no failed attempt fails` |
 | A proven page names a real-run record and passes its eval, held to its previous record and its anchor. | `proof#a proven page whose evidence is only eval records fails`, `eval_record#4 runs below the anchor fails, though the previous record is matched` |
 | An anchor changes, and a proven page is demoted, only with an approved change entry. | `proof#an anchor changed without an approved change fails`, `proof#a proven page marked unproven again fails without an approved change` |
