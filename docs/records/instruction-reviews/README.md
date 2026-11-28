@@ -326,6 +326,18 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-25-signoff-0004.md](2026-11-25-signoff-0004.md) | `docs/decisions/0004-the-hook-contract.md` | enforcement, contradiction |
 | [2026-11-25-signoff-parts.md](2026-11-25-signoff-parts.md) | `docs/parts.md` | enforcement, contradiction |
 | [2026-11-25-signoff-readme.md](2026-11-25-signoff-readme.md) | `README.md` | enforcement, contradiction |
+| [2026-11-28-g0-readme.md](2026-11-28-g0-readme.md) | `README.md` | none |
+| [2026-11-28-g0-parts.md](2026-11-28-g0-parts.md) | `docs/parts.md` | step |
+| [2026-11-28-g0-adopt-the-workspace.md](2026-11-28-g0-adopt-the-workspace.md) | `docs/adopt-the-workspace.md` | step |
+| [2026-11-28-g0-0006.md](2026-11-28-g0-0006.md) | `docs/decisions/0006-what-proven-means.md` | enforcement |
+| [2026-11-28-g0-maintain-the-workspace.md](2026-11-28-g0-maintain-the-workspace.md) | `docs/maintain-the-workspace.md` | step, placement |
+| [2026-11-28-g1-changing-the-machinery.md](2026-11-28-g1-changing-the-machinery.md) | `docs/changing-the-machinery.md` | contradiction, step |
+| [2026-11-28-g1-git-host-operations.md](2026-11-28-g1-git-host-operations.md) | `docs/playbooks/git-host-operations.md` | contradiction |
+| [2026-11-28-g1-parts.md](2026-11-28-g1-parts.md) | `docs/parts.md` | contradiction |
+| [2026-11-28-g1-pull-request.md](2026-11-28-g1-pull-request.md) | `docs/templates/pull-request.md` | step |
+| [2026-11-28-g1-readme.md](2026-11-28-g1-readme.md) | `README.md` | enforcement |
+| [2026-11-28-g1-merge-readme.md](2026-11-28-g1-merge-readme.md) | `README.md` | none |
+| [2026-11-28-g1-merge-parts.md](2026-11-28-g1-merge-parts.md) | `docs/parts.md` | none |
 | [2026-11-28-h0a-changing-the-machinery.md](2026-11-28-h0a-changing-the-machinery.md) | `docs/changing-the-machinery.md` | contradiction, step |
 | [2026-11-28-h0a-decision-0004.md](2026-11-28-h0a-decision-0004.md) | `docs/decisions/0004-the-hook-contract.md` | contradiction, step |
 | [2026-11-28-h0a-decision-0006.md](2026-11-28-h0a-decision-0006.md) | `docs/decisions/0006-what-proven-means.md` | contradiction, enforcement |
@@ -333,3 +345,7 @@ A class is counted from a record's findings, leaving out a finding the author de
 | [2026-11-28-h0a-kit-seed-evals-readme.md](2026-11-28-h0a-kit-seed-evals-readme.md) | `kit/seed/evals-README.md` | contradiction, step |
 | [2026-11-28-h0a-parts.md](2026-11-28-h0a-parts.md) | `docs/parts.md` | contradiction |
 | [2026-11-28-h0a-readme.md](2026-11-28-h0a-readme.md) | `README.md` | contradiction |
+| [2026-11-28-h0a-merge-readme.md](2026-11-28-h0a-merge-readme.md) | `README.md` | contradiction |
+| [2026-11-28-h0a-merge-0006.md](2026-11-28-h0a-merge-0006.md) | `docs/decisions/0006-what-proven-means.md` | none |
+| [2026-11-28-h0a-merge-parts.md](2026-11-28-h0a-merge-parts.md) | `docs/parts.md` | none |
+| [2026-11-28-h0a-merge-changing-the-machinery.md](2026-11-28-h0a-merge-changing-the-machinery.md) | `docs/changing-the-machinery.md` | none |

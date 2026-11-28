@@ -97,6 +97,10 @@ class Folder(unittest.TestCase):
             sys.stdin = old
         return code, out.getvalue() + err.getvalue()
 
+    def engine(self):
+        """This repository's engine library, wslib/, copied in: the pre-push check imports it from the remote's tip."""
+        shutil.copytree(ROOT / "wslib", self.root / "wslib", ignore=shutil.ignore_patterns("__pycache__"))
+
     def workspace(self, *entries):
         """A workspace that borrows this repository's real parts."""
         self.write("workspace.json", manifest(entries))
@@ -2655,13 +2659,13 @@ MACHINERY = ["ws.py", "wslib/", "parts/", "tools/", "evals/*.py", "evals/cases/"
 ZERO = "0" * 40
 
 
-class DirectPushTests(Folder):
-    """M2 slice 1: a direct push to main that changes machinery is refused; the pull request is the only route.
-    Each case pushes to a temporary bare remote, with no network."""
+class PushRepository(Folder):
+    """A workspace with direct_push and the engine library, committed, and a temporary bare remote, with no network."""
 
     def setUp(self):
         super().setUp()
         self.workspace({"use": "direct_push", "machinery": MACHINERY})
+        self.engine()
         self.write("docs/a.md", "# A\n")
         self.git("init", "-q", "-b", "main")
         self.git("add", "--all")
@@ -2688,6 +2692,10 @@ class DirectPushTests(Folder):
         sha = ZERO if local == ZERO else self.git("rev-parse", local).stdout.strip()
         line = f"{local_ref} {sha} {remote_ref} {self.tip(remote_ref)}\n"
         return self.ws("check", "--push", "origin", stdin=line)
+
+
+class DirectPushTests(PushRepository):
+    """M2 slice 1: a direct push to main that changes machinery is refused; the pull request is the only route."""
 
     def test_a_doc_only_push_to_main_passes(self):
         self.commit("docs/b.md", "# B\n", "docs: b")
@@ -2800,9 +2808,8 @@ class DirectPushTests(Folder):
     def test_through_git_each_refspec_form_for_main_is_checked(self):
         for name in ("ws.py",):
             shutil.copy(ROOT / name, self.root / name)
-        shutil.copytree(ROOT / "wslib", self.root / "wslib", ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(ROOT / ".githooks", self.root / ".githooks")
-        self.git("add", "--", "ws.py", "wslib", ".githooks")
+        self.git("add", "--", "ws.py", ".githooks")
         self.git("commit", "-q", "-m", "chore: the engine")
         self.git("push", "-q", "--no-verify", "origin", "main")
         self.git("checkout", "-q", "-b", "topic")
@@ -2834,6 +2841,154 @@ class DirectPushTests(Folder):
             if row.startswith("| `"):
                 listed += re.findall(r"`([^`]+)`", row.split("|")[1])
         self.assertEqual(sorted(listed), sorted(entries[0]["machinery"]))
+
+
+DEMO_RULE = 'WORDS = {words!r}\n\n\ndef refused(command):\n    return any(word in command.split() for word in WORDS)\n'
+DEMO_GUARD = '''"""A guard that refuses the words the library names."""
+KIND = "hook"
+EVENT = "before-shell"
+
+from wslib import demo_rule
+
+
+def decide(event, config):
+    return "refused" if demo_rule.refused(event.get("command", "")) else None
+'''
+DEMO_GUARD_CASES = [{"name": "the old rule allows -f", "event": {"command": "git push -f origin x"}, "allow": True},
+                    {"name": "it refuses --force", "event": {"command": "git push --force origin x"}, "allow": False}]
+DEMO_PUSH = '''"""A push check whose cases read the library."""
+KIND = "check"
+PHASES = ("push",)
+
+from wslib import demo_rule
+from wslib.parts import finding
+
+
+def run(snapshot, config):
+    return [finding("x", 1, "words: " + ",".join(demo_rule.WORDS))] if config.get("loud") else []
+'''
+DEMO_PUSH_CASES = [{"name": "loud", "files": {}, "config": {"loud": True}, "expect": ["words: --force"]},
+                   {"name": "quiet", "files": {}, "expect": []}]
+
+
+class PushLibraryTests(PushRepository):
+    """M4 slice G1, criterion 2 (Q82): the pre-push check runs only the cases of the push checks that judge the ref,
+    and loads them and the library they import from one commit, the remote's tip. Before, it ran every part's cases
+    from the tip against the library on disk, so a guard change that turned a passing case into a refusal could not
+    be pushed without --no-verify. Here the disk's library is this repository's engine, which has no demo_rule."""
+
+    def setUp(self):
+        super().setUp()
+        text = json.loads((self.root / "workspace.json").read_text(encoding="utf-8"))
+        text["parts"] += [{"use": "demo_guard", "why": "test"}, {"use": "demo_push", "why": "test"}]
+        self.write("workspace.json", json.dumps(text))
+        self.write("wslib/demo_rule.py", DEMO_RULE.format(words=("--force",)))
+        self.write("parts/demo_guard.py", DEMO_GUARD)
+        self.write("parts/demo_guard.cases.json", json.dumps(DEMO_GUARD_CASES))
+        self.write("parts/demo_push.py", DEMO_PUSH)
+        self.write("parts/demo_push.cases.json", json.dumps(DEMO_PUSH_CASES))
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", "chore: a guard and its library")
+        self.git("push", "-q", "--no-verify", "origin", "main")
+
+    def guard_change(self):
+        """The rule now refuses -f, so the tip's case that allows it would fail under the new library."""
+        return self.commit("wslib/demo_rule.py", DEMO_RULE.format(words=("-f",)), "fix: refuse -f")
+
+    def test_a_guard_change_pushed_to_a_branch_is_judged_without_no_verify(self):
+        self.git("checkout", "-q", "-b", "m4/g")
+        self.guard_change()
+        code, output = self.push(remote_ref="refs/heads/m4/g", local_ref="refs/heads/m4/g")
+        self.assertEqual(code, 0, output)
+
+    def test_a_doc_pushed_to_main_loads_the_push_checks_with_the_tips_library(self):
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        code, output = self.push()
+        self.assertEqual(code, 0, output)
+
+    def test_a_guard_change_pushed_to_main_is_refused_by_the_push_check_not_by_a_case(self):
+        sha = self.guard_change()
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertIn(sha[:7], output)
+        self.assertIn("wslib/demo_rule.py", output)
+        self.assertNotIn("cases fail", output)
+
+    def test_the_library_comes_from_the_tip_not_the_push(self):
+        """The push check's case wants the tip's words; the pushed library's words would fail it."""
+        self.guard_change()
+        self.commit("parts/demo_push.cases.json", json.dumps(DEMO_PUSH_CASES).replace("--force", "-f"),
+                    "test: the new words")
+        code, output = self.push()
+        self.assertEqual(code, 1, output)
+        self.assertNotIn("cases fail", output)
+
+    def test_a_failing_case_of_a_push_check_still_refuses(self):
+        self.git("checkout", "-q", "-b", "side")
+        self.write("parts/demo_push.cases.json", json.dumps(DEMO_PUSH_CASES).replace("--force", "--nope"))
+        self.git("add", "--all")
+        self.git("commit", "-q", "-m", "test: a case the tip's library fails")
+        self.git("push", "-q", "--no-verify", "origin", "side:main")
+        self.git("checkout", "-q", "main")
+        self.git("merge", "-q", "--ff-only", "side")
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        code, output = self.push()
+        self.assertEqual(code, 2, output)
+        self.assertIn("demo_push: refused", output)
+
+    def test_a_tip_with_no_library_refuses_a_push_to_main_and_not_to_a_branch(self):
+        self.git("rm", "-q", "-r", "wslib")
+        self.git("commit", "-q", "-m", "chore: no engine")
+        self.git("push", "-q", "--no-verify", "origin", "main")
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        code, output = self.push()
+        self.assertEqual(code, 2, output)
+        self.assertIn("no wslib/__init__.py at", output)
+        self.assertEqual(self.push(remote_ref="refs/heads/x", local_ref="refs/heads/x")[0], 0)
+
+    def test_the_tips_library_leaves_no_module_behind(self):
+        self.commit("docs/b.md", "# B\n", "docs: b")
+        self.assertEqual(self.push()[0], 0)
+        self.assertFalse([name for name in sys.modules if "demo_rule" in name])
+        self.assertFalse([finder for finder in sys.meta_path if type(finder).__name__ == "Library"])
+
+    def on_main(self, files, uses):
+        """Commit parts and library files straight to the remote's main, as if they had merged, then add a doc."""
+        manifest = json.loads((self.root / "workspace.json").read_text(encoding="utf-8"))
+        manifest["parts"] += [{"use": use, "why": "test"} for use in uses]
+        files = dict(files, **{"workspace.json": json.dumps(manifest)})
+        for path, text in files.items():
+            self.write(path, text)
+        self.git("add", "--", *files)
+        self.git("commit", "-q", "-m", "chore: more parts")
+        self.git("push", "-q", "--no-verify", "origin", "main")
+        self.commit("docs/b.md", "# B\n", "docs: b")
+
+    def test_a_check_that_cannot_load_at_the_tip_refuses_a_push_to_main(self):
+        """Re-check finding 1: a check is loaded at the tip to read its PHASES, so a broken one is not skipped."""
+        broken = 'KIND = "check"\n\nfrom wslib import no_such_module\n\n\ndef run(snapshot, config):\n    return []\n'
+        self.on_main({"parts/demo_broken.py": broken, "parts/demo_broken.cases.json": json.dumps(DEMO_PUSH_CASES)},
+                     ["demo_broken"])
+        code, output = self.push()
+        self.assertEqual(code, 2, output)
+        self.assertIn("part demo_broken: cannot be loaded", output)
+        self.assertEqual(self.push(remote_ref="refs/heads/x", local_ref="refs/heads/x")[0], 0)
+
+    def test_the_push_loads_no_hook(self):
+        """Re-check finding 2: a hook that would fail as it loads does not touch a push to main."""
+        broken = '"""A hook that fails as it loads."""\nKIND = "hook"\nEVENT = "before-shell"\n\nraise RuntimeError("loaded")\n'
+        self.on_main({"parts/demo_loud_hook.py": broken,
+                      "parts/demo_loud_hook.cases.json": json.dumps(DEMO_GUARD_CASES)}, ["demo_loud_hook"])
+        code, output = self.push()
+        self.assertEqual(code, 0, output)
+        self.assertNotIn("loaded", output)
+
+    def test_an_absolute_import_inside_the_tips_library_is_the_tips_too(self):
+        """Re-check finding 4: wslib/demo_rule.py at the tip imports wslib.demo_words, which only the tip holds."""
+        rule = "from wslib.demo_words import WORDS\n\n\ndef refused(command):\n    return False\n"
+        self.on_main({"wslib/demo_words.py": "WORDS = ('--force',)\n", "wslib/demo_rule.py": rule}, [])
+        code, output = self.push()
+        self.assertEqual(code, 0, output)
 
 
 class AdminMergeTests(Folder):

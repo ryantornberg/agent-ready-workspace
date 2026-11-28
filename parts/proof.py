@@ -8,11 +8,13 @@ a section merged into another page says so in a line under its heading. This che
   - every proven-by item exists: a bare path in the workspace, or <sha>:<path> at a full 40-hex sha that is an
     ancestor of the commit being checked; and at least one item is a real-run record, not an eval record;
   - an unproven page fails once its prove-by milestone's record (docs/milestones/m<n>.md) is signed off;
+  - a milestone the manifest's "building" list names fails once its record is signed off: the sign-off commit
+    removes it from the list;
   - against the base commit: a prove-by newly set to a milestone being built fails; a prove-by moved later
     fails unless a failed proof attempt is on record for the milestone it moves away from, under evals/runs/,
     added while that milestone was being built; a renamed page whose proof keys change fails; an existing
     anchor changed, or a proven page or section marked unproven again, fails unless an approved entry in
-    "Changes after approval" of a plan whose milestone is being built says so, in a line
+    "Changes after approval" of an approved or done plan whose milestone is being built says so, in a line
     "Anchor: <page> <old item> -> <new item>" or "Demote: <page>";
   - the README's table of proven and unproven pages matches the pages.
 
@@ -76,7 +78,7 @@ def _item(sha, path):
 
 
 def approvals(snapshot, plans, building, keys):
-    """The Anchor and Demote lines of approved entries in plans whose milestone is being built."""
+    """The Anchor and Demote lines of approved entries in approved or done plans whose milestone is being built."""
     lines = set()
     for plan in snapshot.paths(suffixes=(".md",), under=plans):
         text = snapshot.read(plan) or ""
@@ -84,7 +86,7 @@ def approvals(snapshot, plans, building, keys):
         for row in markdown.split_front_matter(text)[0]:
             key, _, value = row.partition(":")
             front[key.strip()] = value.strip()
-        if front.get("milestone") not in building:
+        if front.get("milestone") not in building or front.get("status") not in ("approved", "done"):
             continue
         inside, entry, approved = False, False, False
         rows = text.replace("\r\n", "\n").split("\n")
@@ -139,6 +141,7 @@ def run(snapshot, config):
     runs = config.get("runs", "evals/runs")
     found, all_marks = [], {}
     approved, attempts = None, None
+    found += _signed_off_building(snapshot, building, milestones)
     pages = [page for page in snapshot.pages(skip=config.get("skip", ("evals/scaffold", "archive")))
              if any(page.startswith(f.rstrip("/") + "/") for f in folders)]
     anchors = []
@@ -165,8 +168,7 @@ def run(snapshot, config):
                     found.append(finding(page, 1, f"{name} is unproven and names no prove-by milestone; see {PAGE}"))
                     continue
                 record = f"{milestones}/m{prove_by[1:]}.md"
-                text = snapshot.read(record) if snapshot.is_file(record) else None
-                if text and re.search(r"(?m)^status:\s*signed off\s*$", "\n".join(markdown.split_front_matter(text)[0])):
+                if _signed_off(snapshot, record):
                     found.append(finding(page, 1, f"{name} is still unproven, but {prove_by}, its prove-by milestone, "
                                                   f"is signed off ({record}). Prove it, cut it, or move prove-by later "
                                                   f"with a failed attempt on record; see {PAGE}"))
@@ -249,6 +251,30 @@ def run(snapshot, config):
                                                     f"which is marked {state}; correct the row"))
             for name in sorted(set(table) - set(all_marks)):
                 found.append(finding(readme, 1, f"its table lists {name}, which carries no proof mark"))
+    return found
+
+
+def _signed_off(snapshot, record):
+    """True when the milestone record's front matter says status: signed off."""
+    text = snapshot.read(record) if snapshot.is_file(record) else None
+    return bool(text) and bool(re.search(r"(?m)^status:\s*signed off\s*$",
+                                         "\n".join(markdown.split_front_matter(text)[0])))
+
+
+def _signed_off_building(snapshot, building, milestones):
+    """A finding for each milestone the "building" list names whose record is signed off."""
+    found = []
+    lines = (snapshot.read("workspace.json") or "").replace("\r\n", "\n").split("\n")
+    for milestone in building if isinstance(building, list) else []:
+        number = _number(milestone) if isinstance(milestone, str) else None
+        if number is None:
+            continue
+        record = f"{milestones}/m{number}.md"
+        if _signed_off(snapshot, record):
+            line = next((i + 1 for i, row in enumerate(lines) if f'"{milestone}"' in row), 1)
+            found.append(finding("workspace.json", line, f'"building" names {milestone}, whose record {record} is '
+                                                         f'signed off. Remove {milestone} from "building" in its '
+                                                         f'sign-off commit; see {PAGE}'))
     return found
 
 

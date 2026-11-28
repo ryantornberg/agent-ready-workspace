@@ -1,5 +1,5 @@
 {
-  "about": "gh's answers for ws.py merge's tests (tests/test_merge.py). 'recorded' holds real answers from gh 2.96.0 on this repository, 2026-11-21: pull request 32, its head commit c57ded3 and its merge commit ffbdc3d. Large API answers are trimmed to the fields the helper reads. 'made_up' holds answers no safe read could record, each with the reason; the tests say which they use.",
+  "about": "gh's answers for ws.py merge's tests (tests/test_merge.py). 'recorded' holds real answers from gh 2.96.0 on this repository, 2026-11-21: pull request 32, its head commit c57ded3 and its merge commit ffbdc3d. On 2026-11-28, M4 slice G1 recorded the check runs again with their check suite, the workflow runs of c57ded3 and ffbdc3d, the open pull requests based on m3/b1, and pull request 56. Large API answers are trimmed to the fields the helper reads. 'made_up' holds answers no safe read could record, each with the reason; the tests say which they use.",
   "recorded": {
     "view": {
       "call": [
@@ -64,7 +64,7 @@
         "repos/ryantornberg/agent-ready-workspace/commits/c57ded34de5d96d5fc296d4a756bf26993728781/check-runs?per_page=100"
       ],
       "exit": 0,
-      "stdout": "{\"check_runs\": [{\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838256, \"name\": \"check (ubuntu-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838211, \"name\": \"check (windows-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838186, \"name\": \"check (windows-latest, 3.9)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838121, \"name\": \"check (macos-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838022, \"name\": \"check (macos-latest, 3.9)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970837927, \"name\": \"cold-clone (ubuntu-latest)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970837819, \"name\": \"cold-clone (macos-latest)\", \"status\": \"completed\"}], \"total_count\": 7}\n",
+      "stdout": "{\"check_runs\": [{\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"check_suite\": {\"id\": 121642135392}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838256, \"name\": \"check (ubuntu-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"check_suite\": {\"id\": 121642135392}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838211, \"name\": \"check (windows-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"check_suite\": {\"id\": 121642135392}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838186, \"name\": \"check (windows-latest, 3.9)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"check_suite\": {\"id\": 121642135392}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838121, \"name\": \"check (macos-latest, 3.13)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"check_suite\": {\"id\": 121642135392}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970838022, \"name\": \"check (macos-latest, 3.9)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"check_suite\": {\"id\": 121642135231}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970837927, \"name\": \"cold-clone (ubuntu-latest)\", \"status\": \"completed\"}, {\"app\": {\"id\": 15368, \"slug\": \"github-actions\"}, \"check_suite\": {\"id\": 121642135231}, \"conclusion\": \"success\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 136970837819, \"name\": \"cold-clone (macos-latest)\", \"status\": \"completed\"}], \"total_count\": 7}\n",
       "stderr": ""
     },
     "statuses": {
@@ -131,6 +131,54 @@
       "exit": 1,
       "stdout": "{\"message\":\"Reference does not exist\",\"documentation_url\":\"https://docs.github.com/rest/git/refs#delete-a-reference\",\"status\":\"422\"}",
       "stderr": "gh: Reference does not exist (HTTP 422)\n"
+    },
+    "workflow_runs": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/actions/runs?head_sha=c57ded34de5d96d5fc296d4a756bf26993728781&per_page=100"
+      ],
+      "exit": 0,
+      "stdout": "{\"total_count\": 2, \"workflow_runs\": [{\"check_suite_id\": 121642135231, \"conclusion\": \"success\", \"event\": \"pull_request\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 44945188194, \"name\": \"cold-clone\", \"status\": \"completed\"}, {\"check_suite_id\": 121642135392, \"conclusion\": \"success\", \"event\": \"pull_request\", \"head_sha\": \"c57ded34de5d96d5fc296d4a756bf26993728781\", \"id\": 44945188271, \"name\": \"ci\", \"status\": \"completed\"}]}\n",
+      "stderr": ""
+    },
+    "workflow_runs_push": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/actions/runs?head_sha=ffbdc3db3567eecba70ceee18b0321660c256f96&per_page=100"
+      ],
+      "exit": 0,
+      "stdout": "{\"total_count\": 2, \"workflow_runs\": [{\"check_suite_id\": 121643374066, \"conclusion\": \"success\", \"event\": \"push\", \"head_sha\": \"ffbdc3db3567eecba70ceee18b0321660c256f96\", \"id\": 44945665760, \"name\": \"ci\", \"status\": \"completed\"}, {\"check_suite_id\": 121643374107, \"conclusion\": \"success\", \"event\": \"push\", \"head_sha\": \"ffbdc3db3567eecba70ceee18b0321660c256f96\", \"id\": 44945665777, \"name\": \"cold-clone\", \"status\": \"completed\"}]}\n",
+      "stderr": ""
+    },
+    "dependents": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/pulls?state=open&base=m3%2Fb1&per_page=100"
+      ],
+      "exit": 0,
+      "stdout": "[]\n",
+      "stderr": ""
+    },
+    "pull": {
+      "call": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "repos/ryantornberg/agent-ready-workspace/pulls/56"
+      ],
+      "exit": 0,
+      "stdout": "{\"number\": 56, \"state\": \"closed\", \"html_url\": \"https://github.com/ryantornberg/agent-ready-workspace/pull/56\", \"base\": {\"ref\": \"main\"}, \"head\": {\"ref\": \"m3/gfix\"}}\n",
+      "stderr": ""
     }
   },
   "made_up": {
@@ -157,6 +205,24 @@
       "exit": 0,
       "stdout": "[{\"type\": \"required_status_checks\", \"ruleset_source_type\": \"Repository\", \"ruleset_source\": \"owner/repo\", \"ruleset_id\": 1, \"parameters\": {\"strict_required_status_checks_policy\": false, \"required_status_checks\": [{\"context\": \"lint\", \"integration_id\": 15368}]}}]\n",
       "stderr": ""
+    },
+    "dependents_two": {
+      "why": "no pull request is open on a branch of this repository; the shape is pull request 56's recorded answer, as GitHub lists open pull requests",
+      "exit": 0,
+      "stdout": "[{\"number\": 33, \"state\": \"open\", \"html_url\": \"https://github.com/ryantornberg/agent-ready-workspace/pull/33\", \"base\": {\"ref\": \"m3/b1\"}, \"head\": {\"ref\": \"m3/b2\"}}, {\"number\": 34, \"state\": \"open\", \"html_url\": \"https://github.com/ryantornberg/agent-ready-workspace/pull/34\", \"base\": {\"ref\": \"m3/b1\"}, \"head\": {\"ref\": \"m3/b3\"}}]\n",
+      "stderr": ""
+    },
+    "retarget": {
+      "why": "a real retarget cannot be recorded without changing a pull request; GitHub answers the pull request, as pull request 56's recorded answer shows it, with its new base",
+      "exit": 0,
+      "stdout": "{\"number\": 33, \"state\": \"open\", \"html_url\": \"https://github.com/ryantornberg/agent-ready-workspace/pull/33\", \"base\": {\"ref\": \"main\"}, \"head\": {\"ref\": \"m3/b2\"}}\n",
+      "stderr": ""
+    },
+    "retarget_refused": {
+      "why": "a refused retarget cannot be recorded without trying a write; the text is gh's form for an API error, with GitHub's documented message (inferred)",
+      "exit": 1,
+      "stdout": "{\"message\": \"Validation Failed\", \"errors\": [{\"resource\": \"PullRequest\", \"code\": \"custom\", \"message\": \"There are no new commits between base branch 'main' and head branch 'm3/b3'.\"}], \"status\": \"422\"}\n",
+      "stderr": "gh: Validation Failed (HTTP 422)\n"
     }
   }
 }

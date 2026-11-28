@@ -43,12 +43,11 @@ class EveryTutorialTests(unittest.TestCase):
 
 
 class Fixture(Folder):
-    """A small workspace with the launcher, committed, and a bare remote whose main holds it."""
+    """A small workspace with the engine and its launcher, committed, and a bare remote whose main holds it."""
 
     def setUp(self):
         super().setUp()
-        for name in ("launch.sh", "start.py"):
-            self.write(f"wslib/{name}", (ROOT / "wslib" / name).read_text(encoding="utf-8"))
+        self.engine()
         self.workspace({"use": "direct_push", "why": "test", "machinery": ["wslib/"]})
         self.write("README.md", "# W\n")
         self.write("hello.py", "print('hello from', __file__)\n")
