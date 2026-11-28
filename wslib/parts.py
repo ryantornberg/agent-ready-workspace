@@ -12,7 +12,9 @@ A part is one Python file. It declares what it is and exposes one function:
                        and the runner lets it refuse a stop once (wslib/runner.py).
     A check may set PHASES, the phases it runs in: "commit", "ci", "nightly" and "push". The default is
     ("commit", "ci"). `ws.py check --phase nightly` runs only the checks whose PHASES hold "nightly".
-    A "push" check runs from the pre-push hook, `ws.py check --push REMOTE`, on the commits being pushed.
+    A "push" check runs from the pre-push hook, `ws.py check --push REMOTE`, on the commits being pushed. The hook
+    loads it from the remote's tip with a Library (below), so the check, its cases and the engine library it
+    imports all come from that one commit.
 
 KIND and EVENT are each one plain line of their own, such as KIND = "hook".
 The runner reads those lines without running the file, so a hook call loads
@@ -59,7 +61,9 @@ The manifest's "parts" lists the parts in use. A part that an older manifest
 used may leave only by being listed under "retired", with a reason:
     "retired": [{"use": "no_stage_all", "why": "the commit check now compares staged paths"}]
 """
+import builtins
 import hashlib
+import importlib.util
 import json
 import os
 import pathlib
@@ -156,6 +160,13 @@ class Part:
         if reason is not None and not isinstance(reason, str):
             raise PartError(f"part {self.name}: decide must return None or the reason as text")
         return reason
+
+    def require_cases(self):
+        """Run the part's cases; raise PartError, naming the first failure, when any fails."""
+        failures = self.failed_cases()
+        if failures:
+            raise PartError(f"part {self.name}: refused, {len(failures)} of its {len(self.cases)} cases fail; "
+                            f"first: {failures[0]}")
 
     def failed_cases(self):
         """Run the part's cases, each with its own config only. Return a list of "case name: what went wrong"."""
@@ -404,7 +415,66 @@ def _read_cases(name, kind, cases_file, text, mode="refuse"):
     return cases
 
 
-def load(root, entry, run_cases=True, snapshot=None, tiers=None, memory=None):
+class Library:
+    """The engine library, wslib/, as one commit holds it, for a part loaded from that commit.
+
+    A part imports the library by the name `wslib`. Loaded with a Library, that name resolves to the commit's own
+    wslib/ files instead of the engine on disk, under a module name of their own, so the part, its cases and the
+    library they call come from one commit (M4 plan, Q82). The engine that loads and runs the part stays the one on
+    disk. read(file name) gives a file's text, or None; each file is read when it is first imported. folder is where
+    wslib/ sits in a working copy, the module's __file__, which the library reads only to name a path. Use it as a
+    context manager around loading and running the parts: on leaving, the commit's modules are dropped.
+    """
+
+    def __init__(self, read, commit, folder):
+        self.read, self.commit, self.folder = read, commit, pathlib.Path(folder)
+        self.name = f"_wslib_at_{commit[:12]}"
+        self.texts = {}
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == self.name:
+            file, package = "__init__.py", True
+        elif fullname.startswith(self.name + ".") and "." not in fullname[len(self.name) + 1:]:
+            file, package = fullname[len(self.name) + 1:] + ".py", False
+        else:
+            return None
+        text = self.read(file)
+        if text is None:
+            raise ModuleNotFoundError(f"no wslib/{file} at {self.commit[:7]}, the commit the part is read from",
+                                      name=fullname)
+        self.texts[fullname] = (file, text)
+        spec = importlib.util.spec_from_loader(fullname, self, origin=str(self.folder / file), is_package=package)
+        spec.has_location = True
+        return spec
+
+    def create_module(self, spec):
+        return None
+
+    def exec_module(self, module):
+        file, text = self.texts[module.__name__]
+        exec(compile(text, f"{self.commit[:7]}:wslib/{file}", "exec"), module.__dict__)
+
+    def builtins(self):
+        """The builtins a part runs with: the same, except that importing wslib imports this commit's."""
+        def redirected(name, globals=None, locals=None, fromlist=(), level=0):
+            if level == 0 and (name == "wslib" or name.startswith("wslib.")):
+                name = self.name + name[len("wslib"):]
+            return builtins.__import__(name, globals, locals, fromlist, level)
+        return dict(builtins.__dict__, __import__=redirected)
+
+    def __enter__(self):
+        sys.meta_path.insert(0, self)
+        return self
+
+    def __exit__(self, *exc):
+        if self in sys.meta_path:
+            sys.meta_path.remove(self)
+        for name in [name for name in sys.modules if name == self.name or name.startswith(self.name + ".")]:
+            del sys.modules[name]
+        return False
+
+
+def load(root, entry, run_cases=True, snapshot=None, tiers=None, memory=None, library=None):
     """Load one manifest entry: {"use": "links", ...config}. "use" is a name under parts/, or a path to a .py file.
 
     The part's cases run as it loads, and a failing case refuses the part.
@@ -412,6 +482,7 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None, memory=None):
     snapshot: read the part and its cases from it (the staged commit) instead of from disk.
     tiers: the manifest's tier binding, given to the part as config["tiers"].
     memory: a CaseMemory, for hook calls only: the cases are skipped when they passed on the same files.
+    library: a Library, so the part imports the engine library from the commit it is read from.
     """
     name, relative = source_of(root, entry)
     text = _read(root, relative, snapshot)
@@ -425,6 +496,8 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None, memory=None):
     try:
         module = types.ModuleType(f"workspace_part_{name}")
         module.__file__ = str(pathlib.Path(root) / relative)
+        if library is not None:
+            module.__dict__["__builtins__"] = library.builtins()
         exec(compile(text, module.__file__, "exec"), module.__dict__)
     except Exception as error:
         raise PartError(f"part {name}: cannot be loaded: {type(error).__name__}: {error}")
@@ -460,9 +533,7 @@ def load(root, entry, run_cases=True, snapshot=None, tiers=None, memory=None):
     if memory is not None and snapshot is None and memory.passed(relative, cases_file):
         return part
     if run_cases:
-        failures = part.failed_cases()
-        if failures:
-            raise PartError(f"part {name}: refused, {len(failures)} of its {len(cases)} cases fail; first: {failures[0]}")
+        part.require_cases()
         if memory is not None and snapshot is None:
             memory.remember(relative, cases_file)
     return part
