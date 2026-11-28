@@ -6,7 +6,6 @@
     "evals/cases/fix-a-bug.json",
     "docs/playbooks/fix-a-bug.md",
     "evals/run.py",
-    "evals/grade.py",
     "evals/proofkeys.py",
     "evals/arms.json",
     "AGENTS.md",
@@ -15,8 +14,6 @@
     "docs/definition-of-done.md",
     "evals/two-line.md",
     "evals/acceptance/fix-a-bug.py",
-    "parts/no_stage_all.py",
-    "wslib/shell.py",
     "evals/scaffold/README.md",
     "evals/scaffold/src/orders-api/reconciliation_worker.py",
     "evals/scaffold/src/orders-api/sales_report.py",
@@ -29,7 +26,14 @@
     "evals/scaffold/tests/test_orders_service_v1.py",
     "evals/scaffold/tests/test_orders_web.py"
   ],
-  "guidance_sha256": "bcb7b72f225035b9dd221a0fc4fcbb53fe34b022afd69e2aeb25691e8eae5145",
+  "guidance_sha256": "242db43dad66e5e61d7afc8b8dd8bcaa8a8ad776c6c9ed082d2adf25984c11f6",
+  "grader_covers": [
+    "evals/grade.py",
+    "parts/no_stage_all.py",
+    "wslib/__init__.py",
+    "wslib/shell.py"
+  ],
+  "grader_sha256": "db33c3803b5ba07854ad6641096ec80c197f455f24493179b27211d93322c8cb",
   "runs_per_arm": 15,
   "agent": "Claude Code 2.1.331",
   "model": "claude-haiku-5-5",

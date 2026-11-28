@@ -10,16 +10,24 @@ comes from the arms file next to the cases folder (evals/arms.json), or from the
   "add_files"  files added to a shared arm for this case only, {arm: {destination: source}}, such as the rule
                pages whose paths the case's code touches. Hashed into this case only.
 
-evals/run.py stores a record of the last run of each case, with one hash over everything an agent or a grade
-depends on: the case, the arm files, the scaffold, the acceptance test, the harness itself (run.py, grade.py
-and proofkeys.py), the code of every workspace hook a grader runs, and the shell parser those hooks share
-(wslib/shell.py). Edit any of them and the hash stops matching, so this check fails until the case is run
+evals/run.py stores a record of the last run of each case, with one hash over what a run depends on: the
+case, the arm files, the scaffold, the acceptance test and the harness that runs the agent (run.py and
+proofkeys.py). Edit any of them and the hash stops matching, so this check fails until the case is run
 again. Two kinds of text are left out of the hash: a page's review date in its front matter, and the proof
 keys of decision record 0006 (proof, prove-by, proven-by and a section's proof line) in their exact forms.
 The runner takes the same keys out of every page a gated arm reads, through the same function, which lives
 in evals/proofkeys.py; this check loads that file from the snapshot's text, so the text that is hashed is
 exactly the text tested. So marking a page proven does not stale the record that proved it, while any other
 spelling of those keys is hashed (and page_kinds fails it).
+
+The record holds a second hash, over the grading files (M4 slice H0a): grade.py, the code of every workspace
+hook a grader runs, and every module of this workspace those hooks import, read from their import lines,
+the shell parser wslib/shell.py among them. No agent reads them, so a change to them alone needs no new run:
+`python3 evals/grade.py --recorded --stamp` re-grades every stored transcript and writes the new grader hash
+only when no grade differs. Until then this check fails the record, and a record with no grader hash fails.
+A change to grade.py itself is not stamped, since the grade.py that changed would judge it: when grade.py differs
+from the base commit's, a record that held a grader hash at the base fails unless every run in it was recorded
+since the base, its transcript holding other content than the base's.
 
 A run counts when it passes every grader of its case. A record passes when every arm has five or more runs,
 and the guided arm passes more often than the bare arm. An arm may hold twice the record's runs per arm when
@@ -58,10 +66,17 @@ from wslib import kitlock
 from wslib.parts import finding
 
 KIND = "check"
-HARNESS = ("run.py", "grade.py", "proofkeys.py")
+HARNESS = ("run.py", "proofkeys.py")       # the harness that runs the agent and writes the state lines: in the hash
+GRADER = "grade.py"                        # grading files: in the grader hash
 PROOF_KEYS = "proofkeys.py"
 ARMS = "arms.json"
 SHELL = "wslib/shell.py"
+STAMP = "python3 evals/grade.py --recorded --stamp"
+# An import statement, once comments are dropped, continuations and bracketed name lists joined, and statements split
+# at ";": "import a.b as c, d" or "from .a import b, c". A false match only adds a file to the grader hash.
+COMMENT = re.compile(r"#[^\n]*")
+GROUP = re.compile(r"(\bimport[ \t]*)\(([^)]*)\)")
+STATEMENT = re.compile(r"(?:from[ \t]+(\.*)([\w.]*)[ \t]+import[ \t]+(.+)|import[ \t]+(.+))")
 REQUIRED_ARMS = ("guided", "two-line", "bare")
 MIN_RUNS = 5
 POOLED_P = 0.05
@@ -144,7 +159,8 @@ def case_arms(case, shared):
 
 
 def covered_files(case_path, case, paths=(), arms=None, folder="evals"):
-    """Everything a run of the case depends on. paths: all known file paths. arms: the parsed shared arms file."""
+    """What a run of the case depends on, but the grading files. paths: all known file paths. arms: the parsed
+    shared arms file."""
     files = [case_path, page_of(case["playbook"])] + [_join(folder, name) for name in HARNESS]
     if "arms" not in case:
         files.append(_join(folder, ARMS))
@@ -152,15 +168,102 @@ def covered_files(case_path, case, paths=(), arms=None, folder="evals"):
         files += sorted(given.values())
     if case.get("acceptance"):
         files.append(case["acceptance"])
-    hooks = sorted({g.get("hook") for g in case.get("graders", []) if isinstance(g, dict) and g.get("type") == "hook_allows"})
-    for hook in hooks:
-        files.append(f"parts/{hook}.py")
-    if hooks:
-        files.append(SHELL)
     scaffold = case.get("scaffold_dir")
     if scaffold:
         files += sorted(p for p in paths if p.startswith(scaffold.strip("/") + "/"))
     return list(dict.fromkeys(files))
+
+
+def graded_hooks(case):
+    """The workspace hooks the case's graders run, by name."""
+    return sorted({g.get("hook") for g in case.get("graders", []) if isinstance(g, dict) and g.get("type") == "hook_allows"})
+
+
+def _statements(text):
+    """Each statement of a module's text, roughly: comments dropped, a backslash continuation and an import's
+    bracketed name list joined onto one line, and lines split at ";"."""
+    text = COMMENT.sub("", text.replace("\r\n", "\n")).replace("\\\n", " ")
+    text = GROUP.sub(lambda found: found.group(1) + found.group(2).replace("\n", " "), text)
+    return [part.strip() for line in text.split("\n") for part in line.split(";") if part.strip()]
+
+
+def imported_files(path, text, paths):
+    """The files of this workspace that importing the module at path, whose text is given, loads: each module its
+    import statements name, and the package folders' __init__.py on the way. paths: all known file paths.
+
+    It fails closed: a statement that mentions importing and names a package of this workspace, such as wslib,
+    but resolves to none of its files, adds every Python file of that package."""
+    known, found = set(paths), []
+    packages = {p.split("/", 1)[0] for p in known if p.count("/") == 1 and p.endswith("/__init__.py")}
+    here = path.split("/")[:-1]
+    for statement in _statements(text):
+        matched, resolved = STATEMENT.fullmatch(statement), []
+        if matched:
+            dots, module, names, plain = matched.groups()
+            if plain:
+                targets = [(name.split()[0], ()) for name in plain.split(",") if name.split()]
+            else:
+                package = here[:len(here) - len(dots) + 1] if dots else []
+                listed = [name.split()[0] for name in names.strip().strip("()").split(",") if name.split()]
+                targets = [(".".join(package + [p for p in module.split(".") if p]), listed)]
+            for dotted, listed in targets:
+                parts = [p for p in dotted.split(".") if p]
+                for end in range(1, len(parts) + 1):
+                    for candidate in ("/".join(parts[:end]) + "/__init__.py", "/".join(parts[:end]) + ".py"):
+                        if candidate in known:
+                            resolved.append(candidate)
+                for name in listed:
+                    for candidate in ("/".join(parts + [name]) + ".py", "/".join(parts + [name]) + "/__init__.py"):
+                        if candidate in known:
+                            resolved.append(candidate)
+        if "import" in statement:
+            for package in sorted(packages):
+                if re.search(rf"\b{re.escape(package)}\b", statement) and \
+                        not any(f.startswith(package + "/") for f in resolved):
+                    resolved += sorted(p for p in known if p.startswith(package + "/") and p.endswith(".py"))
+        found += resolved
+    return list(dict.fromkeys(found))
+
+
+def grading_files(case, paths=(), read=None, folder="evals"):
+    """The files that grade a stored run of the case: grade.py, the code of each hook a grader runs, and every
+    module of this workspace those hooks import, followed through each module's own imports. paths: all known
+    file paths. read: path -> text, or None when the file cannot be read."""
+    known = set(paths)
+    files, queue = [_join(folder, GRADER)], [f"parts/{hook}.py" for hook in graded_hooks(case)]
+    while queue:
+        path = queue.pop(0)
+        if path in files:
+            continue
+        files.append(path)
+        text = read(path) if read is not None and path in known else None
+        if text:
+            queue += imported_files(path, text, known)
+    return files
+
+
+def _parsed(text):
+    try:
+        return json.loads(text) if text else None
+    except ValueError:
+        return None
+
+
+def recorded_since_base(snapshot, folder, record):
+    """Whether every run of the record was recorded since the base: its transcript, read as JSON, is not the one
+    the base holds. A run whose transcript the base holds unchanged was graded before anything since."""
+    for arm in record.get("arms", {}).values() if isinstance(record.get("arms"), dict) else ():
+        for run in arm.get("runs", []) if isinstance(arm, dict) else ():
+            path = f"{folder}/{run.get('transcript') if isinstance(run, dict) else None}"
+            then = _parsed(snapshot.base_text(path))
+            if then is not None and then == _parsed(snapshot.read(path)):
+                return False
+    return True
+
+
+def grader_hash(texts):
+    """One hash over the grading files, in a fixed order, as guidance_hash makes it. Line endings do not count."""
+    return guidance_hash(texts, lambda text: text)
 
 
 def passing(runs, grader_ids):
@@ -321,6 +424,7 @@ def run(snapshot, config):
                   if state == "proven"}
 
     by_playbook, records, all_paths = {}, {}, list(snapshot.paths())
+    grader_path = _join(folder, GRADER)
     for path in case_paths:
         try:
             case = json.loads(snapshot.read(path) or "")
@@ -348,6 +452,17 @@ def run(snapshot, config):
             entry["problem"] = (f"a file case {name} covers {snapshot.not_utf8(unreadable[0])}, so the case cannot be "
                                 f"hashed: {unreadable[0]}")
             continue
+        grading = grading_files(case, all_paths, snapshot.read, folder)
+        missing = [f for f in grading if not snapshot.is_file(f)]
+        if missing:
+            entry["problem"] = f"a grading file case {name} needs is missing: {missing[0]}"
+            continue
+        grading_texts = {f: snapshot.read(f) for f in grading}
+        unreadable = [f for f, text in grading_texts.items() if text is None]
+        if unreadable:
+            entry["problem"] = (f"a grading file case {name} needs {snapshot.not_utf8(unreadable[0])}, so the case "
+                                f"cannot be hashed: {unreadable[0]}")
+            continue
         record_path = f"{runs}/{name}/record.json"
         if not snapshot.is_file(record_path):
             entry["problem"] = f"no eval run on record for case {name}; run python3 evals/run.py {name}"
@@ -358,6 +473,14 @@ def run(snapshot, config):
         elif record.get("guidance_sha256") != guidance_hash(texts, proof.strip):
             entry["problem"] = (f"it, its guidance, its case or the eval harness changed since the last recorded eval "
                                 f"run; run case {name} again (python3 evals/run.py {name})")
+        elif record.get("grader_sha256") != grader_hash(grading_texts):
+            entry["record_path"], entry["unstamped"] = record_path, record
+            entry["problem"] = ((f"its record of case {name} holds no grader hash" if "grader_sha256" not in record else
+                                 f"a grading file of case {name} changed since its stored runs were last re-graded "
+                                 f"({', '.join(grading)})") +
+                                f"; run {STAMP}, which writes the new grader hash only when re-grading every stored "
+                                f"transcript changes no grade. A grade that changes means the case is recorded again "
+                                f"(python3 evals/run.py {name})")
         else:
             try:
                 problem = judge(record, list(arms), grader_ids)
@@ -366,7 +489,7 @@ def run(snapshot, config):
             if problem:
                 entry["problem"] = f"its last recorded run of case {name} does not pass: {problem}"
             else:
-                entry["record"] = record
+                entry["record"], entry["record_path"] = record, record_path
                 records[name] = record
 
     for playbook, entries in sorted(by_playbook.items()):
@@ -376,6 +499,7 @@ def run(snapshot, config):
         if state != "proven":
             continue
         page = page_of(playbook)
+        _not_stamped_after_a_grader_change(snapshot, grader_path, runs, entries, anchors)
         problems = [e["problem"] for e in entries if e["problem"]]
         for problem in problems:
             found.append(finding(page, 1, f"{problem}; see {PAGE}"))
@@ -404,6 +528,44 @@ def run(snapshot, config):
                     found.append(finding(page, 1, f"section {heading!r} is marked proven, but no eval case names "
                                                   f"{key}; see {PAGE}"))
     return found
+
+
+def _not_stamped_after_a_grader_change(snapshot, grader_path, runs, entries, anchors):
+    """A change to grade.py itself is not stamped, since the grade.py that changed would judge it (M4 slice H0a).
+    When grade.py differs from the base's, a record that held a grader hash at the base fails, whether or not it
+    holds the new one, unless every run in it was recorded since the base. The base's grade.py, the records and the
+    anchors the later comparisons read are fetched in one git process."""
+    if not snapshot.has_base():
+        return
+    snapshot.prefetch_history([grader_path] + [e["record_path"] for e in entries if e.get("record_path")], anchors)
+    at_base = snapshot.base_text(grader_path)
+    if at_base is None or not snapshot.is_file(grader_path) or \
+            at_base.replace("\r\n", "\n") == (snapshot.read(grader_path) or "").replace("\r\n", "\n"):
+        return
+    for entry in entries:
+        record = entry["record"] or entry.get("unstamped")
+        if record is None or not _stamped_at_base(snapshot, entry["record_path"]) or \
+                _all_new(snapshot, f"{runs}/{entry['name']}", record):
+            continue
+        entry["record"] = None
+        entry["problem"] = (f"{grader_path} changed since the base commit, and the stored runs of case {entry['name']} "
+                            f"were graded before that change. A change to grade.py itself is not stamped, since the "
+                            f"grade.py that changed would judge it: record the case again (python3 evals/run.py "
+                            f"{entry['name']}), then run {STAMP}")
+
+
+def _stamped_at_base(snapshot, record_path):
+    """Whether the record at the base held a grader hash: a new one over the same runs would be a stamp. One with
+    none there is H0a's migration, which tests/test_m4_h0a.py holds, or a case recorded since."""
+    found = _record(snapshot.base_text(record_path))
+    return found is not None and "grader_sha256" in found
+
+
+def _all_new(snapshot, folder, record):
+    transcripts = [f"{folder}/{run.get('transcript')}" for arm in record.get("arms", {}).values()
+                   if isinstance(arm, dict) for run in arm.get("runs", []) if isinstance(run, dict)]
+    snapshot.prefetch_history(transcripts)
+    return recorded_since_base(snapshot, folder, record)
 
 
 def _slug(heading):

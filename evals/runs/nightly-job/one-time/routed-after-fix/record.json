@@ -6,7 +6,6 @@
     "evals/cases/nightly-job.json",
     "docs/playbooks/fix-a-bug.md",
     "evals/run.py",
-    "evals/grade.py",
     "evals/proofkeys.py",
     "evals/arms.json",
     "AGENTS.md",
@@ -16,8 +15,6 @@
     "docs/rules/orders-api.md",
     "evals/two-line.md",
     "evals/acceptance/nightly-job.py",
-    "parts/no_stage_all.py",
-    "wslib/shell.py",
     "evals/scaffold/README.md",
     "evals/scaffold/src/orders-api/reconciliation_worker.py",
     "evals/scaffold/src/orders-api/sales_report.py",
@@ -30,7 +27,14 @@
     "evals/scaffold/tests/test_orders_service_v1.py",
     "evals/scaffold/tests/test_orders_web.py"
   ],
-  "guidance_sha256": "dbd628dcf3441addc4357a674b90ab5ac64246b892d208364f07f01e49d737fe",
+  "guidance_sha256": "d0d6f3fefb3251275e1ee8746894c57e8acaf01ad8ada1a358b8e9857fc6a6a4",
+  "grader_covers": [
+    "evals/grade.py",
+    "parts/no_stage_all.py",
+    "wslib/__init__.py",
+    "wslib/shell.py"
+  ],
+  "grader_sha256": "db33c3803b5ba07854ad6641096ec80c197f455f24493179b27211d93322c8cb",
   "runs_per_arm": 15,
   "agent": "Claude Code 2.1.332",
   "model": "claude-haiku-5-5",
