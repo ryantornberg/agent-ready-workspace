@@ -21,8 +21,8 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **Review sessions:** about 231 planned, stop at 250, 16 per pull request.
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
-- **Red team:** sixteen rounds held with fixes; paused on Q113.
-- **Not approved.** Queue answers through Q111 are applied; Q113 reopens Q109.
+- **Red team:** sixteen rounds held with fixes; round 17 next.
+- **Not approved.** Queue answers through Q113 are applied.
 
 ## Settled decisions
 
@@ -89,8 +89,9 @@ The maintainer, answering the workspace's queue, 2026-11-26:
 - **Q105.** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request. A larger run and the routing suite still need his yes with a count.
 - **Q106.** The red team loop runs on until a round only finishes earlier work.
 - **Q108.** Every proof baseline runs both the bare model and the two-line arm, 400 runs. Planned total about 1,285 of 1,400, and 1,420 with every re-record. *Amended by Q111: with its 45-run reserve the planned total is about 1,330.*
-- **Q109 (2026-11-27).** A GitHub ruleset on main, with no bypass and binding the owner too, requires a pull request and the five CI checks. The pages that say docs go straight to main are reworded: changing the machinery, procedure endings and the cold-clone reasoning in the parts page.
-- **Q110.** With the ruleset, no direct push to main exists, so every edit, a wrapped page's included, goes through a pull request, and Q105's standing yes covers its suites.
+- **Q109 (2026-11-27), replaced by Q113.** A GitHub ruleset on main, with no bypass and binding the owner too, requires a pull request and the five CI checks. The pages that say docs go straight to main are reworded: changing the machinery, procedure endings and the cold-clone reasoning in the parts page.
+- **Q110.** Every edit to a wrapped page goes through a pull request, and Q105's standing yes covers its suites. *Under Q113 this binds agents; the maintainer may still push directly.*
+- **Q113 (2026-11-27), in place of Q109.** Agents get their own GitHub identity without admin rights. The existing branch rule then binds them: their page edits go through a pull request with a fast page-only CI path. He keeps his own direct pushes. No ruleset. His ruling of the same day: a 30-minute CI wait for a page edit is not acceptable.
 - **Q111.** When he picks pages after the baselines, 45 runs stay unspent for a routed-arm diagnosis, even if one fewer page is recorded.
 - **Upkeep.** The plan states what each proven page costs to edit after M4, and how edits to proven pages are batched. From his notes of 2026-11-25.
 
@@ -169,7 +170,7 @@ It fails two size-gate conditions: it is far more than one screen of diff, and f
 
 ## Slices
 
-Every slice is built in its own worktree under `.claude/worktrees/`, on a branch `m4/<slice>`, started from the remote's main. H0a has the branch `m4/h0a`. H0b and H1 share the branch `m4/h`. Every slice merges through a pull request, a doc-only one too, since the ruleset of Q109 leaves no direct push to main. Every slice here changes a gate, a hook, a grader or the contract, so each runs at the driver tier; a slice's page batches may go to worker-tier helpers, and every review is driver work.
+Every slice is built in its own worktree under `.claude/worktrees/`, on a branch `m4/<slice>`, started from the remote's main. H0a has the branch `m4/h0a`. H0b and H1 share the branch `m4/h`. Every slice merges through a pull request, a doc-only one too, since under Q113 the branch rule binds an agent's push to main. Every slice here changes a gate, a hook, a grader or the contract, so each runs at the driver tier; a slice's page batches may go to worker-tier helpers, and every review is driver work.
 
 Recordings are numbered on from M3's: R3 follows the harness slices, and R4 closes the milestone.
 
@@ -177,7 +178,7 @@ Recordings are numbered on from M3's: R3 follows the harness slices, and R4 clos
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| G0 | Open M4 | `building` becomes `["M4"]`, with its test, parts row and adoption page. A check fails a `building` entry whose record is signed off. `.env` joins `.gitignore`. The pages that say docs go straight to main are reworded for the ruleset (Q109). | driver | Criteria 1, 64 |
+| G0 | Open M4 | `building` becomes `["M4"]`, with its test, parts row and adoption page. A check fails a `building` entry whose record is signed off. `.env` joins `.gitignore`. Agents get a non-admin identity, and the pages that send an agent's doc straight to main are reworded (Q113); page-only pull requests get a fast CI path. | driver | Criteria 1, 64, 65 |
 | G1 | Push check and merge helper | The pre-push check loads a part's cases and the library they call from one commit (Q82). `ws.py merge` retargets pull requests stacked on a branch before it deletes that branch (Q84). | driver | Criteria 2–3 |
 | G2 | The one rule, in the parser | The parser marks each word literal or not. A guard refuses a command whose deciding word is not literal. The stopgaps in the guards' own files go. See "G2" below. | driver | Criteria 4–8 |
 | G3 | Commands git itself runs | A git setting passes only when it is on a list of settings known to run no command. A git option that takes a command is read as that command. See "G3" below. | driver | Criteria 9–10, 62 |
@@ -226,7 +227,11 @@ After slice Z, the program's outside checks run before sign-off: CI, a fresh-ses
 
 The [defect register](../records/defects.md) holds the row this slice closes: M3's sign-off left M3 in `building`, because a test pins the list to M3 and the adoption page says it names M3. The test stops pinning a number. The `proof` check gains one rule: a `building` entry whose record in `docs/milestones/` has `status: signed off` fails. M4 then removes itself in its own sign-off commit, and that rule holds every later milestone to the same step. The register's `.env` row closes here too: the secrets file joins `.gitignore`, in the repository and in the kit.
 
-**Pages through a pull request (Q109).** The maintainer turns on a GitHub ruleset on main, with no bypass and binding the owner, requiring a pull request and the five CI checks, as G0's pull request merges. G0 rewords every page that sends a doc straight to main: changing the machinery's opening and its path, procedure endings' push table, its "Off main" and "When main has moved" sections, and the parts page's cold-clone reasoning. A new decision record supersedes decision 0011, pages go straight to main, with the reason: an agent that disables its own guards still meets a pull request and CI. `direct_push` stays, as the local check before a push. Hashed pages that say the same, if any, change in slice Z. Each edit takes its instruction review.
+**Agents on their own identity (Q113).** The maintainer gives agent sessions a GitHub identity without admin rights: a second account with write access, or a fine-grained token with contents and pull-request write and no administration or workflow permission, used for `gh` and for git's pushes, which today go over his own SSH key. He adds "require a pull request before merging", with 0 approvals, to main's branch rule, which already requires the five checks and does not bind an admin. So an agent's push to main is refused, an agent cannot change the branch rule, and, lacking workflow permission, cannot push a change to `.github/workflows/`; he keeps his own direct pushes and merges the pull requests L3 leaves to a person.
+
+**Pages through a pull request, for agents.** G0 rewords every page that sends an agent's doc straight to main: changing the machinery's opening, its path and rules; procedure endings' push table, "Off main" and "When main has moved", so an agent commits pages on a branch, opens a pull request and merges it with `ws.py merge` once the fast checks pass, and never commits on local main; extend the workspace's last step; the parts page's cold-clone reasoning; and the README's rows that say the same. A new decision record supersedes decision 0011 for agents, with the reason. Each page states the rule where the branch rule binds agents, so an instance without the identity split reads it as its own choice; the adoption page gains the identity step as optional. The contract's lines, which the eval hashes, change in slice Z if they say otherwise. `direct_push` stays, as the local check before a push. Each edit takes its instruction review.
+
+**A fast CI path for pages.** This session's CI runs took 20 to 30 minutes, mostly on Windows. Each of the five `check` jobs first classes a pull request's range against `direct_push`'s machinery list, read from the base commit, so a pull request cannot widen its own fast path. A range that changes no machinery path runs only the page checks: `ws.py check` at the commit and CI phases, the commit-message checks, and the tutorial runner when a tutorial changed. The job then ends green, so all five required checks report within a few minutes, the time to start a runner (inferred until G0 measures it). A range that touches any machinery path runs everything. The mark and suite steps sit inside the same required jobs and run on `pull_request` events; `ws.py merge` reads the checks of the pull request's own run, not a push run. The classing step is a workflow change, so the maintainer pushes or merges it, and a test holds its reading of the list to `direct_push`'s.
 
 ### G2: The one rule, in the parser
 
@@ -266,7 +271,7 @@ The parser also matches every program name it reads without regard to letter cas
 
 **The measure.** Before it merges, the slice runs the guards at main and at its tip over every command stored under `evals/runs/`, and reports each line whose answer changed. The maintainer's machine repeats that over its session logs, as M3's sign-off did. A newly refused line that does nothing a guard guards is fixed, or named in the README with its way round.
 
-**The re-check.** One fresh driver-tier session gets the rule, the cases and the README's limits, and looks for a line that passes and should not. Its findings follow the [stop rule](#stop-rule)'s split. The README's Limits is rewritten around the rule: what the guards refuse, and what stays out of reach, which is an interpreter, a script, a program's own configuration, PowerShell, and a tracked hooks folder that a known repository's own config names, such as this repository's `.githooks/` or a pinned repository's `.husky/`, which their owners edit as ordinary work (row F27); and the hook launcher, the engine and the agent tool's settings, which machinery slices must edit and whose edit turns that session's guards off (row F35). Against an agent that edits the guards' launcher, nothing in the repository holds: the pre-push hook runs through the same launcher. What holds is GitHub's ruleset (Q109), which binds the owner's sign-in too: a direct push or an admin merge is refused, and every change meets a pull request and the CI checks. CI's workflow runs from the pull request itself, so the ruleset also requires the CI workflow from main, where GitHub offers that rule (inferred until G0 sets it); otherwise the README names that last gap.
+**The re-check.** One fresh driver-tier session gets the rule, the cases and the README's limits, and looks for a line that passes and should not. Its findings follow the [stop rule](#stop-rule)'s split. The README's Limits is rewritten around the rule: what the guards refuse, and what stays out of reach, which is an interpreter, a script, a program's own configuration, PowerShell, and a tracked hooks folder that a known repository's own config names, such as this repository's `.githooks/` or a pinned repository's `.husky/`, which their owners edit as ordinary work (row F27); and the hook launcher, the engine and the agent tool's settings, which machinery slices must edit and whose edit turns that session's guards off (row F35). Against an agent that edits the guards' launcher, nothing in the repository holds: the pre-push hook runs through the same launcher. What holds is the branch rule, which under Q113 binds an agent's identity: an agent with its guards off still cannot push to main, change the rule or push a workflow change, so every change it makes meets a pull request and the five checks.
 
 A new decision record states the rule, and decision 0004's amendments point to it.
 
@@ -626,7 +631,8 @@ Added on the maintainer's answers of 2026-11-26, numbered as they came:
 
 Added on the maintainer's answers of 2026-11-27:
 
-64. A read of main's rulesets with `gh api` shows a pull request and the five CI checks required with no bypass actor. `git grep` finds no page outside plans, records and milestone records that tells an agent to push a doc to main; a decision record supersedes 0011. (V2)
+64. Read with the agents' identity, `gh api repos/OWNER/REPO` shows `permissions.admin` false, and main's branch rule requires a pull request with 0 approvals and the five checks; a recorded push to main by that identity is refused. `git grep -n -i -E "push(es)? (a doc |pages )?(straight )?to main|git push origin (HEAD:)?main"` over pages outside plans, records, milestone records and decision 0011 finds no step that tells an agent to push to main; a decision record supersedes 0011 for agents. The evidence goes in the first slice report after the identity exists. (V2)
+65. On a pull request that changes only pages, every required check reports success in under 5 minutes, with the full test run skipped; on one that changes a machinery path, the full run happens. The classing reads the machinery list from the base commit. (V4)
 
 ## Verification
 
@@ -720,7 +726,7 @@ A proven page is gated from the day it is marked. Each edit to it makes its reco
 | The contract or the index | The routing suite at the head: about 40 to 120 selection runs | None |
 
 - **How many pages.** After M4, at most about six pages are proven: `fix-a-bug.md` and up to five pages H3 records and passes. 28 wrappers name 29 pages, and each of those pays the selection row above.
-- **An edit to a wrapped page (Q110).** With the ruleset, no direct push to main exists, so an edit to one of the 29 wrapped pages goes through a pull request, and Q105's standing yes covers its suites.
+- **An edit to a wrapped page (Q110, Q113).** An agent's edit to one of the 29 wrapped pages goes through a pull request, and Q105's standing yes covers its suites; the fast page path keeps its CI to minutes.
 - **Who says yes to a suite run (Q105).** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request; `suites.py` counts them in a file per branch and refuses the 13th without a batch yes. A larger run, and the routing suite, still need the maintainer's yes with a count, as Q46 says. The number of proven pages is his choice after the baselines.
 - **How often.** Up to M3's sign-off the ten pages changed in 1 to 55 commits each. H3 weighs that before a page is recorded, and moves a high-churn page's tables to a reference page first.
 - **Batching.** An edit to a proven page does not land on its own. It waits in a list under the current milestone's plan, "Results", as M3's "Queued for slice Z" did, and the queued edits land together in that milestone's closing slice, with one recording per page: the guided arm alone when the other arms were recorded that milestone, else every arm. A fix the maintainer will not wait for lands with its own recording, on his yes with its count.
@@ -779,7 +785,7 @@ Per slice, for M4's own build:
 About 6 hours, as the program estimates.
 
 - Agree the spec, then approve the plan after its red team.
-- Turn on the GitHub ruleset on main as G0's pull request merges: no bypass, the owner bound, a pull request and the five CI checks required, and the CI workflow from main where GitHub offers it.
+- Before G0 merges, give agent sessions their own GitHub identity without admin or workflow rights, for `gh` and for git pushes, and add "require a pull request", 0 approvals, to main's branch rule (Q113).
 - Say yes, with a count, to each eval batch. After H3's baselines, choose which pages go to a recording.
 - Read one full review record.
 - Raise a pull request's cap of review sessions, or end its review, when a loop stops there.
@@ -844,7 +850,7 @@ Round 14: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guar
 
 Round 15: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guards-review-loop-and-evals-round-15.md), holds with fixes, 8 findings, rows R15-1 to R15-8; three need the maintainer and are queued. Round 15 changed the plan in substance, so round 16 runs.
 
-Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-16.md), holds with fixes, 7 findings, rows R16-1 to R16-7. Five turn on Q109's ruleset, which the maintainer's ruling of 2026-11-27 on the CI wait reopens; they wait for Q113. The loop pauses there, since an open question that blocks a decision leaves the plan unfinished.
+Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-16.md), holds with fixes, 7 findings, rows R16-1 to R16-7. Five turned on Q109's ruleset; Q113 replaced it, and they are settled under it. Round 16 changed the plan in substance, so round 17 runs.
 
 | # | Finding | Disposition | Action |
 |---|---|---|---|
@@ -981,12 +987,12 @@ Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guar
 | R15-6 | Cuts' selection cost, about 100, passes the reserve, and a batch yes does not lift the stop. | Accepted | The budget prices cuts as H3 does; past the reserve the stop fires for his decision. |
 | R15-7 | The routed arm took four measurements in M3; M4 prices one and a re-record. | Deferred to the maintainer | Queued as Q111, recommending that 45 runs be held back for a diagnosis; until he answers, a miss stops M4 at Z. |
 | R15-8 | Small slips: F24's slice, the round count, dispatched helpers overrunning a batch. | Accepted | F24 is G4's; each further round adds a session; the batch count holds room for in-flight helpers. |
-| R16-1 | The ruleset does not stop an agent that disabled its guards: the agents' sign-in is a repository admin that can delete the ruleset, a pull request's own `ci.yml` can be rewritten to pass, and "require workflows" is for organizations only. | Deferred to the maintainer | Verified by its author: `permissions.admin` is true and the owner is a user account. Q109 is reopened as Q113, with the CI wait he ruled out on 2026-11-27. |
-| R16-2 | The plan never says which CI job holds the mark and suite steps, or whether the ruleset requires them. | Deferred to the maintainer | Depends on Q113. |
-| R16-3 | Q109 changes where every page commit goes: procedure endings, the contract's "work where you are" and more pages than G0 names. | Deferred to the maintainer | Depends on Q113; the scope of G0's rewording follows its answer. |
-| R16-4 | The reworded pages and the decision replacing 0011 ship to every instance, which has no ruleset. | Deferred to the maintainer | Depends on Q113. |
+| R16-1 | The ruleset does not stop an agent that disabled its guards: the agents' sign-in is a repository admin that can delete the ruleset, a pull request's own `ci.yml` can be rewritten to pass, and "require workflows" is for organizations only. | Accepted under Q113 | No ruleset: agents get a non-admin identity without workflow permission, so they cannot change the branch rule or push a workflow change; the branch rule requires a pull request and the five checks. |
+| R16-2 | The plan never says which CI job holds the mark and suite steps, or whether the ruleset requires them. | Accepted under Q113 | The mark and suite steps sit in the required `check` jobs on `pull_request` events; `ws.py merge` reads the pull request's own run. A person, an admin, merges what L3 leaves to a person. |
+| R16-3 | Q109 changes where every page commit goes: procedure endings, the contract's "work where you are" and more pages than G0 names. | Accepted under Q113 | G0 rewords procedure endings, changing the machinery, extend the workspace, the parts page and the README for agents' page commits through a pull request; contract lines change in slice Z. |
+| R16-4 | The reworded pages and the decision replacing 0011 ship to every instance, which has no ruleset. | Accepted under Q113 | The pages state the rule where the branch rule binds agents; the adoption page makes the identity step optional for an instance. |
 | R16-5 | Q111's reserve has no step that spends it, and the stop fires first. | Accepted | Slice Z spends the reserve on M3's diagnosis, the run without the plugin, before the stop; later measurements need a yes. Figures corrected. |
-| R16-6 | The ruleset's settings are underspecified, and criterion 64 cannot be shown at G0's merge. | Deferred to the maintainer | Depends on Q113. |
+| R16-6 | The ruleset's settings are underspecified, and criterion 64 cannot be shown at G0's merge. | Accepted under Q113 | No ruleset; criterion 64 checks the identity, the branch rule's 0 approvals, a refused push, and a grep with a pattern; its evidence goes in the first report after the identity exists. |
 | R16-7 | Small slips: four or five pages, Q108's figures, Q109's date. | Accepted | Each fixed. |
 ## Approval
 
@@ -1027,5 +1033,5 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Red team round 13, 2026-11-26:** holds with fixes, 5 findings, all accepted. Verified by its author: `grade.py --recorded` reads three fixed globs; the one-time records carry their cases' hash.
 - **Red team round 14, 2026-11-26:** holds with fixes, 6 findings, 5 accepted and one in part. Verified by its author: an `exit 0` line in `wslib/launch.sh` let a force push through in a throwaway clone; `echo main | parallel git push -f origin @` is refused today.
 - **Red team round 15, 2026-11-26:** holds with fixes, 8 findings; 5 accepted, one accepted with its remedy deferred, two deferred to the maintainer (Q109 to Q111). Verified by its author: `C=echo; read C <<< git; $C push -f origin main` is refused today and runs git in both shells.
-- **Red team round 16, 2026-11-27:** holds with fixes, 7 findings; 2 accepted, 5 deferred to Q113. Verified by its author: the agents' `gh` sign-in has admin rights on the repository, and the repository is owned by a user account.
+- **Red team round 16, 2026-11-27:** holds with fixes, 7 findings; 2 accepted, then 5 settled under Q113. Verified by its author: the agents' `gh` sign-in has admin rights on the repository, and the repository is owned by a user account.
 - **Not run:** no eval or selection run, and no guard attack.
