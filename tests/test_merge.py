@@ -1,4 +1,6 @@
-"""M3 slice C4: the merge helper, `ws.py merge NUMBER` (wslib/merge.py; criterion 35).
+"""M3 slice C4: the merge helper, `ws.py merge NUMBER` (wslib/merge.py; criterion 35). M4 slice G1 (criterion 3): it
+reads only each required check's pull_request run, and retargets the open pull requests based on the merged branch
+before it deletes that branch.
 
 Every gh call the helper makes is answered from tests/records/merge-gh.json: real answers recorded on this
 repository, and a few made-up ones the record names with their reason. No test reaches the network. The
@@ -40,6 +42,13 @@ def edited(name, change):
     return code, json.dumps(data) + "\n", err
 
 
+def edited_made_up(name, change):
+    code, out, err = answer(name, made_up=True)
+    data = json.loads(out)
+    change(data)
+    return code, json.dumps(data) + "\n", err
+
+
 def git(folder, *args):
     subprocess.run(["git", "-C", str(folder), *args], check=True, capture_output=True, env=gitcall.environment())
 
@@ -59,10 +68,14 @@ class FakeGh:
             "branch_rule": answer("branch_rule"),
             "rulesets": answer("rulesets"),
             "check_runs": answer("check_runs"),
+            "workflow_runs": answer("workflow_runs"),
             "statuses": answer("statuses"),
             "merge": answer("merge", made_up=True),
             "merged": answer("merged"),
             "commit": answer("commit"),
+            "dependents": answer("dependents"),
+            "retarget 33": answer("retarget", made_up=True),
+            "retarget 34": edited_made_up("retarget", lambda d: d.update(number=34, head={"ref": "m3/b3"})),
             "delete": answer("delete", made_up=True),
         }
         self.answers.update(overrides)
@@ -75,10 +88,14 @@ class FakeGh:
             "branch_rule": merge.build_branch_rule(REPO, "main"),
             "rulesets": merge.build_rulesets(REPO, "main"),
             "check_runs": merge.build_check_runs(REPO, HEAD),
+            "workflow_runs": merge.build_workflow_runs(REPO, HEAD),
             "statuses": merge.build_statuses(REPO, HEAD),
             "merge": merge.build_merge(REPO, NUMBER, HEAD),
             "merged": merge.build_merged(REPO, NUMBER),
             "commit": merge.build_commit(REPO, MERGE_COMMIT),
+            "dependents": merge.build_dependents(REPO, "m3/b1"),
+            "retarget 33": merge.build_retarget(REPO, 33, "main"),
+            "retarget 34": merge.build_retarget(REPO, 34, "main"),
             "delete": merge.build_delete(REPO, "m3/b1"),
         }
         for name, built in expected.items():
@@ -120,6 +137,17 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(merge.build_view(REPO, NUMBER), recorded["view"]["call"])
         self.assertEqual(merge.build_merged(REPO, NUMBER), recorded["merged"]["call"])
         self.assertEqual(merge.build_commit(REPO, MERGE_COMMIT), recorded["commit"]["call"])
+        self.assertEqual(merge.build_workflow_runs(REPO, HEAD), recorded["workflow_runs"]["call"])
+        self.assertEqual(merge.build_workflow_runs(REPO, MERGE_COMMIT), recorded["workflow_runs_push"]["call"])
+        self.assertEqual(merge.build_dependents(REPO, "m3/b1"), recorded["dependents"]["call"])
+
+    def test_a_retarget_names_the_new_base_alone(self):
+        self.assertEqual(merge.build_retarget(REPO, 33, "main"),
+                         ["gh", "api", "--hostname", "github.com", "-X", "PATCH",
+                          "repos/ryantornberg/agent-ready-workspace/pulls/33", "-f", "base=main"])
+
+    def test_a_branch_name_is_one_query_value(self):
+        self.assertTrue(merge.build_dependents(REPO, "a&b=c#d")[-1].endswith("base=a%26b%3Dc%23d&per_page=100"))
 
     def test_the_merge_is_a_merge_commit_on_the_exact_head(self):
         words = merge.build_merge(REPO, NUMBER, HEAD)
@@ -259,6 +287,148 @@ class MergeTests(Helper):
         self.assertEqual(self.run_merge(FakeGh(), update=held), 0)
         self.assertIn("Merged ryantornberg/agent-ready-workspace#32", self.output())
         self.assertIn("Did not bring the main working copy up to date. Another live agent session", self.output())
+
+
+PUSH_SUITE = 121642139999
+
+
+def with_push_run(data):
+    """The recorded workflow runs, with a newer run of the ci workflow on the same commit, made by a push."""
+    data["workflow_runs"].append({"check_suite_id": PUSH_SUITE, "conclusion": "success", "event": "push",
+                                  "head_sha": HEAD, "id": 44945199999, "name": "ci", "status": "completed"})
+    data["total_count"] = len(data["workflow_runs"])
+
+
+class PullRequestRunTests(Helper):
+    """M4 criterion 3: only the pull request's own run of each required check counts, never a push run's."""
+
+    def runs(self, change):
+        return FakeGh(workflow_runs=edited("workflow_runs", with_push_run), check_runs=edited("check_runs", change))
+
+    def test_the_recorded_runs_are_the_pull_requests_own(self):
+        events = {run["event"] for run in json.loads(answer("workflow_runs")[1])["workflow_runs"]}
+        self.assertEqual(events, {"pull_request"})
+        events = {run["event"] for run in json.loads(answer("workflow_runs_push")[1])["workflow_runs"]}
+        self.assertEqual(events, {"push"})
+
+    def test_a_newer_push_run_that_passed_does_not_hide_a_failed_pull_request_run(self):
+        def push_passes_later(data):
+            first = data["check_runs"][0]
+            first["conclusion"] = "failure"
+            data["check_runs"].append(dict(first, id=first["id"] + 1000, conclusion="success",
+                                           check_suite={"id": PUSH_SUITE}))
+            data["total_count"] = len(data["check_runs"])
+        gh = self.runs(push_passes_later)
+        self.assertEqual(self.run_merge(gh), 1)
+        self.assertEqual(gh.named("merge"), [])
+        self.assertIn("check (ubuntu-latest, 3.13): failure on c57ded3", self.output())
+
+    def test_a_check_that_passed_only_in_a_push_run_has_not_run(self):
+        def push_only(data):
+            data["check_runs"][0]["check_suite"] = {"id": PUSH_SUITE}
+        gh = self.runs(push_only)
+        self.assertEqual(self.run_merge(gh), 1)
+        self.assertEqual(gh.named("merge"), [])
+        self.assertIn("check (ubuntu-latest, 3.13): has not run on c57ded3 for the pull request", self.output())
+
+    def test_an_actions_run_whose_workflow_run_is_not_listed_does_not_count(self):
+        def unknown_suite(data):
+            data["check_runs"][0]["check_suite"] = {"id": 1}
+        self.assertEqual(self.run_merge(FakeGh(check_runs=edited("check_runs", unknown_suite))), 1)
+        self.assertIn("check (ubuntu-latest, 3.13): has not run on c57ded3", self.output())
+
+    def test_an_actions_run_with_no_check_suite_does_not_count(self):
+        self.assertEqual(self.run_merge(FakeGh(check_runs=edited("check_runs",
+                                                                 lambda d: d["check_runs"][0].pop("check_suite")))), 1)
+        self.assertIn("check (ubuntu-latest, 3.13): has not run on c57ded3", self.output())
+
+    def test_a_workflow_run_on_another_commit_does_not_vouch_for_this_one(self):
+        """Re-check finding 3: a pull_request workflow run counts only when its head is the pull request's head."""
+        def elsewhere(data):
+            for run in data["workflow_runs"]:
+                if run["name"] == "ci":
+                    run["head_sha"] = "0" * 40
+        gh = FakeGh(workflow_runs=edited("workflow_runs", elsewhere))
+        self.assertEqual(self.run_merge(gh), 1)
+        self.assertEqual(gh.named("merge"), [])
+        self.assertIn("check (ubuntu-latest, 3.13): has not run on c57ded3", self.output())
+
+    def test_more_workflow_runs_than_one_page_refuses(self):
+        gh = FakeGh(workflow_runs=edited("workflow_runs", lambda d: d.update(total_count=101)))
+        self.assertEqual(self.run_merge(gh), 1)
+        self.assertIn("has 101 workflow runs", self.output())
+
+    def test_a_pull_request_run_still_passes_beside_a_push_run(self):
+        self.assertEqual(self.run_merge(FakeGh(workflow_runs=edited("workflow_runs", with_push_run))), 0)
+
+
+def stacked(data):
+    """The recorded answer for the pull requests open on m3/b1, with two stacked on it."""
+    data[:] = json.loads(answer("dependents_two", made_up=True)[1])
+
+
+class StackedTests(Helper):
+    """M4 criterion 3 and Q84: each open pull request based on the merged branch moves to the merged one's base
+    before the branch is deleted, so GitHub does not close it. A retarget that fails deletes nothing."""
+
+    def dependents(self, **overrides):
+        return FakeGh(dependents=edited("dependents", stacked), **overrides)
+
+    def test_none_open_on_the_branch_and_it_is_deleted(self):
+        gh = FakeGh()
+        self.assertEqual(self.run_merge(gh), 0)
+        self.assertNotIn("Retargeted", self.output())
+        self.assertEqual(gh.calls[-2:], [merge.build_dependents(REPO, "m3/b1"), merge.build_delete(REPO, "m3/b1")])
+
+    def test_each_is_retargeted_to_the_merged_ones_base_before_the_branch_is_deleted(self):
+        gh = self.dependents()
+        self.assertEqual(self.run_merge(gh), 0)
+        retargets = [gh.calls.index(merge.build_retarget(REPO, n, "main")) for n in (33, 34)]
+        self.assertLess(gh.calls.index(merge.build_merge(REPO, NUMBER, HEAD)), min(retargets))
+        self.assertLess(max(retargets), gh.calls.index(merge.build_delete(REPO, "m3/b1")))
+        self.assertIn("Retargeted #33 (m3/b2) from m3/b1 to main.", self.output())
+        self.assertIn("Retargeted #34 (m3/b3) from m3/b1 to main.", self.output())
+        self.assertIn("covered the old range", self.output())
+        self.assertIn("Deleted the branch m3/b1", self.output())
+
+    def failed(self, gh, *texts):
+        with self.assertRaises(merge.MergeError) as raised:
+            self.run_merge(gh)
+        self.assertNotIn(merge.build_delete(REPO, "m3/b1"), gh.calls, "nothing may be deleted")
+        text = "\n".join(self.said + [str(raised.exception)])
+        for item in ("the merge went through", "m3/b1 was not deleted", *texts):
+            self.assertIn(item, text)
+        return text
+
+    def test_a_retarget_that_fails_deletes_nothing_and_says_so(self):
+        text = self.failed(self.dependents(**{"retarget 34": answer("retarget_refused", made_up=True)}),
+                           "#34", "Validation Failed", "Retargeted #33")
+        self.assertIn("git push origin --delete m3/b1", text)
+        self.assertIn("ask before you make it", text)          # a retarget by hand is not the helper's exception
+        self.assertIn("which writes need a yes", text)
+
+    def test_a_retarget_whose_answer_names_another_base_fails(self):
+        wrong = edited_made_up("retarget", lambda d: d.update(base={"ref": "m3/b1"}))
+        self.failed(self.dependents(**{"retarget 33": wrong}), "#33", "names its base as m3/b1, not main")
+
+    def test_a_list_that_cannot_be_read_deletes_nothing(self):
+        self.failed(FakeGh(dependents=(1, "", "gh: Not Found (HTTP 404)\n")), "could not be listed", "Not Found")
+
+    def test_a_full_page_of_pull_requests_deletes_nothing(self):
+        def hundred(data):
+            data[:] = [{"number": n, "state": "open", "base": {"ref": "m3/b1"}, "head": {"ref": f"x{n}"}}
+                       for n in range(100, 200)]
+        self.failed(FakeGh(dependents=edited("dependents", hundred)), "100 or more")
+        self.assertEqual([c for c in self.said if c.startswith("Retargeted")], [])
+
+    def test_only_open_pull_requests_on_the_branch_are_moved(self):
+        def mixed(data):
+            stacked(data)
+            data[1]["base"]["ref"] = "elsewhere"
+        gh = FakeGh(dependents=edited("dependents", mixed))
+        self.assertEqual(self.run_merge(gh), 0)
+        self.assertIn(merge.build_retarget(REPO, 33, "main"), gh.calls)
+        self.assertNotIn(merge.build_retarget(REPO, 34, "main"), gh.calls)
 
 
 class RedirectTests(Helper):

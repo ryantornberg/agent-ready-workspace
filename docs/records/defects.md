@@ -11,6 +11,7 @@ Defects found in passing, kept until each is fixed or accepted, in the shape the
 
 | Found | Where | What | Evidence | State |
 |---|---|---|---|---|
+| 2026-11-28 | `wslib/parts.py`, `Library.builtins` | The pre-push check loads a push check's library from the remote's tip by redirecting the `import` statement and `__import__` alone. A module at the tip that loads another with `importlib.import_module("wslib.x")` gets the one on disk, so its cases would call a library from another commit. Nothing in `wslib/` or `parts/` calls `importlib.import_module` today, so no push check is affected yet. | Found by M4 slice G1's delta re-check of #63, reading `Library.builtins`, which wraps `__import__` only (verified). That no module calls `importlib.import_module` is from a search of `wslib/` and `parts/` (verified). | open |
 | 2026-11-23 | `docs/orchestration.md`, "The binding" | It says the `tiers` entry is "the only place a model name appears", but the eval harness sets its own model with `--model`, and `evals/README.md` names models in its commands. | Read `evals/run.py`'s argument handling and `evals/README.md` at `dace91e`; found by slice B5's review of decision 0014, which now says the binding is the only place a tier's model is set. | open |
 
 ## Closed

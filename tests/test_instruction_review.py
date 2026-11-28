@@ -34,6 +34,7 @@ class Repository(Folder):
     def setUp(self):
         super().setUp()
         self.workspace(GUIDANCE, {"use": "commit_subject", "why": "test"})
+        self.engine()
         self.write("docs/a.md", "# A\n")
         self.git("init", "-q", "-b", "main")
         self.git("config", "user.name", "t")

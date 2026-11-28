@@ -25,8 +25,11 @@ working copy has uncommitted changes. While a ledger is open, the commit check f
 tool wrote (parts/edit_ledger.py).
 
 The pre-push hook runs `check --push REMOTE`, with git's list of updated refs on standard input. For each
-ref pushed, the parts and the manifest come from the remote's current tip, not from the push, so a push
-cannot weaken the check that judges it. A push whose range cannot be listed, or whose remote tip holds no
+ref pushed, the push checks that judge that ref, their cases, the engine library they import and the manifest
+all come from the remote's current tip, not from the push, so a push cannot weaken the check that judges it,
+and a case never runs against a library from another commit. Only the push checks' cases run, and no hook is
+loaded: a guard's cases are not the push's to judge. The other checks for that ref are loaded from the tip
+without their cases, to read their PHASES, so a check that cannot load there still refuses the push. A push whose range cannot be listed, or whose remote tip holds no
 readable manifest, is refused when it goes to main.
 
 A session hook only reminds, and a session start or end never fails: on any error the runner prints
@@ -213,21 +216,40 @@ def list_commits(root, span):
     return commits
 
 
-def push_parts(root, base):
-    """The manifest and the push checks, as the commit `base` holds them. None when it holds no readable manifest."""
+def push_parts(root, base, ref, library):
+    """The push checks that judge a push to ref, as the commit `base` holds them, each with its cases run and the
+    engine library imported from base through library. None when base holds no readable manifest.
+
+    A part whose manifest entry names another branch is not read, and a hook is not loaded: neither judges this
+    push, so none of their cases run. A check is loaded without its cases to read its PHASES; only a push check's
+    cases then run. A part whose KIND line cannot be read is loaded, and so refused, as at a hook call."""
     text = _git_text(root, "show", f"{base}:{partlib.MANIFEST}")
     if text is None:
         return None
     manifest = partlib.parse_manifest(text, f"{partlib.MANIFEST} at {base[:7]}")
     files = {partlib.MANIFEST: text}
+    chosen = []
     for entry in manifest["parts"]:
+        if ref != f"refs/heads/{entry.get('branch', 'main')}":
+            continue
         relative = partlib.source_of(root, entry)[1]
+        source = _git_text(root, "show", f"{base}:{relative}")
+        if source is not None and partlib.declared(source, "KIND") == "hook":
+            continue
+        chosen.append(entry)
         for name in (relative, relative[:-len(".py")] + ".cases.json"):
-            found = _git_text(root, "show", f"{base}:{name}")
+            found = source if name == relative else _git_text(root, "show", f"{base}:{name}")
             if found is not None:
                 files[name] = found
-    loaded = partlib.load_all(root, manifest, snapshot=snapshots.Memory(files))
-    return [part for part in loaded if part.kind == "check" and "push" in part.phases]
+    snapshot = snapshots.Memory(files)
+    parts = []
+    for entry in chosen:
+        part = partlib.load(root, entry, run_cases=False, snapshot=snapshot, tiers=manifest.get("tiers"),
+                            library=library)
+        if part.kind == "check" and "push" in part.phases:
+            part.require_cases()
+            parts.append(part)
+    return parts
 
 
 def command_push(root, args):
@@ -247,20 +269,21 @@ def command_push(root, args):
             raise partlib.PartError(f"the remote's tip {remote[:7]} is not in this clone, so the push cannot be "
                                     f"checked. Fetch first (git fetch), then push again.")
         base = local if remote == ZERO else remote
-        parts = push_parts(root, base)
-        if parts is None:
-            if remote_ref == "refs/heads/main":
-                raise partlib.PartError(f"{partlib.MANIFEST} cannot be read at {base[:7]}, the tip this push builds on, "
-                                        f"so a push to main cannot be checked; see docs/changing-the-machinery.md")
-            continue
-        for part in parts:
-            if remote_ref != f"refs/heads/{part.config.get('branch', 'main')}":
+        library = partlib.Library(lambda name, base=base: _git_text(root, "show", f"{base}:wslib/{name}"), base,
+                                  pathlib.Path(root) / "wslib")
+        with library:
+            parts = push_parts(root, base, remote_ref, library)
+            if parts is None:
+                if remote_ref == "refs/heads/main":
+                    raise partlib.PartError(f"{partlib.MANIFEST} cannot be read at {base[:7]}, the tip this push builds "
+                                            f"on, so a push to main cannot be checked; see docs/changing-the-machinery.md")
                 continue
-            snapshot = snapshots.Memory({}, pushed=pushed_commits(root, local, remote))
-            for found in part.run(snapshot):
-                errors += found["level"] == "error"
-                print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
-                                       "git push"), file=sys.stderr)
+            for part in parts:
+                snapshot = snapshots.Memory({}, pushed=pushed_commits(root, local, remote))
+                for found in part.run(snapshot):
+                    errors += found["level"] == "error"
+                    print(partlib.describe(found, part.name, getattr(part.module, "PAGE", None),
+                                           "git push"), file=sys.stderr)
         if remote_ref == "refs/heads/main":
             errors += push_tutorials(root, local, remote)
     if errors:
