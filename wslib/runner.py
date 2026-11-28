@@ -27,8 +27,9 @@ tool wrote (parts/edit_ledger.py).
 The pre-push hook runs `check --push REMOTE`, with git's list of updated refs on standard input. For each
 ref pushed, the push checks that judge that ref, their cases, the engine library they import and the manifest
 all come from the remote's current tip, not from the push, so a push cannot weaken the check that judges it,
-and a case never runs against a library from another commit. No other part is loaded and no other case runs:
-a guard's cases are not the push's to judge. A push whose range cannot be listed, or whose remote tip holds no
+and a case never runs against a library from another commit. Only the push checks' cases run, and no hook is
+loaded: a guard's cases are not the push's to judge. The other checks for that ref are loaded from the tip
+without their cases, to read their PHASES, so a check that cannot load there still refuses the push. A push whose range cannot be listed, or whose remote tip holds no
 readable manifest, is refused when it goes to main.
 
 A session hook only reminds, and a session start or end never fails: on any error the runner prints

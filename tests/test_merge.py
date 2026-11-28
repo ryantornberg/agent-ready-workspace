@@ -393,6 +393,8 @@ class StackedTests(Helper):
         text = self.failed(self.dependents(**{"retarget 34": answer("retarget_refused", made_up=True)}),
                            "#34", "Validation Failed", "Retargeted #33")
         self.assertIn("git push origin --delete m3/b1", text)
+        self.assertIn("ask before you make it", text)          # a retarget by hand is not the helper's exception
+        self.assertIn("which writes need a yes", text)
 
     def test_a_retarget_whose_answer_names_another_base_fails(self):
         wrong = edited_made_up("retarget", lambda d: d.update(base={"ref": "m3/b1"}))

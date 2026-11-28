@@ -311,8 +311,11 @@ def parse_commit(answer, sha):
 def _kept(branch, done, why):
     moved = "".join(f" Retargeted already: #{number}." for number in done)
     return MergeError(f"the merge went through, but the branch {branch} was not deleted: {why}.{moved} GitHub closes "
-                      f"an open pull request whose base branch is deleted, so retarget each one still based on {branch} "
-                      f"with gh pr edit NUMBER --base BASE, then delete the branch with git push origin --delete {branch}")
+                      f"an open pull request whose base branch is deleted, so each one still based on {branch} needs a "
+                      f"retarget first. A retarget by hand is a write on a pull request the merge did not name: report "
+                      f"this to the person and ask before you make it (docs/playbooks/git-host-operations.md, which "
+                      f"writes need a yes). Then: gh pr edit NUMBER --base BASE for each, and git push origin --delete "
+                      f"{branch} once nothing is based on it")
 
 
 def parse_dependents(answer, branch):
