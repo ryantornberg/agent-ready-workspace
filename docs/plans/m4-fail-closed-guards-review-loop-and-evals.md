@@ -21,8 +21,8 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **Review sessions:** about 231 planned, stop at 250, 16 per pull request.
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
-- **Red team:** sixteen rounds held with fixes; paused on Q112.
-- **Not approved.** Queue answers through Q111 are applied; Q112 reopens Q109.
+- **Red team:** sixteen rounds held with fixes; paused on Q113.
+- **Not approved.** Queue answers through Q111 are applied; Q113 reopens Q109.
 
 ## Settled decisions
 
@@ -844,7 +844,7 @@ Round 14: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guar
 
 Round 15: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guards-review-loop-and-evals-round-15.md), holds with fixes, 8 findings, rows R15-1 to R15-8; three need the maintainer and are queued. Round 15 changed the plan in substance, so round 16 runs.
 
-Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-16.md), holds with fixes, 7 findings, rows R16-1 to R16-7. Five turn on Q109's ruleset, which the maintainer's ruling of 2026-11-27 on the CI wait reopens; they wait for Q112. The loop pauses there, since an open question that blocks a decision leaves the plan unfinished.
+Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-16.md), holds with fixes, 7 findings, rows R16-1 to R16-7. Five turn on Q109's ruleset, which the maintainer's ruling of 2026-11-27 on the CI wait reopens; they wait for Q113. The loop pauses there, since an open question that blocks a decision leaves the plan unfinished.
 
 | # | Finding | Disposition | Action |
 |---|---|---|---|
@@ -981,12 +981,12 @@ Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guar
 | R15-6 | Cuts' selection cost, about 100, passes the reserve, and a batch yes does not lift the stop. | Accepted | The budget prices cuts as H3 does; past the reserve the stop fires for his decision. |
 | R15-7 | The routed arm took four measurements in M3; M4 prices one and a re-record. | Deferred to the maintainer | Queued as Q111, recommending that 45 runs be held back for a diagnosis; until he answers, a miss stops M4 at Z. |
 | R15-8 | Small slips: F24's slice, the round count, dispatched helpers overrunning a batch. | Accepted | F24 is G4's; each further round adds a session; the batch count holds room for in-flight helpers. |
-| R16-1 | The ruleset does not stop an agent that disabled its guards: the agents' sign-in is a repository admin that can delete the ruleset, a pull request's own `ci.yml` can be rewritten to pass, and "require workflows" is for organizations only. | Deferred to the maintainer | Verified by its author: `permissions.admin` is true and the owner is a user account. Q109 is reopened as Q112, with the CI wait he ruled out on 2026-11-27. |
-| R16-2 | The plan never says which CI job holds the mark and suite steps, or whether the ruleset requires them. | Deferred to the maintainer | Depends on Q112. |
-| R16-3 | Q109 changes where every page commit goes: procedure endings, the contract's "work where you are" and more pages than G0 names. | Deferred to the maintainer | Depends on Q112; the scope of G0's rewording follows its answer. |
-| R16-4 | The reworded pages and the decision replacing 0011 ship to every instance, which has no ruleset. | Deferred to the maintainer | Depends on Q112. |
+| R16-1 | The ruleset does not stop an agent that disabled its guards: the agents' sign-in is a repository admin that can delete the ruleset, a pull request's own `ci.yml` can be rewritten to pass, and "require workflows" is for organizations only. | Deferred to the maintainer | Verified by its author: `permissions.admin` is true and the owner is a user account. Q109 is reopened as Q113, with the CI wait he ruled out on 2026-11-27. |
+| R16-2 | The plan never says which CI job holds the mark and suite steps, or whether the ruleset requires them. | Deferred to the maintainer | Depends on Q113. |
+| R16-3 | Q109 changes where every page commit goes: procedure endings, the contract's "work where you are" and more pages than G0 names. | Deferred to the maintainer | Depends on Q113; the scope of G0's rewording follows its answer. |
+| R16-4 | The reworded pages and the decision replacing 0011 ship to every instance, which has no ruleset. | Deferred to the maintainer | Depends on Q113. |
 | R16-5 | Q111's reserve has no step that spends it, and the stop fires first. | Accepted | Slice Z spends the reserve on M3's diagnosis, the run without the plugin, before the stop; later measurements need a yes. Figures corrected. |
-| R16-6 | The ruleset's settings are underspecified, and criterion 64 cannot be shown at G0's merge. | Deferred to the maintainer | Depends on Q112. |
+| R16-6 | The ruleset's settings are underspecified, and criterion 64 cannot be shown at G0's merge. | Deferred to the maintainer | Depends on Q113. |
 | R16-7 | Small slips: four or five pages, Q108's figures, Q109's date. | Accepted | Each fixed. |
 ## Approval
 
@@ -1027,5 +1027,5 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Red team round 13, 2026-11-26:** holds with fixes, 5 findings, all accepted. Verified by its author: `grade.py --recorded` reads three fixed globs; the one-time records carry their cases' hash.
 - **Red team round 14, 2026-11-26:** holds with fixes, 6 findings, 5 accepted and one in part. Verified by its author: an `exit 0` line in `wslib/launch.sh` let a force push through in a throwaway clone; `echo main | parallel git push -f origin @` is refused today.
 - **Red team round 15, 2026-11-26:** holds with fixes, 8 findings; 5 accepted, one accepted with its remedy deferred, two deferred to the maintainer (Q109 to Q111). Verified by its author: `C=echo; read C <<< git; $C push -f origin main` is refused today and runs git in both shells.
-- **Red team round 16, 2026-11-27:** holds with fixes, 7 findings; 2 accepted, 5 deferred to Q112. Verified by its author: the agents' `gh` sign-in has admin rights on the repository, and the repository is owned by a user account.
+- **Red team round 16, 2026-11-27:** holds with fixes, 7 findings; 2 accepted, 5 deferred to Q113. Verified by its author: the agents' `gh` sign-in has admin rights on the repository, and the repository is owned by a user account.
 - **Not run:** no eval or selection run, and no guard attack.
