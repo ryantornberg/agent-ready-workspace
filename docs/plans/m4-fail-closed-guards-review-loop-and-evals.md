@@ -17,12 +17,12 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **The guard fixes wait for one small slice.** H0a moves grading files out of the recording's hash, so G2 to G4 merge on a re-grade.
 - **The review loop:** dispatch, a completion record, a review mark, a gate at pull-request creation, teach-back and a merge policy.
 - **The eval system:** suites, a gate at the push, and proof attempts for ten pages.
-- **Eval runs:** about 1,285 planned, a stop at 1,400. After M4, an edit batch to a proven page costs about 132 runs.
+- **Eval runs:** about 1,330 planned with a routed reserve, a stop at 1,400. After M4, an edit batch to a proven page costs about 132 runs.
 - **Review sessions:** about 231 planned, stop at 250, 16 per pull request.
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
 - **Red team:** fifteen rounds held with fixes; 133 findings settled; round 16 next.
-- **Not approved.** Queue answers through Q106 are applied; Q108 to Q111 wait.
+- **Not approved.** Queue answers through Q111 are applied.
 
 ## Settled decisions
 
@@ -88,6 +88,10 @@ The maintainer, answering the workspace's queue, 2026-11-26:
 - **Q104.** The selection and routing stop rises from 300 to 400.
 - **Q105.** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request. A larger run and the routing suite still need his yes with a count.
 - **Q106.** The red team loop runs on until a round only finishes earlier work.
+- **Q108.** Every proof baseline runs both the bare model and the two-line arm, 400 runs. Planned total about 1,285 of 1,400, and 1,420 with every re-record.
+- **Q109.** A GitHub ruleset on main, with no bypass and binding the owner too, requires a pull request and the five CI checks. The pages that say docs go straight to main are reworded: changing the machinery, procedure endings and the cold-clone reasoning in the parts page.
+- **Q110.** With the ruleset, no direct push to main exists, so every edit, a wrapped page's included, goes through a pull request, and Q105's standing yes covers its suites.
+- **Q111.** When he picks pages after the baselines, 45 runs stay unspent for a routed-arm diagnosis, even if one fewer page is recorded.
 - **Upkeep.** The plan states what each proven page costs to edit after M4, and how edits to proven pages are batched. From his notes of 2026-11-25.
 
 The maintainer, on the program, 2026-11-17 to 2026-11-24:
@@ -118,7 +122,6 @@ Each is the author's. A reviewer reads this section to challenge them.
 - **A path inside a git folder passes only for a program that only reads** (G4). Rejected: the list of writers, which missed `tar`, `unzip` and `patch`.
 - **No copy of the wrappers for Codex** (Q45). Rejected: a second skills folder. The selection cases run only on `claude plugin eval`, so a copy would ship untested, and the maintainer's own records retired prompt wrappers for a second tool. The README keeps the limit.
 - **The eval gate moves from the commit to the push** (H2). A commit and a branch push warn; a push to main is refused; CI fails the pull request. Rejected: refusing the commit, which forces `--no-verify` commits while a recording is still to come.
-- **The baselines run two arms, 400 runs, where Q87 said about 200.** Q87 set the baselines first and the pick after them; this keeps that order and adds the two-line arm, so the pick sees whether two lines already match a page. The maintainer's approval accepts the change; it is also in his queue. Rejected: the bare arm alone, which left 660 recording runs chosen blind to the comparison a recording most often fails.
 - **Five of the ten pages are planned to reach a recording.** That five is a guess, and the baselines replace it. The ceiling of 1,400 is the maintainer's (Q87).
 - **A stale usage reading stops a batch** (H0b, item 7). Q89 says a stale file counts as unknown, and leaves open what unknown does. Here `run.py` names the reading's age and refuses, unless the batch's yes allowed a run without a reading. Rejected: going on, which would spend quota on a reading nobody trusts.
 - **The routed arm is measured once more at the close.** M4 adds contract lines, index rows and pages, and M3 showed that added text can cost passes.
@@ -166,7 +169,7 @@ It fails two size-gate conditions: it is far more than one screen of diff, and f
 
 ## Slices
 
-Every slice is built in its own worktree under `.claude/worktrees/`, on a branch `m4/<slice>`, started from the remote's main. H0a has the branch `m4/h0a`. H0b and H1 share the branch `m4/h`. A slice that touches a machinery path merges through a pull request; a doc-only slice may push straight to main, as [changing the machinery](../changing-the-machinery.md) allows. Every slice here changes a gate, a hook, a grader or the contract, so each runs at the driver tier; a slice's page batches may go to worker-tier helpers, and every review is driver work.
+Every slice is built in its own worktree under `.claude/worktrees/`, on a branch `m4/<slice>`, started from the remote's main. H0a has the branch `m4/h0a`. H0b and H1 share the branch `m4/h`. Every slice merges through a pull request, a doc-only one too, since the ruleset of Q109 leaves no direct push to main. Every slice here changes a gate, a hook, a grader or the contract, so each runs at the driver tier; a slice's page batches may go to worker-tier helpers, and every review is driver work.
 
 Recordings are numbered on from M3's: R3 follows the harness slices, and R4 closes the milestone.
 
@@ -174,7 +177,7 @@ Recordings are numbered on from M3's: R3 follows the harness slices, and R4 clos
 
 | Order | Slice | Work | Tier | Done when |
 |---|---|---|---|---|
-| G0 | Open M4 | `building` becomes `["M4"]`. The test that pins it to M3, the parts page's row and the adoption page are corrected. A check fails a `building` entry whose milestone record is signed off. `.env` joins `.gitignore`. | driver | Criterion 1 |
+| G0 | Open M4 | `building` becomes `["M4"]`, with its test, parts row and adoption page. A check fails a `building` entry whose record is signed off. `.env` joins `.gitignore`. The pages that say docs go straight to main are reworded for the ruleset (Q109). | driver | Criteria 1, 64 |
 | G1 | Push check and merge helper | The pre-push check loads a part's cases and the library they call from one commit (Q82). `ws.py merge` retargets pull requests stacked on a branch before it deletes that branch (Q84). | driver | Criteria 2–3 |
 | G2 | The one rule, in the parser | The parser marks each word literal or not. A guard refuses a command whose deciding word is not literal. The stopgaps in the guards' own files go. See "G2" below. | driver | Criteria 4–8 |
 | G3 | Commands git itself runs | A git setting passes only when it is on a list of settings known to run no command. A git option that takes a command is read as that command. See "G3" below. | driver | Criteria 9–10, 62 |
@@ -223,6 +226,8 @@ After slice Z, the program's outside checks run before sign-off: CI, a fresh-ses
 
 The [defect register](../records/defects.md) holds the row this slice closes: M3's sign-off left M3 in `building`, because a test pins the list to M3 and the adoption page says it names M3. The test stops pinning a number. The `proof` check gains one rule: a `building` entry whose record in `docs/milestones/` has `status: signed off` fails. M4 then removes itself in its own sign-off commit, and that rule holds every later milestone to the same step. The register's `.env` row closes here too: the secrets file joins `.gitignore`, in the repository and in the kit.
 
+**Pages through a pull request (Q109).** The maintainer turns on a GitHub ruleset on main, with no bypass and binding the owner, requiring a pull request and the five CI checks, as G0's pull request merges. G0 rewords every page that sends a doc straight to main: changing the machinery's opening and its path, procedure endings' push table, its "Off main" and "When main has moved" sections, and the parts page's cold-clone reasoning. A new decision record supersedes decision 0011, pages go straight to main, with the reason: an agent that disables its own guards still meets a pull request and CI. `direct_push` stays, as the local check before a push. Hashed pages that say the same, if any, change in slice Z. Each edit takes its instruction review.
+
 ### G2: The one rule, in the parser
 
 **The rule.** The parser reports, for each word it reads, whether the word is literal: bash and zsh would both hand the program exactly the text the parser reports. A word is not literal when it holds, outside quotes, a variable, a substitution, braces the shell expands (a comma or a range inside, so `HEAD@{1}` and `stash@{0}` stay literal), a glob, zsh's extended glob, `=name`, or a `(` that zsh reads as a glob group or a glob qualifier. It is not literal when it holds an ANSI-C escape other than the seven both shells read alike, or a quote the parser cannot close as the shells do, as inside `${...}` or `((`.
@@ -261,7 +266,7 @@ The parser also matches every program name it reads without regard to letter cas
 
 **The measure.** Before it merges, the slice runs the guards at main and at its tip over every command stored under `evals/runs/`, and reports each line whose answer changed. The maintainer's machine repeats that over its session logs, as M3's sign-off did. A newly refused line that does nothing a guard guards is fixed, or named in the README with its way round.
 
-**The re-check.** One fresh driver-tier session gets the rule, the cases and the README's limits, and looks for a line that passes and should not. Its findings follow the [stop rule](#stop-rule)'s split. The README's Limits is rewritten around the rule: what the guards refuse, and what stays out of reach, which is an interpreter, a script, a program's own configuration, PowerShell, and a tracked hooks folder that a known repository's own config names, such as this repository's `.githooks/` or a pinned repository's `.husky/`, which their owners edit as ordinary work (row F27); and the hook launcher, the engine and the agent tool's settings, which machinery slices must edit and whose edit turns that session's guards off (row F35). Against an agent that edits the guards' launcher, nothing in the repository holds: the pre-push hook runs through the same launcher, and GitHub's branch rule does not bind the owner's sign-in. Only a GitHub ruleset that binds the owner, with no bypass, requiring a pull request and the CI checks, would; that setting is the maintainer's, and it is in his queue.py merge`, which run the base commit's code.
+**The re-check.** One fresh driver-tier session gets the rule, the cases and the README's limits, and looks for a line that passes and should not. Its findings follow the [stop rule](#stop-rule)'s split. The README's Limits is rewritten around the rule: what the guards refuse, and what stays out of reach, which is an interpreter, a script, a program's own configuration, PowerShell, and a tracked hooks folder that a known repository's own config names, such as this repository's `.githooks/` or a pinned repository's `.husky/`, which their owners edit as ordinary work (row F27); and the hook launcher, the engine and the agent tool's settings, which machinery slices must edit and whose edit turns that session's guards off (row F35). Against an agent that edits the guards' launcher, nothing in the repository holds: the pre-push hook runs through the same launcher. What holds is GitHub's ruleset (Q109), which binds the owner's sign-in too: a direct push or an admin merge is refused, and every change meets a pull request and the CI checks. CI's workflow runs from the pull request itself, so the ruleset also requires the CI workflow from main, where GitHub offers that rule (inferred until G0 sets it); otherwise the README names that last gap.
 
 A new decision record states the rule, and decision 0004's amendments point to it.
 
@@ -619,6 +624,10 @@ Added on the maintainer's answers of 2026-11-26, numbered as they came:
 63. `run.py --baseline` runs the bare and the two-line arms into one baseline record at a path named by its milestone, naming the page, the milestone and the verdict `not proven`, with a test; a page whose case holds an M3 baseline can move its `prove-by` on its M4 one. H3 sends no page to a recording whose two-line arm passed 17 or more of its 20 baseline runs. (V1)
 
 
+Added on the maintainer's answers of 2026-11-27:
+
+64. A read of main's rulesets with `gh api` shows a pull request and the five CI checks required with no bypass actor. `git grep` finds no page outside plans, records and milestone records that tells an agent to push a doc to main; a decision record supersedes 0011. (V2)
+
 ## Verification
 
 - **V1:** `python3 -m unittest discover -b tests` passes, including the test each criterion names.
@@ -683,12 +692,13 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 | H1 | R3: three cases, three arms, 15 runs each | 135 | 180 |
 | H3 | Baselines for the ten pages, bare and two-line, 40 each | 400 | 400 |
 | H3 | Recordings, 132 a page; five pages planned, picked after the baselines | 660 | 660 |
+| Z | Held back for a routed-arm diagnosis (Q111) | 45 | 45 |
 | Z | R4, the guided arm alone | 45 | 90 |
 | Z | The routed arm | 45 | 90 |
-| | **Agent runs on the small model** | **1,285, or about 1,405 if the three dispatching pages' baselines cost twice** | **1,420** |
+| | **Agent runs on the small model** | **1,330, or about 1,450 if the three dispatching pages' baselines cost twice** | **1,465** |
 
-- **The stop is 1,400 agent runs, staged (Q87).** If all ten pages went to a recording, the total would be about 1,945, or 2,080 with every re-record. With every re-record, the five planned recordings reach 1,420, past the stop, so a margin miss in R4 or the routed arm stops for the maintainer. If the three dispatching pages' baselines cost twice, the planned total is about 1,405 before any re-record; the maintainer's pick after the baselines then holds back slice Z's 90 runs, 180 with re-records, and a case replacement may find no reserve left. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
-- **The routed arm may miss, as M3's did.** M3's routed arm took four measurements, 180 runs, to pass. M4 prices 45, 90 with a re-record. Whether the maintainer's pick after the baselines holds back about 45 runs for a diagnosis, or a routed miss stops M4 at slice Z for his decision, is in his queue; until he answers, a miss stops M4 at Z.
+- **The stop is 1,400 agent runs, staged (Q87).** If all ten pages went to a recording, the total would be about 1,945, or 2,080 with every re-record. With the routed reserve and every re-record, the plan reaches 1,465, past the stop, so the pick after the baselines records four pages, not five, unless the baselines cut some (Q111 accepts one fewer). If the three dispatching pages' baselines cost twice, the planned total is about 1,450 before any re-record; the maintainer's pick after the baselines then holds back slice Z's 90 runs, 180 with re-records, and a case replacement may find no reserve left. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
+- **A diagnosis reserve for the routed arm (Q111).** M3's routed arm took four measurements, 180 runs, to pass. M4 prices 45, 90 with a re-record, and holds 45 more unspent from the pick after the baselines, for a routed-arm diagnosis, even if one fewer page is recorded.
 - **Dispatched sessions.** A case whose agent dispatches a helper, as delegating's, orchestration's and the instruction review's cases may, counts each helper toward its batch. Such a page's recording may cost about twice 132. The maintainer sees that price for each page after the baselines, before he picks.
 - **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. Suite runs are counted per wrapper touched. H2's gate merges after L4 and L7, so their edits run no suite. After it, about six wrappers are touched by L5, L6 and slice Z, and H3's cuts touch their own neighbours, up to about 100 runs for all cuts, which the reserve may not cover; each run at the base and the head the first time, about 12 runs each, 72. Q49's second rewrite, for any wrapper that still misses, reruns the rewritten wrappers' cases and their neighbours' fire cases, as M3's 75-run rerun did: at most 75. Slice Z runs the routing suite once per case at its head, about 40, and the runner reruns any case that fails twice more. That is about 343, against a stop of 400 (Q104), with about 57 held for reruns. Two more wrappers, debugging and the reuse checklist, passed their fire case at exactly two of three in M3's last run, so their suites may need a rerun on noise alone. A wrapper's description change reruns its own suite and those of the wrappers that name it; a full rerun of 174 happens only on the maintainer's yes.
 - **Review sessions are not eval runs, and are budgeted apart,** in the next section.
@@ -710,7 +720,7 @@ A proven page is gated from the day it is marked. Each edit to it makes its reco
 | The contract or the index | The routing suite at the head: about 40 to 120 selection runs | None |
 
 - **How many pages.** After M4, at most about six pages are proven: `fix-a-bug.md` and up to five pages H3 records and passes. 28 wrappers name 29 pages, and each of those pays the selection row above.
-- **A direct doc push to a wrapped page.** Docs go straight to main, so after H2 a direct push that edits one of the 29 wrapped pages needs its suite's mark too. Whether Q105's allowance covers such a push's suites, counted per push, or such an edit goes through a pull request, is in the maintainer's queue; until he answers, it goes through a pull request.
+- **An edit to a wrapped page (Q110).** With the ruleset, no direct push to main exists, so an edit to one of the 29 wrapped pages goes through a pull request, and Q105's standing yes covers its suites.
 - **Who says yes to a suite run (Q105).** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request; `suites.py` counts them in a file per branch and refuses the 13th without a batch yes. A larger run, and the routing suite, still need the maintainer's yes with a count, as Q46 says. The number of proven pages is his choice after the baselines.
 - **How often.** Up to M3's sign-off the ten pages changed in 1 to 55 commits each. H3 weighs that before a page is recorded, and moves a high-churn page's tables to a reference page first.
 - **Batching.** An edit to a proven page does not land on its own. It waits in a list under the current milestone's plan, "Results", as M3's "Queued for slice Z" did, and the queued edits land together in that milestone's closing slice, with one recording per page: the guided arm alone when the other arms were recorded that milestone, else every arm. A fix the maintainer will not wait for lands with its own recording, on his yes with its count.
@@ -769,6 +779,7 @@ Per slice, for M4's own build:
 About 6 hours, as the program estimates.
 
 - Agree the spec, then approve the plan after its red team.
+- Turn on the GitHub ruleset on main as G0's pull request merges: no bypass, the owner bound, a pull request and the five CI checks required, and the CI workflow from main where GitHub offers it.
 - Say yes, with a count, to each eval batch. After H3's baselines, choose which pages go to a recording.
 - Read one full review record.
 - Raise a pull request's cap of review sessions, or end its review, when a loop stops there.
