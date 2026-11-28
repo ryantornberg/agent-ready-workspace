@@ -21,8 +21,8 @@ The plan for the fourth milestone: close the shell guards' known gaps with one r
 - **Review sessions:** about 231 planned, stop at 250, 16 per pull request.
 - **The stop rule splits findings.** A gap a slice caused can stop it. A gap open on main is recorded instead.
 - **The decision queue is cut:** its trial closed no item from evidence.
-- **Red team:** fifteen rounds held with fixes; 133 findings settled; round 16 next.
-- **Not approved.** Queue answers through Q111 are applied.
+- **Red team:** sixteen rounds held with fixes; paused on Q112.
+- **Not approved.** Queue answers through Q111 are applied; Q112 reopens Q109.
 
 ## Settled decisions
 
@@ -88,8 +88,8 @@ The maintainer, answering the workspace's queue, 2026-11-26:
 - **Q104.** The selection and routing stop rises from 300 to 400.
 - **Q105.** An agent may run a pull request's wrapper suites at its head itself, up to 12 runs per pull request. A larger run and the routing suite still need his yes with a count.
 - **Q106.** The red team loop runs on until a round only finishes earlier work.
-- **Q108.** Every proof baseline runs both the bare model and the two-line arm, 400 runs. Planned total about 1,285 of 1,400, and 1,420 with every re-record.
-- **Q109.** A GitHub ruleset on main, with no bypass and binding the owner too, requires a pull request and the five CI checks. The pages that say docs go straight to main are reworded: changing the machinery, procedure endings and the cold-clone reasoning in the parts page.
+- **Q108.** Every proof baseline runs both the bare model and the two-line arm, 400 runs. Planned total about 1,285 of 1,400, and 1,420 with every re-record. *Amended by Q111: with its 45-run reserve the planned total is about 1,330.*
+- **Q109 (2026-11-27).** A GitHub ruleset on main, with no bypass and binding the owner too, requires a pull request and the five CI checks. The pages that say docs go straight to main are reworded: changing the machinery, procedure endings and the cold-clone reasoning in the parts page.
 - **Q110.** With the ruleset, no direct push to main exists, so every edit, a wrapped page's included, goes through a pull request, and Q105's standing yes covers its suites.
 - **Q111.** When he picks pages after the baselines, 45 runs stay unspent for a routed-arm diagnosis, even if one fewer page is recorded.
 - **Upkeep.** The plan states what each proven page costs to edit after M4, and how edits to proven pages are batched. From his notes of 2026-11-25.
@@ -122,7 +122,7 @@ Each is the author's. A reviewer reads this section to challenge them.
 - **A path inside a git folder passes only for a program that only reads** (G4). Rejected: the list of writers, which missed `tar`, `unzip` and `patch`.
 - **No copy of the wrappers for Codex** (Q45). Rejected: a second skills folder. The selection cases run only on `claude plugin eval`, so a copy would ship untested, and the maintainer's own records retired prompt wrappers for a second tool. The README keeps the limit.
 - **The eval gate moves from the commit to the push** (H2). A commit and a branch push warn; a push to main is refused; CI fails the pull request. Rejected: refusing the commit, which forces `--no-verify` commits while a recording is still to come.
-- **Five of the ten pages are planned to reach a recording.** That five is a guess, and the baselines replace it. The ceiling of 1,400 is the maintainer's (Q87).
+- **Four or five of the ten pages are planned to reach a recording,** four if every re-record is needed. That count is a guess, and the baselines replace it. The ceiling of 1,400 is the maintainer's (Q87).
 - **A stale usage reading stops a batch** (H0b, item 7). Q89 says a stale file counts as unknown, and leaves open what unknown does. Here `run.py` names the reading's age and refuses, unless the batch's yes allowed a run without a reading. Rejected: going on, which would spend quota on a reading nobody trusts.
 - **The routed arm is measured once more at the close.** M4 adds contract lines, index rows and pages, and M3 showed that added text can cost passes.
 - **Both red team cases' hidden tests change, not only the lease case's** (H0b, item 9). Q103 names `red-team-lease.py`. `red-team-fail-closed.py` makes the same assertion, so a run that puts its triage in the record, as the page will allow, would fail it. Rejected: changing one, which leaves two cases that disagree on what the page asks.
@@ -657,7 +657,7 @@ Stop the plan and report when any of these happens:
 
 - A slice goes past two fix rounds on a failure it caused.
 - R3 fails criterion 20, or R4 criterion 50, after the one re-record a margin miss allows. Publish the result and stop.
-- The routed arm fails criterion 51 after its one re-record. Publish the result and stop; the new index rows stay out until a person decides.
+- The routed arm fails criterion 51 after its one re-record and the diagnosis Q111 reserves. Publish the result and stop; the new index rows stay out until a person decides.
 - After R3, a slice needs a change to a file criterion 21 names. That costs a recording, so the maintainer decides.
 - **The fallback (Q102).** H0a cannot migrate the stored records with no new run, or a re-grade after G2, G3 or G4 changes a stored grade. The guard slice stops before it merges. The maintainer then decides between giving the parser fix its own recording, the three fix-a-bug cases at 135 runs, so it merges first, and holding it until R3.
 - The eval runs reach 1,400 agent runs, or the selection and routing runs 400. Re-records, probes, failed runs and dispatched sessions count.
@@ -697,8 +697,8 @@ Runs cost the maintainer's usage quota. Each figure is a ceiling to plan by, nev
 | Z | The routed arm | 45 | 90 |
 | | **Agent runs on the small model** | **1,330, or about 1,450 if the three dispatching pages' baselines cost twice** | **1,465** |
 
-- **The stop is 1,400 agent runs, staged (Q87).** If all ten pages went to a recording, the total would be about 1,945, or 2,080 with every re-record. With the routed reserve and every re-record, the plan reaches 1,465, past the stop, so the pick after the baselines records four pages, not five, unless the baselines cut some (Q111 accepts one fewer). If the three dispatching pages' baselines cost twice, the planned total is about 1,450 before any re-record; the maintainer's pick after the baselines then holds back slice Z's 90 runs, 180 with re-records, and a case replacement may find no reserve left. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
-- **A diagnosis reserve for the routed arm (Q111).** M3's routed arm took four measurements, 180 runs, to pass. M4 prices 45, 90 with a re-record, and holds 45 more unspent from the pick after the baselines, for a routed-arm diagnosis, even if one fewer page is recorded.
+- **The stop is 1,400 agent runs, staged (Q87).** If all ten pages went to a recording, the total would be about 1,945, or 2,080 with every re-record. With the routed reserve and every re-record, the plan reaches 1,465, past the stop, so the pick after the baselines records four pages, not five, unless the baselines cut some (Q111 accepts one fewer). If the three dispatching pages' baselines cost twice, the planned total is about 1,450 before any re-record; the maintainer's pick after the baselines then holds back slice Z's 135 runs, 225 with re-records, and a case replacement may find no reserve left. The maintainer chooses the pages after the baselines. A page past the stop stays unproven and moves to M6.
+- **A diagnosis reserve for the routed arm (Q111).** M3's routed arm took four measurements, 180 runs, to pass. M4 prices 45, 90 with a re-record, and holds 45 more unspent from the pick after the baselines, for a routed-arm diagnosis, even if one fewer page is recorded. After a re-record misses, slice Z spends the reserve before the stop fires: the diagnosis is M3's, the routed arm run once without the wrappers' plugin, 45 runs, to show whether the pages or the wrappers drive the loss. A measurement after a fix, and R4 again if the fix touches the contract or the index, need the maintainer's yes beyond the reserve.
 - **Dispatched sessions.** A case whose agent dispatches a helper, as delegating's, orchestration's and the instruction review's cases may, counts each helper toward its batch. Such a page's recording may cost about twice 132. The maintainer sees that price for each page after the baselines, before he picks.
 - **Short runs on `claude plugin eval`:** Q49's rerun, about 12; the routing baseline, at most 120; the suite runner's first base-and-head run, about 24. Suite runs are counted per wrapper touched. H2's gate merges after L4 and L7, so their edits run no suite. After it, about six wrappers are touched by L5, L6 and slice Z, and H3's cuts touch their own neighbours, up to about 100 runs for all cuts, which the reserve may not cover; each run at the base and the head the first time, about 12 runs each, 72. Q49's second rewrite, for any wrapper that still misses, reruns the rewritten wrappers' cases and their neighbours' fire cases, as M3's 75-run rerun did: at most 75. Slice Z runs the routing suite once per case at its head, about 40, and the runner reruns any case that fails twice more. That is about 343, against a stop of 400 (Q104), with about 57 held for reruns. Two more wrappers, debugging and the reuse checklist, passed their fire case at exactly two of three in M3's last run, so their suites may need a rerun on noise alone. A wrapper's description change reruns its own suite and those of the wrappers that name it; a full rerun of 174 happens only on the maintainer's yes.
 - **Review sessions are not eval runs, and are budgeted apart,** in the next section.
@@ -844,6 +844,8 @@ Round 14: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guar
 
 Round 15: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guards-review-loop-and-evals-round-15.md), holds with fixes, 8 findings, rows R15-1 to R15-8; three need the maintainer and are queued. Round 15 changed the plan in substance, so round 16 runs.
 
+Round 16: [record](../records/adversarial-reviews/2026-11-27-m4-fail-closed-guards-review-loop-and-evals-round-16.md), holds with fixes, 7 findings, rows R16-1 to R16-7. Five turn on Q109's ruleset, which the maintainer's ruling of 2026-11-27 on the CI wait reopens; they wait for Q112. The loop pauses there, since an open question that blocks a decision leaves the plan unfinished.
+
 | # | Finding | Disposition | Action |
 |---|---|---|---|
 | 1 | The review mark cannot sit at the tip it reviewed: committing the review's record makes a new tip with no mark. | Accepted | L3: a commit after the marked one that changes only the review's record paths keeps the mark; any other path makes it `delta`. Criterion 39 tests both. |
@@ -979,6 +981,13 @@ Round 15: [record](../records/adversarial-reviews/2026-11-26-m4-fail-closed-guar
 | R15-6 | Cuts' selection cost, about 100, passes the reserve, and a batch yes does not lift the stop. | Accepted | The budget prices cuts as H3 does; past the reserve the stop fires for his decision. |
 | R15-7 | The routed arm took four measurements in M3; M4 prices one and a re-record. | Deferred to the maintainer | Queued as Q111, recommending that 45 runs be held back for a diagnosis; until he answers, a miss stops M4 at Z. |
 | R15-8 | Small slips: F24's slice, the round count, dispatched helpers overrunning a batch. | Accepted | F24 is G4's; each further round adds a session; the batch count holds room for in-flight helpers. |
+| R16-1 | The ruleset does not stop an agent that disabled its guards: the agents' sign-in is a repository admin that can delete the ruleset, a pull request's own `ci.yml` can be rewritten to pass, and "require workflows" is for organizations only. | Deferred to the maintainer | Verified by its author: `permissions.admin` is true and the owner is a user account. Q109 is reopened as Q112, with the CI wait he ruled out on 2026-11-27. |
+| R16-2 | The plan never says which CI job holds the mark and suite steps, or whether the ruleset requires them. | Deferred to the maintainer | Depends on Q112. |
+| R16-3 | Q109 changes where every page commit goes: procedure endings, the contract's "work where you are" and more pages than G0 names. | Deferred to the maintainer | Depends on Q112; the scope of G0's rewording follows its answer. |
+| R16-4 | The reworded pages and the decision replacing 0011 ship to every instance, which has no ruleset. | Deferred to the maintainer | Depends on Q112. |
+| R16-5 | Q111's reserve has no step that spends it, and the stop fires first. | Accepted | Slice Z spends the reserve on M3's diagnosis, the run without the plugin, before the stop; later measurements need a yes. Figures corrected. |
+| R16-6 | The ruleset's settings are underspecified, and criterion 64 cannot be shown at G0's merge. | Deferred to the maintainer | Depends on Q112. |
+| R16-7 | Small slips: four or five pages, Q108's figures, Q109's date. | Accepted | Each fixed. |
 ## Approval
 
 Not yet approved.
@@ -1018,4 +1027,5 @@ Written by a driver-tier session that built nothing, in a worktree on the branch
 - **Red team round 13, 2026-11-26:** holds with fixes, 5 findings, all accepted. Verified by its author: `grade.py --recorded` reads three fixed globs; the one-time records carry their cases' hash.
 - **Red team round 14, 2026-11-26:** holds with fixes, 6 findings, 5 accepted and one in part. Verified by its author: an `exit 0` line in `wslib/launch.sh` let a force push through in a throwaway clone; `echo main | parallel git push -f origin @` is refused today.
 - **Red team round 15, 2026-11-26:** holds with fixes, 8 findings; 5 accepted, one accepted with its remedy deferred, two deferred to the maintainer (Q109 to Q111). Verified by its author: `C=echo; read C <<< git; $C push -f origin main` is refused today and runs git in both shells.
+- **Red team round 16, 2026-11-27:** holds with fixes, 7 findings; 2 accepted, 5 deferred to Q112. Verified by its author: the agents' `gh` sign-in has admin rights on the repository, and the repository is owned by a user account.
 - **Not run:** no eval or selection run, and no guard attack.
